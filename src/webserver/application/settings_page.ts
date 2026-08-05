@@ -134,8 +134,7 @@ export function installSettingsPageModule(): GlobalDescriptors {
             storage.textContent = info.requiresUsbFlash
                 ? "Image storage is not installed. Reflash this display over USB once, then background images will become available."
                 : info.storageBytes
-                    ? (items || []).length + " image" + ((items || []).length === 1 ? "" : "s") +
-                        " • " + (used || "0 B") + " used" +
+                    ? (used || "0 B") + " used" +
                         (free ? " • " + free + " free" : "")
                     : "";
             if (!items || !items.length) {
