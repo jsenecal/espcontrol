@@ -7,9 +7,10 @@ export function installAppEventsModule(): GlobalDescriptors {
             _eventSource.close();
             _eventSource = null;
         }
-        function markConnected(this: any) {
+        function markConnected(this: any, resetOrderState?: any) {
             resetStateForConnection(state);
-            orderReceived = false;
+            if (resetOrderState)
+                orderReceived = false;
             setConfigLocked(false);
             if (els.banner)
                 els.banner.className = "sp-banner";
