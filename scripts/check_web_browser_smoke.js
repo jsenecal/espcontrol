@@ -1468,6 +1468,12 @@ async function assertCardImageManagerFeedback(page, label) {
     0,
     `${label}: image manager should refresh automatically without a manual action`,
   );
+  const thumbnailBounds = await card.locator(".sp-card-image-thumb").first().boundingBox();
+  assert(thumbnailBounds, `${label}: image manager should show an image preview`);
+  assert(
+    Math.abs(thumbnailBounds.width - thumbnailBounds.height) <= 1,
+    `${label}: image manager preview should be square`,
+  );
   const rename = card.getByRole("button", { name: "Rename image", exact: true }).first();
   const remove = card.getByRole("button", { name: "Delete image", exact: true }).first();
   assert.strictEqual(await rename.innerText(), "", `${label}: rename action should be icon-only`);

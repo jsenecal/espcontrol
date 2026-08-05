@@ -378,7 +378,7 @@ export function installStylesModule(): GlobalDescriptors {
         "color:var(--text2);font-size:.875rem;text-align:center}" +
         ".sp-card-image-item{border:1px solid var(--border);border-radius:8px;background:var(--surface2);" +
         "overflow:hidden;display:grid;min-width:0}" +
-        ".sp-card-image-thumb{height:96px;background:#111 center/cover no-repeat;border-bottom:1px solid var(--border)}" +
+        ".sp-card-image-thumb{aspect-ratio:1/1;background:#111 center/cover no-repeat;border-bottom:1px solid var(--border)}" +
         ".sp-card-image-meta{display:grid;gap:4px;padding:10px;min-width:0}" +
         ".sp-card-image-name{color:var(--text);font-size:.84rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
         ".sp-card-image-detail{color:var(--text3);font-size:.74rem}" +
