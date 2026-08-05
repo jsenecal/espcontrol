@@ -164,10 +164,17 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
         device_path = ROOT / "devices" / slug / "device" / "device.yaml"
         sensor_path = ROOT / "devices" / slug / "device" / "sensors.yaml"
         package = package_path.read_text(encoding="utf-8")
-        device_path.read_text(encoding="utf-8")
+        device = device_path.read_text(encoding="utf-8")
         sensors = sensor_path.read_text(encoding="utf-8")
         assert f'device_slug: "{slug}"' in package, f"{slug}: packages.yaml missing device slug"
         assert f'firmware_manifest_slug: "{slug}"' in package, f"{slug}: packages.yaml missing manifest slug"
+        assert 'partitions: ${partition_table_file}' in device, f"{slug}: device YAML missing generated partition path"
+        capabilities = (ROOT / "devices" / slug / "device" / "card_asset_capabilities.yaml").read_text(
+            encoding="utf-8"
+        )
+        assert 'partition_table_file: "../../common/device/' in capabilities, (
+            f"{slug}: partition path must resolve inside the active checkout"
+        )
         assert f"cfg.num_slots = {profile['slots']};" in sensors, f"{slug}: sensors.yaml missing slot count"
         slots = int(profile["slots"])
         resident_frames = int(profile["capabilities"]["cardBackgrounds"]["residentFrames"])

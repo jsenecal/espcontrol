@@ -43,7 +43,7 @@ def card_asset_capabilities_text(device: dict) -> str:
             "# =============================================================================",
             "",
             "substitutions:",
-            f'  partition_table_file: "../../../common/device/{partition_filename(device)}"',
+            f'  partition_table_file: "../../common/device/{partition_filename(device)}"',
             "",
             "esphome:",
             "  build_flags:",
