@@ -1468,6 +1468,11 @@ async function assertCardImageManagerFeedback(page, label) {
     0,
     `${label}: image manager should refresh automatically without a manual action`,
   );
+  assert.strictEqual(
+    await card.locator(".sp-card-image-storage").innerText(),
+    "1 image • 0 B used • 2.0 MB free",
+    `${label}: image manager should show a concise storage summary`,
+  );
   const thumbnailBounds = await card.locator(".sp-card-image-thumb").first().boundingBox();
   assert(thumbnailBounds, `${label}: image manager should show an image preview`);
   assert(

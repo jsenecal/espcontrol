@@ -129,17 +129,14 @@ export function installSettingsPageModule(): GlobalDescriptors {
             list.innerHTML = "";
             var info: any = cardImageLibraryInfo();
             var used: any = formatCardImageSize(info.usedBytes);
-            var total: any = formatCardImageSize(info.storageBytes);
             var free: any = formatCardImageSize(info.freeBytes);
-            var max: any = formatCardImageSize(info.maxBytes);
             upload.disabled = !info.available;
             storage.textContent = info.requiresUsbFlash
                 ? "Image storage is not installed. Reflash this display over USB once, then background images will become available."
-                : total
+                : info.storageBytes
                     ? (items || []).length + " image" + ((items || []).length === 1 ? "" : "s") +
-                        " • " + (used || "0 B") + " used of " + total +
-                        (free ? " • " + free + " free" : "") +
-                        (max ? " • " + max + " max per image" : "")
+                        " • " + (used || "0 B") + " used" +
+                        (free ? " • " + free + " free" : "")
                     : "";
             if (!items || !items.length) {
                 var empty: any = document.createElement("div");
