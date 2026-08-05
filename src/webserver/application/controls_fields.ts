@@ -465,6 +465,10 @@ export function installControlsFieldsModule(): GlobalDescriptors {
     function renderCardBackgroundControl(this: any, panel?: any, b?: any, helpers?: any) {
         if (!cardBackgroundSupported(b))
             return null;
+        var disclosure: any = helpers.disclosureSection(
+            "Card Image",
+            helpers.idPrefix + "card-image-settings",
+            false);
         var field: any = document.createElement("div");
         field.className = "sp-field sp-card-bg-field";
         field.appendChild(fieldLabel("Background Image", helpers.idPrefix + "bg-image"));
@@ -589,8 +593,9 @@ export function installControlsFieldsModule(): GlobalDescriptors {
         });
         fillSelect(_cardImageLibrary || []);
         listCardImages(false).then(fillSelect);
-        panel.appendChild(field);
-        return field;
+        disclosure.section.appendChild(field);
+        panel.appendChild(disclosure.panel);
+        return disclosure.panel;
     }
     function cardSensorPreviewHtml(this: any, b?: any, helpers?: any, value?: any, unit?: any, extraClass?: any, valueClass?: any) {
         var className: any = "sp-sensor-preview" + (extraClass ? " " + extraClass : "") +
