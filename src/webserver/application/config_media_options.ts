@@ -18,6 +18,9 @@ export function installConfigMediaOptionsModule(): GlobalDescriptors {
     }
     function normalizeMediaOptions(this: any, options?: any, mode?: any) {
         mode = mediaEditorMode(mode);
+        function withBackground(this: any, out?: any) {
+            return copyCardBackgroundOptions(out, options, { type: "media" });
+        }
         if (mode === "control_modal") {
             var controlOut: any = "";
             var controlGroupEntity: any = normalizeMediaSpeakerGroupEntity(configOptionValue(options, MEDIA_SPEAKER_GROUP_ENTITY_OPTION));
@@ -36,7 +39,7 @@ export function installConfigMediaOptionsModule(): GlobalDescriptors {
             if (controlMaxVolume !== cardContractOptionDefaultValue("media", MEDIA_VOLUME_MAX_OPTION, "100")) {
                 controlOut = setConfigOptionValue(controlOut, MEDIA_VOLUME_MAX_OPTION, controlMaxVolume);
             }
-            return controlOut;
+            return withBackground(controlOut);
         }
         if (mode === "speaker_group") {
             var groupOut: any = "";
@@ -63,7 +66,7 @@ export function installConfigMediaOptionsModule(): GlobalDescriptors {
             var playerSource: any = configOptionValue(options, MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION).trim();
             if (playerSource)
                 playlistOut = setConfigOptionValue(playlistOut, MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION, playerSource);
-            return playlistOut;
+            return withBackground(playlistOut);
         }
         if (mode === "cover_art") {
             var coverArtOut: any = "";
@@ -78,17 +81,17 @@ export function installConfigMediaOptionsModule(): GlobalDescriptors {
             if (secondaryEntity) {
                 coverArtOut = setConfigOptionValue(coverArtOut, MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION, secondaryEntity);
             }
-            return coverArtOut;
+            return withBackground(coverArtOut);
         }
         if (mode !== "volume" && mode !== "position")
-            return "";
+            return withBackground("");
         var out: any = "";
         var maxVolume: any = normalizeMediaVolumeMax(configOptionValue(options, MEDIA_VOLUME_MAX_OPTION));
         if (mode === "volume" && maxVolume !== cardContractOptionDefaultValue("media", MEDIA_VOLUME_MAX_OPTION, "100")) {
             out = setConfigOptionValue(out, MEDIA_VOLUME_MAX_OPTION, maxVolume);
         }
         out = copyLargeNumbersOption(out, options);
-        return out;
+        return withBackground(out);
     }
     function normalizeMediaCoverArtAction(this: any, value?: any) {
         value = String(value || "").trim();

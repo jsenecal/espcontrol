@@ -110,12 +110,16 @@ export function installAppEventsModule(): GlobalDescriptors {
             console.log("[state] unhandled:", id, val);
         }
         if (!eventStreamEnabled()) {
-            loadInitialState(handleState, markConnected);
+            loadInitialState(handleState, function () {
+                markConnected(false);
+            });
             return;
         }
         var source: any = new EventSource("/events");
         _eventSource = source;
-        source.addEventListener("open", markConnected);
+        source.addEventListener("open", function () {
+            markConnected(true);
+        });
         source.addEventListener("error", function (this: any) {
             handleDisconnected(source);
         });
