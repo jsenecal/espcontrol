@@ -497,6 +497,8 @@ export function installControlsFieldsModule(): GlobalDescriptors {
         deleteBtn.type = "button";
         deleteBtn.className = "sp-action-btn sp-card-bg-delete-btn";
         deleteBtn.innerHTML = '<span class="mdi mdi-trash-can-outline"></span>';
+        deleteBtn.setAttribute("aria-label", "Delete image");
+        deleteBtn.title = "Delete image";
         actions.appendChild(upload);
         actions.appendChild(uploadBtn);
         actions.appendChild(clearBtn);
@@ -585,10 +587,20 @@ export function installControlsFieldsModule(): GlobalDescriptors {
             if (used && !window.confirm("This image is used by " + used + " card" +
                 (used === 1 ? "" : "s") + ". Delete it anyway?"))
                 return;
+            deleteBtn.disabled = true;
+            deleteBtn.setAttribute("aria-busy", "true");
             deleteCardImageSafely(id).then(function () {
                 return listCardImages(true);
-            }).then(fillSelect).catch(function (this: any, err?: any) {
+            }).then(function () {
+                showBanner("Image deleted.", "success");
+                renderPreview();
+                renderButtonSettings();
+            }).catch(function (this: any, err?: any) {
                 showBanner(err && err.message || "Could not delete image.", "error");
+                if (deleteBtn.isConnected) {
+                    deleteBtn.disabled = false;
+                    deleteBtn.removeAttribute("aria-busy");
+                }
             });
         });
         fillSelect(_cardImageLibrary || []);
