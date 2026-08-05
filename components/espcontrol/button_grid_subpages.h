@@ -228,7 +228,7 @@ inline SubpageBtn normalize_subpage_btn(SubpageBtn b) {
   if (b.type == "sensor") {
     b.options = sensor_card_options_normalized(b.options, b.precision);
   }
-  if (card_background_supported_type(b.type)) {
+  if (card_background_supported_card(b.type, b.sensor)) {
     append_card_background_options(b.options, original_options);
   }
   return b;

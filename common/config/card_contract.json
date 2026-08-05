@@ -160,7 +160,17 @@
   "appearance": {
     "backgroundImage": {
       "option": "bg_image",
-      "supportedCardTypes": ["", "action", "push", "media", "light_switch", "internal", "subpage", "garage"]
+      "supportedCardTypes": [
+        "", "action", "vacuum", "lawn_mower", "alarm", "alarm_action",
+        "calendar", "clock", "climate", "climate_control", "cover",
+        "door_window", "presence", "fan_direction", "fan_oscillate",
+        "fan_preset", "fan_speed", "fan_control", "fan_switch", "garage",
+        "gate", "internal", "light_brightness", "light_switch",
+        "light_temperature", "light_control", "lock", "media",
+        "option_select", "push", "screen_lock", "webhook", "sensor",
+        "local_sensor", "slider", "subpage", "timezone", "weather",
+        "weather_forecast"
+      ]
     }
   },
   "cards": {

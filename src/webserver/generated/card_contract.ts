@@ -4504,7 +4504,7 @@ export const CARD_CONTRACT_OPTION_NAMES: Readonly<Record<string, string>> = {
   "weather_mode": "weather_mode",
   "webhook_headers": "webhook_headers"
 };
-export const CARD_CONTRACT_BACKGROUND_IMAGE_TYPES = ["", "action", "push", "media", "light_switch", "internal", "subpage", "garage"] as const;
+export const CARD_CONTRACT_BACKGROUND_IMAGE_TYPES = ["", "action", "vacuum", "lawn_mower", "alarm", "alarm_action", "calendar", "clock", "climate", "climate_control", "cover", "door_window", "presence", "fan_direction", "fan_oscillate", "fan_preset", "fan_speed", "fan_control", "fan_switch", "garage", "gate", "internal", "light_brightness", "light_switch", "light_temperature", "light_control", "lock", "media", "option_select", "push", "screen_lock", "webhook", "sensor", "local_sensor", "slider", "subpage", "timezone", "weather", "weather_forecast"] as const;
 
 function cardContractListContains(list: readonly string[] | undefined, value: string): boolean {
   return (list || []).indexOf(value) >= 0;

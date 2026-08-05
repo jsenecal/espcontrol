@@ -262,6 +262,16 @@ inline bool card_background_supported_type(const std::string &type) {
   return card_runtime_supports_background(type);
 }
 
+inline bool card_background_supported_card(const std::string &type,
+                                           const std::string &sensor) {
+  return card_background_supported_type(type) &&
+         !(type == "media" && sensor == "cover_art");
+}
+
+inline bool card_background_supported_card(const ParsedCfg &card) {
+  return card_background_supported_card(card.type, card.sensor);
+}
+
 inline void append_card_background_options(std::string &out, const std::string &options) {
   std::string background = card_background_options_normalized(options);
   if (background.empty()) return;
@@ -1375,7 +1385,7 @@ inline ParsedCfg normalize_parsed_cfg(ParsedCfg p) {
   normalize_saved_config_sensor(p, was_legacy_text_sensor,
                                 normalize_saved_config_sensor_fields,
                                 sensor_card_options_normalized);
-  if (card_background_supported_type(p.type)) {
+  if (card_background_supported_card(p)) {
     append_card_background_options(p.options, original_options);
   }
   return p;

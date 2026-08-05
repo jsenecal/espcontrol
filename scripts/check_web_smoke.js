@@ -10,6 +10,7 @@ const { freshWebOutputDir, loadBuiltWebSource } = require("./web_source");
 const ROOT = path.resolve(__dirname, "..");
 const SOURCE = path.join(ROOT, "src", "webserver", "entry.ts");
 const DEVICE_MANIFEST = path.join(ROOT, "devices", "manifest.json");
+const CARD_CONTRACT = path.join(ROOT, "common", "config", "card_contract.json");
 const WEB_OUTPUT_DIR = path.join(ROOT, "docs", "public", "webserver");
 const ALL_ROTATIONS = ["0", "90", "180", "270"];
 const REQUIRED_HOOK_GROUPS = ["config", "preview", "backup", "settings"];
@@ -77,6 +78,19 @@ function assertGeneratedConfigValue(slug, generated, key, value) {
 
 const hooks = loadHooks();
 assert(hooks, "web test hooks were not exported");
+const cardContract = JSON.parse(fs.readFileSync(CARD_CONTRACT, "utf8"));
+for (const type of Object.keys(cardContract.runtime.specs)) {
+  assert.strictEqual(
+    hooks.cardBackgroundSupported({ type, sensor: "" }),
+    type !== "image",
+    `${type || "switch"}: Card Image support should only exclude camera/image cards`,
+  );
+}
+assert.strictEqual(
+  hooks.cardBackgroundSupported({ type: "media", sensor: "cover_art" }),
+  false,
+  "Media Cover Art cards must not expose Card Image",
+);
 assert.strictEqual(
   hooks.normalizeMediaOptions("speaker_group_entity=media_player.house,bg_image=lounge", "speaker_group"),
   "speaker_group_entity=media_player.house,bg_image=lounge",

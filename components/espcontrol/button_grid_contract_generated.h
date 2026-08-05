@@ -259,7 +259,7 @@ inline CardRuntimeSpec resolve_card_runtime(const Config &config) {
 constexpr const char *CARD_CONTRACT_OPTION_SELECT_ACTION = "input_select.select_option";
 inline const char *const CARD_CONTRACT_OPTION_SELECT_ACTIONS[] = {"input_select.select_option", "select.select_option"};
 inline const char *const CARD_CONTRACT_BRIGHTNESS_SLIDER_TYPES[] = {"slider", "light_brightness", "fan_speed"};
-inline const char *const CARD_CONTRACT_BACKGROUND_IMAGE_TYPES[] = {"", "action", "push", "media", "light_switch", "internal", "subpage", "garage"};
+inline const char *const CARD_CONTRACT_BACKGROUND_IMAGE_TYPES[] = {"", "action", "vacuum", "lawn_mower", "alarm", "alarm_action", "calendar", "clock", "climate", "climate_control", "cover", "door_window", "presence", "fan_direction", "fan_oscillate", "fan_preset", "fan_speed", "fan_control", "fan_switch", "garage", "gate", "internal", "light_brightness", "light_switch", "light_temperature", "light_control", "lock", "media", "option_select", "push", "screen_lock", "webhook", "sensor", "local_sensor", "slider", "subpage", "timezone", "weather", "weather_forecast"};
 inline const char *const CARD_CONTRACT_COVER_MODES[] = {"modal", "", "tilt", "toggle", "open", "close", "stop", "set_position"};
 inline const char *const CARD_CONTRACT_COVER_CONTROL_TABS[] = {"position", "controls", "tilt", "presets"};
 inline const char *const CARD_CONTRACT_GARAGE_MODES[] = {"", "open", "close"};

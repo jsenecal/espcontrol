@@ -170,7 +170,7 @@ inline void card_background_move_content_foreground(const BtnSlot &s) {
 
 inline bool card_background_configured_for_card(const ParsedCfg &p) {
   std::string id = cfg_option_value(p.options, CARD_BACKGROUND_IMAGE_OPTION);
-  return card_background_supported_type(p.type) && card_background_image_id_valid(id);
+  return card_background_supported_card(p) && card_background_image_id_valid(id);
 }
 
 inline void card_background_position_widget(lv_obj_t *btn, lv_obj_t *widget) {
@@ -736,7 +736,7 @@ inline void card_background_activate_page(const GridConfig &cfg, lv_obj_t *page)
 
 inline void apply_card_background_image(BtnSlot &s, const ParsedCfg &p,
                                         const GridConfig &cfg) {
-  if (!s.btn || !card_background_supported_type(p.type)) return;
+  if (!s.btn || !card_background_supported_card(p)) return;
   std::string id = cfg_option_value(p.options, CARD_BACKGROUND_IMAGE_OPTION);
   if (!card_background_image_id_valid(id)) return;
 
@@ -798,7 +798,7 @@ inline void apply_card_background_image(BtnSlot &s, const ParsedCfg &p,
 inline void sync_card_background_image(BtnSlot &s, const ParsedCfg &p,
                                        const GridConfig &cfg) {
   if (!s.btn) return;
-  std::string desired_id = card_background_supported_type(p.type)
+  std::string desired_id = card_background_supported_card(p)
     ? cfg_option_value(p.options, CARD_BACKGROUND_IMAGE_OPTION) : "";
   if (!card_background_image_id_valid(desired_id)) desired_id.clear();
 
