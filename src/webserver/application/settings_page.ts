@@ -19,11 +19,9 @@ export function installSettingsPageModule(): GlobalDescriptors {
         file.type = "file";
         file.accept = "image/*";
         file.className = "sp-card-image-manager-file";
-        var upload: any = createActionButton("sp-action-btn", "Upload Image", "upload");
-        var refresh: any = createActionButton("sp-action-btn", "Refresh", "refresh");
+        var upload: any = createActionButton("sp-action-btn", "Add image", "plus");
         actions.appendChild(file);
         actions.appendChild(upload);
-        actions.appendChild(refresh);
         body.appendChild(actions);
         var status: any = document.createElement("div");
         status.className = "sp-card-image-manager-status";
@@ -42,7 +40,6 @@ export function installSettingsPageModule(): GlobalDescriptors {
         body.appendChild(list);
         function setBusy(this: any, busy?: any) {
             upload.disabled = !!busy || !cardImageLibraryInfo().available;
-            refresh.disabled = !!busy;
         }
         function showManagerStatus(this: any, message?: any, type?: any) {
             status.textContent = message || "";
@@ -182,7 +179,6 @@ export function installSettingsPageModule(): GlobalDescriptors {
                     setBusy(false);
                 });
         });
-        refresh.addEventListener("click", function () { refreshList(true); });
         refreshList(false);
         return makeCollapsibleCard("Card Images", body, true);
     }

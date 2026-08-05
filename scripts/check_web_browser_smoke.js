@@ -1459,6 +1459,15 @@ async function assertCardImageManagerFeedback(page, label) {
   if (!(await card.locator(".sp-card-image-manager").isVisible())) {
     await card.locator(":scope > .card-header").click();
   }
+  assert(
+    await card.getByRole("button", { name: "Add image", exact: true }).isVisible(),
+    `${label}: image manager should use the concise Add image action`,
+  );
+  assert.strictEqual(
+    await card.getByRole("button", { name: "Refresh", exact: true }).count(),
+    0,
+    `${label}: image manager should refresh automatically without a manual action`,
+  );
   await card.locator(".sp-card-image-rename input").first().fill("Renamed image");
   await card.getByRole("button", { name: "Rename", exact: true }).first().click();
   const status = card.locator(".sp-card-image-manager-status");
