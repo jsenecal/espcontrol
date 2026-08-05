@@ -488,7 +488,7 @@ export function installControlsFieldsModule(): GlobalDescriptors {
         var uploadBtn: any = document.createElement("button");
         uploadBtn.type = "button";
         uploadBtn.className = "sp-action-btn";
-        uploadBtn.innerHTML = '<span class="mdi mdi-upload"></span>Upload';
+        uploadBtn.innerHTML = '<span class="mdi mdi-plus"></span>Add image';
         var clearBtn: any = document.createElement("button");
         clearBtn.type = "button";
         clearBtn.className = "sp-action-btn";
