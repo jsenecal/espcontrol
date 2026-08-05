@@ -208,6 +208,22 @@ def test_generated_yaml(profiles: dict[str, dict]) -> None:
             assert "cfg.info_only = true;" in sensors, f"{slug}: sensors.yaml missing info-only grid flag"
 
 
+def test_card_image_partition_reserves_settings_headroom() -> None:
+    for flash_mb in (16, 32):
+        partition = (ROOT / "common" / "device" / f"partitions_{flash_mb}mb_card_images.csv").read_text(
+            encoding="utf-8"
+        )
+        assert "nvs,      data, nvs,     0x9000,    0xd000," in partition, (
+            f"{flash_mb} MB card-image layout must reserve enough NVS space for image-bearing card configs"
+        )
+        assert "otadata,  data, ota,     0x16000,   0x2000," in partition, (
+            f"{flash_mb} MB card-image layout must place OTA metadata after the enlarged NVS partition"
+        )
+        assert "app0,     app,  ota_0,   0x20000," in partition, (
+            f"{flash_mb} MB card-image layout must keep the first app partition flash-aligned"
+        )
+
+
 def test_upgrades_do_not_reset_saved_panel_config() -> None:
     display = (ROOT / "common" / "config" / "display.yaml").read_text(encoding="utf-8")
     generator = (ROOT / "scripts" / "generate_device_slots.py").read_text(encoding="utf-8")
@@ -654,6 +670,7 @@ def main() -> int:
     test_zero_image_capacity_disables_all_image_card_pickers(profiles)
     test_constrained_s3_supports_one_cover_art_card(profiles)
     test_generated_yaml(profiles)
+    test_card_image_partition_reserves_settings_headroom()
     test_upgrades_do_not_reset_saved_panel_config()
     test_local_voice_generation_uses_capability()
     test_square_s3_reapplies_clock_bar_after_screen_changes()
