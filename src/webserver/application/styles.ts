@@ -382,10 +382,13 @@ export function installStylesModule(): GlobalDescriptors {
         ".sp-card-image-meta{display:grid;gap:4px;padding:10px;min-width:0}" +
         ".sp-card-image-name{color:var(--text);font-size:.84rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}" +
         ".sp-card-image-detail{color:var(--text3);font-size:.74rem}" +
-        ".sp-card-image-rename{margin:0 10px 8px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}" +
-        ".sp-card-image-rename .sp-input{height:34px;padding:7px 9px;font-size:.8rem}" +
-        ".sp-card-image-rename .sp-action-btn{padding:7px 10px}" +
-        ".sp-card-image-delete{justify-self:start;margin:0 10px 10px;padding:7px 10px}" +
+        ".sp-card-image-item-actions{display:flex;gap:8px;margin:0 10px 10px}" +
+        ".sp-card-image-item-actions .sp-action-btn{width:36px;height:36px;padding:0;display:flex;align-items:center;justify-content:center}" +
+        ".sp-card-image-rename-dialog{width:min(380px,100%);height:auto;max-height:none}" +
+        ".sp-card-image-rename-dialog .sp-field{margin:16px 0 0}" +
+        ".sp-card-image-rename-error{min-height:20px;margin-top:8px;font-size:.8rem;color:#ff8b8b}" +
+        ".sp-card-image-rename-actions{justify-content:flex-end;margin-top:12px}" +
+        "@media(max-width:600px){.sp-card-image-rename-overlay{padding:20px}.sp-card-image-rename-dialog{width:min(380px,100%);height:auto;max-height:none;border:1px solid var(--border);border-radius:var(--radius);padding:20px}}" +
         ".sp-icon-picker{position:relative}" +
         ".sp-icon-picker-input{width:100%;padding:10px 12px;padding-left:36px;background:var(--surface2);" +
         "border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.875rem;" +

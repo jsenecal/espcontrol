@@ -47,6 +47,84 @@ export function installSettingsPageModule(): GlobalDescriptors {
                 (type === "error" ? "error" : "success");
             status.setAttribute("role", type === "error" ? "alert" : "status");
         }
+        var renameDialogCounter: any = 0;
+        function openRenameDialog(this: any, id?: any, currentName?: any) {
+            var previousFocus: any = document.activeElement;
+            var overlay: any = document.createElement("div");
+            overlay.className = "sp-transfer-overlay sp-card-image-rename-overlay";
+            var dialog: any = document.createElement("form");
+            dialog.className = "sp-transfer-dialog sp-card-image-rename-dialog";
+            dialog.setAttribute("role", "dialog");
+            dialog.setAttribute("aria-modal", "true");
+            var headingId: any = "sp-card-image-rename-title-" + (++renameDialogCounter);
+            dialog.setAttribute("aria-labelledby", headingId);
+            var heading: any = document.createElement("h2");
+            heading.id = headingId;
+            heading.textContent = "Rename image";
+            dialog.appendChild(heading);
+            var field: any = document.createElement("div");
+            field.className = "sp-field";
+            var inputId: any = "sp-card-image-rename-input-" + renameDialogCounter;
+            field.appendChild(fieldLabel("Image name", inputId));
+            var input: any = textInput(inputId, currentName || id, "Image name");
+            field.appendChild(input);
+            dialog.appendChild(field);
+            var error: any = document.createElement("div");
+            error.className = "sp-card-image-rename-error";
+            error.setAttribute("role", "alert");
+            dialog.appendChild(error);
+            var actionsRow: any = document.createElement("div");
+            actionsRow.className = "sp-btn-row sp-card-image-rename-actions";
+            var cancel: any = createActionButton("sp-action-btn", "Cancel");
+            var save: any = createActionButton("sp-action-btn sp-save-btn", "Save");
+            save.type = "submit";
+            actionsRow.appendChild(cancel);
+            actionsRow.appendChild(save);
+            dialog.appendChild(actionsRow);
+            overlay.appendChild(dialog);
+            function close(this: any) {
+                document.removeEventListener("keydown", handleKeydown);
+                if (overlay.parentNode)
+                    overlay.parentNode.removeChild(overlay);
+                if (previousFocus && previousFocus.focus)
+                    previousFocus.focus();
+            }
+            function handleKeydown(this: any, event?: any) {
+                if (event.key === "Escape")
+                    close();
+            }
+            cancel.addEventListener("click", close);
+            overlay.addEventListener("mousedown", function (this: any, event?: any) {
+                if (event.target === overlay)
+                    close();
+            });
+            dialog.addEventListener("submit", function (this: any, event?: any) {
+                event.preventDefault();
+                save.disabled = true;
+                cancel.disabled = true;
+                error.textContent = "";
+                setBusy(true);
+                renameCardImage(id, input.value.trim())
+                    .then(function () { return listCardImages(true); })
+                    .then(function (this: any, fresh?: any) {
+                        close();
+                        showManagerStatus("Image renamed.", "success");
+                        renderItems(fresh);
+                        renderButtonSettings();
+                    })
+                    .catch(function (this: any, err?: any) {
+                        error.textContent = err && err.message || "Could not rename image.";
+                        save.disabled = false;
+                        cancel.disabled = false;
+                        input.focus();
+                    })
+                    .then(function () { setBusy(false); });
+            });
+            document.addEventListener("keydown", handleKeydown);
+            document.body.appendChild(overlay);
+            input.focus();
+            input.select();
+        }
         function renderItems(this: any, items?: any) {
             list.innerHTML = "";
             var info: any = cardImageLibraryInfo();
@@ -95,37 +173,18 @@ export function installSettingsPageModule(): GlobalDescriptors {
                     (usage ? "Used by " + usage + " card" + (usage === 1 ? "" : "s") : "Not used");
                 meta.appendChild(detail);
                 card.appendChild(meta);
-                var rename: any = document.createElement("div");
-                rename.className = "sp-card-image-rename";
-                var renameInput: any = textInput("", item.name || id, "Image name");
-                renameInput.setAttribute("aria-label", "Image name");
-                var renameBtn: any = createActionButton("sp-action-btn", "Rename", "pencil");
-                function saveRename(this: any) {
-                    var value: any = renameInput.value.trim();
-                    setBusy(true);
-                    renameCardImage(id, value)
-                        .then(function () { return listCardImages(true); })
-                        .then(function (this: any, fresh?: any) {
-                            showManagerStatus("Image renamed.", "success");
-                            renderItems(fresh);
-                            renderButtonSettings();
-                        })
-                        .catch(function (this: any, err?: any) {
-                            showManagerStatus(err && err.message || "Could not rename image.", "error");
-                        })
-                        .then(function () { setBusy(false); });
-                }
-                renameBtn.addEventListener("click", saveRename);
-                renameInput.addEventListener("keydown", function (this: any, event?: any) {
-                    if (event.key === "Enter") {
-                        event.preventDefault();
-                        saveRename();
-                    }
+                var cardActions: any = document.createElement("div");
+                cardActions.className = "sp-card-image-item-actions";
+                var renameBtn: any = createActionButton(
+                    "sp-action-btn sp-card-image-rename-btn", "", "pencil", "Rename image");
+                renameBtn.title = "Rename image";
+                renameBtn.addEventListener("click", function () {
+                    openRenameDialog(id, item.name || id);
                 });
-                rename.appendChild(renameInput);
-                rename.appendChild(renameBtn);
-                card.appendChild(rename);
-                var del: any = createActionButton("sp-action-btn sp-card-image-delete", "Delete", "trash-can-outline");
+                cardActions.appendChild(renameBtn);
+                var del: any = createActionButton(
+                    "sp-action-btn sp-card-image-delete", "", "trash-can-outline", "Delete image");
+                del.title = "Delete image";
                 del.addEventListener("click", function () {
                     var usedByCards: any = countCardImageUsage(id);
                     if (usedByCards && !window.confirm("This image is used by " + usedByCards + " card" +
@@ -145,7 +204,8 @@ export function installSettingsPageModule(): GlobalDescriptors {
                         })
                         .then(function () { setBusy(false); });
                 });
-                card.appendChild(del);
+                cardActions.appendChild(del);
+                card.appendChild(cardActions);
                 list.appendChild(card);
             });
         }

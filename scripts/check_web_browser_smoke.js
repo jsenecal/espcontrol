@@ -1468,8 +1468,16 @@ async function assertCardImageManagerFeedback(page, label) {
     0,
     `${label}: image manager should refresh automatically without a manual action`,
   );
-  await card.locator(".sp-card-image-rename input").first().fill("Renamed image");
-  await card.getByRole("button", { name: "Rename", exact: true }).first().click();
+  const rename = card.getByRole("button", { name: "Rename image", exact: true }).first();
+  const remove = card.getByRole("button", { name: "Delete image", exact: true }).first();
+  assert.strictEqual(await rename.innerText(), "", `${label}: rename action should be icon-only`);
+  assert.strictEqual(await remove.innerText(), "", `${label}: delete action should be icon-only`);
+  await rename.click();
+  const renameDialog = page.getByRole("dialog", { name: "Rename image", exact: true });
+  await renameDialog.waitFor({ state: "visible" });
+  await renameDialog.getByLabel("Image name").fill("Renamed image");
+  await renameDialog.getByRole("button", { name: "Save", exact: true }).click();
+  await renameDialog.waitFor({ state: "detached" });
   const status = card.locator(".sp-card-image-manager-status");
   await status.waitFor({ state: "visible" });
   assert.strictEqual(
