@@ -79,28 +79,33 @@ export function installCardImageServiceModule(): GlobalDescriptors {
         id = normalizeCardBackgroundImageId(id);
         if (!id)
             return Promise.reject(new Error("Invalid card image ID."));
-        if (cardImagesFeature.info().referenceTransactions) {
-            return deleteCardImageWithDeviceTransaction({
+        // Refresh capabilities before choosing the deletion protocol. A browser can
+        // retain library state from older firmware across an OTA update; using that
+        // stale state would select the legacy configuration-first flow unnecessarily.
+        return listCardImages(true).then(function () {
+            if (cardImagesFeature.info().referenceTransactions) {
+                return deleteCardImageWithDeviceTransaction({
+                    waitForPendingPosts: function () { return postQueueIdle(); },
+                    resetPostError: function () { resetPostQueueError(); },
+                    deleteImage: function () { return deleteCardImage(id); },
+                    clearLocalReferences: function () { clearCardImageReferences(id, false); },
+                    rerender: function () {
+                        renderPreview();
+                        renderButtonSettings();
+                    },
+                });
+            }
+            return deleteCardImageConfigurationFirst({
                 waitForPendingPosts: function () { return postQueueIdle(); },
                 resetPostError: function () { resetPostQueueError(); },
+                clearReferences: function () { return clearCardImageReferences(id); },
+                postsHadError: function () { return postQueueHadError(); },
                 deleteImage: function () { return deleteCardImage(id); },
-                clearLocalReferences: function () { clearCardImageReferences(id, false); },
                 rerender: function () {
                     renderPreview();
                     renderButtonSettings();
                 },
             });
-        }
-        return deleteCardImageConfigurationFirst({
-            waitForPendingPosts: function () { return postQueueIdle(); },
-            resetPostError: function () { resetPostQueueError(); },
-            clearReferences: function () { return clearCardImageReferences(id); },
-            postsHadError: function () { return postQueueHadError(); },
-            deleteImage: function () { return deleteCardImage(id); },
-            rerender: function () {
-                renderPreview();
-                renderButtonSettings();
-            },
         });
     }
 

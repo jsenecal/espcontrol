@@ -177,7 +177,13 @@ async function installRoutes(context, slug) {
           used_bytes: 0,
           free_bytes: 2 * 1024 * 1024,
           max_bytes: 64 * 1024,
-          images: [],
+          reference_transactions: true,
+          images: [{
+            id: "test-image",
+            name: "Test image",
+            size: 12 * 1024,
+            url: "/card-images/test-image.jpg",
+          }],
         }),
       });
       return;
@@ -3327,6 +3333,12 @@ async function assertEditSmoke(page, posts, errors) {
     .click();
   await page.locator("#sp-inp-label").fill("Kitchen Main");
   await page.locator("#sp-inp-entity").fill("switch.kitchen_main");
+  const cardImageSettings = page
+    .locator(".sp-settings-modal .sp-disclosure")
+    .filter({ hasText: "Card Image" })
+    .first();
+  await cardImageSettings.locator(".sp-disclosure-button").click();
+  await page.locator("#sp-inp-bg-image").selectOption("test-image");
   await page.getByRole("button", { name: "Save" }).click();
   await waitForPost(
     posts,
@@ -3334,7 +3346,7 @@ async function assertEditSmoke(page, posts, errors) {
       domain: "text",
       name: "button_1_config",
       action: "set",
-      value: "switch.kitchen_main;Kitchen Main;Lightbulb;Lightbulb",
+      value: "switch.kitchen_main;Kitchen Main;Lightbulb;Lightbulb;;;;;bg_image=test-image",
     },
     "switch card edit",
     before,
