@@ -614,8 +614,8 @@ assert(
 );
 assert.strictEqual(
   hooks.cardBackgroundSupported({ type: "vacuum" }),
-  false,
-  "vacuum cards do not advertise unsupported background editing"
+  true,
+  "vacuum cards support background editing like other non-visual cards"
 );
 assert.strictEqual(
   hooks.cardBackgroundSupported({ type: "image", entity: "camera.front_door" }),
