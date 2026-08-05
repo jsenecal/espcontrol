@@ -51,7 +51,7 @@ export function installConfigMediaOptionsModule(): GlobalDescriptors {
             if (groupMaxVolume !== cardContractOptionDefaultValue("media", MEDIA_VOLUME_MAX_OPTION, "100")) {
                 groupOut = setConfigOptionValue(groupOut, MEDIA_VOLUME_MAX_OPTION, groupMaxVolume);
             }
-            return groupOut;
+            return withBackground(groupOut);
         }
         if (mode === "playlist") {
             var playlistOut: any = "";
@@ -81,7 +81,7 @@ export function installConfigMediaOptionsModule(): GlobalDescriptors {
             if (secondaryEntity) {
                 coverArtOut = setConfigOptionValue(coverArtOut, MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION, secondaryEntity);
             }
-            return withBackground(coverArtOut);
+            return coverArtOut;
         }
         if (mode !== "volume" && mode !== "position")
             return withBackground("");

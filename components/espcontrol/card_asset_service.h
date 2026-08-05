@@ -10,6 +10,11 @@
 #include "esphome/core/preferences.h"
 #endif
 
+#ifdef USE_ESP32
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+#endif
+
 namespace espcontrol {
 
 class CardAssetReferenceAdapter {
@@ -116,6 +121,30 @@ class CardAssetService {
   }
 
  private:
+#ifdef USE_ESP32
+  class StateLock {
+   public:
+    explicit StateLock(CardAssetService *service) : service_(service) {
+      if (service_ != nullptr && service_->state_mutex_ != nullptr) {
+        xSemaphoreTakeRecursive(service_->state_mutex_, portMAX_DELAY);
+      }
+    }
+    ~StateLock() {
+      if (service_ != nullptr && service_->state_mutex_ != nullptr) {
+        xSemaphoreGiveRecursive(service_->state_mutex_);
+      }
+    }
+
+   private:
+    CardAssetService *service_{nullptr};
+  };
+#else
+  class StateLock {
+   public:
+    explicit StateLock(CardAssetService *) {}
+  };
+#endif
+
   struct RuntimeHolderBase {
     virtual ~RuntimeHolderBase() = default;
     virtual void shutdown() = 0;
@@ -140,6 +169,9 @@ class CardAssetService {
   bool restore_recovery_needed_{false};
   bool delete_running_{false};
   bool running_{false};
+#ifdef USE_ESP32
+  SemaphoreHandle_t state_mutex_{xSemaphoreCreateRecursiveMutex()};
+#endif
 
   bool load_pending_delete();
   bool save_pending_delete(const std::string &id);

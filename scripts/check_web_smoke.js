@@ -78,6 +78,16 @@ function assertGeneratedConfigValue(slug, generated, key, value) {
 const hooks = loadHooks();
 assert(hooks, "web test hooks were not exported");
 assert.strictEqual(
+  hooks.normalizeMediaOptions("speaker_group_entity=media_player.house,bg_image=lounge", "speaker_group"),
+  "speaker_group_entity=media_player.house,bg_image=lounge",
+  "speaker group option normalization preserves its card background",
+);
+assert.strictEqual(
+  hooks.normalizeMediaOptions("cover_art_details,bg_image=lounge", "cover_art"),
+  "cover_art_details",
+  "cover art option normalization removes its hidden card background",
+);
+assert.strictEqual(
   hooks.backupExportFileName(new Date(2026, 5, 9)),
   "espcontrol-7-inch-2026-06-09.zip",
   "backup export filename includes screen size and date"

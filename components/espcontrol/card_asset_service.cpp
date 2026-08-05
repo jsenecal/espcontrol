@@ -74,6 +74,7 @@ uint32_t restore_checksum(const RestoreSessionRecord &record) {
 }
 
 bool CardAssetService::start() {
+  StateLock lock(this);
   if (running_ || (active_card_asset_service != nullptr && active_card_asset_service != this)) {
     return false;
   }
@@ -85,6 +86,7 @@ bool CardAssetService::start() {
 }
 
 bool CardAssetService::stop() {
+  StateLock lock(this);
   if (!running_) return false;
   clear_card_background_runtime();
   if (active_card_asset_service == this) active_card_asset_service = nullptr;
@@ -93,6 +95,7 @@ bool CardAssetService::stop() {
 }
 
 void CardAssetService::loop() {
+  StateLock lock(this);
   if (!running_ || delete_running_ ||
       (pending_delete_id_.empty() && !restore_recovery_needed_)) return;
 #ifdef ESP_PLATFORM
@@ -107,6 +110,7 @@ void CardAssetService::loop() {
 }
 
 void CardAssetService::set_reference_adapter(CardAssetReferenceAdapter *adapter) {
+  StateLock lock(this);
   reference_adapter_ = adapter;
   if (running_ && !pending_delete_id_.empty()) resume_pending_delete();
   if (running_ && restore_recovery_needed_ && !restore_session_.empty()) {
@@ -160,6 +164,7 @@ bool CardAssetService::clear_pending_delete() {
 }
 
 CardAssetDeleteResult CardAssetService::delete_with_references(const std::string &id) {
+  StateLock lock(this);
   if (delete_running_) return CardAssetDeleteResult::BUSY;
   esphome::card_image_store::CardImageInfo image;
   if (!store_.find(id, image)) return CardAssetDeleteResult::NOT_FOUND;
@@ -284,6 +289,7 @@ bool CardAssetService::clear_restore_session() {
 }
 
 std::string CardAssetService::begin_restore_session() {
+  StateLock lock(this);
   if (!restore_session_.empty()) return "";
   char token[17];
 #ifdef ESP_PLATFORM
@@ -305,6 +311,7 @@ std::string CardAssetService::begin_restore_session() {
 }
 
 bool CardAssetService::stage_restored_asset(const std::string &session, const std::string &id) {
+  StateLock lock(this);
   if (session.empty() || session != restore_session_ ||
       !esphome::card_image_store::CardImageStore::id_valid(id) ||
       staged_restore_ids_.size() >= MAX_STAGED_RESTORE_ASSETS) {
@@ -321,6 +328,7 @@ bool CardAssetService::stage_restored_asset(const std::string &session, const st
 }
 
 void CardAssetService::unstage_restored_asset(const std::string &session, const std::string &id) {
+  StateLock lock(this);
   if (session != restore_session_) return;
   const auto item = std::find(staged_restore_ids_.begin(), staged_restore_ids_.end(), id);
   if (item == staged_restore_ids_.end()) return;
@@ -329,12 +337,14 @@ void CardAssetService::unstage_restored_asset(const std::string &session, const 
 }
 
 CardAssetRestoreResult CardAssetService::commit_restore_session(const std::string &session) {
+  StateLock lock(this);
   if (session.empty() || session != restore_session_) return CardAssetRestoreResult::INVALID_SESSION;
   return clear_restore_session() ? CardAssetRestoreResult::SUCCESS
                                  : CardAssetRestoreResult::PERSISTENCE_FAILED;
 }
 
 CardAssetRestoreResult CardAssetService::rollback_restore_session(const std::string &session) {
+  StateLock lock(this);
   if (session.empty() || session != restore_session_) return CardAssetRestoreResult::INVALID_SESSION;
   restore_recovery_needed_ = true;
   for (const auto &id : staged_restore_ids_) {

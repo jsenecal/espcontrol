@@ -262,16 +262,20 @@ export function installAppBackupModule(): GlobalDescriptors {
                 schedule_clock_text_color: normalizeHexColor(state.scheduleClockTextColor, "FFFFFF"),
             },
         });
+        function downloadArchive(this: any, imageEntries?: any, imagesUnavailable?: any) {
+            imageEntries = imageEntries || [];
+            imageEntries.unshift({ name: "backup.json", bytes: new TextEncoder().encode(JSON.stringify(data, null, 2)) });
+            backupDownload(backupCreateZip(imageEntries), backupExportFileName());
+            if (imagesUnavailable) {
+                showBanner("Backup exported without images because image storage is unavailable.", "warning");
+                return;
+            }
+            showBanner("Backup exported with " + Math.max(0, imageEntries.length - 2) + " image" +
+                (imageEntries.length === 3 ? "" : "s") + ".", "success");
+        }
         backupImageArchiveEntries()
-            .then(function (this: any, imageEntries?: any) {
-                imageEntries.unshift({ name: "backup.json", bytes: new TextEncoder().encode(JSON.stringify(data, null, 2)) });
-                backupDownload(backupCreateZip(imageEntries), backupExportFileName());
-                showBanner("Backup exported with " + Math.max(0, imageEntries.length - 2) + " image" +
-                    (imageEntries.length === 3 ? "" : "s") + ".", "success");
-            })
-            .catch(function (this: any, err?: any) {
-                showBanner(err && err.message || "Could not create backup with images.", "error");
-            });
+            .then(function (this: any, imageEntries?: any) { downloadArchive(imageEntries, false); })
+            .catch(function (this: any) { downloadArchive([], true); });
     }
     function importConfig(this: any) {
         var input: any = document.createElement("input");
