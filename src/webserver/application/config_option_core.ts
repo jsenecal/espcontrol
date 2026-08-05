@@ -73,6 +73,9 @@ export function installConfigOptionCoreModule(): GlobalDescriptors {
     function cardBackgroundSupported(this: any, b?: any) {
         if (!b)
             return false;
+        if (b.type === "image" ||
+            (b.type === "media" && mediaEditorMode(b.sensor) === "cover_art"))
+            return false;
         return cardContractSupportsBackground(b.type || "");
     }
     function normalizeCardBackgroundImageId(this: any, value?: any) {

@@ -618,6 +618,16 @@ assert.strictEqual(
   "vacuum cards do not advertise unsupported background editing"
 );
 assert.strictEqual(
+  hooks.cardBackgroundSupported({ type: "image", entity: "camera.front_door" }),
+  false,
+  "camera cards do not advertise redundant background editing"
+);
+assert.strictEqual(
+  hooks.cardBackgroundSupported({ type: "media", sensor: "cover_art" }),
+  false,
+  "cover art cards do not advertise redundant background editing"
+);
+assert.strictEqual(
   hooks.normalizeMediaOptions("volume_max=40", "volume"),
   "volume_max=40",
   "media volume max option is preserved for volume mode"
