@@ -368,6 +368,10 @@ export function installStylesModule(): GlobalDescriptors {
         ".sp-card-image-manager{display:grid;gap:14px}" +
         ".sp-card-image-manager-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}" +
         ".sp-card-image-manager-file{display:none}" +
+        ".sp-card-image-manager-status{display:none;padding:10px 12px;border-radius:8px;font-size:.8rem;font-weight:500}" +
+        ".sp-card-image-manager-status.sp-visible{display:block}" +
+        ".sp-card-image-manager-status.sp-success{background:rgba(16,185,129,.16);color:#3dd68c;border:1px solid rgba(16,185,129,.25)}" +
+        ".sp-card-image-manager-status.sp-error{background:rgba(244,63,94,.16);color:#f66f81;border:1px solid rgba(244,63,94,.25)}" +
         ".sp-card-image-storage{color:var(--text2);font-size:.8rem;line-height:1.35}" +
         ".sp-card-image-manager-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}" +
         ".sp-card-image-manager-empty{border:1px dashed var(--border);border-radius:8px;padding:18px;" +

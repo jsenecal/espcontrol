@@ -188,6 +188,23 @@ async function installRoutes(context, slug) {
       });
       return;
     }
+    if (
+      requestUrl.hostname === "espcontrol.test" &&
+      requestUrl.pathname === "/api/card-images/test-image/rename" &&
+      route.request().method() === "POST"
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "test-image",
+          name: "Renamed image",
+          size: 12 * 1024,
+          url: "/card-images/test-image.jpg",
+        }),
+      });
+      return;
+    }
     if (requestUrl.hostname === "espcontrol.test") {
       await route.fulfill({ status: 204, contentType: "text/plain", body: "" });
       return;
@@ -1430,6 +1447,32 @@ async function assertSettingsPage(page, label, options = {}, posts = []) {
   await page.getByRole("tab", { name: "Screen" }).click();
   await page.waitForSelector("#sp-screen.sp-page.active");
   await assertVoiceClockBarPreview(page, label, options.slug === "esp32-p4-86");
+}
+
+async function assertCardImageManagerFeedback(page, label) {
+  await page.getByRole("tab", { name: "Settings" }).click();
+  await page.waitForSelector("#sp-settings.sp-page.active");
+  const card = page
+    .locator("#sp-settings .card")
+    .filter({ has: page.locator(".card-header h3", { hasText: /^Card Images$/ }) })
+    .first();
+  if (!(await card.locator(".sp-card-image-manager").isVisible())) {
+    await card.locator(":scope > .card-header").click();
+  }
+  await card.locator(".sp-card-image-rename input").first().fill("Renamed image");
+  await card.getByRole("button", { name: "Rename", exact: true }).first().click();
+  const status = card.locator(".sp-card-image-manager-status");
+  await status.waitFor({ state: "visible" });
+  assert.strictEqual(
+    await status.innerText(),
+    "Image renamed.",
+    `${label}: image rename confirmation should appear inside the Card Images panel`,
+  );
+  assert.strictEqual(
+    await status.getAttribute("role"),
+    "status",
+    `${label}: image rename confirmation should be announced accessibly`,
+  );
 }
 
 async function assertVoiceClockBarPreview(page, label, supported) {
@@ -4419,6 +4462,7 @@ async function runCase(browser, testCase) {
     );
     await assertSettingsPage(page, testCase.name, testCase, posts);
     if (testCase.exerciseInteractions) {
+      await assertCardImageManagerFeedback(page, testCase.name);
       await assertNightScheduleSensorControls(page, posts, testCase.name);
     }
     assertNoLayoutBreaks(

@@ -25,6 +25,10 @@ export function installSettingsPageModule(): GlobalDescriptors {
         actions.appendChild(upload);
         actions.appendChild(refresh);
         body.appendChild(actions);
+        var status: any = document.createElement("div");
+        status.className = "sp-card-image-manager-status";
+        status.setAttribute("aria-live", "polite");
+        body.appendChild(status);
         var note: any = infoPanel(
             "sp-card-image-optimization-note",
             "Images are resized and compressed in your browser to 200×200 JPEGs before upload, keeping the device fast."
@@ -39,6 +43,12 @@ export function installSettingsPageModule(): GlobalDescriptors {
         function setBusy(this: any, busy?: any) {
             upload.disabled = !!busy || !cardImageLibraryInfo().available;
             refresh.disabled = !!busy;
+        }
+        function showManagerStatus(this: any, message?: any, type?: any) {
+            status.textContent = message || "";
+            status.className = "sp-card-image-manager-status sp-visible sp-" +
+                (type === "error" ? "error" : "success");
+            status.setAttribute("role", type === "error" ? "alert" : "status");
         }
         function renderItems(this: any, items?: any) {
             list.innerHTML = "";
@@ -99,12 +109,12 @@ export function installSettingsPageModule(): GlobalDescriptors {
                     renameCardImage(id, value)
                         .then(function () { return listCardImages(true); })
                         .then(function (this: any, fresh?: any) {
-                            showBanner("Image renamed.", "success");
+                            showManagerStatus("Image renamed.", "success");
                             renderItems(fresh);
                             renderButtonSettings();
                         })
                         .catch(function (this: any, err?: any) {
-                            showBanner(err && err.message || "Could not rename image.", "error");
+                            showManagerStatus(err && err.message || "Could not rename image.", "error");
                         })
                         .then(function () { setBusy(false); });
                 }
@@ -128,13 +138,13 @@ export function installSettingsPageModule(): GlobalDescriptors {
                     deleteCardImageSafely(id)
                         .then(function () { return listCardImages(true); })
                         .then(function (this: any, fresh?: any) {
-                            showBanner("Image deleted.", "success");
+                            showManagerStatus("Image deleted.", "success");
                             renderItems(fresh);
                             renderPreview();
                             renderButtonSettings();
                         })
                         .catch(function (this: any, err?: any) {
-                            showBanner(err && err.message || "Could not delete image.", "error");
+                            showManagerStatus(err && err.message || "Could not delete image.", "error");
                         })
                         .then(function () { setBusy(false); });
                 });
@@ -147,7 +157,7 @@ export function installSettingsPageModule(): GlobalDescriptors {
             return listCardImages(force)
                 .then(renderItems)
                 .catch(function (this: any, err?: any) {
-                    showBanner(err && err.message || "Could not load images.", "error");
+                    showManagerStatus(err && err.message || "Could not load images.", "error");
                 })
                 .then(function () { setBusy(false); });
         }
@@ -160,12 +170,12 @@ export function installSettingsPageModule(): GlobalDescriptors {
             uploadCardImage(selected)
                 .then(function () { return listCardImages(true); })
                 .then(function (this: any, fresh?: any) {
-                    showBanner("Image uploaded.", "success");
+                    showManagerStatus("Image uploaded.", "success");
                     renderItems(fresh);
                     renderButtonSettings();
                 })
                 .catch(function (this: any, err?: any) {
-                    showBanner(err && err.message || "Could not upload image.", "error");
+                    showManagerStatus(err && err.message || "Could not upload image.", "error");
                 })
                 .then(function () {
                     file.value = "";
