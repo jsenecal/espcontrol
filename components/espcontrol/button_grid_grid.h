@@ -1047,6 +1047,7 @@ inline bool grid_refresh_subpage_layouts(
   const int NS = bounded_grid_slots(cfg.num_slots);
   const int COLS = cfg.cols > 0 ? cfg.cols : 1;
   const int ROWS = (NS + COLS - 1) / COLS;
+  const DisplayProfile display = display_profile_from_grid_config(cfg);
   static lv_coord_t subpage_cols[MAX_GRID_SLOTS + 1];
   static lv_coord_t subpage_rows[MAX_GRID_SLOTS + 1];
   for (int i = 0; i < COLS; i++) subpage_cols[i] = LV_GRID_FR(1);
@@ -1094,8 +1095,8 @@ inline bool grid_refresh_subpage_layouts(
     for (int gp = 0; gp < NS; gp++) {
       const int button_index = sp_order.positions[gp];
       if (button_index < 1 || button_index > static_cast<int>(sp_btns.size())) continue;
-      lv_obj_t *button = navigation_subpage_card_button(*entry, button_index);
-      if (button == nullptr) {
+      NavigationSubpageEntry::Card *card = navigation_subpage_card(*entry, button_index);
+      if (card == nullptr || card->button == nullptr) {
         ESP_LOGW("sensors", "Subpage %d is missing card %d", si + 1, button_index);
         continue;
       }
@@ -1105,7 +1106,13 @@ inline bool grid_refresh_subpage_layouts(
         ? sp_order.col_span[button_index - 1] : 1;
       const int row_span = sp_order.row_span[button_index - 1] > 0
         ? sp_order.row_span[button_index - 1] : 1;
-      set_grid_card_cell(button, entry->screen, col, row, col_span, row_span, COLS, ROWS);
+      set_grid_card_cell(card->button, entry->screen, col, row, col_span, row_span, COLS, ROWS);
+      const ParsedCfg button_config =
+        parsed_cfg_from_subpage_btn(sp_btns[button_index - 1]);
+      const auto context = card_runtime_context(
+        button_config, espcontrol::cards::Surface::SUBPAGE);
+      espcontrol::cards::sensor_driver_refresh_layout(
+        card->slot, button_config, context, display, row_span, col_span);
     }
     lv_obj_update_layout(entry->screen);
     refreshed = true;
@@ -1941,10 +1948,10 @@ inline void grid_phase2(
         sub_scr, sp_radius, sp_pad, sp_btn_fnt, sp_txt_color);
       int cs = sp_ord.col_span[bn - 1] > 0 ? sp_ord.col_span[bn - 1] : 1;
       set_grid_card_cell(sb_btn, sub_scr, col, row, cs, rs, COLS, ROWS);
-      navigation_register_subpage_card(si + 1, bn, sb_btn);
       BtnSlot sub_slot = create_dynamic_card_slot(
         sb_btn, sp_icon_fnt, display_sensor_font(display), sp_btn_fnt, sp_txt_color,
         cfg.subpage_chevron_font);
+      navigation_register_subpage_card(si + 1, bn, sub_slot);
       display_apply_main_width(sub_slot.icon_lbl, display);
       display_apply_slot_text_width(sub_slot, display);
       setup_card_visual(sub_slot, sb_cfg, context, cfg, palette, rs, cs);

@@ -21,6 +21,7 @@ struct NavigationSubpageEntry {
   struct Card {
     int index = 0;
     lv_obj_t *button = nullptr;
+    BtnSlot slot{};
   };
   std::vector<Card> cards;
 };
@@ -208,11 +209,19 @@ inline void navigation_register_subpage_back_button(int slot, lv_obj_t *button) 
   if (entry != nullptr) entry->back_button = button;
 }
 
-inline void navigation_register_subpage_card(int slot, int index, lv_obj_t *button) {
-  if (index <= 0 || button == nullptr) return;
+inline void navigation_register_subpage_card(int slot, int index, const BtnSlot &card_slot) {
+  if (index <= 0 || card_slot.btn == nullptr) return;
   NavigationSubpageEntry *entry = navigation_find_slot(slot);
   if (entry == nullptr) return;
-  entry->cards.push_back({index, button});
+  entry->cards.push_back({index, card_slot.btn, card_slot});
+}
+
+inline NavigationSubpageEntry::Card *navigation_subpage_card(
+    NavigationSubpageEntry &entry, int index) {
+  for (auto &card : entry.cards) {
+    if (card.index == index) return &card;
+  }
+  return nullptr;
 }
 
 inline lv_obj_t *navigation_subpage_card_button(

@@ -302,6 +302,11 @@ def test_subpage_config_changes_schedule_live_refresh() -> None:
             f"{sensors_path}: secondary-page refresh must not recreate card subscriptions"
         )
 
+    grid_runtime = (ROOT / "components/espcontrol/button_grid_grid.h").read_text(encoding="utf-8")
+    assert "sensor_driver_refresh_layout(" in grid_runtime, (
+        "secondary-page layout refresh must update sensor font sizing in place"
+    )
+
 
 def web_screen_width_percent(profile: dict) -> float:
     width = str(profile["web"]["screen"]["width"]).strip()
