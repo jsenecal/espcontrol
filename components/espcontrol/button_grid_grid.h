@@ -1048,6 +1048,7 @@ inline bool grid_refresh_subpage_layouts(
   const int COLS = cfg.cols > 0 ? cfg.cols : 1;
   const int ROWS = (NS + COLS - 1) / COLS;
 
+  bool refreshed = false;
   for (int si = 0; si < NS; si++) {
     const auto parent_context = card_runtime_context(parse_cfg(slots[si].config->state));
     if (!espcontrol::cards::navigation_driver_matches(parent_context)) continue;
@@ -1064,10 +1065,12 @@ inline bool grid_refresh_subpage_layouts(
 
     NavigationSubpageEntry *entry = navigation_find_slot(si + 1);
     const auto sp_btns = parse_subpage_config(sp_cfg);
-    if (entry == nullptr || entry->screen == nullptr || entry->back_button == nullptr ||
-        entry->cards.size() != sp_btns.size()) {
-      ESP_LOGW("sensors", "Subpage %d changed structurally; layout refresh deferred", si + 1);
-      return false;
+    if (entry == nullptr || entry->screen == nullptr || entry->back_button == nullptr) {
+      ESP_LOGW("sensors", "Subpage %d is not ready for a layout refresh", si + 1);
+      continue;
+    }
+    if (entry->cards.size() != sp_btns.size()) {
+      ESP_LOGW("sensors", "Subpage %d card count changed; repositioning existing cards", si + 1);
     }
 
     const std::string order = get_subpage_order(sp_cfg);
@@ -1084,7 +1087,7 @@ inline bool grid_refresh_subpage_layouts(
       lv_obj_t *button = navigation_subpage_card_button(*entry, button_index);
       if (button == nullptr) {
         ESP_LOGW("sensors", "Subpage %d is missing card %d", si + 1, button_index);
-        return false;
+        continue;
       }
       const int col = sp_order.has_back_token ? gp % COLS : (gp + 1) % COLS;
       const int row = sp_order.has_back_token ? gp / COLS : (gp + 1) / COLS;
@@ -1095,8 +1098,9 @@ inline bool grid_refresh_subpage_layouts(
       set_grid_card_cell(button, entry->screen, col, row, col_span, row_span, COLS, ROWS);
     }
     lv_obj_update_layout(entry->screen);
+    refreshed = true;
   }
-  return true;
+  return refreshed;
 }
 
 template<typename T>
