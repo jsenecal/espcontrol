@@ -1096,10 +1096,6 @@ inline bool grid_refresh_subpage_layouts(
       ESP_LOGW("sensors", "Subpage %d card count changed; repositioning existing cards", si + 1);
     }
 
-    // The descriptor changes with screen rotation. Update it before the cells
-    // so a live layout change does not require recreating any data-bound card.
-    lv_obj_set_grid_dsc_array(entry->screen, subpage_cols, subpage_rows);
-
     const std::string order = get_subpage_order(sp_cfg);
     SubpageOrder sp_order;
     parse_subpage_order(order, NS, sp_btns.size(), sp_order);
@@ -1123,6 +1119,10 @@ inline bool grid_refresh_subpage_layouts(
       ESP_LOGW("sensors", "Subpage %d card details changed; deferring until the next normal rebuild", si + 1);
       continue;
     }
+
+    // Change the descriptor only when the preserved cards will be repositioned
+    // below. A deferred structural edit must keep its current grid intact.
+    lv_obj_set_grid_dsc_array(entry->screen, subpage_cols, subpage_rows);
     const std::string back_label = get_subpage_back_label(order);
     if (entry->back_slot.text_lbl != nullptr) {
       lv_label_set_text(entry->back_slot.text_lbl, back_label.c_str());
@@ -1131,6 +1131,8 @@ inline bool grid_refresh_subpage_layouts(
       entry->back_button, entry->screen,
       sp_order.back_pos % COLS, sp_order.back_pos / COLS,
       sp_order.back_col_span, sp_order.back_row_span, COLS, ROWS);
+    apply_card_label_line_clamp(entry->back_slot.text_lbl, cfg,
+                                sp_order.back_row_span);
 
     // Preserve card instances (and their HA subscriptions), but hide cards
     // removed from the saved order so stale content is never left visible.
