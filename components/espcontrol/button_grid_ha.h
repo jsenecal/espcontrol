@@ -233,7 +233,10 @@ inline bool ha_subscribe_state(const std::string &entity_id,
                                HomeAssistantStateCallback callback,
                                uint32_t scope = HA_SUBSCRIPTION_SCOPE_DEFAULT) {
   if (scope == HA_SUBSCRIPTION_SCOPE_DEFAULT) scope = ha_subscription_scope();
-  return ha_read_coordinator().subscribe(entity_id, std::string(), std::move(callback), scope);
+  return ha_read_coordinator().subscribe(
+      entity_id, std::string(), std::move(callback), scope,
+      (scope & HA_SUBSCRIPTION_SCOPE_SUBPAGE) != 0,
+      HA_READ_INTERNAL_FREE_MIN_BYTES, HA_READ_INTERNAL_LARGEST_MIN_BYTES);
 }
 
 inline bool ha_get_state(const std::string &entity_id,
@@ -248,7 +251,10 @@ inline bool ha_subscribe_attribute(const std::string &entity_id,
                                    HomeAssistantStateCallback callback,
                                    uint32_t scope = HA_SUBSCRIPTION_SCOPE_DEFAULT) {
   if (scope == HA_SUBSCRIPTION_SCOPE_DEFAULT) scope = ha_subscription_scope();
-  return ha_read_coordinator().subscribe(entity_id, attribute, std::move(callback), scope);
+  return ha_read_coordinator().subscribe(
+      entity_id, attribute, std::move(callback), scope,
+      (scope & HA_SUBSCRIPTION_SCOPE_SUBPAGE) != 0,
+      HA_READ_INTERNAL_FREE_MIN_BYTES, HA_READ_INTERNAL_LARGEST_MIN_BYTES);
 }
 
 inline bool ha_get_attribute(const std::string &entity_id,

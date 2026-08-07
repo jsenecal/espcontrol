@@ -48,13 +48,22 @@ class HaReadCoordinator {
   bool subscribe(const std::string &entity_id,
                  const std::string &attribute,
                  Callback callback,
-                 uint32_t scope) {
+                 uint32_t scope,
+                 bool request_initial_state = false,
+                 size_t initial_min_free = 0,
+                 size_t initial_min_largest = 0) {
     if (!available() || entity_id.empty() || !callback) return false;
     auto callback_ref = std::make_shared<Callback>(std::move(callback));
     subscriptions_.push_back({callback_ref, scope});
     transport_.subscribe(
         entity_id, attribute,
         [this, callback_ref](State state) { invoke(callback_ref, state); });
+    if (request_initial_state) {
+      get(
+          entity_id, attribute,
+          [this, callback_ref](State state) { invoke(callback_ref, state); },
+          !attribute.empty(), initial_min_free, initial_min_largest);
+    }
     return true;
   }
 
