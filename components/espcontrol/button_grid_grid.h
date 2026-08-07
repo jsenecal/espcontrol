@@ -2143,6 +2143,31 @@ inline void grid_phase2(
   ESP_LOGI("sensors", "Phase 2: done (%lu ms)", esphome::millis());
 }
 
+// A secondary-page edit can replace cards rather than merely move them. Return
+// to Home first, then use the normal two-phase rebuild so every card runtime,
+// subscription, image context, relay watcher, and lock reference is released
+// before the replacement subpages are created.
+inline void grid_rebuild_all(
+    BtnSlot *slots, const GridConfig &cfg,
+    esphome::text::Text **sp_configs,
+    esphome::text::Text **sp_ext_configs,
+    esphome::text::Text **sp_ext2_configs,
+    esphome::text::Text **sp_ext3_configs,
+    esphome::text::Text **sp_ext4_configs,
+    esphome::text::Text **sp_ext5_configs,
+    esphome::text::Text **sp_ext6_configs,
+    esphome::text::Text **sp_ext7_configs,
+    const std::string &order_str,
+    const std::string &on_hex,
+    lv_obj_t *main_page_obj) {
+  if (!navigation_return_home(main_page_obj)) return;
+  grid_phase1(slots, cfg, order_str, on_hex, main_page_obj);
+  grid_phase2(slots, cfg, sp_configs, sp_ext_configs, sp_ext2_configs,
+              sp_ext3_configs, sp_ext4_configs, sp_ext5_configs,
+              sp_ext6_configs, sp_ext7_configs, order_str, on_hex,
+              main_page_obj);
+}
+
 inline void grid_phase2(
     BtnSlot *slots, const GridConfig &cfg,
     esphome::text::Text **sp_configs,

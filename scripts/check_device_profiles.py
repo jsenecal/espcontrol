@@ -237,11 +237,12 @@ def test_square_s3_reapplies_clock_bar_after_screen_changes() -> None:
     sensors = (ROOT / "devices" / slug / "device" / "sensors.yaml").read_text(encoding="utf-8")
     device = (ROOT / "devices" / slug / "device" / "device.yaml").read_text(encoding="utf-8")
     assert (
-        "grid_refresh_layout(slots, cfg,\n"
+        "grid_rebuild_all(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, nullptr, nullptr, nullptr, nullptr,\n"
         "            id(button_order).state,\n"
+        "            id(button_on_color).state,\n"
         "            id(main_page)->obj);\n"
         "      - script.execute: clock_bar_apply"
-    ) in sensors, "S3 grid refresh must reapply the fixed clock bar like the working square profile"
+    ) in sensors, "S3 grid refresh must rebuild safely and reapply the fixed clock bar"
     assert (
         "grid_phase2(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3,\n"
         "              id(button_order).state,\n"
@@ -259,30 +260,21 @@ def test_square_s3_reapplies_clock_bar_after_screen_changes() -> None:
     ) in device, "S3 rotation changes must reapply the fixed clock bar"
 
 
-def test_rotation_refresh_repositions_subpages() -> None:
+def test_rotation_refresh_rebuilds_subpages() -> None:
     slugs = (
         "guition-esp32-p4-jc1060p470",
         "guition-esp32-p4-jc4880p443",
         "guition-esp32-p4-jc8012p4a1",
         "guition-esp32-p4-jc8012p4a1-v2",
+        "esp32-p4-86",
+        "guition-esp32-s3-4848s040",
     )
     for slug in slugs:
         sensors = (ROOT / "devices" / slug / "device" / "sensors.yaml").read_text(encoding="utf-8")
         refresh_script = sensors.split("  - id: refresh_button_grid", 1)[1].split(
             "  - id: refresh_subpage_grid", 1)[0]
-        assert (
-            "grid_refresh_layout(slots, cfg,\n"
-            "            id(button_order).state,\n"
-            "            id(main_page)->obj);"
-        ) in refresh_script, f"{slug}: rotation refresh must refresh the home layout"
-        assert "grid_refresh_subpage_layouts(slots, cfg," in refresh_script, (
-            f"{slug}: rotation refresh must reposition secondary cards with the current column count"
-        )
-        assert "grid_phase2(" not in refresh_script, (
-            f"{slug}: layout refresh must not recreate Home Assistant subscriptions"
-        )
-        assert "navigation_return_home" not in refresh_script, (
-            f"{slug}: layout refresh must keep the current secondary page open"
+        assert "grid_rebuild_all(slots, cfg," in refresh_script, (
+            f"{slug}: rotation refresh must rebuild secondary cards safely"
         )
 
 
@@ -303,16 +295,13 @@ def test_subpage_config_changes_schedule_live_refresh() -> None:
             f"{sensors_path}: missing secondary-page refresh script"
         )
         refresh_script = sensors.split("  - id: refresh_subpage_grid", 1)[1].split("\nesphome:", 1)[0]
-        assert "grid_refresh_subpage_layouts(slots, cfg," in refresh_script, (
-            f"{sensors_path}: secondary-page refresh must reposition existing cards"
-        )
-        assert "grid_phase2(" not in refresh_script, (
-            f"{sensors_path}: secondary-page refresh must not recreate card subscriptions"
+        assert "grid_rebuild_all(slots, cfg," in refresh_script, (
+            f"{sensors_path}: secondary-page refresh must rebuild card subscriptions"
         )
 
     grid_runtime = (ROOT / "components/espcontrol/button_grid_grid.h").read_text(encoding="utf-8")
-    assert "sensor_driver_refresh_layout(" in grid_runtime, (
-        "secondary-page layout refresh must update sensor font sizing in place"
+    assert "inline void grid_rebuild_all(" in grid_runtime, (
+        "secondary-page refresh must use the full runtime cleanup path"
     )
 
 
@@ -698,7 +687,7 @@ def main() -> int:
     test_upgrades_do_not_reset_saved_panel_config()
     test_local_voice_generation_uses_capability()
     test_square_s3_reapplies_clock_bar_after_screen_changes()
-    test_rotation_refresh_repositions_subpages()
+    test_rotation_refresh_rebuilds_subpages()
     test_subpage_config_changes_schedule_live_refresh()
     test_web_screen_aspect_matches_public_resolution()
     test_web_grid_spacing_matches_across_screen_sizes()

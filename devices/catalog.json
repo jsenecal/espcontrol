@@ -869,6 +869,7 @@
         "firmware": {
           "display": {
             "wrapTallLabels": false,
+            "refreshRebuildsSubpages": true,
             "coverArt": {
               "cover_art_size": "720",
               "cover_art_decode_size": "720",
@@ -1059,6 +1060,7 @@
         "firmware": {
           "display": {
             "wrapTallLabels": false,
+            "refreshRebuildsSubpages": true,
             "subpageChevronX": 3,
             "subpageChevronY": -2,
             "subpageChevronTextWidthPercent": 96,
