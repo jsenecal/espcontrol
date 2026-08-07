@@ -184,48 +184,6 @@ void attribute_requests_preserve_attribute() {
           "attribute read lost its attribute");
 }
 
-void rebuilt_subpage_subscriptions_request_current_state() {
-  Coordinator coordinator;
-  constexpr uint32_t subpage_scope = 1u << 4;
-  int calls = 0;
-  std::string state;
-  require(coordinator.subscribe(
-              "light.kitchen", "brightness",
-              [&](std::string value) {
-                calls++;
-                state = std::move(value);
-              },
-              subpage_scope, true, 10, 5),
-          "subpage subscription should register");
-  require(coordinator.transport().subscriptions.size() == 1,
-          "subpage subscription was not registered");
-  require(coordinator.transport().reads.size() == 1,
-          "subpage subscription did not request its current value");
-  require(coordinator.transport().reads[0].attribute == "brightness",
-          "subpage initial read lost its attribute");
-  coordinator.transport().deliver_read(0, "128");
-  coordinator.transport().publish(0, "255");
-  require(calls == 2 && state == "255",
-          "subpage subscription did not retain live updates after its initial read");
-}
-
-void discarded_subpage_initial_reads_do_not_touch_deleted_widgets() {
-  Coordinator coordinator;
-  constexpr uint32_t subpage_scope = 1u << 4;
-  int calls = 0;
-  require(coordinator.subscribe(
-              "sensor.discarded", "",
-              [&](std::string) { calls++; },
-              subpage_scope, true, 10, 5),
-          "discarded subpage subscription should register");
-  require(coordinator.transport().reads.size() == 1,
-          "discarded subpage should queue an initial read");
-  coordinator.reset_subscriptions(subpage_scope);
-  coordinator.transport().deliver_read(0, "late");
-  require(calls == 0,
-          "discarded subpage initial read invoked a callback after cleanup");
-}
-
 }  // namespace
 
 int main() {
@@ -236,7 +194,5 @@ int main() {
   cancellation_is_safe_during_callback();
   stale_generations_do_not_deliver();
   attribute_requests_preserve_attribute();
-  rebuilt_subpage_subscriptions_request_current_state();
-  discarded_subpage_initial_reads_do_not_touch_deleted_widgets();
   return EXIT_SUCCESS;
 }

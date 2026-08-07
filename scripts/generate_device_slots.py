@@ -682,9 +682,10 @@ def script_block(device: dict) -> str:
         "            id(button_on_color).state,",
         "            id(main_page)->obj);",
     ]
-    subpage_phase2_call = [
-        *phase2_call[:-1],
-        "            id(main_page)->obj, false);",
+    subpage_layout_call = [
+        "          grid_refresh_subpage_layouts(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, sp_ext4, sp_ext5, sp_ext6, sp_ext7);"
+        if subpage_chunks >= 8
+        else "          grid_refresh_subpage_layouts(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, nullptr, nullptr, nullptr, nullptr);",
     ]
     subpage_refresh = [
         "  - id: refresh_subpage_grid",
@@ -694,11 +695,7 @@ def script_block(device: dict) -> str:
         "      - lambda: |-",
         refresh_block(device, "SUBPAGE REFRESH"),
         *refresh_subpage_arrays(device),
-        "          int active_subpage_slot = navigation_active_subpage_slot();",
-        "          if (active_subpage_slot > 0) navigation_return_home(id(main_page)->obj);",
-        *subpage_phase2_call,
-        "          if (active_subpage_slot > 0)",
-        "            navigation_open_slot(active_subpage_slot, id(main_page)->obj);",
+        *subpage_layout_call,
         "",
     ]
     if device.get("refresh_rebuilds_subpages"):

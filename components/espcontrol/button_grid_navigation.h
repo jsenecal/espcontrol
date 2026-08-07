@@ -17,6 +17,12 @@ struct NavigationSubpageEntry {
   int display_order = 0;
   std::string kind;
   lv_obj_t *screen = nullptr;
+  lv_obj_t *back_button = nullptr;
+  struct Card {
+    int index = 0;
+    lv_obj_t *button = nullptr;
+  };
+  std::vector<Card> cards;
 };
 
 inline std::vector<NavigationHomeTargetEntry> &navigation_home_targets() {
@@ -197,23 +203,24 @@ inline NavigationSubpageEntry *navigation_find_slot(int slot) {
   return nullptr;
 }
 
-inline int navigation_active_subpage_slot() {
-  lv_obj_t *active = lv_scr_act();
-  for (const auto &entry : navigation_subpages()) {
-    if (entry.screen == active) return entry.slot;
-  }
-  return 0;
+inline void navigation_register_subpage_back_button(int slot, lv_obj_t *button) {
+  NavigationSubpageEntry *entry = navigation_find_slot(slot);
+  if (entry != nullptr) entry->back_button = button;
 }
 
-inline bool navigation_open_slot(int slot, lv_obj_t *main_page_obj) {
-  navigation_hide_modals();
-  NavigationSubpageEntry *target = navigation_find_slot(slot);
-  if (target == nullptr) {
-    ESP_LOGW("navigation", "No subpage for slot %d", slot);
-    return navigation_return_home(main_page_obj);
+inline void navigation_register_subpage_card(int slot, int index, lv_obj_t *button) {
+  if (index <= 0 || button == nullptr) return;
+  NavigationSubpageEntry *entry = navigation_find_slot(slot);
+  if (entry == nullptr) return;
+  entry->cards.push_back({index, button});
+}
+
+inline lv_obj_t *navigation_subpage_card_button(
+    const NavigationSubpageEntry &entry, int index) {
+  for (const auto &card : entry.cards) {
+    if (card.index == index) return card.button;
   }
-  lv_scr_load_anim(target->screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false);
-  return true;
+  return nullptr;
 }
 
 inline bool navigation_open_first_kind(const std::string &kind,

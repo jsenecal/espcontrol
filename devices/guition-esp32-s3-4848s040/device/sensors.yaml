@@ -216,14 +216,7 @@ script:
           #undef SP_EXT
           #undef SP_EXT2
           #undef SP_EXT3
-          int active_subpage_slot = navigation_active_subpage_slot();
-          if (active_subpage_slot > 0) navigation_return_home(id(main_page)->obj);
-          grid_phase2(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3,
-            id(button_order).state,
-            id(button_on_color).state,
-            id(main_page)->obj, false);
-          if (active_subpage_slot > 0)
-            navigation_open_slot(active_subpage_slot, id(main_page)->obj);
+          grid_refresh_subpage_layouts(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, nullptr, nullptr, nullptr, nullptr);
 
 
 esphome:

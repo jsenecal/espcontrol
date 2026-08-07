@@ -290,11 +290,12 @@ def test_subpage_config_changes_schedule_live_refresh() -> None:
         assert "  - id: refresh_subpage_grid" in sensors, (
             f"{sensors_path}: missing secondary-page refresh script"
         )
-        assert "int active_subpage_slot = navigation_active_subpage_slot();" in sensors, (
-            f"{sensors_path}: secondary-page refresh must preserve the page being viewed"
+        refresh_script = sensors.split("  - id: refresh_subpage_grid", 1)[1].split("\nesphome:", 1)[0]
+        assert "grid_refresh_subpage_layouts(slots, cfg," in refresh_script, (
+            f"{sensors_path}: secondary-page refresh must reposition existing cards"
         )
-        assert "id(main_page)->obj, false);" in sensors, (
-            f"{sensors_path}: secondary-page refresh must not recreate home-screen subscriptions"
+        assert "grid_phase2(" not in refresh_script, (
+            f"{sensors_path}: secondary-page refresh must not recreate card subscriptions"
         )
 
 
