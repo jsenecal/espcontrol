@@ -281,8 +281,20 @@ def test_subpage_config_changes_schedule_live_refresh() -> None:
     }
     for relative_path, subpage_config_count in templates.items():
         text = (ROOT / relative_path).read_text(encoding="utf-8")
-        assert text.count("- script.execute: refresh_button_grid") == subpage_config_count, (
-            f"{relative_path}: every subpage config chunk must schedule a live refresh"
+        assert text.count("- script.execute: refresh_subpage_grid") == subpage_config_count, (
+            f"{relative_path}: every subpage config chunk must refresh only its secondary page"
+        )
+
+    for sensors_path in sorted((ROOT / "devices").glob("*/device/sensors.yaml")):
+        sensors = sensors_path.read_text(encoding="utf-8")
+        assert "  - id: refresh_subpage_grid" in sensors, (
+            f"{sensors_path}: missing secondary-page refresh script"
+        )
+        assert "int active_subpage_slot = navigation_active_subpage_slot();" in sensors, (
+            f"{sensors_path}: secondary-page refresh must preserve the page being viewed"
+        )
+        assert "id(main_page)->obj, false);" in sensors, (
+            f"{sensors_path}: secondary-page refresh must not recreate home-screen subscriptions"
         )
 
 

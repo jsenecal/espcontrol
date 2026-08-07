@@ -189,6 +189,33 @@ inline NavigationSubpageEntry *navigation_find_first_kind(const std::string &kin
   return best;
 }
 
+inline NavigationSubpageEntry *navigation_find_slot(int slot) {
+  if (slot <= 0) return nullptr;
+  for (auto &entry : navigation_subpages()) {
+    if (entry.screen != nullptr && entry.slot == slot) return &entry;
+  }
+  return nullptr;
+}
+
+inline int navigation_active_subpage_slot() {
+  lv_obj_t *active = lv_scr_act();
+  for (const auto &entry : navigation_subpages()) {
+    if (entry.screen == active) return entry.slot;
+  }
+  return 0;
+}
+
+inline bool navigation_open_slot(int slot, lv_obj_t *main_page_obj) {
+  navigation_hide_modals();
+  NavigationSubpageEntry *target = navigation_find_slot(slot);
+  if (target == nullptr) {
+    ESP_LOGW("navigation", "No subpage for slot %d", slot);
+    return navigation_return_home(main_page_obj);
+  }
+  lv_scr_load_anim(target->screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false);
+  return true;
+}
+
 inline bool navigation_open_first_kind(const std::string &kind,
                                        lv_obj_t *main_page_obj) {
   navigation_hide_modals();

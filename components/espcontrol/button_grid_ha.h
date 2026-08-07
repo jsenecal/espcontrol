@@ -25,6 +25,7 @@ constexpr uint32_t HA_SUBSCRIPTION_SCOPE_DEFAULT = 1u << 0;
 constexpr uint32_t HA_SUBSCRIPTION_SCOPE_COVER_ART = 1u << 1;
 constexpr uint32_t HA_SUBSCRIPTION_SCOPE_PHASE3 = 1u << 2;
 constexpr uint32_t HA_SUBSCRIPTION_SCOPE_COVER_ART_PROGRESS = 1u << 3;
+constexpr uint32_t HA_SUBSCRIPTION_SCOPE_SUBPAGE = 1u << 4;
 #define ESPCONTROL_HA_SUBSCRIPTION_SCOPE_CONSTANTS_DEFINED 1
 #endif
 
@@ -102,6 +103,24 @@ inline uint32_t &ha_subscription_generation() {
   return ha_read_coordinator().generation_ref();
 }
 
+inline uint32_t &ha_subscription_scope() {
+  static uint32_t scope = HA_SUBSCRIPTION_SCOPE_DEFAULT;
+  return scope;
+}
+
+class HaSubscriptionScopeGuard {
+ public:
+  explicit HaSubscriptionScopeGuard(uint32_t scope)
+      : previous_scope_(ha_subscription_scope()) {
+    ha_subscription_scope() = scope;
+  }
+
+  ~HaSubscriptionScopeGuard() { ha_subscription_scope() = previous_scope_; }
+
+ private:
+  uint32_t previous_scope_;
+};
+
 inline void ha_reset_subscription_callbacks(uint32_t scope = HA_SUBSCRIPTION_SCOPE_ALL) {
   ha_read_coordinator().reset_subscriptions(scope);
 }
@@ -114,7 +133,8 @@ inline void ha_reset_deferred_state_requests() {
 
 inline void bump_ha_subscription_generation() {
   ha_read_coordinator().bump_generation(
-      HA_SUBSCRIPTION_SCOPE_DEFAULT | HA_SUBSCRIPTION_SCOPE_COVER_ART_PROGRESS);
+      HA_SUBSCRIPTION_SCOPE_DEFAULT | HA_SUBSCRIPTION_SCOPE_COVER_ART_PROGRESS |
+      HA_SUBSCRIPTION_SCOPE_SUBPAGE);
 }
 #define ESPCONTROL_HA_GENERATION_HELPERS_DEFINED 1
 
@@ -212,6 +232,7 @@ inline bool ha_cancel_action_response_callback(uint32_t call_id, const char *err
 inline bool ha_subscribe_state(const std::string &entity_id,
                                HomeAssistantStateCallback callback,
                                uint32_t scope = HA_SUBSCRIPTION_SCOPE_DEFAULT) {
+  if (scope == HA_SUBSCRIPTION_SCOPE_DEFAULT) scope = ha_subscription_scope();
   return ha_read_coordinator().subscribe(entity_id, std::string(), std::move(callback), scope);
 }
 
@@ -226,6 +247,7 @@ inline bool ha_subscribe_attribute(const std::string &entity_id,
                                    const std::string &attribute,
                                    HomeAssistantStateCallback callback,
                                    uint32_t scope = HA_SUBSCRIPTION_SCOPE_DEFAULT) {
+  if (scope == HA_SUBSCRIPTION_SCOPE_DEFAULT) scope = ha_subscription_scope();
   return ha_read_coordinator().subscribe(entity_id, attribute, std::move(callback), scope);
 }
 
