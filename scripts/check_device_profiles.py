@@ -274,6 +274,18 @@ def test_rotation_refresh_rebuilds_subpages() -> None:
         )
 
 
+def test_subpage_config_changes_schedule_live_refresh() -> None:
+    templates = {
+        "common/config/button_template.yaml": 8,
+        "common/config/button_template_4chunk.yaml": 4,
+    }
+    for relative_path, subpage_config_count in templates.items():
+        text = (ROOT / relative_path).read_text(encoding="utf-8")
+        assert text.count("- script.execute: refresh_button_grid") == subpage_config_count, (
+            f"{relative_path}: every subpage config chunk must schedule a live refresh"
+        )
+
+
 def web_screen_width_percent(profile: dict) -> float:
     width = str(profile["web"]["screen"]["width"]).strip()
     assert width.endswith("%"), f"{profile['public']['name']}: web screen width must be a percentage"
@@ -641,6 +653,7 @@ def main() -> int:
     test_local_voice_generation_uses_capability()
     test_square_s3_reapplies_clock_bar_after_screen_changes()
     test_rotation_refresh_rebuilds_subpages()
+    test_subpage_config_changes_schedule_live_refresh()
     test_web_screen_aspect_matches_public_resolution()
     test_web_grid_spacing_matches_across_screen_sizes()
     test_setup_icon_glyphs()
