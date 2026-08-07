@@ -676,10 +676,13 @@ def script_block(device: dict) -> str:
     after_refresh = ["      - script.execute: clock_bar_apply"]
     package = device.get("package") or {}
     subpage_chunks = int(package.get("subpageConfigChunks") or 8)
-    subpage_layout_call = [
-        "          grid_refresh_subpage_layouts(slots, cfg, id(main_page)->obj, sp_cfgs, sp_ext, sp_ext2, sp_ext3, sp_ext4, sp_ext5, sp_ext6, sp_ext7);"
+    subpage_rebuild_call = [
+        "          grid_rebuild_all(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, sp_ext4, sp_ext5, sp_ext6, sp_ext7,"
         if subpage_chunks >= 8
-        else "          grid_refresh_subpage_layouts(slots, cfg, id(main_page)->obj, sp_cfgs, sp_ext, sp_ext2, sp_ext3, nullptr, nullptr, nullptr, nullptr);",
+        else "          grid_rebuild_all(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, nullptr, nullptr, nullptr, nullptr,",
+        "            id(button_order).state,",
+        "            id(button_on_color).state,",
+        "            id(main_page)->obj);",
     ]
     subpage_refresh = [
         "  - id: refresh_subpage_grid",
@@ -689,7 +692,7 @@ def script_block(device: dict) -> str:
         "      - lambda: |-",
         refresh_block(device, "SUBPAGE REFRESH"),
         *refresh_subpage_arrays(device),
-        *subpage_layout_call,
+        *subpage_rebuild_call,
         "",
     ]
     if device.get("refresh_rebuilds_subpages"):
@@ -703,10 +706,7 @@ def script_block(device: dict) -> str:
                 "      - lambda: |-",
                 refresh_block(device),
                 *refresh_subpage_arrays(device),
-                "          grid_refresh_layout(slots, cfg,",
-                "            id(button_order).state,",
-                "            id(main_page)->obj);",
-                *subpage_layout_call,
+                *subpage_rebuild_call,
                 *after_refresh,
                 *subpage_refresh,
                 "",
