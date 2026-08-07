@@ -183,7 +183,7 @@ script:
           grid_refresh_layout(slots, cfg,
             id(button_order).state,
             id(main_page)->obj);
-          grid_refresh_subpage_layouts(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, sp_ext4, sp_ext5, sp_ext6, sp_ext7);
+          grid_refresh_subpage_layouts(slots, cfg, id(main_page)->obj, sp_cfgs, sp_ext, sp_ext2, sp_ext3, sp_ext4, sp_ext5, sp_ext6, sp_ext7);
       - script.execute: clock_bar_apply
   - id: refresh_subpage_grid
     mode: restart
@@ -219,6 +219,8 @@ script:
           cfg.width_compensation_vertical = portrait;
           cfg.subpage_chevrons_enabled = id(subpage_chevrons_enabled).state;
           cfg.wrap_tall_labels = true;
+          cfg.label_lines = 2;
+          cfg.label_lines_tall = 3;
           cfg.volume_width_compensation_percent = 95;
           cfg.media_artwork_width_compensation_percent = 98;
           cfg.modal_profile.layout_family = DisplayModalLayoutFamily::WIDE_LANDSCAPE;
@@ -347,7 +349,7 @@ script:
           #undef SP_EXT5
           #undef SP_EXT6
           #undef SP_EXT7
-          grid_refresh_subpage_layouts(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, sp_ext4, sp_ext5, sp_ext6, sp_ext7);
+          grid_refresh_subpage_layouts(slots, cfg, id(main_page)->obj, sp_cfgs, sp_ext, sp_ext2, sp_ext3, sp_ext4, sp_ext5, sp_ext6, sp_ext7);
 
 
 esphome:

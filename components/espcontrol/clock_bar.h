@@ -239,6 +239,13 @@ inline void clock_bar_register_button_grid_page(lv_obj_t *page) {
   }
 }
 
+inline void clock_bar_unregister_button_grid_page(lv_obj_t *page) {
+  if (!page) return;
+  clock_bar_clear_responsive_grid_cards(page);
+  std::vector<lv_obj_t *> &pages = clock_bar_button_grid_pages();
+  pages.erase(std::remove(pages.begin(), pages.end(), page), pages.end());
+}
+
 inline void clock_bar_set_button_grid_pages_pad_top(lv_obj_t *main_page_obj,
                                                     lv_coord_t pad_top) {
   if (main_page_obj) {

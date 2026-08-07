@@ -23,6 +23,7 @@ struct NavigationSubpageEntry {
     int index = 0;
     lv_obj_t *button = nullptr;
     BtnSlot slot{};
+    SubpageBtn definition{};
   };
   std::vector<Card> cards;
 };
@@ -214,11 +215,26 @@ inline void navigation_register_subpage_back_button(int slot,
   }
 }
 
-inline void navigation_register_subpage_card(int slot, int index, const BtnSlot &card_slot) {
+inline void navigation_register_subpage_card(int slot, int index,
+                                             const BtnSlot &card_slot,
+                                             const SubpageBtn &definition) {
   if (index <= 0 || card_slot.btn == nullptr) return;
   NavigationSubpageEntry *entry = navigation_find_slot(slot);
   if (entry == nullptr) return;
-  entry->cards.push_back({index, card_slot.btn, card_slot});
+  entry->cards.push_back({index, card_slot.btn, card_slot, definition});
+}
+
+inline void navigation_retire_subpage(int slot, lv_obj_t *main_page_obj) {
+  std::vector<NavigationSubpageEntry> &entries = navigation_subpages();
+  for (auto it = entries.begin(); it != entries.end(); ++it) {
+    if (it->slot != slot) continue;
+    if (it->screen != nullptr && it->screen == lv_scr_act()) {
+      navigation_return_home(main_page_obj);
+    }
+    clock_bar_unregister_button_grid_page(it->screen);
+    entries.erase(it);
+    return;
+  }
 }
 
 inline NavigationSubpageEntry::Card *navigation_subpage_card(

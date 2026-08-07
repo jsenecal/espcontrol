@@ -1047,7 +1047,7 @@ inline std::string optional_text_state(esphome::text::Text **configs, int index)
 // just their grid cells. Structural card edits are applied on the next normal
 // grid rebuild rather than risking a blank live page.
 inline bool grid_refresh_subpage_layouts(
-    BtnSlot *slots, const GridConfig &cfg,
+    BtnSlot *slots, const GridConfig &cfg, lv_obj_t *main_page_obj,
     esphome::text::Text **sp_configs,
     esphome::text::Text **sp_ext_configs,
     esphome::text::Text **sp_ext2_configs,
@@ -1071,7 +1071,10 @@ inline bool grid_refresh_subpage_layouts(
   bool refreshed = false;
   for (int si = 0; si < NS; si++) {
     const auto parent_context = card_runtime_context(parse_cfg(slots[si].config->state));
-    if (!espcontrol::cards::navigation_driver_matches(parent_context)) continue;
+    if (!espcontrol::cards::navigation_driver_matches(parent_context)) {
+      navigation_retire_subpage(si + 1, main_page_obj);
+      continue;
+    }
 
     const std::string sp_cfg = optional_text_state(sp_configs, si) +
       optional_text_state(sp_ext_configs, si) +
@@ -1100,6 +1103,26 @@ inline bool grid_refresh_subpage_layouts(
     const std::string order = get_subpage_order(sp_cfg);
     SubpageOrder sp_order;
     parse_subpage_order(order, NS, sp_btns.size(), sp_order);
+
+    // Binding a card to another entity/type requires new HA callbacks. Keep
+    // the existing data-bound widgets intact and defer that structural edit to
+    // a normal rebuild rather than moving a card that still controls its old
+    // entity. Pure order and span changes continue to update in place.
+    bool structural_change = false;
+    for (int gp = 0; gp < NS; gp++) {
+      const int button_index = sp_order.positions[gp];
+      if (button_index < 1 || button_index > static_cast<int>(sp_btns.size())) continue;
+      NavigationSubpageEntry::Card *card = navigation_subpage_card(*entry, button_index);
+      if (card != nullptr &&
+          !subpage_btn_same_definition(card->definition, sp_btns[button_index - 1])) {
+        structural_change = true;
+        break;
+      }
+    }
+    if (structural_change) {
+      ESP_LOGW("sensors", "Subpage %d card details changed; deferring until the next normal rebuild", si + 1);
+      continue;
+    }
     const std::string back_label = get_subpage_back_label(order);
     if (entry->back_slot.text_lbl != nullptr) {
       lv_label_set_text(entry->back_slot.text_lbl, back_label.c_str());
@@ -1994,7 +2017,7 @@ inline void grid_phase2(
       BtnSlot sub_slot = create_dynamic_card_slot(
         sb_btn, sp_icon_fnt, display_sensor_font(display), sp_btn_fnt, sp_txt_color,
         cfg.subpage_chevron_font);
-      navigation_register_subpage_card(si + 1, bn, sub_slot);
+      navigation_register_subpage_card(si + 1, bn, sub_slot, sb);
       display_apply_main_width(sub_slot.icon_lbl, display);
       display_apply_slot_text_width(sub_slot, display);
       setup_card_visual(sub_slot, sb_cfg, context, cfg, palette, rs, cs);
