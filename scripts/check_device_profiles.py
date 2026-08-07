@@ -251,7 +251,7 @@ def test_square_s3_reapplies_clock_bar_after_screen_changes() -> None:
     ) in device, "S3 rotation changes must reapply the fixed clock bar"
 
 
-def test_rotation_refresh_rebuilds_subpages() -> None:
+def test_rotation_refresh_repositions_subpages() -> None:
     slugs = (
         "guition-esp32-p4-jc1060p470",
         "guition-esp32-p4-jc4880p443",
@@ -260,17 +260,21 @@ def test_rotation_refresh_rebuilds_subpages() -> None:
     )
     for slug in slugs:
         sensors = (ROOT / "devices" / slug / "device" / "sensors.yaml").read_text(encoding="utf-8")
+        refresh_script = sensors.split("  - id: refresh_button_grid", 1)[1].split(
+            "  - id: refresh_subpage_grid", 1)[0]
         assert (
             "grid_refresh_layout(slots, cfg,\n"
             "            id(button_order).state,\n"
-            "            id(main_page)->obj);\n"
-            "          navigation_return_home(id(main_page)->obj);"
-        ) in sensors, f"{slug}: rotation refresh must refresh home before rebuilding subpages"
-        assert "grid_phase2(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, sp_ext4, sp_ext5, sp_ext6, sp_ext7," in sensors, (
-            f"{slug}: rotation refresh must rebuild subpage grids with the current column count"
+            "            id(main_page)->obj);"
+        ) in refresh_script, f"{slug}: rotation refresh must refresh the home layout"
+        assert "grid_refresh_subpage_layouts(slots, cfg," in refresh_script, (
+            f"{slug}: rotation refresh must reposition secondary cards with the current column count"
         )
-        assert "id(button_on_color).state" in sensors and "id(button_off_color).state" not in sensors, (
-            f"{slug}: subpage rebuild must keep the configured primary color only"
+        assert "grid_phase2(" not in refresh_script, (
+            f"{slug}: layout refresh must not recreate Home Assistant subscriptions"
+        )
+        assert "navigation_return_home" not in refresh_script, (
+            f"{slug}: layout refresh must keep the current secondary page open"
         )
 
 
@@ -665,7 +669,7 @@ def main() -> int:
     test_upgrades_do_not_reset_saved_panel_config()
     test_local_voice_generation_uses_capability()
     test_square_s3_reapplies_clock_bar_after_screen_changes()
-    test_rotation_refresh_rebuilds_subpages()
+    test_rotation_refresh_repositions_subpages()
     test_subpage_config_changes_schedule_live_refresh()
     test_web_screen_aspect_matches_public_resolution()
     test_web_grid_spacing_matches_across_screen_sizes()

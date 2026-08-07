@@ -1047,6 +1047,12 @@ inline bool grid_refresh_subpage_layouts(
   const int NS = bounded_grid_slots(cfg.num_slots);
   const int COLS = cfg.cols > 0 ? cfg.cols : 1;
   const int ROWS = (NS + COLS - 1) / COLS;
+  static lv_coord_t subpage_cols[MAX_GRID_SLOTS + 1];
+  static lv_coord_t subpage_rows[MAX_GRID_SLOTS + 1];
+  for (int i = 0; i < COLS; i++) subpage_cols[i] = LV_GRID_FR(1);
+  subpage_cols[COLS] = LV_GRID_TEMPLATE_LAST;
+  for (int i = 0; i < ROWS; i++) subpage_rows[i] = LV_GRID_FR(1);
+  subpage_rows[ROWS] = LV_GRID_TEMPLATE_LAST;
 
   bool refreshed = false;
   for (int si = 0; si < NS; si++) {
@@ -1072,6 +1078,10 @@ inline bool grid_refresh_subpage_layouts(
     if (entry->cards.size() != sp_btns.size()) {
       ESP_LOGW("sensors", "Subpage %d card count changed; repositioning existing cards", si + 1);
     }
+
+    // The descriptor changes with screen rotation. Update it before the cells
+    // so a live layout change does not require recreating any data-bound card.
+    lv_obj_set_grid_dsc_array(entry->screen, subpage_cols, subpage_rows);
 
     const std::string order = get_subpage_order(sp_cfg);
     SubpageOrder sp_order;
