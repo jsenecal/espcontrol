@@ -251,23 +251,27 @@ def test_square_s3_reapplies_clock_bar_after_screen_changes() -> None:
     ) in device, "S3 rotation changes must reapply the fixed clock bar"
 
 
-def test_p4_43_rotation_refresh_rebuilds_subpages() -> None:
-    slug = "guition-esp32-p4-jc4880p443"
-    sensors = (ROOT / "devices" / slug / "device" / "sensors.yaml").read_text(encoding="utf-8")
-    assert (
-        "grid_refresh_layout(slots, cfg,\n"
-        "            id(button_order).state,\n"
-        "            id(main_page)->obj);\n"
-        "          navigation_return_home(id(main_page)->obj);"
-    ) in sensors, (
-        "4.3-inch P4 rotation refresh must refresh the home grid before rebuilding subpages"
+def test_rotation_refresh_rebuilds_subpages() -> None:
+    slugs = (
+        "guition-esp32-p4-jc1060p470",
+        "guition-esp32-p4-jc4880p443",
+        "guition-esp32-p4-jc8012p4a1",
+        "guition-esp32-p4-jc8012p4a1-v2",
     )
-    assert "grid_phase2(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, sp_ext4, sp_ext5, sp_ext6, sp_ext7," in sensors, (
-        "4.3-inch P4 rotation refresh must rebuild subpage grids with the current column count"
-    )
-    assert "id(button_on_color).state" in sensors and "id(button_off_color).state" not in sensors, (
-        "4.3-inch P4 subpage rebuild must keep the configured primary color only"
-    )
+    for slug in slugs:
+        sensors = (ROOT / "devices" / slug / "device" / "sensors.yaml").read_text(encoding="utf-8")
+        assert (
+            "grid_refresh_layout(slots, cfg,\n"
+            "            id(button_order).state,\n"
+            "            id(main_page)->obj);\n"
+            "          navigation_return_home(id(main_page)->obj);"
+        ) in sensors, f"{slug}: rotation refresh must refresh home before rebuilding subpages"
+        assert "grid_phase2(slots, cfg, sp_cfgs, sp_ext, sp_ext2, sp_ext3, sp_ext4, sp_ext5, sp_ext6, sp_ext7," in sensors, (
+            f"{slug}: rotation refresh must rebuild subpage grids with the current column count"
+        )
+        assert "id(button_on_color).state" in sensors and "id(button_off_color).state" not in sensors, (
+            f"{slug}: subpage rebuild must keep the configured primary color only"
+        )
 
 
 def web_screen_width_percent(profile: dict) -> float:
@@ -636,7 +640,7 @@ def main() -> int:
     test_upgrades_do_not_reset_saved_panel_config()
     test_local_voice_generation_uses_capability()
     test_square_s3_reapplies_clock_bar_after_screen_changes()
-    test_p4_43_rotation_refresh_rebuilds_subpages()
+    test_rotation_refresh_rebuilds_subpages()
     test_web_screen_aspect_matches_public_resolution()
     test_web_grid_spacing_matches_across_screen_sizes()
     test_setup_icon_glyphs()
