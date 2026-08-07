@@ -2145,11 +2145,11 @@ inline void grid_phase2(
   ESP_LOGI("sensors", "Phase 2: done (%lu ms)", esphome::millis());
 }
 
-// A secondary-page edit can replace cards rather than merely move them. Return
-// to Home first, then use the normal two-phase rebuild so every card runtime,
-// subscription, image context, relay watcher, and lock reference is released
-// before the replacement subpages are created.
-inline void grid_rebuild_all(
+// Secondary-page definitions can change the cards, subscriptions, or runtime
+// resources they own. Recreate the complete grid instead of retaining widgets
+// that may still refer to the previous definition. Restore the current page
+// only when its parent survives the rebuild.
+inline bool grid_rebuild_all(
     BtnSlot *slots, const GridConfig &cfg,
     esphome::text::Text **sp_configs,
     esphome::text::Text **sp_ext_configs,
@@ -2162,12 +2162,19 @@ inline void grid_rebuild_all(
     const std::string &order_str,
     const std::string &on_hex,
     lv_obj_t *main_page_obj) {
-  if (!navigation_return_home(main_page_obj)) return;
+  const int active_subpage_slot = navigation_active_subpage_slot();
+  if (!navigation_return_home(main_page_obj)) return false;
   grid_phase1(slots, cfg, order_str, on_hex, main_page_obj);
   grid_phase2(slots, cfg, sp_configs, sp_ext_configs, sp_ext2_configs,
               sp_ext3_configs, sp_ext4_configs, sp_ext5_configs,
               sp_ext6_configs, sp_ext7_configs, order_str, on_hex,
               main_page_obj);
+  if (active_subpage_slot > 0 &&
+      !navigation_restore_subpage_slot(active_subpage_slot)) {
+    ESP_LOGI("navigation", "Secondary page %d was removed during rebuild",
+             active_subpage_slot);
+  }
+  return true;
 }
 
 inline void grid_phase2(

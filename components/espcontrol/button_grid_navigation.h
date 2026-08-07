@@ -206,6 +206,21 @@ inline NavigationSubpageEntry *navigation_find_slot(int slot) {
   return nullptr;
 }
 
+inline int navigation_active_subpage_slot() {
+  lv_obj_t *active = lv_scr_act();
+  for (const auto &entry : navigation_subpages()) {
+    if (entry.screen == active) return entry.slot;
+  }
+  return 0;
+}
+
+inline bool navigation_restore_subpage_slot(int slot) {
+  NavigationSubpageEntry *entry = navigation_find_slot(slot);
+  if (entry == nullptr || entry->screen == nullptr) return false;
+  lv_scr_load_anim(entry->screen, LV_SCR_LOAD_ANIM_NONE, 0, 0, false);
+  return true;
+}
+
 inline void navigation_register_subpage_back_button(int slot,
                                                     const BtnSlot &back_slot) {
   NavigationSubpageEntry *entry = navigation_find_slot(slot);

@@ -300,8 +300,11 @@ def test_subpage_config_changes_schedule_live_refresh() -> None:
         )
 
     grid_runtime = (ROOT / "components/espcontrol/button_grid_grid.h").read_text(encoding="utf-8")
-    assert "inline void grid_rebuild_all(" in grid_runtime, (
+    assert "inline bool grid_rebuild_all(" in grid_runtime, (
         "secondary-page refresh must use the full runtime cleanup path"
+    )
+    assert "navigation_active_subpage_slot()" in grid_runtime, (
+        "secondary-page refresh must restore the page that was active before rebuilding"
     )
 
 
