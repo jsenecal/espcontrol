@@ -1100,10 +1100,38 @@ inline bool grid_refresh_subpage_layouts(
     const std::string order = get_subpage_order(sp_cfg);
     SubpageOrder sp_order;
     parse_subpage_order(order, NS, sp_btns.size(), sp_order);
+    const std::string back_label = get_subpage_back_label(order);
+    if (entry->back_slot.text_lbl != nullptr) {
+      lv_label_set_text(entry->back_slot.text_lbl, back_label.c_str());
+    }
     set_grid_card_cell(
       entry->back_button, entry->screen,
       sp_order.back_pos % COLS, sp_order.back_pos / COLS,
       sp_order.back_col_span, sp_order.back_row_span, COLS, ROWS);
+
+    // Preserve card instances (and their HA subscriptions), but hide cards
+    // removed from the saved order so stale content is never left visible.
+    bool visible_cards[MAX_GRID_SLOTS] = {};
+    for (int gp = 0; gp < NS; gp++) {
+      const int button_index = sp_order.positions[gp];
+      if (button_index >= 1 &&
+          button_index <= static_cast<int>(sp_btns.size()) &&
+          button_index <= MAX_GRID_SLOTS) {
+        visible_cards[button_index - 1] = true;
+      }
+    }
+    for (auto &card : entry->cards) {
+      const bool visible = card.index >= 1 && card.index <= MAX_GRID_SLOTS &&
+        card.index <= static_cast<int>(sp_btns.size()) &&
+        visible_cards[card.index - 1];
+      if (card.button != nullptr) {
+        if (visible) {
+          lv_obj_clear_flag(card.button, LV_OBJ_FLAG_HIDDEN);
+        } else {
+          lv_obj_add_flag(card.button, LV_OBJ_FLAG_HIDDEN);
+        }
+      }
+    }
 
     for (int gp = 0; gp < NS; gp++) {
       const int button_index = sp_order.positions[gp];
@@ -1124,6 +1152,7 @@ inline bool grid_refresh_subpage_layouts(
         parsed_cfg_from_subpage_btn(sp_btns[button_index - 1]);
       const auto context = card_runtime_context(
         button_config, espcontrol::cards::Surface::SUBPAGE);
+      refresh_card_layout(card->slot, button_config, cfg, row_span, col_span);
       espcontrol::cards::sensor_driver_refresh_layout(
         card->slot, button_config, context, display, row_span, col_span);
     }
@@ -1914,7 +1943,7 @@ inline void grid_phase2(
       lv_scr_load_anim((lv_obj_t *)lv_event_get_user_data(e), LV_SCR_LOAD_ANIM_NONE, 0, 0, false);
     }, LV_EVENT_CLICKED, main_page_obj);
     screen_lock_register_controlled_button(back_btn);
-    navigation_register_subpage_back_button(si + 1, back_btn);
+    navigation_register_subpage_back_button(si + 1, back_slot);
 
     auto add_parent_indicator = [&](const std::string &entity_id,
                                     bool (*is_active_state)(esphome::StringRef) = is_entity_on_ref) {

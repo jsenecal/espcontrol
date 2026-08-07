@@ -166,6 +166,19 @@ inline void clock_bar_clear_responsive_grid_cards(lv_obj_t *page) {
       cards.end());
 }
 
+// A card that has been reduced to one grid cell must no longer keep the
+// explicit width or height that was applied while it spanned multiple cells.
+inline void clock_bar_unregister_responsive_grid_card(lv_obj_t *card) {
+  if (!card) return;
+  std::vector<ClockBarResponsiveGridCard> &cards = clock_bar_responsive_grid_cards();
+  cards.erase(
+      std::remove_if(cards.begin(), cards.end(),
+                     [card](const ClockBarResponsiveGridCard &entry) {
+                       return entry.card == card;
+                     }),
+      cards.end());
+}
+
 inline void clock_bar_refresh_responsive_grid_cards(lv_obj_t *page = nullptr) {
   std::vector<ClockBarResponsiveGridCard> &cards = clock_bar_responsive_grid_cards();
   for (const ClockBarResponsiveGridCard &entry : cards) {

@@ -18,6 +18,7 @@ struct NavigationSubpageEntry {
   std::string kind;
   lv_obj_t *screen = nullptr;
   lv_obj_t *back_button = nullptr;
+  BtnSlot back_slot{};
   struct Card {
     int index = 0;
     lv_obj_t *button = nullptr;
@@ -204,9 +205,13 @@ inline NavigationSubpageEntry *navigation_find_slot(int slot) {
   return nullptr;
 }
 
-inline void navigation_register_subpage_back_button(int slot, lv_obj_t *button) {
+inline void navigation_register_subpage_back_button(int slot,
+                                                    const BtnSlot &back_slot) {
   NavigationSubpageEntry *entry = navigation_find_slot(slot);
-  if (entry != nullptr) entry->back_button = button;
+  if (entry != nullptr) {
+    entry->back_button = back_slot.btn;
+    entry->back_slot = back_slot;
+  }
 }
 
 inline void navigation_register_subpage_card(int slot, int index, const BtnSlot &card_slot) {
