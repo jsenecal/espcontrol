@@ -165,7 +165,7 @@ def cpp_assertions(entry: dict, index: int) -> list[str]:
         "    ContentRequest standalone_content_request;",
         "    standalone_content_request.show_tab_bar = false;",
         "    standalone_content_request.top_without_tabs = layout.inset * 2;",
-        "    standalone_content_request.safe_top = layout.back_inset_y + layout.back_size + 12;",
+        "    standalone_content_request.safe_top = layout.back_inset_y + layout.back_size + scaled_px(12, layout.short_side);",
         "    standalone_content_request.minimum_height = 180;",
         "    standalone_content_request.fallback_height = layout.panel_height / 2;",
         "    const ContentLayout standalone_content = calculate_content(layout, standalone_content_request);",
