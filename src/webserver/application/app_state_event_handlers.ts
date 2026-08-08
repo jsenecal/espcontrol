@@ -5,9 +5,11 @@ export function installAppStateEventHandlersModule(): GlobalDescriptors {
     function createSseHandlers(this: any) {
         return {
             "text-button_order": function (this: any, val?: any) {
-                if (gridPreviewBlockedByRotationStartup()) {
+                if (gridPreviewBlockedByRotationStartup() || state.screenRotationInitialFallbackActive) {
                     orderReceived = !!(val && val.trim());
                     state.pendingButtonOrderRaw = val;
+                    if (state.screenRotationInitialFallbackActive)
+                        applyButtonOrderValue(val);
                     return;
                 }
                 applyButtonOrderValue(val);
@@ -175,11 +177,14 @@ export function installAppStateEventHandlersModule(): GlobalDescriptors {
             "text-presence_sensor_entity": function (this: any, val?: any) {
                 state.presenceEntity = val;
                 syncInput(els.setPresence, val);
-                syncInput(els.setSchedulePresence, val);
                 if (state.screensaverMode === "") {
                     if (els.setSsMode)
                         els.setSsMode(getActiveScreensaverMode());
                 }
+            },
+            "text-screen_schedule_sensor_entity": function (this: any, val?: any) {
+                state.scheduleSensorEntity = val;
+                syncInput(els.setSchedulePresence, val);
             },
             "text-media_player_sleep_prevention_entity": function (this: any, val?: any) {
                 state.mediaPlayerSleepPreventionEntity = val;
@@ -216,6 +221,10 @@ export function installAppStateEventHandlersModule(): GlobalDescriptors {
             },
             "number-home_assistant_artwork_port": function (this: any, val?: any) {
                 state.coverArtHomeAssistantPort = normalizeHomeAssistantArtworkPort(val);
+                syncCoverArtScreensaverUi();
+            },
+            "text-home_assistant_artwork_base_url": function (this: any, val?: any) {
+                state.coverArtHomeAssistantBaseUrl = normalizeHomeAssistantArtworkBaseUrl(val);
                 syncCoverArtScreensaverUi();
             },
             "text-screensaver_mode": function (this: any, val?: any) {
@@ -385,7 +394,9 @@ export function installAppStateEventHandlersModule(): GlobalDescriptors {
                     state.screenRotationOptions = d.option;
                 }
                 syncScreenRotationSelect();
-                syncPreviewOrientation();
+                var preservePendingGrid: any = state.screenRotationInitialFallbackActive ||
+                    state.pendingButtonOrderRaw !== null;
+                syncPreviewOrientation(preservePendingGrid);
                 resolveInitialScreenRotationCheck();
                 renderPreview();
             },

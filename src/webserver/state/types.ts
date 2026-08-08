@@ -153,6 +153,7 @@ export interface AppState {
   coverArtHideExternalInputOn: boolean;
   homeAssistantArtworkProtocol: string;
   coverArtHomeAssistantPort: number;
+  coverArtHomeAssistantBaseUrl: string;
   screensaverMode: string;
   _screensaverModeReceived: boolean;
   screensaverAction: string;
@@ -177,6 +178,7 @@ export interface AppState {
   _scheduleTriggerReceived: boolean;
   scheduleEnabled: boolean;
   scheduleSensorActivation: string;
+  scheduleSensorEntity: string;
   scheduleOnHour: number;
   scheduleOffHour: number;
   scheduleMode: string;
@@ -200,6 +202,7 @@ export interface AppState {
   screenRotationOptions: string[];
   screenRotationDeviceOptions: readonly string[] | null;
   screenRotationInitialReady: boolean;
+  screenRotationInitialFallbackActive: boolean;
   screenRotationInitialTimer: number | null;
   pendingButtonOrderRaw: string | null;
   sunrise: string;

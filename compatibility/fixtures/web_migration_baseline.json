@@ -53,6 +53,7 @@
       "coverArtSecondaryMediaPlayerEntity": "",
       "coverArtAttributeConditions": "", "coverArtDelay": 10, "coverArtTrackOverlayDuration": 5,
       "coverArtHideExternalInput": true, "coverArtHomeAssistantProtocol": "https", "coverArtHomeAssistantPort": 8123,
+      "coverArtHomeAssistantBaseUrl": "",
       "autoUpdate": true, "updateFrequency": "Weekly", "screensaverAction": "off", "clockScreensaver": false,
       "clockBrightnessDay": 35, "clockBrightnessNight": 35, "screensaverDimmedBrightness": 10,
       "screensaverTimeout": 300, "homeScreenTimeout": 60, "screenRotation": "90"
@@ -71,7 +72,7 @@
       "brightnessDayVal": 80, "brightnessNightVal": 20,
       "brightnessMode": "sunrise_sunset", "manualBrightnessVal": 100,
       "brightnessDawnTime": "06:00", "brightnessDuskTime": "18:00", "scheduleTrigger": "time",
-      "scheduleEnabled": true, "scheduleSensorActivation": "on", "scheduleOnHour": 6, "scheduleOffHour": 23, "scheduleMode": "clock",
+      "scheduleEnabled": true, "scheduleSensorActivation": "on", "scheduleSensorEntity": "", "scheduleOnHour": 6, "scheduleOffHour": 23, "scheduleMode": "clock",
       "scheduleWakeTimeout": 30, "scheduleWakeBrightness": 10, "scheduleDimmedBrightness": 10,
       "scheduleClockBrightness": 10, "scheduleClockTextColor": "FFFFFF"
     }
@@ -106,5 +107,5 @@
       "/number/Screen%20Saver%3A%20Cover%20Art%20Delay/set?value=30"
     ]
   },
-  "bundleSize": { "minified": 653618, "gzip": 155809 }
+  "bundleSize": { "minified": 656454, "gzip": 156246 }
 }

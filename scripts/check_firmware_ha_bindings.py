@@ -973,6 +973,15 @@ def firmware_cover_art_refresh_errors(path: Path, root: Path) -> list[str]:
     if resubscribe_body and "if (!url.empty() && url != id(cover_art_runtime).source_url)" not in resubscribe_body:
         errors.append(f"{rel}: mark changed Home Assistant artwork attributes as stale")
 
+    base_url_body = yaml_script_body(text, "cover_art_resolve_home_assistant_base_url") or ""
+    if (
+        "rebuild_relative_artwork_url" not in base_url_body
+        or "id(cover_art_runtime).sources.remote_url" not in base_url_body
+        or "id(cover_art_runtime).sources.local_url" not in base_url_body
+        or "id(cover_art_process_cached_artwork).execute();" not in base_url_body
+    ):
+        errors.append(f"{rel}: rebuild cached full-screen artwork URLs when the Home Assistant base URL changes")
+
     apply_body = yaml_script_body(text, "cover_art_apply_downloaded_image")
     if not apply_body:
         errors.append(f"{rel}: missing cover_art_apply_downloaded_image script")
@@ -2184,10 +2193,20 @@ def firmware_image_card_startup_errors(
     if core_infra_path.exists():
         core_rel = core_infra_path.relative_to(root)
         core_text = core_infra_path.read_text(encoding="utf-8")
+        port_action = re.search(
+            r'(?ms)^  - platform: template\n    name: "Home Assistant Artwork Port".*?'
+            r'^    set_action:\n      - lambda: \|-\n(?P<body>.*?)(?=^  - platform: |\Z)',
+            core_text,
+        )
         if "is_home_assistant && ha_api_connected()" not in core_text:
             errors.append(f"{core_rel}: start image-card refresh when Home Assistant API connects")
-        if core_text.count("refresh_image_cards();") < 4:
-            errors.append(f"{core_rel}: refresh image cards through Home Assistant connect retries")
+        if (
+            core_text.count("refresh_image_cards();") < 3
+            or "id(cover_art_resolve_home_assistant_base_url).execute();" not in core_text
+            or not port_action
+            or "id(cover_art_home_assistant_artwork_port).publish_state(x);" not in port_action.group("body")
+        ):
+            errors.append(f"{core_rel}: resolve artwork URLs with the newly selected port")
     return errors
 
 
@@ -2786,7 +2805,16 @@ def firmware_screen_schedule_screensaver_override_errors(backlight_path: Path, r
             reconcile_index = wake_body.find("script.execute: screen_schedule_check")
             sensor_guard_index = wake_body.find("screen_schedule_sensor_trigger(")
             wake_action_index = wake_body.find("script.execute: screensaver_wake")
-            if not (0 <= reconcile_index < sensor_guard_index < wake_action_index):
+            separate_schedule_sensor = "id(schedule_presence_detected)" in text
+            if separate_schedule_sensor and (
+                reconcile_index != -1 or sensor_guard_index != -1
+            ):
+                errors.append(
+                    f"{rel}: keep the Screensaver sensor independent from the Night Schedule sensor"
+                )
+            elif not separate_schedule_sensor and not (
+                0 <= reconcile_index < sensor_guard_index < wake_action_index
+            ):
                 errors.append(
                     f"{rel}: reconcile sensor-triggered night schedule before presence wake behavior"
                 )
@@ -2820,11 +2848,91 @@ def firmware_screen_schedule_screensaver_override_errors(backlight_path: Path, r
         reconcile_index = presence_sleep_body.find("script.execute: screen_schedule_check")
         sensor_guard_index = presence_sleep_body.find("screen_schedule_sensor_trigger(")
         sleep_action_index = presence_sleep_body.find("script.execute: screensaver_sleep_sensor")
-        if not (0 <= reconcile_index < sensor_guard_index < sleep_action_index):
+        separate_schedule_sensor = "id(schedule_presence_detected)" in text
+        if separate_schedule_sensor and (
+            reconcile_index != -1 or sensor_guard_index != -1
+        ):
+            errors.append(
+                f"{rel}: keep the Screensaver sleep sensor independent from the Night Schedule sensor"
+            )
+        elif not separate_schedule_sensor and not (
+            0 <= reconcile_index < sensor_guard_index < sleep_action_index
+        ):
             errors.append(
                 f"{rel}: reconcile sensor-triggered night schedule before presence sleep behavior"
             )
 
+    return errors
+
+
+def firmware_separate_schedule_sensor_errors(
+    backlight_path: Path,
+    display_path: Path,
+    cover_art_path: Path,
+    grid_header_path: Path,
+    sensor_paths: tuple[Path, ...],
+    root: Path,
+) -> list[str]:
+    """Require independent screensaver and Night Schedule sensor bindings."""
+    errors: list[str] = []
+    schedule_path = backlight_path.with_name("backlight_schedule.yaml")
+    required_schedule_markers = (
+        "id: screen_schedule_sensor_entity_migrated",
+        "id: screen_schedule_sensor_entity",
+        "id(screen_schedule_sensor_entity_migrated)",
+        "call.set_value(id(presence_sensor_entity).state)",
+        "id(schedule_presence_detected)",
+    )
+    if not schedule_path.exists():
+        errors.append(f"{schedule_path.relative_to(root)}: define the dedicated Night Schedule sensor")
+    else:
+        schedule_text = schedule_path.read_text(encoding="utf-8")
+        for marker in required_schedule_markers:
+            if marker not in schedule_text:
+                errors.append(
+                    f"{schedule_path.relative_to(root)}: retain {marker} for the dedicated Night Schedule sensor"
+                )
+
+    if display_path.exists():
+        display_text = display_path.read_text(encoding="utf-8")
+        if "id: presence_sensor_entity" not in display_text:
+            errors.append(f"{display_path.relative_to(root)}: retain the Screensaver presence sensor")
+        if "script.execute: refresh_button_grid" not in display_text:
+            errors.append(f"{display_path.relative_to(root)}: refresh subscriptions when the Screensaver sensor changes")
+
+    if backlight_path.exists():
+        backlight_text = backlight_path.read_text(encoding="utf-8")
+        if "id: schedule_presence_detected" not in backlight_text:
+            errors.append(f"{backlight_path.relative_to(root)}: keep separate schedule sensor state")
+        if "id(presence_detected)" not in backlight_text:
+            errors.append(f"{backlight_path.relative_to(root)}: keep Screensaver presence state")
+
+    if cover_art_path.exists() and "id(schedule_presence_detected)" not in cover_art_path.read_text(encoding="utf-8"):
+        errors.append(f"{cover_art_path.relative_to(root)}: use the Night Schedule sensor when blocking cover art")
+
+    if not grid_header_path.exists():
+        errors.append(f"{grid_header_path.relative_to(root)}: bind both sensor subscriptions in grid_phase3")
+    else:
+        grid_text = grid_header_path.read_text(encoding="utf-8")
+        for marker in (
+            "schedule_presence_entity",
+            "schedule_presence_detected_ptr",
+            "schedule_presence_changed_callback",
+            "ha_reset_subscription_callbacks(HA_SUBSCRIPTION_SCOPE_PHASE3)",
+        ):
+            if marker not in grid_text:
+                errors.append(f"{grid_header_path.relative_to(root)}: retain {marker} for independent, refreshable sensor subscriptions")
+
+    for sensor_path in sensor_paths:
+        sensor_text = sensor_path.read_text(encoding="utf-8")
+        if (
+            "id(screen_schedule_sensor_entity).state" not in sensor_text
+            or "&id(schedule_presence_detected)" not in sensor_text
+            or "id(screen_schedule_check).execute();" not in sensor_text
+        ):
+            errors.append(
+                f"{sensor_path.relative_to(root)}: pass and immediately apply the dedicated Night Schedule sensor"
+            )
     return errors
 
 
@@ -3169,6 +3277,16 @@ def run_scan() -> int:
     errors.extend(firmware_clock_screensaver_overlay_errors(BACKLIGHT_PATH, ROOT))
     errors.extend(firmware_screen_schedule_screensaver_overlay_errors(COVER_ART_PATH, ROOT))
     errors.extend(firmware_screen_schedule_screensaver_override_errors(BACKLIGHT_PATH, ROOT))
+    errors.extend(
+        firmware_separate_schedule_sensor_errors(
+            BACKLIGHT_PATH,
+            DISPLAY_CONFIG_PATH,
+            COVER_ART_PATH,
+            FIRMWARE_DIR / "button_grid_grid.h",
+            DEVICE_SENSOR_PATHS,
+            ROOT,
+        )
+    )
     errors.extend(firmware_climate_step_errors(FIRMWARE_DIR, ROOT))
     errors.extend(
         firmware_s3_api_errors(
@@ -5278,6 +5396,13 @@ def run_self_test() -> int:
         "# cover_art_runtime).effective_download_url\n"
         "  - id: cover_art_album\n"
         "script:\n"
+        "  - id: cover_art_resolve_home_assistant_base_url\n"
+        "    then:\n"
+        "      - lambda: |-\n"
+        "          auto rebuild_relative_artwork_url = [](std::string &url) { return !url.empty(); };\n"
+        "          id(cover_art_runtime).sources.remote_url.clear();\n"
+        "          id(cover_art_runtime).sources.local_url.clear();\n"
+        "          id(cover_art_process_cached_artwork).execute();\n"
         "  - id: cover_art_download\n"
         "    then:\n"
         "      - if:\n"
@@ -6300,7 +6425,7 @@ def run_self_test() -> int:
             "request bounded Home Assistant image card proxy downloads",
             "recognize Home Assistant camera and image proxy URLs",
             "start image-card refresh when Home Assistant API connects",
-            "refresh image cards through Home Assistant connect retries",
+            "resolve artwork URLs with the newly selected port",
         ),
     )
     expect_image_card_startup_errors(
@@ -6385,7 +6510,7 @@ def run_self_test() -> int:
         "  on_client_connected:\n"
         "    - lambda: |-\n"
         "        if (is_home_assistant && ha_api_connected()) {\n"
-        "        refresh_image_cards();\n"
+        "        id(cover_art_resolve_home_assistant_base_url).execute();\n"
         "        }\n"
         "    - delay: 2s\n"
         "    - lambda: |-\n"
@@ -6395,7 +6520,13 @@ def run_self_test() -> int:
         "        refresh_image_cards();\n"
         "    - delay: 20s\n"
         "    - lambda: |-\n"
-        "        refresh_image_cards();\n",
+        "        refresh_image_cards();\n"
+        "number:\n"
+        "  - platform: template\n"
+        "    name: \"Home Assistant Artwork Port\"\n"
+        "    set_action:\n"
+        "      - lambda: |-\n"
+        "          id(cover_art_home_assistant_artwork_port).publish_state(x);\n",
         (),
     )
     valid_shared_wake_guard_widget = (

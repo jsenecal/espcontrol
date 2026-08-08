@@ -39,6 +39,8 @@ script:
           cfg.num_slots = 9;
           cfg.cols = 3;
           cfg.subpage_chevrons_enabled = id(subpage_chevrons_enabled).state;
+          cfg.label_lines = 2;
+          cfg.label_lines_tall = 3;
           cfg.modal_profile.layout_family = DisplayModalLayoutFamily::LARGE_SQUARE;
           cfg.modal_profile.density = DisplayModalDensity::COMFORTABLE;
           cfg.modal_profile.memory_tier = DisplayModalMemoryTier::STANDARD;
@@ -152,6 +154,8 @@ esphome:
             cfg.num_slots = 9;
             cfg.cols = 3;
             cfg.subpage_chevrons_enabled = id(subpage_chevrons_enabled).state;
+            cfg.label_lines = 2;
+            cfg.label_lines_tall = 3;
             cfg.modal_profile.layout_family = DisplayModalLayoutFamily::LARGE_SQUARE;
             cfg.modal_profile.density = DisplayModalDensity::COMFORTABLE;
             cfg.modal_profile.memory_tier = DisplayModalMemoryTier::STANDARD;
@@ -318,6 +322,8 @@ esphome:
             cfg.num_slots = 9;
             cfg.cols = 3;
             cfg.subpage_chevrons_enabled = id(subpage_chevrons_enabled).state;
+            cfg.label_lines = 2;
+            cfg.label_lines_tall = 3;
             cfg.modal_profile.layout_family = DisplayModalLayoutFamily::LARGE_SQUARE;
             cfg.modal_profile.density = DisplayModalDensity::COMFORTABLE;
             cfg.modal_profile.memory_tier = DisplayModalMemoryTier::STANDARD;
@@ -426,6 +432,8 @@ esphome:
               id(main_page)->obj,
               id(presence_sensor_entity).state,
               &id(presence_detected),
+              id(screen_schedule_sensor_entity).state,
+              &id(schedule_presence_detected),
               id(media_player_sleep_prevention_entity).state,
               &id(media_player_playing),
               []() {
@@ -440,6 +448,9 @@ esphome:
               },
               []() {
                 id(screensaver_presence_sleep).execute();
+              },
+              []() {
+                id(screen_schedule_check).execute();
               },
               []() {
                 return id(outdoor_temp_enable).state;

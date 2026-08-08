@@ -197,6 +197,21 @@ export function normalizeHomeAssistantArtworkProtocol(value: unknown): string {
   return String(value || "").trim().toLowerCase() === "https" ? "https" : "http";
 }
 
+export function normalizeHomeAssistantArtworkBaseUrl(value: unknown): string {
+  const text = String(value == null ? "" : value).trim();
+  if (!text) return "";
+  const normalized = text.replace(/\/+$/, "");
+  try {
+    const url = new URL(normalized);
+    if ((url.protocol !== "http:" && url.protocol !== "https:") || !url.hostname ||
+        url.username || url.password || url.search || url.hash ||
+        (url.port && (Number(url.port) < 1 || Number(url.port) > 65535))) return "";
+    return url.href.replace(/\/+$/, "");
+  } catch (_) {
+    return "";
+  }
+}
+
 export function normalizeNtpServer(value: unknown, fallback: string): string {
   const server = String(value == null ? "" : value).trim();
   return server || fallback;
@@ -212,6 +227,7 @@ export interface BackupScreenSettingsState {
   scheduleTrigger: string;
   scheduleEnabled: boolean;
   scheduleSensorActivation: string;
+  scheduleSensorEntity: string;
   scheduleOnHour: number;
   scheduleOffHour: number;
   scheduleMode: string;
@@ -234,6 +250,7 @@ function objectValue(source: Record<string, unknown>, key: string): unknown {
 export function normalizeBackupScreenSettings(
   screenSettings: Record<string, unknown>,
   current: Partial<BackupScreenSettingsState>,
+  legacyPresenceSensorEntity = "",
 ): BackupScreenSettingsState {
   const legacyScheduleEnabled = !!screenSettings.schedule_enabled;
   const scheduleTrigger = normalizeScheduleTrigger(screenSettings.schedule_trigger, legacyScheduleEnabled);
@@ -259,6 +276,9 @@ export function normalizeBackupScreenSettings(
         ? screenSettings.schedule_sensor_activation
         : current.scheduleSensorActivation,
     ),
+    scheduleSensorEntity: objectValue(screenSettings, "schedule_sensor_entity") !== undefined
+      ? String(screenSettings.schedule_sensor_entity || "")
+      : legacyPresenceSensorEntity,
     scheduleOnHour: normalizeHour(screenSettings.schedule_on_hour, 6),
     scheduleOffHour: normalizeHour(screenSettings.schedule_off_hour, 23),
     scheduleMode: normalizeScheduleMode(screenSettings.schedule_mode),
@@ -298,6 +318,7 @@ export interface BackupPanelSettingsCurrent {
   ntpServer3: string;
   coverArtHomeAssistantProtocol: string;
   coverArtHomeAssistantPort: number;
+  coverArtHomeAssistantBaseUrl: string;
   autoUpdate: boolean;
   updateFrequency: string;
   updateFrequencyOptions: readonly string[];
@@ -346,6 +367,7 @@ export interface BackupPanelSettingsState {
   coverArtHideExternalInput: boolean;
   coverArtHomeAssistantProtocol: string;
   coverArtHomeAssistantPort: number;
+  coverArtHomeAssistantBaseUrl: string;
   autoUpdate: boolean;
   updateFrequency: string;
   screensaverAction: string;
@@ -477,6 +499,9 @@ export function normalizeBackupPanelSettings(
     coverArtHomeAssistantPort: objectValue(settings, "home_assistant_artwork_port") != null
       ? normalizeHomeAssistantArtworkPort(settings.home_assistant_artwork_port)
       : normalizeHomeAssistantArtworkPort(current.coverArtHomeAssistantPort),
+    coverArtHomeAssistantBaseUrl: objectValue(settings, "home_assistant_artwork_base_url") != null
+      ? normalizeHomeAssistantArtworkBaseUrl(settings.home_assistant_artwork_base_url)
+      : normalizeHomeAssistantArtworkBaseUrl(current.coverArtHomeAssistantBaseUrl),
     autoUpdate: objectValue(settings, "firmware_auto_update") != null
       ? !!settings.firmware_auto_update
       : current.autoUpdate,

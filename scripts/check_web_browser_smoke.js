@@ -700,6 +700,10 @@ async function assertRotationStartupOrdering(browser) {
   });
   await installRoutes(fallbackContext, slug);
   const fallbackPage = await fallbackContext.newPage();
+  const fallbackPosts = [];
+  fallbackPage.on("request", (request) => {
+    if (request.method() === "POST") fallbackPosts.push(request.url());
+  });
   await installFakeEventSource(fallbackPage);
   try {
     await fallbackPage.goto(`http://espcontrol.test/${slug}?events=1`, {
@@ -711,8 +715,8 @@ async function assertRotationStartupOrdering(browser) {
     );
     await fallbackPage.evaluate(
       (events) => window.__seedEspState(events),
-      [{ id: "text-button_order", state: "1,2,3w,4,5" }].concat(
-        rotationStartupBaseEvents(false, 5),
+      [{ id: "text-button_order", state: "1p,,,,,,,,,,,,2,3,4" }].concat(
+        rotationStartupBaseEvents(false, 4),
       ),
     );
     let layout = await measureRotationStartupLayout(fallbackPage);
@@ -743,8 +747,33 @@ async function assertRotationStartupOrdering(browser) {
       "rotation fallback: grid should be visible after fallback timeout",
     );
     assert(
-      layout.visibleCards >= 5,
+      layout.visibleCards >= 4,
       "rotation fallback: saved cards should render after fallback timeout",
+    );
+
+    await fallbackPage.evaluate(() =>
+      window.__seedEspState([
+        {
+          id: "select-screen__rotation",
+          state: "90",
+          value: "90",
+          option: ["0", "90", "180", "270"],
+        },
+      ]),
+    );
+    await fallbackPage.waitForFunction(() => {
+      var main = document.querySelector(".sp-main");
+      return main && getComputedStyle(main).gridTemplateColumns.split(" ").length === 3;
+    });
+    assertPortraitGridLayout(
+      await measureRotationStartupLayout(fallbackPage),
+      "rotation after fallback",
+      { minVisibleCards: 4 },
+    );
+    assert.deepStrictEqual(
+      fallbackPosts.filter((url) => /\/text\/button_order\//.test(url)),
+      [],
+      "rotation fallback: an unconfirmed startup orientation must not overwrite the saved layout",
     );
   } finally {
     await fallbackContext.close();
@@ -1500,6 +1529,7 @@ async function assertMobileTabLayout(page, label, restoreViewport) {
     var screen = document.querySelector(".sp-screen").getBoundingClientRect();
     return {
       tab: document.querySelector("#sp-app").getAttribute("data-active-tab"),
+      supportDismissControl: !!document.querySelector(".sp-support-dismiss"),
       viewportMeta:
         document.querySelector('meta[name="viewport"]') &&
         document.querySelector('meta[name="viewport"]').getAttribute("content"),
@@ -1522,6 +1552,11 @@ async function assertMobileTabLayout(page, label, restoreViewport) {
     mobile.viewportMeta,
     "width=device-width,initial-scale=1",
     `${label}: web app should provide mobile viewport metadata`,
+  );
+  assert.strictEqual(
+    mobile.supportDismissControl,
+    false,
+    `${label}: support button should not have a dismiss control`,
   );
   assert(
     mobile.supportVisible,
@@ -2883,6 +2918,7 @@ function backupFixture(device, slots) {
       manual_brightness: 62,
       schedule_enabled: true,
       schedule_sensor_activation: "on",
+      schedule_sensor_entity: "binary_sensor.night_schedule",
       schedule_on_hour: 7,
       schedule_off_hour: 22,
       schedule_mode: "clock",
@@ -3183,6 +3219,17 @@ async function assertBackupImportSmoke(page, posts, testCase) {
   for (const [expected, label] of screensaverImportPosts) {
     await waitForPost(posts, expected, label, before);
   }
+  await waitForPost(
+    posts,
+    {
+      domain: "text",
+      name: "screen_schedule_sensor_entity",
+      action: "set",
+      value: "binary_sensor.night_schedule",
+    },
+    "backup Night Schedule sensor import",
+    before,
+  );
   await waitForPost(
     posts,
     {
@@ -4256,11 +4303,11 @@ async function assertNightScheduleSensorControls(page, posts, label) {
     posts,
     {
       domain: "text",
-      name: "presence_sensor_entity",
+      name: "screen_schedule_sensor_entity",
       action: "set",
       value: "binary_sensor.all_lights_on",
     },
-    `${label}: Sensor mode posts the sensor entity`,
+    `${label}: Sensor mode posts the dedicated sensor entity`,
     before,
   );
   await waitForPost(

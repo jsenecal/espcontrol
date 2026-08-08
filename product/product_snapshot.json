@@ -11,7 +11,7 @@
   "summary": {
     "deviceProfiles": 6,
     "cardTypes": 40,
-    "entityNames": 96,
+    "entityNames": 98,
     "icons": 334,
     "structuralIcons": 16,
     "compatibilityFixtureGroups": 2
@@ -6103,6 +6103,17 @@
         ]
       },
       {
+        "key": "screen_schedule_sensor_entity",
+        "domain": "text",
+        "name": "Screen Schedule Sensor Entity",
+        "objectIds": [
+          "screen_schedule_sensor_entity"
+        ],
+        "groups": [
+          "settings"
+        ]
+      },
+      {
         "key": "screen_saver_media_player_sleep_prevention",
         "domain": "switch",
         "name": "Screen Saver: Media Player Sleep Prevention",
@@ -6238,6 +6249,18 @@
         "name": "Home Assistant Artwork Port",
         "objectIds": [
           "home_assistant_artwork_port"
+        ],
+        "groups": [
+          "settings"
+        ]
+      },
+      {
+        "key": "home_assistant_artwork_base_url",
+        "domain": "text",
+        "name": "Home Assistant Artwork Base URL",
+        "objectIds": [
+          "home_assistant_artwork_base_url",
+          "cover_art_home_assistant_artwork_base_url_override"
         ],
         "groups": [
           "settings"

@@ -236,6 +236,13 @@ export const ENTITY_CATALOG = {
         "presence_sensor_entity"
       ]
     },
+    "screen_schedule_sensor_entity": {
+      "domain": "text",
+      "name": "Screen Schedule Sensor Entity",
+      "objectIds": [
+        "screen_schedule_sensor_entity"
+      ]
+    },
     "screen_saver_media_player_sleep_prevention": {
       "domain": "switch",
       "name": "Screen Saver: Media Player Sleep Prevention",
@@ -331,6 +338,14 @@ export const ENTITY_CATALOG = {
       "name": "Home Assistant Artwork Port",
       "objectIds": [
         "home_assistant_artwork_port"
+      ]
+    },
+    "home_assistant_artwork_base_url": {
+      "domain": "text",
+      "name": "Home Assistant Artwork Base URL",
+      "objectIds": [
+        "home_assistant_artwork_base_url",
+        "cover_art_home_assistant_artwork_base_url_override"
       ]
     },
     "screen_saver_daytime_clock_brightness": {
@@ -708,6 +723,7 @@ export const ENTITY_CATALOG = {
       "screensaver_mode",
       "screen_saver_action",
       "presence_sensor_entity",
+      "screen_schedule_sensor_entity",
       "screen_saver_media_player_sleep_prevention",
       "media_player_sleep_prevention_entity",
       "screen_saver_cover_art",
@@ -719,6 +735,7 @@ export const ENTITY_CATALOG = {
       "screen_saver_hide_cover_art_external_input",
       "home_assistant_artwork_protocol",
       "home_assistant_artwork_port",
+      "home_assistant_artwork_base_url",
       "screen_saver_daytime_clock_brightness",
       "screen_saver_nighttime_clock_brightness",
       "screen_saver_clock_brightness",
