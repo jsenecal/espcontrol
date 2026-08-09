@@ -1,25 +1,21 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createBackupImportController } from "../features/backup_import_controller";
+import { createBackupExportController } from "../features/backup_export_controller";
 export function installAppBackupModule(): GlobalDescriptors {
     // ── Export / Import ────────────────────────────────────────────────────
+    var backupExportController: any = createBackupExportController({
+        "serializeButtonConfig": function (button: any) { return serializeButtonConfig(button); },
+        "serializeSubpageConfig": function (subpage: any) { return serializeSubpageConfig(subpage); },
+    });
     function backupExportScreenSizeSlug(this: any, value?: any) {
-        value = String(value || "").trim().toLowerCase();
-        if (!value)
-            return "screen";
-        value = value.replace(/\binches\b/g, "inch").replace(/\bin\b/g, "inch");
-        value = value.replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "");
-        return value || "screen";
+        return backupExportController.screenSizeSlug(value);
     }
     function backupExportFileDate(this: any, value?: any) {
-        return value.getFullYear() + "-" +
-            String(value.getMonth() + 1).padStart(2, "0") + "-" +
-            String(value.getDate()).padStart(2, "0");
+        return backupExportController.fileDate(value);
     }
     function backupExportFileName(this: any, value?: any) {
-        var date: any = value || new Date();
-        return "espcontrol-" + backupExportScreenSizeSlug(CFG.screenSize) + "-" +
-            backupExportFileDate(date) + ".json";
+        return backupExportController.fileName(CFG.screenSize, value);
     }
     function normalizeImportedPanelSettings(this: any, settings?: any) {
         if (!settings)
@@ -68,27 +64,13 @@ export function installAppBackupModule(): GlobalDescriptors {
         URL.revokeObjectURL(url);
     }
     function addNativeConfigToBackup(this: any, data?: any) {
-        var nativeDocument: any = {
-            deviceProfile: DEVICE_ID,
-            buttons: {},
-            subpages: {},
-            settings: {
-                button_order: data.button_order || "",
-                button_on_color: data.button_on_color || "",
-            },
-        };
-        for (var index: any = 0; index < state.buttons.length; index++) {
-            var buttonConfig: any = serializeButtonConfig(state.buttons[index]);
-            if (buttonConfig)
-                nativeDocument.buttons[index + 1] = buttonConfig;
-        }
-        for (var slot in state.subpages) {
-            var subpageConfig: any = serializeSubpageConfig(state.subpages[slot]);
-            if (subpageConfig)
-                nativeDocument.subpages[slot] = subpageConfig;
-        }
-        data.native_config = createPanelConfigBackupPayload(encodePanelConfig(nativeDocument));
-        return data;
+        return backupExportController.addNativeConfig(data, {
+            "deviceProfile": DEVICE_ID,
+            "buttons": state.buttons,
+            "subpages": state.subpages,
+            "buttonOrder": data.button_order,
+            "buttonOnColor": data.button_on_color,
+        });
     }
     function exportConfig(this: any) {
         var data: any = createBackupConfig({
