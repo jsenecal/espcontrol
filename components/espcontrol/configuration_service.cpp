@@ -42,6 +42,18 @@ bool supported_version(uint16_t version) {
 
 }  // namespace
 
+bool ConfigurationService::supports_version(uint16_t document_version) const {
+  return validator_ != nullptr ? validator_->supports_version(document_version)
+                               : supported_version(document_version);
+}
+
+bool ConfigurationService::document_is_valid(uint16_t document_version,
+                                             const uint8_t *document,
+                                             size_t document_size) const {
+  return validator_ == nullptr ||
+         validator_->validate(document_version, document, document_size);
+}
+
 size_t ConfigurationService::maximum_document_size() const {
   const size_t maximum_payload = store_.maximum_payload_size();
   return maximum_payload > CONFIGURATION_DOCUMENT_HEADER_SIZE
@@ -90,8 +102,14 @@ ServiceLoadResult ConfigurationService::load(uint8_t *output,
         read_u16(encoded.data() + DOCUMENT_VERSION_OFFSET);
     const size_t document_size =
         stored.payload_size - CONFIGURATION_DOCUMENT_HEADER_SIZE;
-    if (!supported_version(version)) {
+    if (!supports_version(version)) {
       return {ServiceStatus::UNSUPPORTED_VERSION, stored.status, version,
+              stored.generation, document_size};
+    }
+    const uint8_t *document =
+        encoded.data() + CONFIGURATION_DOCUMENT_HEADER_SIZE;
+    if (!document_is_valid(version, document, document_size)) {
+      return {ServiceStatus::INVALID_DOCUMENT, stored.status, version,
               stored.generation, document_size};
     }
     if (document_size > output_capacity) {
@@ -103,9 +121,7 @@ ServiceLoadResult ConfigurationService::load(uint8_t *output,
               stored.generation, document_size};
     }
     if (document_size > 0) {
-      std::memcpy(output,
-                  encoded.data() + CONFIGURATION_DOCUMENT_HEADER_SIZE,
-                  document_size);
+      std::memcpy(output, document, document_size);
     }
     return {ServiceStatus::OK, stored.status, version, stored.generation,
             document_size};
@@ -127,7 +143,7 @@ ServiceLoadResult ConfigurationService::load(uint8_t *output,
     return {ServiceStatus::LEGACY_READ_FAILED, stored.status,
             legacy.document_version, 0, legacy.document_size};
   }
-  if (!supported_version(legacy.document_version)) {
+  if (!supports_version(legacy.document_version)) {
     return {ServiceStatus::UNSUPPORTED_VERSION, stored.status,
             legacy.document_version, 0, legacy.document_size};
   }
@@ -138,6 +154,11 @@ ServiceLoadResult ConfigurationService::load(uint8_t *output,
                 : ServiceStatus::INVALID_ARGUMENT,
             stored.status, legacy.document_version, 0,
             legacy.document_size};
+  }
+  if (!document_is_valid(legacy.document_version, output,
+                         legacy.document_size)) {
+    return {ServiceStatus::INVALID_DOCUMENT, stored.status,
+            legacy.document_version, 0, legacy.document_size};
   }
 
   const CommitResult imported = commit_document(
@@ -159,8 +180,12 @@ ServiceSaveResult ConfigurationService::save(uint16_t document_version,
     return {ServiceStatus::INVALID_ARGUMENT, StoreStatus::INVALID_ARGUMENT,
             document_version, 0, document_size};
   }
-  if (!supported_version(document_version)) {
+  if (!supports_version(document_version)) {
     return {ServiceStatus::UNSUPPORTED_VERSION, StoreStatus::INVALID_ARGUMENT,
+            document_version, 0, document_size};
+  }
+  if (!document_is_valid(document_version, document, document_size)) {
+    return {ServiceStatus::INVALID_DOCUMENT, StoreStatus::INVALID_ARGUMENT,
             document_version, 0, document_size};
   }
 

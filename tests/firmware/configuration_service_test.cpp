@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "configuration_service.h"
+#include "panel_config_service_validator.h"
 
 namespace {
 
@@ -80,6 +81,22 @@ class FakeLegacy final : public LegacyConfigurationAdapter {
 
 std::vector<uint8_t> bytes(const char *value) {
   return std::vector<uint8_t>(value, value + std::strlen(value));
+}
+
+std::vector<uint8_t> panel_config_document() {
+  std::array<uint8_t, 128> buffer{};
+  PanelConfigWriter writer(buffer.data(), buffer.size());
+  if (writer.begin() != PanelConfigStatus::OK ||
+      writer.append_device_profile(
+          reinterpret_cast<const uint8_t *>("esp32-p4-86"), 11) !=
+          PanelConfigStatus::OK ||
+      writer.append_button(1, reinterpret_cast<const uint8_t *>("light.kitchen"),
+                           13) != PanelConfigStatus::OK) {
+    return {};
+  }
+  size_t document_size = 0;
+  if (writer.finish(&document_size) != PanelConfigStatus::OK) return {};
+  return {buffer.begin(), buffer.begin() + document_size};
 }
 
 bool legacy_is_imported_once() {
@@ -183,6 +200,68 @@ bool malformed_store_document_is_not_treated_as_legacy() {
          legacy.load_calls == 0;
 }
 
+bool panel_config_validator_protects_the_atomic_store() {
+  MemoryBackend backend(256);
+  ConfigurationStore store(backend);
+  FakeLegacy legacy;
+  PanelConfigDocumentValidator validator;
+  ConfigurationService service(store, legacy, &validator);
+  const std::vector<uint8_t> invalid = bytes("not-a-panel-config");
+  const ServiceSaveResult rejected =
+      service.save_current(invalid.data(), invalid.size());
+  if (rejected.status != ServiceStatus::INVALID_DOCUMENT ||
+      legacy.mirror_calls != 0) {
+    return false;
+  }
+
+  const std::vector<uint8_t> expected = panel_config_document();
+  if (expected.empty()) return false;
+  const ServiceSaveResult saved =
+      service.save_current(expected.data(), expected.size());
+  if (!saved.ok() || legacy.mirrored != expected) return false;
+
+  std::array<uint8_t, 128> output{};
+  const ServiceLoadResult loaded = service.load(output.data(), output.size());
+  return loaded.ok() && loaded.document_size == expected.size() &&
+         std::equal(expected.begin(), expected.end(), output.begin());
+}
+
+bool panel_config_validator_rejects_invalid_stored_documents() {
+  MemoryBackend backend(256);
+  ConfigurationStore store(backend);
+  FakeLegacy legacy;
+  const std::vector<uint8_t> invalid = bytes("not-a-panel-config");
+  ConfigurationService compatibility_service(store, legacy);
+  if (!compatibility_service.save_current(invalid.data(), invalid.size()).ok()) {
+    return false;
+  }
+
+  PanelConfigDocumentValidator validator;
+  ConfigurationService service(store, legacy, &validator);
+  std::array<uint8_t, 64> output{};
+  const ServiceLoadResult loaded = service.load(output.data(), output.size());
+  return loaded.status == ServiceStatus::INVALID_DOCUMENT &&
+         loaded.generation == 1 && legacy.load_calls == 0;
+}
+
+bool panel_config_validator_rejects_invalid_legacy_imports() {
+  MemoryBackend backend(256);
+  ConfigurationStore store(backend);
+  FakeLegacy legacy;
+  legacy.value = bytes("not-a-panel-config");
+  PanelConfigDocumentValidator validator;
+  ConfigurationService service(store, legacy, &validator);
+  std::array<uint8_t, 64> output{};
+  if (service.load(output.data(), output.size()).status !=
+      ServiceStatus::INVALID_DOCUMENT) {
+    return false;
+  }
+
+  ConfigurationService compatibility_service(store, legacy);
+  return compatibility_service.load(output.data(), output.size()).status ==
+         ServiceStatus::IMPORTED_LEGACY;
+}
+
 }  // namespace
 
 int main() {
@@ -192,6 +271,9 @@ int main() {
       failed_durable_save_never_updates_legacy() &&
       successful_save_dual_writes() &&
       version_and_buffer_failures_are_explicit() &&
-      malformed_store_document_is_not_treated_as_legacy();
+      malformed_store_document_is_not_treated_as_legacy() &&
+      panel_config_validator_protects_the_atomic_store() &&
+      panel_config_validator_rejects_invalid_stored_documents() &&
+      panel_config_validator_rejects_invalid_legacy_imports();
   return passed ? EXIT_SUCCESS : EXIT_FAILURE;
 }
