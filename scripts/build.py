@@ -14,6 +14,7 @@ Usage:
     python scripts/build.py icons --check # check icons only
     python scripts/build.py --self-test    # verify transactional publishing
 """
+import base64
 import json
 import os
 import re
@@ -35,6 +36,8 @@ from product_model_v2 import source_directory, source_path
 ROOT = Path(__file__).resolve().parent.parent
 MDI_VERSION = "7.4.47"
 MDI_CSS_URL = f"https://cdn.jsdelivr.net/npm/@mdi/font@{MDI_VERSION}/css/materialdesignicons.css"
+MDI_WEB_FONT = ROOT / "common" / "assets" / "fonts" / f"materialdesignicons-webfont-{MDI_VERSION}.ttf"
+WEB_SOURCE_DIR = ROOT / "src" / "webserver"
 
 # ---------------------------------------------------------------------------
 # Shared paths
@@ -235,6 +238,7 @@ def run_generated_transaction_self_test():
             input=json.dumps({
                 "outputDir": str(bundle_root),
                 "devices": {slug: config},
+                "embeddedMdiStyles": embedded_web_mdi_styles(),
                 "testHooks": False,
                 "overlays": {str(entry_path): entry_overlay},
             }),
@@ -3581,6 +3585,62 @@ def load_mdi_codepoints():
     }
 
 
+def web_mdi_icon_names(data, codepoints):
+    """Return every MDI glyph the browser editor can render.
+
+    The picker gets its names from the Product Model. A smaller set of fixed
+    controls and card badges is written directly in the editor source, so scan
+    those string literals too. Filtering them through the pinned MDI map keeps
+    unrelated UI text out of the font stylesheet.
+    """
+    names = {item["mdi"] for item in icon_items(data)}
+    for path in WEB_SOURCE_DIR.rglob("*.ts"):
+        source = path.read_text(encoding="utf-8")
+        names.update(
+            match.group(1)
+            for match in re.finditer(r"\bmdi-([a-z0-9-]+)\b", source)
+            if match.group(1) in codepoints
+        )
+        names.update(
+            match.group(1)
+            for match in re.finditer(r"['\"]([a-z][a-z0-9-]*)['\"]", source)
+            if match.group(1) in codepoints
+        )
+    return names
+
+
+def embedded_web_mdi_styles():
+    """Build the local icon font and CSS used by the browser bundle.
+
+    Browsers receive this as part of www.js, rather than requesting a CDN
+    stylesheet and font after the editor has started. This matters when a
+    display is reachable on the local network but cannot reach the Internet.
+    """
+    if not MDI_WEB_FONT.exists():
+        raise BuildError(f"Missing bundled web icon font: {MDI_WEB_FONT.relative_to(ROOT)}")
+
+    data = load_json(ICONS_JSON)
+    codepoints = load_mdi_codepoints()
+    icon_names = web_mdi_icon_names(data, codepoints)
+    missing = sorted(name for name in icon_names if name not in codepoints)
+    if missing:
+        raise BuildError("Missing MDI codepoints for browser icons: " + ", ".join(missing))
+
+    font_data = base64.b64encode(MDI_WEB_FONT.read_bytes()).decode("ascii")
+    css = [
+        "@font-face{font-family:'Material Design Icons';src:url(data:font/ttf;base64,",
+        font_data,
+        ") format('truetype');font-weight:normal;font-style:normal;font-display:block}",
+        ".mdi{display:inline-block;font-family:'Material Design Icons';font-weight:normal;font-style:normal;line-height:1;text-rendering:auto;-webkit-font-smoothing:antialiased}",
+        ".mdi::before{display:inline-block}",
+    ]
+    css.extend(
+        f".mdi-{name}::before{{content:'\\\\{codepoints[name]}'}}"
+        for name in sorted(icon_names)
+    )
+    return "".join(css)
+
+
 def check_duplicate_icon_fields(data):
     errors = []
     seen = {}
@@ -3839,6 +3899,7 @@ def load_timezone_options():
 def build_www(check_only=False, output_dir=None, test_hooks=False):
     """Build one shared www.js containing the validated device profiles."""
     devices = build_web_devices()
+    embedded_mdi_styles = embedded_web_mdi_styles()
     temporary_root = None
     if output_dir is None:
         temporary_root = tempfile.TemporaryDirectory(prefix="espcontrol-www-")
@@ -3852,6 +3913,7 @@ def build_www(check_only=False, output_dir=None, test_hooks=False):
         input=json.dumps({
             "outputDir": str(build_root),
             "devices": devices,
+            "embeddedMdiStyles": embedded_mdi_styles,
             "testHooks": test_hooks,
             "overlays": GENERATED_TRANSACTION.overlays() if GENERATED_TRANSACTION is not None else {},
         }),
