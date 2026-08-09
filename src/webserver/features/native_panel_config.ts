@@ -26,6 +26,7 @@ export type NativePanelConfigFetch = (
 ) => Promise<NativePanelConfigResponse>;
 
 export type NativePanelConfigSaveResult = "saved" | "unsupported" | "conflict" | "mirror-failed" | "failed";
+export type NativePanelConfigCollection = "buttons" | "subpages" | "settings";
 
 interface Capabilities {
   configuration?: {
@@ -33,6 +34,24 @@ interface Capabilities {
     write?: unknown;
     document_versions?: unknown;
   };
+}
+
+/** Replaces one native record without discarding cards that have not loaded yet. */
+export function updateNativePanelConfigDocument(
+  current: PanelConfigDocument,
+  deviceProfile: string,
+  collection: NativePanelConfigCollection,
+  key: number | string,
+  value: string,
+): PanelConfigDocument {
+  if (current.deviceProfile !== deviceProfile) {
+    throw new Error("The device configuration profile changed. Reload this page before saving.");
+  }
+  const values: Record<string, string> = { ...current[collection] };
+  const recordKey = String(key);
+  if (value) values[recordKey] = value;
+  else delete values[recordKey];
+  return { ...current, [collection]: values };
 }
 
 function supportedCapabilities(value: unknown): boolean {

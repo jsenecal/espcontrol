@@ -708,8 +708,8 @@ declare global {
   var moveSelectedToCell: any;
   var moveToCell: any;
   var networkPreviewIconSlug: any;
-  var nativePanelConfigDocumentFromState: any;
   var nativePanelConfigMigrationSupported: any;
+  var nativePanelConfigSubpageWrite: any;
   var nativePanelConfigTextWrite: any;
   var newCardDraftKey: any;
   var normalizeActionCardConfig: any;

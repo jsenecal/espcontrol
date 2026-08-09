@@ -66,7 +66,7 @@ export function installApiModule(): GlobalDescriptors {
         });
     }
     function postText(this: any, name?: any, value?: any) {
-        var nativeSave: any = nativePanelConfigTextWrite(name);
+        var nativeSave: any = nativePanelConfigTextWrite(name, value);
         if (nativeSave) {
             _postQueue = _postQueue.then(function () { return nativeSave; }).then(function (result: any) {
                 if (result !== "saved")
