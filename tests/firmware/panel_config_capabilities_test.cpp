@@ -23,10 +23,12 @@ int main() {
                                                             capabilities.size(),
                                                             &capabilities_size);
   set_panel_config_read_supported(true);
+  set_panel_config_write_supported(true);
   const bool read_capability_is_advertised =
       write_panel_config_capabilities_json(capabilities.data(),
                                            capabilities.size(),
                                            &capabilities_size) &&
-      std::strstr(capabilities.data(), "\"read\":true") != nullptr;
+      std::strstr(capabilities.data(), "\"read\":true") != nullptr &&
+      std::strstr(capabilities.data(), "\"write\":true") != nullptr;
   return passed && read_capability_is_advertised ? EXIT_SUCCESS : EXIT_FAILURE;
 }

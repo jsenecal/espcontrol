@@ -19,6 +19,15 @@ inline void set_panel_config_read_supported(bool supported) {
   panel_config_read_supported() = supported;
 }
 
+inline bool &panel_config_write_supported() {
+  static bool supported = false;
+  return supported;
+}
+
+inline void set_panel_config_write_supported(bool supported) {
+  panel_config_write_supported() = supported;
+}
+
 // The discovery response is deliberately static for the first native
 // configuration release. The future immutable web-bundle manifest will
 // replace the legacy delivery marker while preserving these version fields.
@@ -30,11 +39,12 @@ inline bool write_panel_config_capabilities_json(char *output,
   const int written = std::snprintf(
       output, output_capacity,
       "{\"api\":{\"version\":%u},\"configuration\":{\"document_versions\":[%u],"
-      "\"read\":%s,\"write\":false},\"web_assets\":{\"versions\":[%u],"
+      "\"read\":%s,\"write\":%s},\"web_assets\":{\"versions\":[%u],"
       "\"delivery\":\"legacy\"}}",
       static_cast<unsigned>(PANEL_CONFIG_API_VERSION),
       static_cast<unsigned>(PANEL_CONFIG_DOCUMENT_VERSION),
       panel_config_read_supported() ? "true" : "false",
+      panel_config_write_supported() ? "true" : "false",
       static_cast<unsigned>(PANEL_CONFIG_WEB_ASSET_VERSION));
   if (written < 0 || static_cast<size_t>(written) >= output_capacity)
     return false;
