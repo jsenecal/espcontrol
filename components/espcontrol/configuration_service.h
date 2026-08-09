@@ -120,6 +120,10 @@ class ConfigurationService {
   }
 
   size_t maximum_document_size() const;
+  void set_scratch_buffer(uint8_t *scratch_buffer, size_t scratch_capacity) {
+    scratch_buffer_ = scratch_buffer;
+    scratch_capacity_ = scratch_capacity;
+  }
 
  private:
   CommitResult commit_document(uint16_t document_version,

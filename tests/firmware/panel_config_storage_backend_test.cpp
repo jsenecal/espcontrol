@@ -58,6 +58,8 @@ class FakeBlobStorage final : public BlobStorage {
 bool missing_slots_behave_like_an_empty_store() {
   FakeBlobStorage blobs;
   BufferedBlobStorageBackend<kSlotCapacity> backend(blobs);
+  std::array<uint8_t, kSlotCapacity * 2> memory{};
+  if (!backend.begin(memory.data(), memory.size())) return false;
   ConfigurationStore store(backend);
   std::array<uint8_t, 32> output{};
   return store.load(output.data(), output.size()).status ==
@@ -68,6 +70,8 @@ bool missing_slots_behave_like_an_empty_store() {
 bool commits_are_buffered_until_the_store_sync_boundary() {
   FakeBlobStorage blobs;
   BufferedBlobStorageBackend<kSlotCapacity> backend(blobs);
+  std::array<uint8_t, kSlotCapacity * 2> memory{};
+  if (!backend.begin(memory.data(), memory.size())) return false;
   const std::array<uint8_t, 3> value{{'o', 'k', '!'}};
   if (!backend.write(0, 8, value.data(), value.size()) || blobs.present(0))
     return false;
@@ -81,6 +85,8 @@ bool commits_are_buffered_until_the_store_sync_boundary() {
 bool failed_sync_keeps_the_pending_slot_for_retry() {
   FakeBlobStorage blobs;
   BufferedBlobStorageBackend<kSlotCapacity> backend(blobs);
+  std::array<uint8_t, kSlotCapacity * 2> memory{};
+  if (!backend.begin(memory.data(), memory.size())) return false;
   const std::array<uint8_t, 2> value{{'v', '1'}};
   if (!backend.write(1, 0, value.data(), value.size())) return false;
   blobs.fail_sync(true);

@@ -36,25 +36,39 @@ class BufferedBlobStorageBackend final : public StorageBackend {
   explicit BufferedBlobStorageBackend(BlobStorage &storage)
       : storage_(storage) {}
 
+  bool begin(uint8_t *slot_storage, size_t slot_storage_size) {
+    if (slot_storage == nullptr ||
+        slot_storage_size < CONFIGURATION_SLOT_COUNT * SlotCapacity)
+      return false;
+    for (uint8_t slot = 0; slot < CONFIGURATION_SLOT_COUNT; ++slot) {
+      slots_[slot] = slot_storage + static_cast<size_t>(slot) * SlotCapacity;
+    }
+    loaded_.fill(false);
+    dirty_.fill(false);
+    return true;
+  }
+
   size_t slot_capacity() const override { return SlotCapacity; }
 
   bool read(uint8_t slot, size_t offset, uint8_t *output,
             size_t size) override {
-    if (!range_is_valid(slot, offset, size) || (size > 0 && output == nullptr) ||
+    if (!ready() || !range_is_valid(slot, offset, size) ||
+        (size > 0 && output == nullptr) ||
         !load_slot(slot)) {
       return false;
     }
-    if (size > 0) std::memcpy(output, slots_[slot].data() + offset, size);
+    if (size > 0) std::memcpy(output, slots_[slot] + offset, size);
     return true;
   }
 
   bool write(uint8_t slot, size_t offset, const uint8_t *data,
              size_t size) override {
-    if (!range_is_valid(slot, offset, size) || (size > 0 && data == nullptr) ||
+    if (!ready() || !range_is_valid(slot, offset, size) ||
+        (size > 0 && data == nullptr) ||
         !load_slot(slot)) {
       return false;
     }
-    if (size > 0) std::memcpy(slots_[slot].data() + offset, data, size);
+    if (size > 0) std::memcpy(slots_[slot] + offset, data, size);
     dirty_[slot] = true;
     return true;
   }
@@ -62,7 +76,7 @@ class BufferedBlobStorageBackend final : public StorageBackend {
   bool sync() override {
     for (uint8_t slot = 0; slot < CONFIGURATION_SLOT_COUNT; ++slot) {
       if (!dirty_[slot]) continue;
-      if (!storage_.save_blob(slot, slots_[slot].data(), SlotCapacity))
+      if (!storage_.save_blob(slot, slots_[slot], SlotCapacity))
         return false;
     }
     if (!storage_.sync()) return false;
@@ -76,19 +90,26 @@ class BufferedBlobStorageBackend final : public StorageBackend {
            size <= SlotCapacity - offset;
   }
 
+  bool ready() const {
+    for (uint8_t slot = 0; slot < CONFIGURATION_SLOT_COUNT; ++slot) {
+      if (slots_[slot] == nullptr) return false;
+    }
+    return true;
+  }
+
   bool load_slot(uint8_t slot) {
     if (loaded_[slot]) return true;
     const BlobLoadStatus result =
-        storage_.load_blob(slot, slots_[slot].data(), SlotCapacity);
+        storage_.load_blob(slot, slots_[slot], SlotCapacity);
     if (result == BlobLoadStatus::FAILED) return false;
-    if (result == BlobLoadStatus::MISSING) slots_[slot].fill(0xFF);
+    if (result == BlobLoadStatus::MISSING)
+      std::memset(slots_[slot], 0xFF, SlotCapacity);
     loaded_[slot] = true;
     return true;
   }
 
   BlobStorage &storage_;
-  std::array<std::array<uint8_t, SlotCapacity>, CONFIGURATION_SLOT_COUNT>
-      slots_{};
+  std::array<uint8_t *, CONFIGURATION_SLOT_COUNT> slots_{};
   std::array<bool, CONFIGURATION_SLOT_COUNT> loaded_{};
   std::array<bool, CONFIGURATION_SLOT_COUNT> dirty_{};
 };

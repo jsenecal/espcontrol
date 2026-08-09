@@ -33,7 +33,8 @@ returned.
 
 The core store depends only on a narrow `StorageBackend`. The first live
 adapter uses an isolated `espcontrol_cfg` namespace in ESPHome's NVS
-partition. It buffers two fixed-size blobs in memory and writes them only at
+partition. On the 7-inch P4, it reserves its fixed-size blobs from PSRAM at
+startup and writes them only at
 the store's explicit durability boundaries, preserving the two-slot protocol
 without a partition-table migration.
 

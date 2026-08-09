@@ -2,6 +2,10 @@
 
 #include <cinttypes>
 
+#ifdef USE_ESP32
+#include <esp_heap_caps.h>
+#endif
+
 #include "esphome/core/log.h"
 
 #include "panel_config_capabilities_endpoint.h"
@@ -45,13 +49,32 @@ void EspControlApp::set_panel_config_button(
 
 void EspControlApp::setup() {
   core_.start();
-  if (!panel_config_blobs_.begin()) {
-    ESP_LOGE(TAG, "Native configuration storage is unavailable");
-  } else if (!legacy_config_.configured()) {
+  if (!legacy_config_.configured()) {
     ESP_LOGW(TAG, "Native configuration sources are not configured");
+  } else if (!panel_config_blobs_.begin()) {
+    ESP_LOGE(TAG, "Native configuration storage is unavailable");
   } else {
+#ifdef USE_ESP32
+    constexpr size_t panel_config_memory_size =
+        PANEL_CONFIG_STORAGE_SLOT_CAPACITY * 4;
+    panel_config_memory_ = static_cast<uint8_t *>(
+        heap_caps_malloc(panel_config_memory_size,
+                         MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT));
+#endif
+    if (panel_config_memory_ == nullptr ||
+        !panel_config_backend_.begin(panel_config_memory_,
+                                     PANEL_CONFIG_STORAGE_SLOT_CAPACITY * 2)) {
+      ESP_LOGE(TAG, "Native configuration memory is unavailable");
+      configuration::register_panel_config_capabilities_endpoint();
+      return;
+    }
+    panel_config_service_.set_scratch_buffer(
+        panel_config_memory_ + PANEL_CONFIG_STORAGE_SLOT_CAPACITY * 2,
+        PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
+    panel_config_document_buffer_ =
+        panel_config_memory_ + PANEL_CONFIG_STORAGE_SLOT_CAPACITY * 3;
     const configuration::ServiceLoadResult loaded = panel_config_service_.load(
-        panel_config_document_buffer_.data(), panel_config_document_buffer_.size());
+        panel_config_document_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
     if (loaded.status == configuration::ServiceStatus::IMPORTED_LEGACY) {
       ESP_LOGI(TAG, "Imported legacy panel configuration into generation %" PRIu32,
                loaded.generation);
