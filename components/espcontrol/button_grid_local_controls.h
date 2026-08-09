@@ -2,6 +2,8 @@
 
 // Internal implementation detail for button_grid.h. Include button_grid.h from device YAML.
 
+inline void set_wrapped_button_label_text(lv_obj_t *label, const std::string &text);
+
 // ── Internal relay controls ───────────────────────────────────────────
 //
 // Only devices that actually have relays register entries here. The shared
