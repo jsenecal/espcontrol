@@ -435,9 +435,15 @@ declare global {
   var createCoverArtScreensaverController: any;
   var createMediaPlaybackController: any;
   var createVoiceServicesController: any;
+  var createClockBarController: any;
   var _coverArtScreensaverController: any;
   var _mediaPlaybackController: any;
   var _voiceServicesController: any;
+  var _clockBarController: any;
+  var clockBarControllerState: any;
+  var setClockBarEnabled: any;
+  var applyClockBarControllerState: any;
+  var clockBarUiState: any;
   var voiceServicesState: any;
   var applyVoiceServicesState: any;
   var voiceServicesUiState: any;

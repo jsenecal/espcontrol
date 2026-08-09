@@ -192,7 +192,7 @@ export function installSettingsPageModule(): GlobalDescriptors {
         clockBarBody.appendChild(clockBar.row);
         els.setClockBarToggle = clockBar.input;
         clockBar.input.addEventListener("change", function (this: any) {
-            state.clockBarOn = this.checked;
+            setClockBarEnabled(this.checked);
             state._clockBarStateValues = { local: state.clockBarOn };
             syncClockBarUi();
             postClockBar(state.clockBarOn);
@@ -201,7 +201,7 @@ export function installSettingsPageModule(): GlobalDescriptors {
         clockBarBody.appendChild(clockBarNightMode.row);
         els.setClockBarNightModeToggle = clockBarNightMode.input;
         clockBarNightMode.input.addEventListener("change", function (this: any) {
-            state.clockBarNightModeOn = this.checked;
+            applyClockBarControllerState(_clockBarController.setNightModeEnabled(clockBarControllerState(), this.checked));
             syncClockBarUi();
             postClockBarNightMode(state.clockBarNightModeOn);
         });
