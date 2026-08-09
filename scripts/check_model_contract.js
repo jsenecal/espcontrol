@@ -91,6 +91,7 @@ assert.deepStrictEqual(plain(model.decodeMediaCardConfigV1({
   mode: "playlist",
   stateDisplay: "label",
   nowPlayingControl: "none",
+  coverArtAction: "control_modal",
   showTrackDetails: false,
   secondaryEntity: "",
   controlLabelDisplay: "status",
@@ -113,6 +114,11 @@ assert.strictEqual(model.decodeMediaCardConfigV1({
 assert.strictEqual(model.decodeMediaCardConfigV1({
   type: "media",
   sensor: "cover_art",
+  options: "cover_art_action=play_pause",
+}).coverArtAction, "control_modal", "Media decoder keeps the versioned cover-art action fixed to All Controls");
+assert.strictEqual(model.decodeMediaCardConfigV1({
+  type: "media",
+  sensor: "cover_art",
   options: "cover_art_secondary_entity=media_player.apple_tv",
 }).secondaryEntity, "media_player.apple_tv", "Media decoder exposes the external-source player");
 assert.deepStrictEqual(plain(model.decodeMediaCardConfigV1({
@@ -126,6 +132,7 @@ assert.deepStrictEqual(plain(model.decodeMediaCardConfigV1({
   mode: "play_pause",
   stateDisplay: "state",
   nowPlayingControl: "none",
+  coverArtAction: "control_modal",
   showTrackDetails: false,
   secondaryEntity: "",
   controlLabelDisplay: "status",
