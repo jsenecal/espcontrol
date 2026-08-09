@@ -33,6 +33,11 @@ export function installConfigPostApiModule(): GlobalDescriptors {
             showBanner("Subpage is too large to save. Shorten labels or entity IDs.", "error");
             return;
         }
+        var nativeSave: any = nativePanelConfigSubpageWrite(slot, full);
+        if (nativeSave) {
+            state.subpageSavePending[slot] = full;
+            return;
+        }
         var previousPendingChunks: any = EspControlModel.splitSubpageConfigChunks(state.subpageSavePending[slot] || "", keys.length, 255) || [];
         state.subpageSavePending[slot] = full;
         for (var ki: any = 0; ki < keys.length; ki++) {

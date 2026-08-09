@@ -9,10 +9,11 @@ import re
 from pathlib import Path
 from typing import Any
 
+from product_model_v2 import source_path
 
 ROOT = Path(__file__).resolve().parent.parent
-DEVICE_MANIFEST = ROOT / "devices" / "manifest.json"
-DEVICE_CATALOG = ROOT / "devices" / "catalog.json"
+DEVICE_MANIFEST = source_path("deviceProfiles")
+DEVICE_CATALOG = source_path("deviceCatalog")
 COMMON_ASSETS = ROOT / "common" / "assets"
 DEVICES_DIR = ROOT / "devices"
 

@@ -43,7 +43,6 @@ export function installConfigOptionCoreModule(): GlobalDescriptors {
     var MEDIA_PLAYLIST_CONTENT_TYPE_OPTION: any = cardContractOptionName("playlist_content_type");
     var MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION: any = cardContractOptionName("playlist_player_source");
     var MEDIA_COVER_ART_OPTION: any = cardContractOptionName("media_cover_art");
-    var MEDIA_COVER_ART_ACTION_OPTION: any = cardContractOptionName("cover_art_action");
     var MEDIA_COVER_ART_DETAILS_OPTION: any = cardContractOptionName("cover_art_details");
     var MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION: any = cardContractOptionName("cover_art_secondary_entity");
     var SUBPAGE_KIND_OPTION: any = cardContractOptionName("subpage_kind");
@@ -53,6 +52,7 @@ export function installConfigOptionCoreModule(): GlobalDescriptors {
     var LIGHT_CONTROL_TABS_OPTION: any = cardContractOptionName("light_tabs");
     var COVER_CONTROL_TABS_OPTION: any = cardContractOptionName("cover_tabs");
     var CLIMATE_CONTROL_TABS_OPTION: any = cardContractOptionName("climate_tabs");
+    var FAN_LIGHT_ENTITY_OPTION: any = cardContractOptionName("fan_light_entity");
     var FAN_CONTROL_TABS_OPTION: any = cardContractOptionName("fan_tabs");
     var IMAGE_SLOT_CAPACITY: any = Math.max(0, parseInt(CFG.imageSlotCapacity, 10) || 0);
     function largeNumbersExplicitlyDisabled(this: any, options?: any) {
@@ -137,7 +137,6 @@ export function installConfigOptionCoreModule(): GlobalDescriptors {
         "MEDIA_PLAYLIST_CONTENT_TYPE_OPTION": liveGlobal(() => MEDIA_PLAYLIST_CONTENT_TYPE_OPTION, (value?: any) => { MEDIA_PLAYLIST_CONTENT_TYPE_OPTION = value; }),
         "MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION": liveGlobal(() => MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION, (value?: any) => { MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION = value; }),
         "MEDIA_COVER_ART_OPTION": liveGlobal(() => MEDIA_COVER_ART_OPTION, (value?: any) => { MEDIA_COVER_ART_OPTION = value; }),
-        "MEDIA_COVER_ART_ACTION_OPTION": liveGlobal(() => MEDIA_COVER_ART_ACTION_OPTION, (value?: any) => { MEDIA_COVER_ART_ACTION_OPTION = value; }),
         "MEDIA_COVER_ART_DETAILS_OPTION": liveGlobal(() => MEDIA_COVER_ART_DETAILS_OPTION, (value?: any) => { MEDIA_COVER_ART_DETAILS_OPTION = value; }),
         "MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION": liveGlobal(() => MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION, (value?: any) => { MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION = value; }),
         "SUBPAGE_KIND_OPTION": liveGlobal(() => SUBPAGE_KIND_OPTION, (value?: any) => { SUBPAGE_KIND_OPTION = value; }),
@@ -147,6 +146,7 @@ export function installConfigOptionCoreModule(): GlobalDescriptors {
         "LIGHT_CONTROL_TABS_OPTION": liveGlobal(() => LIGHT_CONTROL_TABS_OPTION, (value?: any) => { LIGHT_CONTROL_TABS_OPTION = value; }),
         "COVER_CONTROL_TABS_OPTION": liveGlobal(() => COVER_CONTROL_TABS_OPTION, (value?: any) => { COVER_CONTROL_TABS_OPTION = value; }),
         "CLIMATE_CONTROL_TABS_OPTION": liveGlobal(() => CLIMATE_CONTROL_TABS_OPTION, (value?: any) => { CLIMATE_CONTROL_TABS_OPTION = value; }),
+        "FAN_LIGHT_ENTITY_OPTION": liveGlobal(() => FAN_LIGHT_ENTITY_OPTION, (value?: any) => { FAN_LIGHT_ENTITY_OPTION = value; }),
         "FAN_CONTROL_TABS_OPTION": liveGlobal(() => FAN_CONTROL_TABS_OPTION, (value?: any) => { FAN_CONTROL_TABS_OPTION = value; }),
         "IMAGE_SLOT_CAPACITY": liveGlobal(() => IMAGE_SLOT_CAPACITY, (value?: any) => { IMAGE_SLOT_CAPACITY = value; }),
         "largeNumbersExplicitlyDisabled": staticGlobal(largeNumbersExplicitlyDisabled),

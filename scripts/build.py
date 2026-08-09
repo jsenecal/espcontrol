@@ -30,6 +30,7 @@ from product_schema import (
     assert_card_contract_valid,
     assert_entity_names_valid as assert_product_entity_names_valid,
 )
+from product_model_v2 import source_directory, source_path
 
 ROOT = Path(__file__).resolve().parent.parent
 MDI_VERSION = "7.4.47"
@@ -38,14 +39,14 @@ MDI_CSS_URL = f"https://cdn.jsdelivr.net/npm/@mdi/font@{MDI_VERSION}/css/materia
 # ---------------------------------------------------------------------------
 # Shared paths
 # ---------------------------------------------------------------------------
-ICONS_JSON = ROOT / "common" / "assets" / "icons.json"
-ENTITY_NAMES_JSON = ROOT / "common" / "config" / "entity_names.json"
+ICONS_JSON = source_path("icons")
+ENTITY_NAMES_JSON = source_path("entityNames")
 ENTITY_NAMES_YAML = ROOT / "common" / "config" / "entity_names.yaml"
 ENTITY_NAMES_TS = ROOT / "src" / "webserver" / "generated" / "entity_catalog.ts"
 WEB_ICONS_TS = ROOT / "src" / "webserver" / "generated" / "icons.ts"
-STRINGS_DIR = ROOT / "common" / "config"
+STRINGS_DIR = source_directory("translations")
 I18N_GENERATED_H = ROOT / "components" / "espcontrol" / "i18n_generated.h"
-CARD_CONTRACT_JSON = ROOT / "common" / "config" / "card_contract.json"
+CARD_CONTRACT_JSON = source_path("cardContract")
 CARD_CONTRACT_TS = ROOT / "src" / "webserver" / "generated" / "card_contract.ts"
 CARD_CONTRACT_H = ROOT / "components" / "espcontrol" / "button_grid_contract_generated.h"
 SAVED_CONFIG_SHADOW_TS = ROOT / "src" / "webserver" / "generated" / "saved_config_shadow.ts"
@@ -2592,7 +2593,7 @@ def gen_saved_config_shadow_ts(data):
         "  if (config.sensor === \"control_modal\") {\n"
         "    if (optionValue(source, \"label_display\").trim() === \"label\") out.push(\"label_display=label\"); if (optionValue(source, \"number_display\").trim() === \"volume\") out.push(\"number_display=volume\"); if (maxVolume !== MEDIA_VOLUME_DEFAULT) out.push(\"volume_max=\" + maxVolume);\n"
         "  } else if (config.sensor === \"cover_art\") {\n"
-        "    if (optionValue(source, \"cover_art_action\").trim() === \"control_modal\") out.push(\"cover_art_action=control_modal\"); if (optionPresent(source, \"cover_art_details\")) out.push(\"cover_art_details\"); const secondaryEntity = optionValue(source, \"cover_art_secondary_entity\").trim(); if (secondaryEntity) out.push(\"cover_art_secondary_entity=\" + encodeOptionValue(secondaryEntity));\n"
+        "    if (optionPresent(source, \"cover_art_details\")) out.push(\"cover_art_details\"); const secondaryEntity = optionValue(source, \"cover_art_secondary_entity\").trim(); if (secondaryEntity) out.push(\"cover_art_secondary_entity=\" + encodeOptionValue(secondaryEntity));\n"
         "  } else if (config.sensor === \"playlist\") {\n"
         "    for (const [name, defaultValue] of [[\"playlist_content_id\", \"\"], [\"playlist_content_type\", \"playlist\"], [\"playlist_player_source\", \"\"]] as const) { const value = optionValue(source, name).trim() || defaultValue; if (value && value !== defaultValue) out.push(name + \"=\" + encodeOptionValue(value)); }\n"
         "  } else if (config.sensor === \"volume\" || config.sensor === \"position\") {\n"
@@ -2789,7 +2790,6 @@ def gen_saved_config_shadow_h(data):
         "    if (saved_config_shadow_trim(cfg_option_value(source, \"number_display\")) == \"volume\") saved_config_shadow_append_option(out, \"number_display\", \"volume\");\n",
         "    if (max_volume != SAVED_CONFIG_SHADOW_MEDIA_VOLUME_DEFAULT) saved_config_shadow_append_option(out, \"volume_max\", std::to_string(max_volume));\n",
         "  } else if (config.sensor == \"cover_art\") {\n",
-        "    if (saved_config_shadow_trim(cfg_option_value(source, \"cover_art_action\")) == \"control_modal\") saved_config_shadow_append_option(out, \"cover_art_action\", \"control_modal\");\n",
         "    if (cfg_option_token_present(source, \"cover_art_details\")) saved_config_shadow_append_option(out, \"cover_art_details\");\n",
         "    const std::string secondary_entity = saved_config_shadow_trim(cfg_option_value(source, \"cover_art_secondary_entity\"));\n",
         "    if (!secondary_entity.empty()) saved_config_shadow_append_option(out, \"cover_art_secondary_entity\", secondary_entity);\n",

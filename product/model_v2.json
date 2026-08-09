@@ -1,0 +1,46 @@
+{
+  "modelVersion": 2,
+  "stage": "legacy-adapter",
+  "description": "The Product Model v2 ownership boundary while existing authored files remain in place.",
+  "sources": {
+    "cardContract": {
+      "path": "common/config/card_contract.json",
+      "kind": "file",
+      "role": "authored"
+    },
+    "deviceCatalog": {
+      "path": "devices/catalog.json",
+      "kind": "file",
+      "role": "authored"
+    },
+    "deviceProfiles": {
+      "path": "devices/manifest.json",
+      "kind": "file",
+      "role": "generated-legacy-adapter"
+    },
+    "entityNames": {
+      "path": "common/config/entity_names.json",
+      "kind": "file",
+      "role": "authored"
+    },
+    "icons": {
+      "path": "common/assets/icons.json",
+      "kind": "file",
+      "role": "authored"
+    },
+    "translations": {
+      "path": "common/config/strings.*.txt",
+      "kind": "glob",
+      "role": "authored"
+    },
+    "compatibilityFixtures": {
+      "path": "compatibility/fixtures/product_compatibility.json",
+      "kind": "file",
+      "role": "authored"
+    }
+  },
+  "equivalenceSamples": {
+    "cardType": "",
+    "deviceSlug": "esp32-p4-86"
+  }
+}

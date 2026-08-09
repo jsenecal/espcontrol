@@ -69,6 +69,7 @@ declare global {
   var EspControlModel: any;
   var FALLBACK_TIMEZONE_OPTION: any;
   var FAN_CARD_METADATA: any;
+  var FAN_LIGHT_ENTITY_OPTION: any;
   var FAN_CONTROL_TABS_OPTION: any;
   var FAN_CONTROL_TYPE_OPTIONS: any;
   var FAVICON_SVG: any;
@@ -110,7 +111,6 @@ declare global {
   var LOCK_CARD_METADATA: any;
   var MAX_CLOCK_BAR_TEMPERATURES: any;
   var MEDIA_CARD_METADATA: any;
-  var MEDIA_COVER_ART_ACTION_OPTION: any;
   var MEDIA_COVER_ART_DETAILS_OPTION: any;
   var MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION: any;
   var MEDIA_COVER_ART_OPTION: any;
@@ -258,6 +258,7 @@ declare global {
   var applyPageTitle: any;
   var applyScreensaverTimeoutState: any;
   var applySpans: any;
+  var addNativeConfigToBackup: any;
   var applySseHandlerAliases: any;
   var applySubpageConfigStateEvent: any;
   var applySubpagePresetConfig: any;
@@ -429,6 +430,7 @@ declare global {
   var createHourSelect: any;
   var createInitialState: any;
   var createMdiIcon: any;
+  var createPanelConfigBackupPayload: any;
   var createRangeSlider: any;
   var createScreensaverThenControls: any;
   var createSettingsUiFeature: any;
@@ -449,6 +451,7 @@ declare global {
   var defaultClockBarTemperatureEntity: any;
   var defaultTimezoneCardEntity: any;
   var defaultTimezoneOptions: any;
+  var downloadBackupConfig: any;
   var defaultTimezoneOptionsForDevice: any;
   var deleteButtons: any;
   var deleteSlot: any;
@@ -474,6 +477,7 @@ declare global {
   var emptyButtonConfig: any;
   var emptyCardConfig: any;
   var encodeConfigField: any;
+  var encodePanelConfig: any;
   var encodeSubpageField: any;
   var ensureEntityDropdown: any;
   var ensureInternalRelaySelection: any;
@@ -511,6 +515,7 @@ declare global {
   var fanControlTabDefinitions: any;
   var fanControlTabs: any;
   var fanControlTabsAreDefault: any;
+  var fanLightEntity: any;
   var fanTypeFactory: any;
   var fieldLabel: any;
   var fieldWithControl: any;
@@ -676,7 +681,6 @@ declare global {
   var markSpannedCells: any;
   var mdiIcon: any;
   var mediaBehaviorSpec: any;
-  var mediaCoverArtAction: any;
   var mediaCoverArtDetailsEnabled: any;
   var mediaCoverArtSecondaryEntity: any;
   var mediaDefaultMode: any;
@@ -706,6 +710,9 @@ declare global {
   var moveSelectedToCell: any;
   var moveToCell: any;
   var networkPreviewIconSlug: any;
+  var nativePanelConfigMigrationSupported: any;
+  var nativePanelConfigSubpageWrite: any;
+  var nativePanelConfigTextWrite: any;
   var newCardDraftKey: any;
   var normalizeActionCardConfig: any;
   var normalizeSavedConfigActionFields: any;
@@ -769,7 +776,6 @@ declare global {
   var normalizeLightControlType: any;
   var normalizeLockMode: any;
   var normalizeMediaLabelDisplayMode: any;
-  var normalizeMediaCoverArtAction: any;
   var normalizeMediaNumberDisplayMode: any;
   var normalizeMediaOptions: any;
   var normalizeCardSizeForConfig: any;
@@ -1057,6 +1063,7 @@ declare global {
   var setDateTimeCardMode: any;
   var setDoorWindowActiveColorEnabled: any;
   var setFanControlTabs: any;
+  var setFanLightEntity: any;
   var setFanControlType: any;
   var setFavicon: any;
   var setFirmwareUpdateInfo: any;
@@ -1070,7 +1077,6 @@ declare global {
   var setLightControlTabs: any;
   var setLightControlType: any;
   var setMediaLabelDisplayMode: any;
-  var setMediaCoverArtAction: any;
   var setMediaCoverArtDetailsEnabled: any;
   var setMediaCoverArtSecondaryEntity: any;
   var setMediaNumberDisplayMode: any;

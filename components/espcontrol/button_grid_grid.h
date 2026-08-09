@@ -430,7 +430,7 @@ inline void setup_media_cover_art(BtnSlot &s, const ParsedCfg &p,
   art->media_artwork_width_compensation_percent = cfg.media_artwork_width_compensation_percent;
   media_ctx->cover_art = art;
   media_ctx->cover_overlay = overlay;
-  if (media_ctx->btn && media_cover_art_press_action(p) == "play_pause") {
+  if (media_ctx->btn) {
     lv_obj_set_user_data(media_ctx->btn, art);
   }
   if (art->image_ready) {

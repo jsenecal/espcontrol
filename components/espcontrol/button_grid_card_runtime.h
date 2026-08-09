@@ -230,10 +230,6 @@ constexpr const char *card_runtime_option_name_media_cover_art() {
   return CARD_CONTRACT_OPTION_NAME_MEDIA_COVER_ART;
 }
 
-constexpr const char *card_runtime_option_name_cover_art_action() {
-  return CARD_CONTRACT_OPTION_NAME_COVER_ART_ACTION;
-}
-
 constexpr const char *card_runtime_option_name_cover_art_details() {
   return CARD_CONTRACT_OPTION_NAME_COVER_ART_DETAILS;
 }
@@ -252,6 +248,10 @@ constexpr const char *card_runtime_option_name_cover_tabs() {
 
 constexpr const char *card_runtime_option_name_fan_tabs() {
   return CARD_CONTRACT_OPTION_NAME_FAN_TABS;
+}
+
+constexpr const char *card_runtime_option_name_fan_light_entity() {
+  return CARD_CONTRACT_OPTION_NAME_FAN_LIGHT_ENTITY;
 }
 
 constexpr const char *card_runtime_option_name_label_display() {

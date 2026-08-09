@@ -240,6 +240,7 @@ struct LightControlModalUi {
   lv_obj_t *power_group = nullptr;
   lv_obj_t *power_on_btn = nullptr;
   lv_obj_t *power_off_btn = nullptr;
+  ControlModalBinaryToggle power_toggle;
   lv_obj_t *slider = nullptr;
   lv_obj_t *slider_fill = nullptr;
   lv_obj_t *slider_handle = nullptr;
@@ -923,16 +924,13 @@ inline void light_control_open_modal(LightControlCtx *ctx) {
   lv_obj_set_style_border_width(ui.power_group, 0, LV_PART_MAIN);
   lv_obj_set_style_shadow_width(ui.power_group, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_all(ui.power_group, 0, LV_PART_MAIN);
-  control_modal_apply_pressed_fill(ui.power_group);
-  lv_obj_add_flag(ui.power_group, LV_OBJ_FLAG_CLICKABLE);
-  lv_obj_clear_flag(ui.power_group, LV_OBJ_FLAG_SCROLLABLE);
-  lv_obj_add_event_cb(ui.power_group, [](lv_event_t *) {
-    light_control_toggle_modal_power();
-  }, LV_EVENT_CLICKED, nullptr);
   ui.power_on_btn = light_control_create_power_button(
     ui.power_group, ctx->icon_font, ctx->width_compensation_percent, true);
   ui.power_off_btn = light_control_create_power_button(
     ui.power_group, ctx->icon_font, ctx->width_compensation_percent, false);
+  ui.power_toggle.callback = light_control_toggle_modal_power;
+  control_modal_setup_binary_toggle(
+    ui.power_group, ui.power_on_btn, ui.power_off_btn, &ui.power_toggle);
 
   ui.slider = lv_slider_create(ui.panel);
   light_control_style_slider(ui.slider, ctx->accent_color);

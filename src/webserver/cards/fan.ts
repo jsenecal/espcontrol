@@ -106,7 +106,44 @@ export function registerFanCardTypes(): GlobalDescriptors {
             setTabs: setFanControlTabs,
             idPrefix: "fan-tab-",
             hideHeading: true,
+            tabAvailable: function (this: any, button?: any, tab?: any) {
+                return tab !== "light" || !!fanLightEntity(button);
+            },
         });
+        var lightDisclosure: any = helpers.disclosureSection(
+            "Optional Light", helpers.idPrefix + "fan-optional-light",
+            b._fanOptionalLightOpen === true);
+        var lightEntityField: any = helpers.renderCardEntityField(lightDisclosure.section, b, helpers, {
+            entity: {
+                label: "Light Entity",
+                idSuffix: "fan-light-entity",
+                value: function (this: any) { return fanLightEntity(b); },
+                placeholder: "e.g. light.bedroom_fan",
+                domains: ["light"],
+                bindName: null,
+                rerender: false,
+            },
+        });
+        function syncLightEntity(this: any) {
+            setFanLightEntity(b, lightEntityField.input.value);
+            b._modalSettingsOpen = true;
+            b._fanOptionalLightOpen = true;
+            helpers.saveField("options", b.options);
+        }
+        function saveLightEntity(this: any) {
+            syncLightEntity();
+            renderButtonSettings();
+        }
+        lightEntityField.input.addEventListener("input", syncLightEntity);
+        lightEntityField.input.addEventListener("change", saveLightEntity);
+        lightEntityField.input.addEventListener("blur", saveLightEntity);
+        lightEntityField.input.addEventListener("keydown", function (this: any, event?: any) {
+            if (event.key === "Enter") {
+                saveLightEntity();
+                this.blur();
+            }
+        });
+        modalSettingsDisclosure.section.appendChild(lightDisclosure.panel);
         panel.appendChild(modalSettingsDisclosure.panel);
     }
     function fanTypeFactory(this: any, opts?: any) {

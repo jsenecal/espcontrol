@@ -68,7 +68,7 @@ const BUTTON_FIXTURES = [
   "light.kitchen;Kitchen;Lightbulb;Lightbulb",
   "sensor.energy;Energy;Gauge;Auto;sensor.energy;W;sensor;0",
   "climate.hall;Hall;Thermostat;Auto;;;climate;;",
-  "media_player.living;Living Artwork;Auto;Auto;cover_art;;media;;cover_art_action=control_modal,cover_art_details",
+  "media_player.living;Living Artwork;Auto;Auto;cover_art;;media;;cover_art_details",
   "cover.office_blind;Blind;Blinds Open;Blinds;modal;;cover;;cover_tabs=controls%7Cposition%7Ctilt",
   "alarm_control_panel.house;Alarm;Security;Auto;;;alarm;;",
 ];
@@ -2276,6 +2276,76 @@ async function assertAllCardSettingsGrouped(page, posts, label) {
   );
 }
 
+async function assertFanOptionalLightSettings(page, label) {
+  await page.getByRole("tab", { name: "Screen" }).click();
+  await page.waitForSelector("#sp-screen.sp-page.active");
+  const emptyCell = page
+    .locator(".sp-empty-cell:not(.sp-info-only-hidden)")
+    .first();
+  if ((await emptyCell.count()) === 0) return;
+  await emptyCell.click();
+  await page.waitForSelector(".sp-settings-overlay.sp-visible");
+  await page.getByRole("button", { name: "Switch card type" }).click();
+  await page.locator("#sp-inp-type").selectOption("fan_speed");
+  const fanType = page.locator(
+    '.sp-settings-modal .sp-panel > [data-sp-card-primary="type"] select',
+  );
+  await fanType.selectOption("fan_control");
+  await page.getByRole("button", { name: "Modal Settings" }).click();
+
+  const lightTab = page.locator("#sp-inp-fan-tab-light");
+  assert.strictEqual(
+    await lightTab.isDisabled(),
+    true,
+    `${label}: Light tab should wait for an optional light entity`,
+  );
+
+  await page.getByRole("button", { name: "Optional Light" }).click();
+  const lightEntity = page.locator("#sp-inp-fan-light-entity");
+  await lightEntity.evaluate((input) => {
+    input.value = "light.bedroom_fan";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await page.waitForFunction(() => {
+    const input = document.querySelector("#sp-inp-fan-tab-light");
+    return input instanceof HTMLInputElement && !input.disabled;
+  });
+  assert.strictEqual(
+    await lightTab.isChecked(),
+    true,
+    `${label}: configuring a light should enable its tab automatically`,
+  );
+  assert.strictEqual(
+    await lightTab.isDisabled(),
+    false,
+    `${label}: configured light tab should be editable`,
+  );
+
+  await page.getByRole("button", { name: "Move Light up" }).click();
+  const orderedTabs = await page
+    .locator(".sp-settings-modal .sp-light-tab-row")
+    .evaluateAll((rows) => rows.map((row) => row.getAttribute("data-tab")));
+  assert(
+    orderedTabs.indexOf("light") < orderedTabs.indexOf("direction"),
+    `${label}: Light tab should be movable with the other fan tabs`,
+  );
+
+  await page
+    .locator('.sp-light-tab-row[data-tab="light"] .sp-toggle-track')
+    .click();
+  assert.strictEqual(
+    await page.locator("#sp-inp-fan-tab-light").isChecked(),
+    false,
+    `${label}: configured Light tab should be disableable without clearing its entity`,
+  );
+  await page.locator(".sp-settings-close").click();
+  await page.waitForFunction(() => {
+    const overlay = document.querySelector(".sp-settings-overlay");
+    return overlay && !overlay.classList.contains("sp-visible");
+  });
+}
+
 async function assertInternalControlsPanel(page, posts, label) {
   await page.getByRole("tab", { name: "Screen" }).click();
   await page.waitForSelector("#sp-screen.sp-page.active");
@@ -2512,6 +2582,11 @@ async function assertMediaCoverArtSettingsPanels(page, label) {
   assert.strictEqual(await page.locator("#sp-inp-type").inputValue(), "media", `${label}: existing Cover Art card should open as Media`);
   assert.strictEqual(await page.locator("#sp-inp-media-mode").inputValue(), "cover_art", `${label}: existing Cover Art card should retain its subtype`);
   assert.strictEqual(await page.locator("#sp-inp-entity").inputValue(), "media_player.living", `${label}: existing Cover Art card should retain its entity`);
+  assert.deepStrictEqual(
+    await page.locator("#sp-inp-media-mode option").evaluateAll((options) => options.slice(0, 2).map((option) => option.value)),
+    ["control_modal", "cover_art"],
+    `${label}: Media Type should start with All Controls followed by Cover Art`,
+  );
   assert.strictEqual(
     await page.locator("#sp-inp-media-mode").locator('option[value="cover_art"]').textContent(),
     "Cover Art",
@@ -2539,8 +2614,8 @@ async function assertMediaCoverArtSettingsPanels(page, label) {
   );
   assert.strictEqual(
     await cardSettings.locator(".sp-field").filter({ hasText: "Press Action" }).count(),
-    1,
-    `${label}: Cover Art Press Action should be inside Card Settings`,
+    0,
+    `${label}: Cover Art should not offer a configurable press action`,
   );
   assert.strictEqual(
     await cardSettings.locator("#sp-inp-media-cover-art-details").count(),
@@ -2555,10 +2630,6 @@ async function assertMediaCoverArtSettingsPanels(page, label) {
 
   await cardSettings.locator("> .sp-disclosure-button").click();
   assert(await page.locator("#sp-inp-media-cover-art-details").isChecked(), `${label}: existing Cover Art details setting should be retained`);
-  assert(
-    await cardSettings.getByText("Press Action", { exact: true }).isVisible(),
-    `${label}: Cover Art Card Settings should reveal Press Action`,
-  );
   assert(
     await cardSettings.getByText("Show Track Details", { exact: true }).isVisible(),
     `${label}: Cover Art Card Settings should reveal Show Track Details`,
@@ -4446,6 +4517,7 @@ async function runCase(browser, testCase) {
     if (testCase.exerciseInteractions) {
       await assertMobileTabLayout(page, testCase.name, testCase.viewport);
       await assertAllCardSettingsGrouped(page, posts, testCase.name);
+      await assertFanOptionalLightSettings(page, testCase.name);
       await assertWebhookSettingsPanel(page, posts, testCase.name);
     }
     await assertInternalControlsPanel(page, posts, testCase.name);

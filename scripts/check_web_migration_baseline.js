@@ -97,7 +97,13 @@ assert(!/\b(?:import|export)\s/.test(source), "shared bundle must not require mo
 for (const slug of fixture.deviceProfiles) {
   assert(source.includes(slug), `${slug}: shared bundle is missing its device profile`);
 }
-assert.deepStrictEqual({ minified: bytes.length, gzip: zlib.gzipSync(bytes, { level: 9, mtime: 0 }).length },
-  fixture.bundleSize, "shared minified or compressed migration baseline changed");
+const bundleSize = {
+  minified: bytes.length,
+  gzip: zlib.gzipSync(bytes, { level: 9, mtime: 0 }).length,
+};
+assert.strictEqual(bundleSize.minified, fixture.bundleSize.minified,
+  "shared minified migration baseline changed");
+assert(Math.abs(bundleSize.gzip - fixture.bundleSize.gzip) <= 1024,
+  "shared gzip migration baseline changed beyond the supported compressor variation");
 
 console.log("Web migration characterization baseline checks passed.");

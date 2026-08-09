@@ -91,7 +91,7 @@ assert.deepStrictEqual(plain(model.decodeMediaCardConfigV1({
   mode: "playlist",
   stateDisplay: "label",
   nowPlayingControl: "none",
-  coverArtAction: "play_pause",
+  coverArtAction: "control_modal",
   showTrackDetails: false,
   secondaryEntity: "",
   controlLabelDisplay: "status",
@@ -111,6 +111,11 @@ assert.strictEqual(model.decodeMediaCardConfigV1({
   sensor: "cover_art",
   options: "cover_art_details",
 }).showTrackDetails, true, "Media decoder exposes optional cover-art track details");
+assert.strictEqual(model.decodeMediaCardConfigV1({
+  type: "media",
+  sensor: "cover_art",
+  options: "cover_art_action=play_pause",
+}).coverArtAction, "control_modal", "Media decoder keeps the versioned cover-art action fixed to All Controls");
 assert.strictEqual(model.decodeMediaCardConfigV1({
   type: "media",
   sensor: "cover_art",
