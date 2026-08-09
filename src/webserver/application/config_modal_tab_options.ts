@@ -194,6 +194,8 @@ export function installConfigModalTabOptionsModule(): GlobalDescriptors {
         var tabs: any = normalizeFanControlTabs(configuredTabs);
         if (!lightEntity)
             tabs = tabs.filter(function (this: any, tab?: any) { return tab !== "light"; });
+        if (!lightEntity && tabs.length === 0)
+            tabs = ["power"];
         var defaultTabs: any = fanControlDefaultTabs();
         if (lightEntity)
             defaultTabs = defaultTabs.concat(["light"]);

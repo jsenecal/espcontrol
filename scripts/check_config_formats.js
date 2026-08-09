@@ -2312,6 +2312,11 @@ assert.strictEqual(
   "fan_tabs=speed",
   "fan control drops Light when no separate light entity is configured"
 );
+assert.strictEqual(
+  hooks.normalizeFanControlOptions("fan_tabs=light"),
+  "fan_tabs=power",
+  "fan control keeps Power when removing its only Light tab"
+);
 const fanLightModal = { options: "" };
 hooks.setFanLightEntity(fanLightModal, "light.bedroom_fan");
 assert.strictEqual(fanLightModal.options, "fan_light_entity=light.bedroom_fan", "configuring a fan light enables its tab automatically");
@@ -2325,6 +2330,13 @@ assert.strictEqual(
   fanLightModal.options,
   "fan_light_entity=light.bedroom_fan,fan_tabs=light%7Cspeed%7Cpower",
   "fan light tab can be reordered with the other fan tabs"
+);
+const lightOnlyFanModal = { options: "fan_light_entity=light.bedroom_fan,fan_tabs=light" };
+hooks.setFanLightEntity(lightOnlyFanModal, "");
+assert.strictEqual(
+  lightOnlyFanModal.options,
+  "fan_tabs=power",
+  "clearing a light-only fan tab preserves the Power fallback"
 );
 hooks.setFanControlTabs(fanLightModal, ["power", "speed", "preset", "oscillation", "direction"]);
 assert.strictEqual(
