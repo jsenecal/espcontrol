@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "ha_read_coordinator.h"
+#include "home_assistant_binding_service.h"
 
 #ifdef ESP_PLATFORM
 #include "esp_heap_caps.h"
@@ -92,23 +93,28 @@ struct EspHomeHaHeapProbe {
 };
 
 using EspHomeHaReadCoordinator = HaReadCoordinator<EspHomeHaReadTransport, EspHomeHaHeapProbe>;
+using EspHomeHaBindingService =
+    HomeAssistantBindingService<EspHomeHaReadTransport, EspHomeHaHeapProbe>;
+
+inline EspHomeHaBindingService &ha_binding_service() {
+  static EspHomeHaBindingService service;
+  return service;
+}
 
 inline EspHomeHaReadCoordinator &ha_read_coordinator() {
-  static EspHomeHaReadCoordinator coordinator;
-  return coordinator;
+  return ha_binding_service().read_coordinator();
 }
 
 inline void *&ha_callback_owner() {
-  static void *owner = nullptr;
-  return owner;
+  return ha_binding_service().callback_owner_ref();
 }
 
 class HaCallbackOwnerScope {
  public:
-  explicit HaCallbackOwnerScope(void *owner) : previous_(ha_callback_owner()) { ha_callback_owner() = owner; }
-  ~HaCallbackOwnerScope() { ha_callback_owner() = previous_; }
+  explicit HaCallbackOwnerScope(void *owner)
+      : scope_(ha_binding_service().callback_owner_scope(owner)) {}
  private:
-  void *previous_ = nullptr;
+  EspHomeHaBindingService::CallbackOwnerScope scope_;
 };
 
 inline void ha_release_callbacks_for_owner(void *owner) { ha_read_coordinator().release_owner(owner); }
