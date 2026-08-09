@@ -40,6 +40,13 @@ MDI_CSS_URL = f"https://cdn.jsdelivr.net/npm/@mdi/font@{MDI_VERSION}/css/materia
 MDI_WEB_FONT = ROOT / "common" / "assets" / "fonts" / f"materialdesignicons-webfont-{MDI_VERSION}.ttf"
 WEB_SOURCE_DIR = ROOT / "src" / "webserver"
 
+# The hosted editor remains available to the development firmware plus the
+# current stable release and its four supported rollback releases. Keep this
+# list aligned with the GitHub Pages release catalogue in pages.yml.
+WEB_ASSET_SUPPORTED_FIRMWARE_VERSIONS = (
+    "dev", "v2.7.1", "v2.7.0", "v2.6.3", "v2.6.2", "v2.6.1",
+)
+
 # Fixed editor controls use a few MDI glyphs that are not selectable Product
 # Model icons. Keep their pinned codepoints here so rebuilding www.js remains
 # possible without reaching the MDI CDN. Product Model icon codepoints are
@@ -3999,7 +4006,7 @@ def build_www(check_only=False, output_dir=None, test_hooks=False):
             "sha256": bundle_sha256,
             "path": bundle_relative_path.as_posix(),
             "deviceProfiles": list(devices),
-            "firmwareVersions": ["dev"],
+            "firmwareVersions": list(WEB_ASSET_SUPPORTED_FIRMWARE_VERSIONS),
             "webAssetVersion": 1,
         }],
     }, indent=2) + "\n"

@@ -9,6 +9,9 @@ const vm = require("vm");
 const ROOT = path.resolve(__dirname, "..");
 const WEB_ROOT = path.join(ROOT, "docs", "public", "webserver");
 const DEVICE_MANIFEST_PATH = path.join(ROOT, "devices", "manifest.json");
+const SUPPORTED_FIRMWARE_VERSIONS = [
+  "dev", "v2.7.1", "v2.7.0", "v2.6.3", "v2.6.2", "v2.6.1",
+];
 
 function sha256(content) {
   return crypto.createHash("sha256").update(content).digest("hex");
@@ -43,8 +46,8 @@ function verifyManifest(webRoot) {
   assert(Array.isArray(bundle.deviceProfiles), "web bundle must declare device profiles");
   assert(JSON.stringify(bundle.deviceProfiles) === JSON.stringify(expectedProfiles()),
     "web bundle device profiles must match the device manifest");
-  assert(JSON.stringify(bundle.firmwareVersions) === JSON.stringify(["dev"]),
-    "web bundle must declare its compatible firmware version");
+  assert(JSON.stringify(bundle.firmwareVersions) === JSON.stringify(SUPPORTED_FIRMWARE_VERSIONS),
+    "web bundle must declare the development and supported stable firmware versions");
   assert(bundle.webAssetVersion === 1, "web bundle must declare its web asset version");
 
   const bundlePath = path.join(webRoot, bundle.path);
@@ -90,6 +93,16 @@ async function verifyBridge() {
   assert(loaded.length === 1, "web bridge must load one matching immutable bundle");
   assert(loaded[0] === `https://assets.example/webserver/${manifest.bundles[0].path}?device=esp32-p4-86`,
     "web bridge must use the device firmware version when the URL omits it");
+
+  const releaseLoaded = [];
+  sandbox.document.currentScript.getAttribute = () =>
+    "https://assets.example/webserver/www.js?device=esp32-p4-86&v=v2.7.1";
+  sandbox.document.head.appendChild = (script) => releaseLoaded.push(script.src);
+  vm.runInContext(fs.readFileSync(path.join(WEB_ROOT, "www.js"), "utf8"), sandbox);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert(releaseLoaded.length === 1, "web bridge must load the supported stable firmware bundle");
+  assert(releaseLoaded[0] === `https://assets.example/webserver/${manifest.bundles[0].path}?device=esp32-p4-86&v=v2.7.1`,
+    "web bridge must select a bundle for an explicitly requested stable firmware version");
 }
 
 async function main() {
