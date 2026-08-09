@@ -139,6 +139,9 @@ ATTRIBUTE_HELPER_PATTERN = re.compile(
     r"inline\s+bool\s+ha_subscribe_attribute\s*\([^)]*\)\s*\{(?P<body>.*?)\n\}",
     re.DOTALL,
 )
+SUBSCRIPTION_TRACKING_PATTERN = re.compile(
+    r"subscriptions_\.push_back\(\s*\{\s*callback_ref\s*,\s*scope(?:\s*,\s*owner)?\s*\}\s*\)"
+)
 TODO_GET_ITEMS_HELPER_PATTERN = re.compile(
     r"inline\s+bool\s+todo_begin_get_items_request\s*\([^)]*\)\s*\{(?P<body>.*?)\n\}",
     re.DOTALL,
@@ -238,7 +241,7 @@ def firmware_ha_boundary_errors(firmware_dir: Path, root: Path) -> list[str]:
         or "for (const auto &callback : *callback_refs)" not in read_boundary_text
     ):
         errors.append(f"{rel}: fan out duplicate deferred Home Assistant reads")
-    if "subscriptions_.push_back({callback_ref, scope})" not in coordinator_text:
+    if not SUBSCRIPTION_TRACKING_PATTERN.search(coordinator_text):
         errors.append(f"{rel}: track Home Assistant subscription callbacks for generation cleanup")
     if "release_subscriptions" not in coordinator_text or "*ref.callback = nullptr" not in coordinator_text:
         errors.append(f"{rel}: release retired Home Assistant subscription callback bodies")
