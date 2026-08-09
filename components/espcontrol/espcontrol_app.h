@@ -14,6 +14,9 @@ class EspControlApp : public esphome::Component {
   void setup() override;
   void loop() override;
   void on_shutdown() override;
+  float get_setup_priority() const override {
+    return esphome::setup_priority::AFTER_WIFI;
+  }
 
   DisplayModeController &display() { return core_.display(); }
   const DisplayModeController &display() const { return core_.display(); }
