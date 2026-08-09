@@ -67,7 +67,7 @@ async function verifyBridge() {
     document: {
       currentScript: {
         getAttribute() {
-          return "https://assets.example/webserver/www.js?device=esp32-p4-86&v=dev";
+          return "https://assets.example/webserver/www.js?device=esp32-p4-86";
         },
       },
       createElement() { return {}; },
@@ -78,6 +78,9 @@ async function verifyBridge() {
       if (String(url).endsWith("web-assets.json")) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve(manifest) });
       }
+      if (String(url) === "/espcontrol/version.json") {
+        return Promise.resolve({ ok: true, json: () => Promise.resolve({ version: "dev" }) });
+      }
       return Promise.resolve({ ok: false, json: () => Promise.resolve(null) });
     },
   };
@@ -85,8 +88,8 @@ async function verifyBridge() {
   vm.runInContext(fs.readFileSync(path.join(WEB_ROOT, "www.js"), "utf8"), sandbox);
   await new Promise((resolve) => setImmediate(resolve));
   assert(loaded.length === 1, "web bridge must load one matching immutable bundle");
-  assert(loaded[0] === `https://assets.example/webserver/${manifest.bundles[0].path}?device=esp32-p4-86&v=dev`,
-    "web bridge must preserve firmware selection query parameters");
+  assert(loaded[0] === `https://assets.example/webserver/${manifest.bundles[0].path}?device=esp32-p4-86`,
+    "web bridge must use the device firmware version when the URL omits it");
 }
 
 async function main() {
