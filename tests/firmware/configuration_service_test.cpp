@@ -168,6 +168,32 @@ bool successful_save_dual_writes() {
          legacy.mirrored == expected;
 }
 
+bool conditional_save_rejects_a_stale_generation() {
+  MemoryBackend backend(256);
+  ConfigurationStore store(backend);
+  FakeLegacy legacy;
+  ConfigurationService service(store, legacy);
+  const std::vector<uint8_t> first = bytes("first-document");
+  const std::vector<uint8_t> second = bytes("second-document");
+  if (!service.save_current(first.data(), first.size()).ok()) return false;
+
+  const ServiceSaveResult rejected = service.save_if_generation(
+      0, CURRENT_CONFIGURATION_DOCUMENT_VERSION, second.data(), second.size());
+  if (rejected.status != ServiceStatus::GENERATION_CONFLICT ||
+      rejected.store_status != StoreStatus::GENERATION_CONFLICT ||
+      rejected.generation != 1 || legacy.mirror_calls != 1) {
+    return false;
+  }
+
+  const ServiceSaveResult saved = service.save_if_generation(
+      1, CURRENT_CONFIGURATION_DOCUMENT_VERSION, second.data(), second.size());
+  std::array<uint8_t, 64> output{};
+  const ServiceLoadResult loaded = service.load(output.data(), output.size());
+  return saved.ok() && saved.generation == 2 && legacy.mirror_calls == 2 &&
+         loaded.ok() && loaded.generation == 2 &&
+         std::equal(second.begin(), second.end(), output.begin());
+}
+
 bool version_and_buffer_failures_are_explicit() {
   MemoryBackend backend(256);
   ConfigurationStore store(backend);
@@ -270,6 +296,7 @@ int main() {
       saves_are_durable_before_the_legacy_mirror() &&
       failed_durable_save_never_updates_legacy() &&
       successful_save_dual_writes() &&
+      conditional_save_rejects_a_stale_generation() &&
       version_and_buffer_failures_are_explicit() &&
       malformed_store_document_is_not_treated_as_legacy() &&
       panel_config_validator_protects_the_atomic_store() &&

@@ -15,6 +15,7 @@ enum class StoreStatus : uint8_t {
   INVALID_ARGUMENT,
   BUFFER_TOO_SMALL,
   PAYLOAD_TOO_LARGE,
+  GENERATION_CONFLICT,
   READ_FAILED,
   WRITE_FAILED,
   SYNC_FAILED,
@@ -63,6 +64,9 @@ class ConfigurationStore {
 
   LoadResult load(uint8_t *output, size_t output_capacity);
   CommitResult commit(const uint8_t *payload, size_t payload_size);
+  CommitResult commit_if_generation(uint32_t expected_generation,
+                                    const uint8_t *payload,
+                                    size_t payload_size);
 
   size_t maximum_payload_size() const;
 
@@ -80,6 +84,9 @@ class ConfigurationStore {
   SlotMetadata inspect_slot(uint8_t slot);
   bool checksum_slot_payload(uint8_t slot, const uint8_t *header,
                              size_t payload_size, uint32_t *checksum);
+  CommitResult commit_internal(bool enforce_generation,
+                               uint32_t expected_generation,
+                               const uint8_t *payload, size_t payload_size);
   static bool generation_is_newer(uint32_t candidate, uint32_t reference);
   static uint32_t checksum(uint32_t generation, const uint8_t *data,
                            size_t size);

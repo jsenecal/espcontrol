@@ -185,6 +185,19 @@ LoadResult ConfigurationStore::load(uint8_t *output,
 
 CommitResult ConfigurationStore::commit(const uint8_t *payload,
                                         size_t payload_size) {
+  return commit_internal(false, 0, payload, payload_size);
+}
+
+CommitResult ConfigurationStore::commit_if_generation(
+    uint32_t expected_generation, const uint8_t *payload,
+    size_t payload_size) {
+  return commit_internal(true, expected_generation, payload, payload_size);
+}
+
+CommitResult ConfigurationStore::commit_internal(bool enforce_generation,
+                                                 uint32_t expected_generation,
+                                                 const uint8_t *payload,
+                                                 size_t payload_size) {
   if (payload_size > 0 && payload == nullptr) {
     return {StoreStatus::INVALID_ARGUMENT};
   }
@@ -215,6 +228,17 @@ CommitResult ConfigurationStore::commit(const uint8_t *payload,
   } else if (second_valid) {
     target_slot = first.slot;
     next_generation = second.generation + 1;
+  }
+  const uint32_t current_generation =
+      first_valid && second_valid
+          ? (generation_is_newer(second.generation, first.generation)
+                 ? second.generation
+                 : first.generation)
+          : (first_valid ? first.generation
+                         : (second_valid ? second.generation : 0));
+  if (enforce_generation && expected_generation != current_generation) {
+    return {StoreStatus::GENERATION_CONFLICT, current_generation,
+            payload_size, target_slot};
   }
 
   // Keep the target unpublished until both its payload and metadata are
