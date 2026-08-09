@@ -18,6 +18,12 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         dimBrightness: normalizeScreensaverDimmedBrightness,
         clockBrightness: normalizeClockBrightness,
     });
+    var _coverArtScreensaverController: any = createCoverArtScreensaverController({
+        delay: normalizeCoverArtDelay,
+        trackOverlayDuration: function (this: any, value?: any) {
+            return parseFloat(value) || 0;
+        },
+    });
     function alarmDelayAudioState(this: any) {
         return {
             audioEnabled: !!state.alarmDelayAudioOn,
@@ -50,6 +56,24 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         state.clockBrightnessNight = next.clockBrightnessNight;
         state.screensaverDimmedBrightness = next.dimBrightness;
         state.clockScreensaverOn = next.action === "clock";
+    }
+    function coverArtScreensaverState(this: any) {
+        return {
+            enabled: !!state.coverArtScreensaverOn,
+            delay: state.coverArtDelay,
+            trackOverlayDuration: state.coverArtTrackOverlayDuration,
+            hideExternalInput: !!state.coverArtHideExternalInputOn,
+            filteringEnabled: !!state.coverArtFilteringEnabled,
+            attributeConditions: state.coverArtAttributeConditions || "",
+        };
+    }
+    function applyCoverArtScreensaverState(this: any, next?: any) {
+        state.coverArtScreensaverOn = next.enabled;
+        state.coverArtDelay = next.delay;
+        state.coverArtTrackOverlayDuration = next.trackOverlayDuration;
+        state.coverArtHideExternalInputOn = next.hideExternalInput;
+        state.coverArtFilteringEnabled = next.filteringEnabled;
+        state.coverArtAttributeConditions = next.attributeConditions;
     }
     function settingsStatusHeader(this: any, title?: any) {
         return _settingsUiFeature.settingsStatusHeader(title);
@@ -253,22 +277,22 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         }
     }
     function syncCoverArtScreensaverUi(this: any) {
+        applyCoverArtScreensaverState(_coverArtScreensaverController.normalize(coverArtScreensaverState()));
+        var uiState: any = _coverArtScreensaverController.uiState(coverArtScreensaverState());
         if (els.setCoverArtToggle) {
             els.setCoverArtToggle.checked = !!state.coverArtScreensaverOn;
         }
         if (els.setCoverArtOptions) {
-            els.setCoverArtOptions.classList.toggle("sp-visible", !!state.coverArtScreensaverOn);
+            els.setCoverArtOptions.classList.toggle("sp-visible", uiState.contentVisible);
         }
         if (els.setCoverArtOnlyOptions) {
-            els.setCoverArtOnlyOptions.classList.toggle("sp-visible", !!state.coverArtScreensaverOn);
+            els.setCoverArtOnlyOptions.classList.toggle("sp-visible", uiState.contentVisible);
         }
         if (els.setCoverArtBadge) {
-            els.setCoverArtBadge.className = "sp-card-badge" + (state.coverArtScreensaverOn ? "" : " sp-hidden");
+            els.setCoverArtBadge.className = "sp-card-badge" + (uiState.badgeVisible ? "" : " sp-hidden");
         }
         if (els.setCoverArtDelay) {
-            var coverArtDelay: any = normalizeCoverArtDelay(state.coverArtDelay);
-            state.coverArtDelay = coverArtDelay;
-            setSelectValue(els.setCoverArtDelay, coverArtDelay, formatDuration(coverArtDelay));
+            setSelectValue(els.setCoverArtDelay, state.coverArtDelay, formatDuration(state.coverArtDelay));
         }
         if (els.setCoverArtTrackOverlayDuration) {
             var value: any = state.coverArtTrackOverlayDuration;
@@ -279,7 +303,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         }
         if (els.setCoverArtSecondaryMediaPlayerOptions) {
             els.setCoverArtSecondaryMediaPlayerOptions.classList.toggle(
-                "sp-visible", !state.coverArtHideExternalInputOn);
+                "sp-visible", uiState.externalSourcesVisible);
         }
         if (els.setHomeAssistantArtworkProtocol) {
             els.setHomeAssistantArtworkProtocol.value =
@@ -290,11 +314,10 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         }
         syncInput(els.setCoverArtHomeAssistantBaseUrl, state.coverArtHomeAssistantBaseUrl);
         if (els.setCoverArtFilterToggle) {
-            state.coverArtFilteringEnabled = !!state.coverArtFilteringEnabled || !!state.coverArtAttributeConditions;
             els.setCoverArtFilterToggle.checked = !!state.coverArtFilteringEnabled;
         }
         if (els.setCoverArtFilterOptions) {
-            els.setCoverArtFilterOptions.classList.toggle("sp-visible", !!state.coverArtFilteringEnabled);
+            els.setCoverArtFilterOptions.classList.toggle("sp-visible", uiState.filterOptionsVisible);
         }
         syncInput(els.setCoverArtConditions, state.coverArtAttributeConditions || "");
     }
@@ -422,6 +445,9 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         "_settingsUiFeature": liveGlobal(() => _settingsUiFeature, (value?: any) => { _settingsUiFeature = value; }),
         "_alarmDelayAudioController": liveGlobal(() => _alarmDelayAudioController, (value?: any) => { _alarmDelayAudioController = value; }),
         "_screensaverController": liveGlobal(() => _screensaverController, (value?: any) => { _screensaverController = value; }),
+        "_coverArtScreensaverController": liveGlobal(() => _coverArtScreensaverController, (value?: any) => { _coverArtScreensaverController = value; }),
+        "coverArtScreensaverState": staticGlobal(coverArtScreensaverState),
+        "applyCoverArtScreensaverState": staticGlobal(applyCoverArtScreensaverState),
         "settingsStatusHeader": staticGlobal(settingsStatusHeader),
         "appendSettingsSection": staticGlobal(appendSettingsSection),
         "openVoiceServicesSettings": staticGlobal(openVoiceServicesSettings),
