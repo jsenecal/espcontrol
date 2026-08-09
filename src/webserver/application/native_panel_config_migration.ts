@@ -49,6 +49,16 @@ export function installNativePanelConfigMigrationModule(): GlobalDescriptors {
                 return updateNativePanelConfigDocument(current, DEVICE_ID, "settings", "button_order", text);
             });
         }
+        if (entity === entityName("button_on_color")) {
+            text = normalizeHexColor(text, "");
+            // Let the established text-entity path retain responsibility for
+            // invalid input, rather than storing a value it would reject.
+            if (!text)
+                return false;
+            return scheduleNativePanelConfigSave(function (current: any) {
+                return updateNativePanelConfigDocument(current, DEVICE_ID, "settings", "button_on_color", text);
+            });
+        }
         for (var slot: any = 1; slot <= NUM_SLOTS; slot++) {
             if (entity === entityNameForSlot("button_config", slot)) {
                 return scheduleNativePanelConfigSave(function (current: any) {

@@ -28,6 +28,9 @@ class PanelConfigLegacyAdapter final : public LegacyConfigurationAdapter {
   void set_button_order(LegacyTextValue *button_order) {
     button_order_ = button_order;
   }
+  void set_button_on_color(LegacyTextValue *button_on_color) {
+    button_on_color_ = button_on_color;
+  }
   void set_button(uint8_t slot, LegacyTextValue *button,
                   const std::array<LegacyTextValue *, MAX_SUBPAGE_CHUNKS>
                       &subpage_chunks);
@@ -49,6 +52,7 @@ class PanelConfigLegacyAdapter final : public LegacyConfigurationAdapter {
 
   std::string device_profile_;
   LegacyTextValue *button_order_{nullptr};
+  LegacyTextValue *button_on_color_{nullptr};
   std::array<ButtonSources, PANEL_CONFIG_MAX_SLOT_COUNT> buttons_{};
 };
 

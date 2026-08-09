@@ -1,6 +1,8 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { createPreviewPlacementController } from "../features/preview_placement_controller";
 export function installPreviewGridPlacementModule(): GlobalDescriptors {
+    var previewPlacementController: any = createPreviewPlacementController();
     // ── Preview Grid Placement ────────────────────────────────────────
     function resolveSpanPos(this: any, pos?: any) {
         var c: any = ctx();
@@ -24,24 +26,17 @@ export function installPreviewGridPlacementModule(): GlobalDescriptors {
     }
     function moveToCell(this: any, fromPos?: any, toPos?: any) {
         var c: any = ctx();
-        toPos = resolveSpanPos(toPos);
-        if (toPos >= c.maxSlots || c.grid[toPos] === -1)
+        var result: any = previewPlacementController.moveSingle(c, fromPos, toPos, GRID_COLS);
+        if (!result.accepted)
             return;
-        var grid: any = c.grid.slice();
-        var movingSlot: any = grid[fromPos];
-        clearSpans(grid, c.maxSlots);
-        var targetSlot: any = grid[toPos];
-        grid[toPos] = movingSlot;
-        grid[fromPos] = targetSlot;
-        applySpans(grid, c.sizes, c.maxSlots);
-        if ((c.sizes[movingSlot] || 1) > 1 && !sizeFitsAt(toPos, c.sizes[movingSlot], c.maxSlots)) {
-            delete c.sizes[movingSlot];
-        }
         if (c.isSub) {
-            getSubpage(state.editingSubpage).grid = grid;
+            var subpage: any = getSubpage(state.editingSubpage);
+            subpage.grid = result.grid;
+            subpage.sizes = result.sizes;
         }
         else {
-            state.grid = grid;
+            state.grid = result.grid;
+            state.sizes = result.sizes;
         }
     }
     function canPlaceSlotAt(this: any, grid?: any, pos?: any, size?: any, maxSlots?: any) {
@@ -61,14 +56,17 @@ export function installPreviewGridPlacementModule(): GlobalDescriptors {
     }
     function moveSelectedToCell(this: any, fromPos?: any, toPos?: any) {
         var c: any = ctx();
-        var result: any = PreviewGridFeature.moveSelectedGridEntries(c.grid, c.sizes, c.selected, fromPos, toPos, c.maxSlots, GRID_COLS);
+        var result: any = previewPlacementController.moveSelected(c, fromPos, toPos, GRID_COLS);
         if (!result.accepted)
             return false;
         if (c.isSub) {
-            getSubpage(state.editingSubpage).grid = result.grid;
+            var subpage: any = getSubpage(state.editingSubpage);
+            subpage.grid = result.grid;
+            subpage.sizes = result.sizes;
         }
         else {
             state.grid = result.grid;
+            state.sizes = result.sizes;
         }
         return true;
     }

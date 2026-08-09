@@ -26,6 +26,12 @@ void EspControlApp::set_panel_config_button_order(
   legacy_config_.set_button_order(&button_order_text_);
 }
 
+void EspControlApp::set_panel_config_button_on_color(
+    esphome::text::Text *button_on_color) {
+  button_on_color_text_.bind(button_on_color);
+  legacy_config_.set_button_on_color(&button_on_color_text_);
+}
+
 void EspControlApp::set_panel_config_button(
     uint8_t slot, esphome::text::Text *button,
     esphome::text::Text *subpage_0, esphome::text::Text *subpage_1,

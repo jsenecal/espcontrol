@@ -106,7 +106,7 @@ TASKS = (
          ), parallel_safe=True,
          cache="never"),
     task("web-unit", ("node", "--test", "tests/web/unit/**/*.test.js"), profiles=FAST,
-         domains=("web",), inputs=("tests/web/unit/**", "tests/web/*.test.ts", "src/webserver/**", "compatibility/fixtures/product_compatibility.json", "devices/manifest.json", "scripts/load_typescript_module.js", "package-lock.json"), parallel_safe=True,
+         domains=("web",), inputs=("tests/web/unit/**", "tests/web/*.test.ts", "src/webserver/**", "compatibility/fixtures/product_compatibility.json", "compatibility/fixtures/panel_config_migration_v1.json", "devices/manifest.json", "scripts/load_typescript_module.js", "package-lock.json"), parallel_safe=True,
          cache_tools=("node",)),
     task("mutations", ("python3", "scripts/run_mutations.py"),
          domains=("firmware", "web"),

@@ -33,6 +33,7 @@ class FakeText final : public LegacyTextValue {
 
 bool imports_legacy_button_subpage_and_order() {
   FakeText order("2,1");
+  FakeText on_color("FF8800");
   FakeText button("light.kitchen;Kitchen");
   FakeText subpage_a("media.living_room;");
   FakeText subpage_b("media.office");
@@ -44,6 +45,7 @@ bool imports_legacy_button_subpage_and_order() {
   PanelConfigLegacyAdapter adapter;
   adapter.set_device_profile("guition-esp32-p4-jc1060p470");
   adapter.set_button_order(&order);
+  adapter.set_button_on_color(&on_color);
   adapter.set_button(1, &button, chunks);
   std::array<uint8_t, 512> document{};
   const auto loaded = adapter.load(document.data(), document.size());
@@ -55,6 +57,7 @@ bool imports_legacy_button_subpage_and_order() {
   bool button_found = false;
   bool subpage_found = false;
   bool order_found = false;
+  bool on_color_found = false;
   PanelConfigRecord record;
   while (reader.next(&record) == PanelConfigStatus::OK) {
     if (record.type == PanelConfigRecordType::BUTTON && record.slot == 1)
@@ -65,17 +68,24 @@ bool imports_legacy_button_subpage_and_order() {
           std::string(reinterpret_cast<const char *>(record.value), record.value_size) ==
           "media.living_room;media.office";
     if (record.type == PanelConfigRecordType::SETTING)
-      order_found =
+      order_found = order_found || (
           std::string(reinterpret_cast<const char *>(record.key), record.key_size) ==
               "button_order" &&
           std::string(reinterpret_cast<const char *>(record.value), record.value_size) ==
-              "2,1";
+              "2,1");
+    if (record.type == PanelConfigRecordType::SETTING)
+      on_color_found = on_color_found || (
+          std::string(reinterpret_cast<const char *>(record.key), record.key_size) ==
+              "button_on_color" &&
+          std::string(reinterpret_cast<const char *>(record.value), record.value_size) ==
+              "FF8800");
   }
-  return button_found && subpage_found && order_found;
+  return button_found && subpage_found && order_found && on_color_found;
 }
 
-bool native_document_mirrors_back_to_legacy_entities() {
+bool native_document_mirrors_back_to_legacy_entities_for_downgrade() {
   FakeText order("old");
+  FakeText on_color("old-color");
   FakeText button("old");
   FakeText subpage_a("old");
   FakeText subpage_b("old");
@@ -86,6 +96,7 @@ bool native_document_mirrors_back_to_legacy_entities() {
   PanelConfigLegacyAdapter adapter;
   adapter.set_device_profile("profile");
   adapter.set_button_order(&order);
+  adapter.set_button_on_color(&on_color);
   adapter.set_button(1, &button, chunks);
 
   std::array<uint8_t, 512> document{};
@@ -102,19 +113,23 @@ bool native_document_mirrors_back_to_legacy_entities() {
       writer.append_setting(reinterpret_cast<const uint8_t *>("button_order"),
                             12, reinterpret_cast<const uint8_t *>("1"), 1) !=
           PanelConfigStatus::OK ||
+      writer.append_setting(reinterpret_cast<const uint8_t *>("button_on_color"),
+                            15, reinterpret_cast<const uint8_t *>("0088FF"), 6) !=
+          PanelConfigStatus::OK ||
       writer.finish(&document_size) != PanelConfigStatus::OK) {
     return false;
   }
   return adapter.mirror(1, document.data(), document_size) &&
          button.value() == "new-button" && subpage_a.value() == "123456789" &&
-         subpage_b.value().empty() && order.value() == "1";
+         subpage_b.value().empty() && order.value() == "1" &&
+         on_color.value() == "0088FF";
 }
 
 }  // namespace
 
 int main() {
   return imports_legacy_button_subpage_and_order() &&
-                 native_document_mirrors_back_to_legacy_entities()
+                 native_document_mirrors_back_to_legacy_entities_for_downgrade()
              ? 0
              : 1;
 }

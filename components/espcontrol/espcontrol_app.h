@@ -39,6 +39,7 @@ class EspControlApp : public esphome::Component {
 
   void set_panel_config_device_profile(const char *device_profile);
   void set_panel_config_button_order(esphome::text::Text *button_order);
+  void set_panel_config_button_on_color(esphome::text::Text *button_on_color);
   void set_panel_config_button(
       uint8_t slot, esphome::text::Text *button,
       esphome::text::Text *subpage_0, esphome::text::Text *subpage_1,
@@ -72,6 +73,7 @@ class EspControlApp : public esphome::Component {
   std::string web_auth_username_;
   std::string web_auth_password_;
   configuration::EspHomeLegacyTextValue button_order_text_{};
+  configuration::EspHomeLegacyTextValue button_on_color_text_{};
   std::array<LegacyButtonTextSources, configuration::PANEL_CONFIG_MAX_SLOT_COUNT>
       legacy_button_texts_{};
 };
