@@ -428,6 +428,7 @@ def firmware_subpage_modal_wiring_errors(root: Path) -> list[str]:
 
 def firmware_light_control_brightness_errors(root: Path) -> list[str]:
     path = root / "components" / "espcontrol" / "button_grid_sliders.h"
+    modal_path = root / "components" / "espcontrol" / "button_grid_modal.h"
     errors: list[str] = []
 
     if not path.exists():
@@ -446,10 +447,12 @@ def firmware_light_control_brightness_errors(root: Path) -> list[str]:
         errors.append("components/espcontrol/button_grid_sliders.h: update brightness slider immediately when the light power button is used")
     if (
         "bool turn_on = !ui.active->on;" not in text
-        or "lv_obj_add_event_cb(ui.power_group" not in text
-        or "lv_obj_clear_flag(btn, LV_OBJ_FLAG_CLICKABLE);" not in text
+        or "ControlModalBinaryToggle power_toggle;" not in text
+        or "ui.power_group, ui.power_on_btn, ui.power_off_btn, &ui.power_toggle" not in text
+        or not modal_path.exists()
+        or "inline void control_modal_setup_binary_toggle(" not in modal_path.read_text(encoding="utf-8")
     ):
-        errors.append("components/espcontrol/button_grid_sliders.h: toggle light power from the whole modal control")
+        errors.append("components/espcontrol: use the shared full-area binary toggle for modal controls")
 
     return errors
 

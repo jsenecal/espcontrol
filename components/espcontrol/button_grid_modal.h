@@ -652,6 +652,30 @@ inline void control_modal_apply_pressed_fill(lv_obj_t *btn) {
   apply_push_button_transition(btn);
 }
 
+using ControlModalBinaryToggleCallback = void (*)();
+
+struct ControlModalBinaryToggle {
+  ControlModalBinaryToggleCallback callback = nullptr;
+};
+
+// Make a two-state modal control behave as one large toggle target.  The two
+// child buttons remain visual state indicators, so either half always toggles.
+inline void control_modal_setup_binary_toggle(
+    lv_obj_t *group, lv_obj_t *first_option, lv_obj_t *second_option,
+    ControlModalBinaryToggle *toggle) {
+  if (!group || !toggle) return;
+  control_modal_apply_pressed_fill(group);
+  lv_obj_add_flag(group, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_clear_flag(group, LV_OBJ_FLAG_SCROLLABLE);
+  if (first_option) lv_obj_clear_flag(first_option, LV_OBJ_FLAG_CLICKABLE);
+  if (second_option) lv_obj_clear_flag(second_option, LV_OBJ_FLAG_CLICKABLE);
+  lv_obj_add_event_cb(group, [](lv_event_t *e) {
+    ControlModalBinaryToggle *toggle = static_cast<ControlModalBinaryToggle *>(
+      lv_event_get_user_data(e));
+    if (toggle && toggle->callback) toggle->callback();
+  }, LV_EVENT_CLICKED, toggle);
+}
+
 inline void control_modal_apply_pressed_fill_color(lv_obj_t *btn,
                                                    uint32_t pressed_color) {
   if (!btn) return;
