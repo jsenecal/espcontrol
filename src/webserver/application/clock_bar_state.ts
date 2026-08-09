@@ -146,8 +146,8 @@ export function installClockBarStateModule(): GlobalDescriptors {
             state.clockBarTimeOn = visible;
             postClockBarTime(state.clockBarTimeOn);
         }
-        else if (item === "voice" && voiceServicesSupported()) {
-            state.voiceServicesOn = visible;
+        else if (item === "voice" && voiceServicesUiState().clockBarItemVisible) {
+            applyVoiceServicesState(_voiceServicesController.setEnabled(voiceServicesState(), visible));
             postVoiceServices(state.voiceServicesOn);
         }
         else if (item === "network") {
@@ -188,7 +188,7 @@ export function installClockBarStateModule(): GlobalDescriptors {
             els.setNetworkStatusToggle.checked = !!state.networkStatusOn;
         }
         if (els.setVoiceServicesToggle) {
-            els.setVoiceServicesToggle.checked = !!state.voiceServicesOn;
+            els.setVoiceServicesToggle.checked = voiceServicesUiState().iconVisible;
         }
         if (els.setBatteryStatusToggle) {
             els.setBatteryStatusToggle.checked = !!state.batteryStatusOn;

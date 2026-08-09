@@ -211,13 +211,13 @@ export function installSettingsPageModule(): GlobalDescriptors {
         syncTemperatureUi();
         var clockBarCard: any = makeCollapsibleCard("Clock Bar", clockBarBody, true, clockBarBadge);
         var voiceServicesCard: any = null;
-        if (CFG.features && CFG.features.voiceServices) {
+        if (voiceServicesUiState().settingsVisible) {
             var voiceServicesBody: any = document.createElement("div");
             var voiceServices: any = toggleRow("Voice Services", "sp-set-voice-services", state.voiceServicesOn);
             voiceServicesBody.appendChild(voiceServices.row);
             els.setVoiceServicesToggle = voiceServices.input;
             voiceServices.input.addEventListener("change", function (this: any) {
-                state.voiceServicesOn = this.checked;
+                applyVoiceServicesState(_voiceServicesController.setEnabled(voiceServicesState(), this.checked));
                 syncClockBarUi();
                 postVoiceServices(state.voiceServicesOn);
             });
