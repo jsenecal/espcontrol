@@ -2,8 +2,26 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 export function installClockBarStateModule(): GlobalDescriptors {
     // ── Clock Bar State ───────────────────────────────────────────────────
+    var _clockBarController: any = createClockBarController();
+    function clockBarControllerState(this: any) {
+        return {
+            enabled: !!state.clockBarOn,
+            timeEnabled: !!state.clockBarTimeOn,
+            nightModeEnabled: !!state.clockBarNightModeOn,
+            selectedItem: state.clockBarSelectedItem || "",
+        };
+    }
+    function applyClockBarControllerState(this: any, next?: any) {
+        state.clockBarOn = next.enabled;
+        state.clockBarTimeOn = next.timeEnabled;
+        state.clockBarNightModeOn = next.nightModeEnabled;
+        state.clockBarSelectedItem = next.selectedItem;
+    }
+    function clockBarUiState(this: any) {
+        return _clockBarController.uiState(clockBarControllerState());
+    }
     function clockBarVisibleInPreview(this: any) {
-        return !!state.clockBarOn;
+        return clockBarUiState().previewVisible;
     }
     function timezonePrefersFahrenheit(this: any, timezone?: any) {
         var tz: any = getTzId(effectiveTimezoneOptionForWeb(timezone || state.timezone));
@@ -170,16 +188,18 @@ export function installClockBarStateModule(): GlobalDescriptors {
         }
     }
     function syncClockBarUi(this: any) {
-        var visible: any = clockBarVisibleInPreview();
-        if (!visible && state.clockBarSelectedItem) {
-            state.clockBarSelectedItem = "";
+        var before: any = clockBarControllerState();
+        applyClockBarControllerState(_clockBarController.reconcile(before));
+        var uiState: any = clockBarUiState();
+        var visible: any = uiState.previewVisible;
+        if (!visible && before.selectedItem) {
             hideSettingsOverlay();
         }
         syncPreviewGridTop();
         if (els.topbar)
             els.topbar.className = "sp-topbar" + (visible ? "" : " sp-hidden");
         if (els.setClockBarToggle)
-            els.setClockBarToggle.checked = !!state.clockBarOn;
+            els.setClockBarToggle.checked = uiState.previewVisible;
         if (els.setClockBarTimeToggle)
             els.setClockBarTimeToggle.checked = !!state.clockBarTimeOn;
         if (els.setClockBarNightModeToggle)
@@ -194,7 +214,7 @@ export function installClockBarStateModule(): GlobalDescriptors {
             els.setBatteryStatusToggle.checked = !!state.batteryStatusOn;
         }
         if (els.setClockBarBadge) {
-            els.setClockBarBadge.className = "sp-card-badge" + (state.clockBarOn ? "" : " sp-hidden");
+            els.setClockBarBadge.className = "sp-card-badge" + (uiState.badgeVisible ? "" : " sp-hidden");
         }
         if (els.setBatteryStatusBadge) {
             els.setBatteryStatusBadge.className = "sp-card-badge" + (state.batteryStatusOn ? "" : " sp-hidden");
@@ -212,6 +232,10 @@ export function installClockBarStateModule(): GlobalDescriptors {
         updateTempPreview();
     }
     return {
+        "_clockBarController": liveGlobal(() => _clockBarController, (value?: any) => { _clockBarController = value; }),
+        "clockBarControllerState": staticGlobal(clockBarControllerState),
+        "applyClockBarControllerState": staticGlobal(applyClockBarControllerState),
+        "clockBarUiState": staticGlobal(clockBarUiState),
         "clockBarVisibleInPreview": staticGlobal(clockBarVisibleInPreview),
         "timezonePrefersFahrenheit": staticGlobal(timezonePrefersFahrenheit),
         "temperatureUnitSymbol": staticGlobal(temperatureUnitSymbol),

@@ -4,6 +4,7 @@ import { createScreensaverController } from "../../src/webserver/features/screen
 import { createCoverArtScreensaverController } from "../../src/webserver/features/cover_art_screensaver_controller";
 import { createMediaPlaybackController } from "../../src/webserver/features/media_playback_controller";
 import { createVoiceServicesController } from "../../src/webserver/features/voice_services_controller";
+import { createClockBarController } from "../../src/webserver/features/clock_bar_controller";
 
 function equal<T>(actual: T, expected: T, message: string): void {
   if (actual !== expected) throw new Error(`${message}: expected ${String(expected)}, received ${String(actual)}`);
@@ -116,4 +117,13 @@ export function runSettingsFeatureTests(): void {
         "enabling Voice Services updates the preview icon");
   equal(voiceServices.uiState({ supported: false, enabled: true }).clockBarItemVisible, false,
         "unsupported Voice Services stay out of the clock bar");
+
+  const clockBar = createClockBarController();
+  const clockBarInitial = { enabled: true, timeEnabled: true, nightModeEnabled: false, selectedItem: "voice" };
+  equal(clockBar.uiState(clockBarInitial).previewVisible, true, "enabled clock bar remains visible in the preview");
+  equal(clockBar.setNightModeEnabled(clockBarInitial, true).nightModeEnabled, true,
+        "night-mode setting updates independently");
+  const clockBarDisabled = clockBar.setEnabled(clockBarInitial, false);
+  equal(clockBarDisabled.selectedItem, "", "disabling the clock bar closes its selected preview item");
+  equal(clockBar.uiState(clockBarDisabled).badgeVisible, false, "disabled clock bar hides its status badge");
 }
