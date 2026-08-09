@@ -43,7 +43,6 @@ export function installConfigOptionCoreModule(): GlobalDescriptors {
     var MEDIA_PLAYLIST_CONTENT_TYPE_OPTION: any = cardContractOptionName("playlist_content_type");
     var MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION: any = cardContractOptionName("playlist_player_source");
     var MEDIA_COVER_ART_OPTION: any = cardContractOptionName("media_cover_art");
-    var MEDIA_COVER_ART_ACTION_OPTION: any = cardContractOptionName("cover_art_action");
     var MEDIA_COVER_ART_DETAILS_OPTION: any = cardContractOptionName("cover_art_details");
     var MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION: any = cardContractOptionName("cover_art_secondary_entity");
     var SUBPAGE_KIND_OPTION: any = cardContractOptionName("subpage_kind");
@@ -137,7 +136,6 @@ export function installConfigOptionCoreModule(): GlobalDescriptors {
         "MEDIA_PLAYLIST_CONTENT_TYPE_OPTION": liveGlobal(() => MEDIA_PLAYLIST_CONTENT_TYPE_OPTION, (value?: any) => { MEDIA_PLAYLIST_CONTENT_TYPE_OPTION = value; }),
         "MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION": liveGlobal(() => MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION, (value?: any) => { MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION = value; }),
         "MEDIA_COVER_ART_OPTION": liveGlobal(() => MEDIA_COVER_ART_OPTION, (value?: any) => { MEDIA_COVER_ART_OPTION = value; }),
-        "MEDIA_COVER_ART_ACTION_OPTION": liveGlobal(() => MEDIA_COVER_ART_ACTION_OPTION, (value?: any) => { MEDIA_COVER_ART_ACTION_OPTION = value; }),
         "MEDIA_COVER_ART_DETAILS_OPTION": liveGlobal(() => MEDIA_COVER_ART_DETAILS_OPTION, (value?: any) => { MEDIA_COVER_ART_DETAILS_OPTION = value; }),
         "MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION": liveGlobal(() => MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION, (value?: any) => { MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION = value; }),
         "SUBPAGE_KIND_OPTION": liveGlobal(() => SUBPAGE_KIND_OPTION, (value?: any) => { SUBPAGE_KIND_OPTION = value; }),

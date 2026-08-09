@@ -68,7 +68,7 @@ const BUTTON_FIXTURES = [
   "light.kitchen;Kitchen;Lightbulb;Lightbulb",
   "sensor.energy;Energy;Gauge;Auto;sensor.energy;W;sensor;0",
   "climate.hall;Hall;Thermostat;Auto;;;climate;;",
-  "media_player.living;Living Artwork;Auto;Auto;cover_art;;media;;cover_art_action=control_modal,cover_art_details",
+  "media_player.living;Living Artwork;Auto;Auto;cover_art;;media;;cover_art_details",
   "cover.office_blind;Blind;Blinds Open;Blinds;modal;;cover;;cover_tabs=controls%7Cposition%7Ctilt",
   "alarm_control_panel.house;Alarm;Security;Auto;;;alarm;;",
 ];
@@ -2544,8 +2544,8 @@ async function assertMediaCoverArtSettingsPanels(page, label) {
   );
   assert.strictEqual(
     await cardSettings.locator(".sp-field").filter({ hasText: "Press Action" }).count(),
-    1,
-    `${label}: Cover Art Press Action should be inside Card Settings`,
+    0,
+    `${label}: Cover Art should not offer a configurable press action`,
   );
   assert.strictEqual(
     await cardSettings.locator("#sp-inp-media-cover-art-details").count(),
@@ -2560,10 +2560,6 @@ async function assertMediaCoverArtSettingsPanels(page, label) {
 
   await cardSettings.locator("> .sp-disclosure-button").click();
   assert(await page.locator("#sp-inp-media-cover-art-details").isChecked(), `${label}: existing Cover Art details setting should be retained`);
-  assert(
-    await cardSettings.getByText("Press Action", { exact: true }).isVisible(),
-    `${label}: Cover Art Card Settings should reveal Press Action`,
-  );
   assert(
     await cardSettings.getByText("Show Track Details", { exact: true }).isVisible(),
     `${label}: Cover Art Card Settings should reveal Show Track Details`,

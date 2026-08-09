@@ -4290,25 +4290,6 @@
             ]
           },
           {
-            "name": "cover_art_action",
-            "label": "Press Action",
-            "kind": "choice",
-            "values": [
-              "play_pause",
-              "control_modal"
-            ],
-            "defaultValue": "play_pause",
-            "omitDefault": true,
-            "applicability": [
-              {
-                "source": "field",
-                "name": "sensor",
-                "operator": "equals",
-                "value": "cover_art"
-              }
-            ]
-          },
-          {
             "name": "cover_art_details",
             "label": "Show Track Details",
             "kind": "flag",
@@ -4516,7 +4497,6 @@
           "canonicalOptionOrder": [
             "label_display",
             "number_display",
-            "cover_art_action",
             "cover_art_details",
             "cover_art_secondary_entity",
             "speaker_group_entity",

@@ -67,10 +67,6 @@ export function installConfigMediaOptionsModule(): GlobalDescriptors {
         }
         if (mode === "cover_art") {
             var coverArtOut: any = "";
-            var action: any = normalizeMediaCoverArtAction(configOptionValue(options, MEDIA_COVER_ART_ACTION_OPTION));
-            if (action === "control_modal") {
-                coverArtOut = setConfigOptionValue(coverArtOut, MEDIA_COVER_ART_ACTION_OPTION, action);
-            }
             if (configOptionEnabled(options, MEDIA_COVER_ART_DETAILS_OPTION)) {
                 coverArtOut = setConfigOption(coverArtOut, MEDIA_COVER_ART_DETAILS_OPTION, true);
             }
@@ -89,23 +85,6 @@ export function installConfigMediaOptionsModule(): GlobalDescriptors {
         }
         out = copyLargeNumbersOption(out, options);
         return out;
-    }
-    function normalizeMediaCoverArtAction(this: any, value?: any) {
-        value = String(value || "").trim();
-        var spec: any = cardContractOptionSpec("media", MEDIA_COVER_ART_ACTION_OPTION);
-        var values: any = spec && spec.values ? spec.values : ["play_pause", "control_modal"];
-        return values.indexOf(value) >= 0 ? value : "play_pause";
-    }
-    function mediaCoverArtAction(this: any, b?: any) {
-        return normalizeMediaCoverArtAction(configOptionValue(b && b.options, MEDIA_COVER_ART_ACTION_OPTION));
-    }
-    function setMediaCoverArtAction(this: any, b?: any, value?: any) {
-        if (!b)
-            return "";
-        var normalized: any = normalizeMediaCoverArtAction(value);
-        b.options = setConfigOptionValue(b.options, MEDIA_COVER_ART_ACTION_OPTION, normalized === "play_pause" ? "" : normalized);
-        b.options = normalizeMediaOptions(b.options, b.sensor);
-        return b.options;
     }
     function mediaCoverArtDetailsEnabled(this: any, b?: any) {
         return !!(b && configOptionEnabled(b.options, MEDIA_COVER_ART_DETAILS_OPTION));
@@ -223,9 +202,6 @@ export function installConfigMediaOptionsModule(): GlobalDescriptors {
     return {
         "normalizeMediaVolumeMax": staticGlobal(normalizeMediaVolumeMax),
         "normalizeMediaOptions": staticGlobal(normalizeMediaOptions),
-        "normalizeMediaCoverArtAction": staticGlobal(normalizeMediaCoverArtAction),
-        "mediaCoverArtAction": staticGlobal(mediaCoverArtAction),
-        "setMediaCoverArtAction": staticGlobal(setMediaCoverArtAction),
         "mediaCoverArtDetailsEnabled": staticGlobal(mediaCoverArtDetailsEnabled),
         "setMediaCoverArtDetailsEnabled": staticGlobal(setMediaCoverArtDetailsEnabled),
         "mediaCoverArtSecondaryEntity": staticGlobal(mediaCoverArtSecondaryEntity),
