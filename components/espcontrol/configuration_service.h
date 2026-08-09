@@ -44,6 +44,7 @@ enum class ServiceStatus : uint8_t {
   BUFFER_TOO_SMALL,
   UNSUPPORTED_VERSION,
   INVALID_DOCUMENT,
+  GENERATION_CONFLICT,
   STORE_FAILED,
   LEGACY_READ_FAILED,
   LEGACY_MIRROR_FAILED,
@@ -105,6 +106,10 @@ class ConfigurationService {
   ServiceLoadResult load(uint8_t *output, size_t output_capacity);
   ServiceSaveResult save(uint16_t document_version, const uint8_t *document,
                          size_t document_size);
+  ServiceSaveResult save_if_generation(uint32_t expected_generation,
+                                       uint16_t document_version,
+                                       const uint8_t *document,
+                                       size_t document_size);
   ServiceSaveResult save_current(const uint8_t *document,
                                  size_t document_size) {
     return save(CURRENT_CONFIGURATION_DOCUMENT_VERSION, document,
@@ -117,6 +122,10 @@ class ConfigurationService {
   CommitResult commit_document(uint16_t document_version,
                                const uint8_t *document,
                                size_t document_size);
+  CommitResult commit_document_if_generation(uint32_t expected_generation,
+                                             uint16_t document_version,
+                                             const uint8_t *document,
+                                             size_t document_size);
   bool supports_version(uint16_t document_version) const;
   bool document_is_valid(uint16_t document_version, const uint8_t *document,
                          size_t document_size) const;

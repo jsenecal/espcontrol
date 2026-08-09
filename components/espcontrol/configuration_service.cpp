@@ -81,6 +81,27 @@ CommitResult ConfigurationService::commit_document(
   return store_.commit(encoded.data(), encoded.size());
 }
 
+CommitResult ConfigurationService::commit_document_if_generation(
+    uint32_t expected_generation, uint16_t document_version,
+    const uint8_t *document, size_t document_size) {
+  if (document_size > maximum_document_size()) {
+    return {StoreStatus::PAYLOAD_TOO_LARGE, 0, document_size};
+  }
+
+  std::vector<uint8_t> encoded(CONFIGURATION_DOCUMENT_HEADER_SIZE +
+                               document_size);
+  write_u32(encoded.data() + DOCUMENT_MAGIC_OFFSET, DOCUMENT_MAGIC);
+  write_u16(encoded.data() + DOCUMENT_VERSION_OFFSET, document_version);
+  write_u16(encoded.data() + DOCUMENT_HEADER_SIZE_OFFSET,
+            CONFIGURATION_DOCUMENT_HEADER_SIZE);
+  if (document_size > 0) {
+    std::memcpy(encoded.data() + CONFIGURATION_DOCUMENT_HEADER_SIZE, document,
+                document_size);
+  }
+  return store_.commit_if_generation(expected_generation, encoded.data(),
+                                     encoded.size());
+}
+
 ServiceLoadResult ConfigurationService::load(uint8_t *output,
                                              size_t output_capacity) {
   if (output == nullptr && output_capacity > 0) {
@@ -191,6 +212,40 @@ ServiceSaveResult ConfigurationService::save(uint16_t document_version,
 
   const CommitResult committed =
       commit_document(document_version, document, document_size);
+  if (!committed.ok()) {
+    return {ServiceStatus::STORE_FAILED, committed.status, document_version,
+            committed.generation, document_size};
+  }
+  if (!legacy_.mirror(document_version, document, document_size)) {
+    return {ServiceStatus::LEGACY_MIRROR_FAILED, committed.status,
+            document_version, committed.generation, document_size};
+  }
+  return {ServiceStatus::OK, committed.status, document_version,
+          committed.generation, document_size};
+}
+
+ServiceSaveResult ConfigurationService::save_if_generation(
+    uint32_t expected_generation, uint16_t document_version,
+    const uint8_t *document, size_t document_size) {
+  if (document_size > 0 && document == nullptr) {
+    return {ServiceStatus::INVALID_ARGUMENT, StoreStatus::INVALID_ARGUMENT,
+            document_version, 0, document_size};
+  }
+  if (!supports_version(document_version)) {
+    return {ServiceStatus::UNSUPPORTED_VERSION, StoreStatus::INVALID_ARGUMENT,
+            document_version, 0, document_size};
+  }
+  if (!document_is_valid(document_version, document, document_size)) {
+    return {ServiceStatus::INVALID_DOCUMENT, StoreStatus::INVALID_ARGUMENT,
+            document_version, 0, document_size};
+  }
+
+  const CommitResult committed = commit_document_if_generation(
+      expected_generation, document_version, document, document_size);
+  if (committed.status == StoreStatus::GENERATION_CONFLICT) {
+    return {ServiceStatus::GENERATION_CONFLICT, committed.status,
+            document_version, committed.generation, document_size};
+  }
   if (!committed.ok()) {
     return {ServiceStatus::STORE_FAILED, committed.status, document_version,
             committed.generation, document_size};
