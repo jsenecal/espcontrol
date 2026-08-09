@@ -12,6 +12,7 @@ import * as CoverArtScreensaverController from "./features/cover_art_screensaver
 import * as MediaPlaybackController from "./features/media_playback_controller";
 import * as VoiceServicesController from "./features/voice_services_controller";
 import * as ClockBarController from "./features/clock_bar_controller";
+import * as ScreenScheduleController from "./features/screen_schedule_controller";
 import * as ClipboardFeature from "./features/clipboard";
 import * as UiTokens from "./state/ui_tokens";
 import * as AppState from "./state/app_state";
@@ -251,6 +252,7 @@ function startEspControl(): void {
     createMediaPlaybackController: MediaPlaybackController.createMediaPlaybackController,
     createVoiceServicesController: VoiceServicesController.createVoiceServicesController,
     createClockBarController: ClockBarController.createClockBarController,
+    createScreenScheduleController: ScreenScheduleController.createScreenScheduleController,
     screensaverControlState: SettingsFeature.screensaverControlState,
     timedSettingLabel: SettingsFeature.timedSettingLabel,
     ...UiTokens,

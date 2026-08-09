@@ -22,15 +22,15 @@ export function installSettingsScheduleSectionModule(): GlobalDescriptors {
         var scheduleTimes: any = document.createElement("div");
         scheduleTimes.className = "sp-schedule-times";
         var onHour: any = createHourSelect("Daytime", "sp-set-schedule-on-hour", state.scheduleOnHour, function (this: any, hour?: any) {
-            state.scheduleOnHour = hour;
-            postScreenScheduleOnHour(hour);
+            applyScreenScheduleControllerState(_screenScheduleController.setOnHour(screenScheduleControllerState(), hour));
+            postScreenScheduleOnHour(state.scheduleOnHour);
             syncScreenScheduleUi();
         });
         scheduleTimes.appendChild(onHour.wrap);
         els.setScheduleOnHour = onHour.select;
         var offHour: any = createHourSelect("Night Time", "sp-set-schedule-off-hour", state.scheduleOffHour, function (this: any, hour?: any) {
-            state.scheduleOffHour = hour;
-            postScreenScheduleOffHour(hour);
+            applyScreenScheduleControllerState(_screenScheduleController.setOffHour(screenScheduleControllerState(), hour));
+            postScreenScheduleOffHour(state.scheduleOffHour);
             syncScreenScheduleUi();
         });
         scheduleTimes.appendChild(offHour.wrap);
@@ -52,7 +52,7 @@ export function installSettingsScheduleSectionModule(): GlobalDescriptors {
             { value: "off", label: "Sensor Is Off" },
             { value: "on", label: "Sensor Is On" },
         ], state.scheduleSensorActivation, function (this: any) {
-            state.scheduleSensorActivation = normalizeScheduleSensorActivation(this.value);
+            applyScreenScheduleControllerState(_screenScheduleController.setSensorActivation(screenScheduleControllerState(), this.value));
             postScreenScheduleSensorActivation(state.scheduleSensorActivation);
             syncScreenScheduleUi();
         });
@@ -69,7 +69,7 @@ export function installSettingsScheduleSectionModule(): GlobalDescriptors {
             { value: "screen_dimmed", label: "Screen Dimmed" },
             { value: "clock", label: "Clock" },
         ], state.scheduleMode, function (this: any) {
-            state.scheduleMode = normalizeScheduleMode(this.value);
+            applyScreenScheduleControllerState(_screenScheduleController.setMode(screenScheduleControllerState(), this.value));
             postScreenScheduleMode(state.scheduleMode);
             syncScreenScheduleUi();
         });
@@ -88,7 +88,7 @@ export function installSettingsScheduleSectionModule(): GlobalDescriptors {
             { label: "1 hour", value: 3600 },
         ];
         var wakeTimeoutControl: any = selectField("When Woken, Idle Time to Screen Off", "sp-set-schedule-wake-timeout", wakeTimeoutOptions, state.scheduleWakeTimeout, function (this: any) {
-            state.scheduleWakeTimeout = normalizeScheduleWakeTimeout(this.value);
+            applyScreenScheduleControllerState(_screenScheduleController.setWakeTimeout(screenScheduleControllerState(), this.value));
             postScreenScheduleWakeTimeout(state.scheduleWakeTimeout);
             syncScreenScheduleUi();
         });
@@ -98,7 +98,7 @@ export function installSettingsScheduleSectionModule(): GlobalDescriptors {
         var wakeBrightnessSlider: any = createRangeSlider("When Woken, Screen Brightness", state.scheduleWakeBrightness, postScreenScheduleWakeBrightness);
         wakeBrightnessSlider.range.id = "sp-set-schedule-wake-brightness";
         wakeBrightnessSlider.range.addEventListener("change", function (this: any) {
-            state.scheduleWakeBrightness = normalizeScheduleWakeBrightness(this.value);
+            applyScreenScheduleControllerState(_screenScheduleController.setWakeBrightness(screenScheduleControllerState(), this.value));
             syncScreenScheduleUi();
         });
         offScreenOptions.appendChild(wakeBrightnessSlider.wrap);
@@ -112,7 +112,7 @@ export function installSettingsScheduleSectionModule(): GlobalDescriptors {
         dimmedBrightnessSlider.range.min = "1";
         dimmedBrightnessSlider.range.step = "1";
         dimmedBrightnessSlider.range.addEventListener("input", function (this: any) {
-            state.scheduleDimmedBrightness = normalizeScheduleDimmedBrightness(this.value);
+            applyScreenScheduleControllerState(_screenScheduleController.setDimmedBrightness(screenScheduleControllerState(), this.value));
             syncScreenScheduleUi();
         });
         dimmedOptions.appendChild(dimmedBrightnessSlider.wrap);
@@ -126,7 +126,7 @@ export function installSettingsScheduleSectionModule(): GlobalDescriptors {
         clockBrightnessSlider.range.min = "1";
         clockBrightnessSlider.range.step = "1";
         clockBrightnessSlider.range.addEventListener("input", function (this: any) {
-            state.scheduleClockBrightness = normalizeScheduleClockBrightness(this.value);
+            applyScreenScheduleControllerState(_screenScheduleController.setClockBrightness(screenScheduleControllerState(), this.value));
             syncScreenScheduleUi();
         });
         clockOptions.appendChild(clockBrightnessSlider.wrap);
@@ -145,8 +145,7 @@ export function installSettingsScheduleSectionModule(): GlobalDescriptors {
         els.setScheduleActions = scheduleActions;
         function setScheduleTrigger(this: any, trigger?: any) {
             state._scheduleTriggerReceived = true;
-            state.scheduleTrigger = normalizeScheduleTrigger(trigger, state.scheduleEnabled);
-            state.scheduleEnabled = state.scheduleTrigger !== "disabled";
+            applyScreenScheduleControllerState(_screenScheduleController.setTrigger(screenScheduleControllerState(), trigger));
             postScreenScheduleTrigger(state.scheduleTrigger);
             postScreenScheduleEnabled(state.scheduleEnabled);
             syncScreenScheduleUi();
