@@ -89,7 +89,7 @@ assert.deepStrictEqual(Array.from(hooks.coverArtDelayPostUrls(30)), fixture.post
   "cover-art fallback request ordering changed");
 
 const freshOutput = freshWebOutputDir({ testHooks: false });
-const bytes = fs.readFileSync(path.join(freshOutput, "www.js"));
+const bytes = fs.readFileSync(path.join(freshOutput, "embedded", "www.js"));
 const source = bytes.toString("utf8");
 assert(/^\s*(?:["']use strict["'];)?\(\(\)=>\{/.test(source),
   "shared bundle must remain a normal browser IIFE");

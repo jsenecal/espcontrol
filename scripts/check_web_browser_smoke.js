@@ -130,9 +130,15 @@ function publicFirmwareVersions(slug) {
 
 async function installRoutes(context, slug) {
   const scriptPath = path.join(WEB_OUTPUT_DIR, "www.js");
+  const webAssetManifestPath = path.join(WEB_OUTPUT_DIR, "web-assets.json");
   assert(
     fs.existsSync(scriptPath),
     `${slug}: generated web UI does not exist at ${scriptPath}`,
+  );
+  const webAssetManifest = JSON.parse(fs.readFileSync(webAssetManifestPath, "utf8"));
+  const immutableBundlePath = path.join(
+    WEB_OUTPUT_DIR,
+    webAssetManifest.bundles[0].path,
   );
 
   await context.route("**/*", async (route) => {
@@ -156,6 +162,28 @@ async function installRoutes(context, slug) {
         status: 200,
         contentType: "application/javascript",
         body: fs.readFileSync(scriptPath, "utf8"),
+      });
+      return;
+    }
+    if (
+      requestUrl.hostname === "espcontrol.test" &&
+      requestUrl.pathname === "/webserver/web-assets.json"
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(webAssetManifest),
+      });
+      return;
+    }
+    if (
+      requestUrl.hostname === "espcontrol.test" &&
+      requestUrl.pathname === `/webserver/${webAssetManifest.bundles[0].path}`
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/javascript",
+        body: fs.readFileSync(immutableBundlePath, "utf8"),
       });
       return;
     }

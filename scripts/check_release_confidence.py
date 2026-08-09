@@ -60,7 +60,7 @@ def test_public_device_profiles(profile_slugs: list[str]) -> list[dict]:
 
 
 def test_web_bundles(profile_slugs: list[str]) -> None:
-    bundle = WEB_OUTPUT_DIR / "www.js"
+    bundle = WEB_OUTPUT_DIR / "embedded" / "www.js"
     assert bundle.is_file(), "shared generated setup page bundle is missing"
     source = bundle.read_text(encoding="utf-8")
     for slug in profile_slugs:

@@ -3988,7 +3988,8 @@ def build_www(check_only=False, output_dir=None, test_hooks=False):
             temporary_root.cleanup()
         raise BuildError(result.stderr.strip() or "esbuild failed while building web bundles")
 
-    bundle_text = (build_root / "www.js").read_text()
+    bundle_text = (build_root / "app.js").read_text()
+    bridge_text = (build_root / "www.js").read_text()
     bundle_sha256 = hashlib.sha256(bundle_text.encode("utf-8")).hexdigest()
     bundle_relative_path = Path("bundles") / bundle_sha256 / "www.js"
     manifest_text = json.dumps({
@@ -3998,15 +3999,18 @@ def build_www(check_only=False, output_dir=None, test_hooks=False):
             "sha256": bundle_sha256,
             "path": bundle_relative_path.as_posix(),
             "deviceProfiles": list(devices),
+            "firmwareVersions": ["dev"],
+            "webAssetVersion": 1,
         }],
     }, indent=2) + "\n"
 
-    outputs = [(build_root / "www.js", bundle_text)]
+    outputs = [(build_root / "www.js", bridge_text)]
     outputs.extend(
         (build_root / slug / "www.js", (build_root / slug / "www.js").read_text())
         for slug in devices
     )
     outputs.extend([
+        (build_root / "embedded" / "www.js", bundle_text),
         (build_root / bundle_relative_path, bundle_text),
         (build_root / "web-assets.json", manifest_text),
     ])

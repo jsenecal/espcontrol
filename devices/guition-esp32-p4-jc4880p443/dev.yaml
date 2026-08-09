@@ -18,7 +18,7 @@ wifi:
 
 web_server:
   js_url: ""
-  js_include: "../../docs/public/webserver/www.js"
+  js_include: "../../docs/public/webserver/embedded/www.js"
 
 packages:
   espcontrol: !include packages.yaml
