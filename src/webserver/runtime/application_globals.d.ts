@@ -433,6 +433,7 @@ declare global {
   var createPanelConfigBackupPayload: any;
   var createRangeSlider: any;
   var createScreensaverThenControls: any;
+  var createScreensaverController: any;
   var createSettingsUiFeature: any;
   var createAlarmDelayAudioController: any;
   var createSseHandlers: any;

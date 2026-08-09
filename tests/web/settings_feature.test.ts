@@ -1,5 +1,6 @@
 import { screensaverControlState, timedSettingLabel } from "../../src/webserver/features/settings";
 import { createAlarmDelayAudioController } from "../../src/webserver/features/alarm_delay_audio_controller";
+import { createScreensaverController } from "../../src/webserver/features/screensaver_controller";
 
 function equal<T>(actual: T, expected: T, message: string): void {
   if (actual !== expected) throw new Error(`${message}: expected ${String(expected)}, received ${String(actual)}`);
@@ -40,4 +41,23 @@ export function runSettingsFeatureTests(): void {
         "Default", "announcement changes use their fallback");
   equal(alarm.setBeepVolume(enabled, 2).beepVolume, 1, "volume changes are normalized");
   equal(alarm.setFinalCountdown(enabled, 80).finalCountdown, 60, "countdown changes are normalized");
+
+  const screensaver = createScreensaverController({
+    action: (value) => ["off", "dim", "clock"].includes(String(value)) ? String(value) : "off",
+    dimBrightness: (value) => Math.max(1, Math.min(100, Number(value))),
+    clockBrightness: (value, fallback) => Math.max(1, Math.min(100, Number(value) || fallback)),
+  });
+  const dim = {
+    action: "dim",
+    clockBrightnessDay: 35,
+    clockBrightnessNight: 12,
+    dimBrightness: 10,
+  };
+  equal(screensaver.uiState(dim).dimVisible, true, "dim controls show in dim mode");
+  equal(screensaver.uiState(dim).clockVisible, false, "clock controls hide in dim mode");
+  const clockMode = screensaver.setAction(dim, "clock");
+  equal(screensaver.uiState(clockMode).clockVisible, true, "clock controls show in clock mode");
+  equal(screensaver.setDimBrightness(clockMode, 200).dimBrightness, 100, "dim brightness is normalized");
+  equal(screensaver.setClockBrightness(clockMode, "clockBrightnessNight", 0).clockBrightnessNight,
+        35, "night brightness uses daytime brightness as its fallback");
 }

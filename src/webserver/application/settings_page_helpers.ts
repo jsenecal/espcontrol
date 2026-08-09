@@ -13,6 +13,11 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         beepVolume: normalizeAlarmDelayBeepVolume,
         finalCountdown: normalizeAlarmDelayFinalCountdown,
     });
+    var _screensaverController: any = createScreensaverController({
+        action: normalizeScreensaverAction,
+        dimBrightness: normalizeScreensaverDimmedBrightness,
+        clockBrightness: normalizeClockBrightness,
+    });
     function alarmDelayAudioState(this: any) {
         return {
             audioEnabled: !!state.alarmDelayAudioOn,
@@ -30,6 +35,21 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         state.alarmDelayExitAnnouncement = next.exitAnnouncement;
         state.alarmDelayBeepVolume = next.beepVolume;
         state.alarmDelayFinalCountdown = next.finalCountdown;
+    }
+    function screensaverState(this: any) {
+        return {
+            action: state.screensaverAction,
+            clockBrightnessDay: state.clockBrightnessDay,
+            clockBrightnessNight: state.clockBrightnessNight,
+            dimBrightness: state.screensaverDimmedBrightness,
+        };
+    }
+    function applyScreensaverState(this: any, next?: any) {
+        state.screensaverAction = next.action;
+        state.clockBrightnessDay = next.clockBrightnessDay;
+        state.clockBrightnessNight = next.clockBrightnessNight;
+        state.screensaverDimmedBrightness = next.dimBrightness;
+        state.clockScreensaverOn = next.action === "clock";
     }
     function settingsStatusHeader(this: any, title?: any) {
         return _settingsUiFeature.settingsStatusHeader(title);
@@ -185,7 +205,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
     }
     // ── Settings sync helpers ───────────────────────────────────────────
     function syncClockScreensaverControls(this: any) {
-        var controlState: any = screensaverControlState(state.screensaverAction, state.clockBrightnessDay, state.clockBrightnessNight, state.screensaverDimmedBrightness);
+        var controlState: any = _screensaverController.uiState(screensaverState());
         var mode: any = controlState.mode;
         var clockDisplay: any = controlState.clockVisible ? "" : "none";
         var dimDisplay: any = controlState.dimVisible ? "" : "none";
@@ -301,33 +321,32 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
             o.textContent = opt.label;
             clockSelect.appendChild(o);
         });
-        clockSelect.value = normalizeScreensaverAction(state.screensaverAction);
+        clockSelect.value = _screensaverController.uiState(screensaverState()).mode;
         clockSelect.addEventListener("change", function (this: any) {
-            state.screensaverAction = normalizeScreensaverAction(this.value);
-            state.clockScreensaverOn = state.screensaverAction === "clock";
+            applyScreensaverState(_screensaverController.setAction(screensaverState(), this.value));
             syncClockScreensaverControls();
             postScreensaverAction(state.screensaverAction);
             postClockScreensaver(state.clockScreensaverOn);
         });
         clockField.appendChild(clockSelect);
         var dimBrightnessField: any = document.createElement("div");
-        dimBrightnessField.style.display = normalizeScreensaverAction(state.screensaverAction) === "dim" ? "" : "none";
+        dimBrightnessField.style.display = _screensaverController.uiState(screensaverState()).dimVisible ? "" : "none";
         var dimSlider: any = createRangeSlider("Dimmed Screen Brightness", state.screensaverDimmedBrightness, postScreensaverDimmedBrightness);
         dimSlider.range.min = "1";
         dimSlider.range.step = "1";
         dimSlider.range.addEventListener("input", function (this: any) {
-            state.screensaverDimmedBrightness = normalizeScreensaverDimmedBrightness(this.value);
+            applyScreensaverState(_screensaverController.setDimBrightness(screensaverState(), this.value));
             syncClockScreensaverControls();
         });
         dimBrightnessField.appendChild(dimSlider.wrap);
         var clockBrightnessField: any = document.createElement("div");
         clockBrightnessField.className = "sp-clock-brightness-field";
-        clockBrightnessField.style.display = normalizeScreensaverAction(state.screensaverAction) === "clock" ? "" : "none";
+        clockBrightnessField.style.display = _screensaverController.uiState(screensaverState()).clockVisible ? "" : "none";
         var daySlider: any = createRangeSlider("Daytime Clock Brightness", state.clockBrightnessDay, postClockBrightnessDay);
         daySlider.range.min = "1";
         daySlider.range.step = "1";
         daySlider.range.addEventListener("input", function (this: any) {
-            state.clockBrightnessDay = normalizeClockBrightness(this.value, 35);
+            applyScreensaverState(_screensaverController.setClockBrightness(screensaverState(), "clockBrightnessDay", this.value));
             syncClockScreensaverControls();
         });
         clockBrightnessField.appendChild(daySlider.wrap);
@@ -335,7 +354,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         nightSlider.range.min = "1";
         nightSlider.range.step = "1";
         nightSlider.range.addEventListener("input", function (this: any) {
-            state.clockBrightnessNight = normalizeClockBrightness(this.value, state.clockBrightnessDay);
+            applyScreensaverState(_screensaverController.setClockBrightness(screensaverState(), "clockBrightnessNight", this.value));
             syncClockScreensaverControls();
         });
         clockBrightnessField.appendChild(nightSlider.wrap);
@@ -402,6 +421,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
     return {
         "_settingsUiFeature": liveGlobal(() => _settingsUiFeature, (value?: any) => { _settingsUiFeature = value; }),
         "_alarmDelayAudioController": liveGlobal(() => _alarmDelayAudioController, (value?: any) => { _alarmDelayAudioController = value; }),
+        "_screensaverController": liveGlobal(() => _screensaverController, (value?: any) => { _screensaverController = value; }),
         "settingsStatusHeader": staticGlobal(settingsStatusHeader),
         "appendSettingsSection": staticGlobal(appendSettingsSection),
         "openVoiceServicesSettings": staticGlobal(openVoiceServicesSettings),
