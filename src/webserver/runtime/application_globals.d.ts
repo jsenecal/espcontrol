@@ -433,7 +433,11 @@ declare global {
   var createPanelConfigBackupPayload: any;
   var createRangeSlider: any;
   var createCoverArtScreensaverController: any;
+  var createMediaPlaybackController: any;
   var _coverArtScreensaverController: any;
+  var _mediaPlaybackController: any;
+  var mediaPlaybackState: any;
+  var applyMediaPlaybackState: any;
   var coverArtScreensaverState: any;
   var applyCoverArtScreensaverState: any;
   var createScreensaverThenControls: any;

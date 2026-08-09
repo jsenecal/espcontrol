@@ -24,6 +24,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
             return parseFloat(value) || 0;
         },
     });
+    var _mediaPlaybackController: any = createMediaPlaybackController();
     function alarmDelayAudioState(this: any) {
         return {
             audioEnabled: !!state.alarmDelayAudioOn,
@@ -74,6 +75,18 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         state.coverArtHideExternalInputOn = next.hideExternalInput;
         state.coverArtFilteringEnabled = next.filteringEnabled;
         state.coverArtAttributeConditions = next.attributeConditions;
+    }
+    function mediaPlaybackState(this: any) {
+        return {
+            sleepPreventionEnabled: !!state.mediaPlayerSleepPreventionOn,
+            sleepPreventionEntity: state.mediaPlayerSleepPreventionEntity || "",
+            coverArtEntity: state.coverArtMediaPlayerEntity || "",
+        };
+    }
+    function applyMediaPlaybackState(this: any, next?: any) {
+        state.mediaPlayerSleepPreventionOn = next.sleepPreventionEnabled;
+        state.mediaPlayerSleepPreventionEntity = next.sleepPreventionEntity;
+        state.coverArtMediaPlayerEntity = next.coverArtEntity;
     }
     function settingsStatusHeader(this: any, title?: any) {
         return _settingsUiFeature.settingsStatusHeader(title);
@@ -269,11 +282,12 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         }
     }
     function syncMediaPlayerSleepPreventionUi(this: any) {
+        var uiState: any = _mediaPlaybackController.uiState(mediaPlaybackState());
         if (els.setMediaPlayerSleepPreventionToggle) {
-            els.setMediaPlayerSleepPreventionToggle.checked = !!state.mediaPlayerSleepPreventionOn;
+            els.setMediaPlayerSleepPreventionToggle.checked = uiState.sleepPreventionEnabled;
         }
         if (els.setSensorMediaPlayerSleepPreventionToggle) {
-            els.setSensorMediaPlayerSleepPreventionToggle.checked = !!state.mediaPlayerSleepPreventionOn;
+            els.setSensorMediaPlayerSleepPreventionToggle.checked = uiState.sleepPreventionEnabled;
         }
     }
     function syncCoverArtScreensaverUi(this: any) {
@@ -446,8 +460,11 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         "_alarmDelayAudioController": liveGlobal(() => _alarmDelayAudioController, (value?: any) => { _alarmDelayAudioController = value; }),
         "_screensaverController": liveGlobal(() => _screensaverController, (value?: any) => { _screensaverController = value; }),
         "_coverArtScreensaverController": liveGlobal(() => _coverArtScreensaverController, (value?: any) => { _coverArtScreensaverController = value; }),
+        "_mediaPlaybackController": liveGlobal(() => _mediaPlaybackController, (value?: any) => { _mediaPlaybackController = value; }),
         "coverArtScreensaverState": staticGlobal(coverArtScreensaverState),
         "applyCoverArtScreensaverState": staticGlobal(applyCoverArtScreensaverState),
+        "mediaPlaybackState": staticGlobal(mediaPlaybackState),
+        "applyMediaPlaybackState": staticGlobal(applyMediaPlaybackState),
         "settingsStatusHeader": staticGlobal(settingsStatusHeader),
         "appendSettingsSection": staticGlobal(appendSettingsSection),
         "openVoiceServicesSettings": staticGlobal(openVoiceServicesSettings),

@@ -9,6 +9,7 @@ import * as SettingsFeature from "./features/settings";
 import * as AlarmDelayAudioController from "./features/alarm_delay_audio_controller";
 import * as ScreensaverController from "./features/screensaver_controller";
 import * as CoverArtScreensaverController from "./features/cover_art_screensaver_controller";
+import * as MediaPlaybackController from "./features/media_playback_controller";
 import * as ClipboardFeature from "./features/clipboard";
 import * as UiTokens from "./state/ui_tokens";
 import * as AppState from "./state/app_state";
@@ -245,6 +246,7 @@ function startEspControl(): void {
     createAlarmDelayAudioController: AlarmDelayAudioController.createAlarmDelayAudioController,
     createScreensaverController: ScreensaverController.createScreensaverController,
     createCoverArtScreensaverController: CoverArtScreensaverController.createCoverArtScreensaverController,
+    createMediaPlaybackController: MediaPlaybackController.createMediaPlaybackController,
     screensaverControlState: SettingsFeature.screensaverControlState,
     timedSettingLabel: SettingsFeature.timedSettingLabel,
     ...UiTokens,
