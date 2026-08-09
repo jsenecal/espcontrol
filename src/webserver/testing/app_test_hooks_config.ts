@@ -107,8 +107,6 @@ export function installAppTestHooksConfig(): GlobalDescriptors {
             cardSizeMenuOptions: cardSizeMenuOptions,
             normalizeCardSizeForConfig: normalizeCardSizeForConfig,
             normalizeMediaOptions: normalizeMediaOptions,
-            mediaCoverArtAction: mediaCoverArtAction,
-            setMediaCoverArtAction: setMediaCoverArtAction,
             mediaCoverArtDetailsEnabled: mediaCoverArtDetailsEnabled,
             setMediaCoverArtDetailsEnabled: setMediaCoverArtDetailsEnabled,
             mediaVolumeMax: mediaVolumeMax,

@@ -446,14 +446,9 @@ assert.throws(
   (error) => String(error.cardTransferMessage || error.message).includes("does not support the image card type"),
   "S3 card transfer rejects disabled image cards inside subpages",
 );
-const coverArtActionButton = { type: "media", sensor: "cover_art", options: "" };
-assert.strictEqual(hooks.mediaCoverArtAction(coverArtActionButton), "play_pause", "cover art defaults to play/pause action");
-hooks.setMediaCoverArtAction(coverArtActionButton, "control_modal");
-assert.strictEqual(coverArtActionButton.options, "cover_art_action=control_modal", "cover art stores the optional controls action");
+const coverArtActionButton = { type: "media", sensor: "cover_art", options: "cover_art_action=play_pause" };
 hooks.setMediaCoverArtDetailsEnabled(coverArtActionButton, true);
-assert.strictEqual(coverArtActionButton.options, "cover_art_action=control_modal,cover_art_details", "cover art preserves action with track details");
-hooks.setMediaCoverArtAction(coverArtActionButton, "play_pause");
-assert.strictEqual(coverArtActionButton.options, "cover_art_details", "cover art omits its default action without dropping track details");
+assert.strictEqual(coverArtActionButton.options, "cover_art_details", "cover art removes its retired press action while preserving track details");
 hooks.setMediaCoverArtDetailsEnabled(coverArtActionButton, false);
 assert.strictEqual(coverArtActionButton.options, "", "cover art omits disabled track details");
 const speakerGroupButton = { type: "media", sensor: "speaker_group", options: "" };
@@ -1926,7 +1921,7 @@ assertButtonRoundTrip(hooks, "media cover art card", {
   unit: "",
   type: "media",
   precision: "",
-  options: "cover_art_action=control_modal,cover_art_details",
+  options: "cover_art_details",
 }, false);
 
 assertButtonMigration(hooks, "legacy cover art card alias becomes media subtype", "media_player.office;Artwork;Auto;Auto;;;media_cover_art;;cover_art_action=control_modal", {
@@ -1938,7 +1933,7 @@ assertButtonMigration(hooks, "legacy cover art card alias becomes media subtype"
   unit: "",
   type: "media",
   precision: "",
-  options: "cover_art_action=control_modal",
+  options: "",
 });
 
 assertButtonMigration(hooks, "legacy media cover art option becomes cover art subtype", "media_player.office;Now Playing;Auto;Auto;now_playing;;media;progress;media_cover_art", {
