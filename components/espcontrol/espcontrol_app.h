@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 #include "esphome/components/text/text.h"
 #include "esphome/core/component.h"
@@ -44,6 +45,10 @@ class EspControlApp : public esphome::Component {
       esphome::text::Text *subpage_2, esphome::text::Text *subpage_3,
       esphome::text::Text *subpage_4, esphome::text::Text *subpage_5,
       esphome::text::Text *subpage_6, esphome::text::Text *subpage_7);
+  void set_web_auth_credentials(const char *username, const char *password) {
+    web_auth_username_ = username == nullptr ? "" : username;
+    web_auth_password_ = password == nullptr ? "" : password;
+  }
 
  private:
   struct LegacyButtonTextSources {
@@ -64,6 +69,8 @@ class EspControlApp : public esphome::Component {
       panel_config_store_, legacy_config_, &panel_config_validator_};
   uint8_t *panel_config_memory_{nullptr};
   uint8_t *panel_config_document_buffer_{nullptr};
+  std::string web_auth_username_;
+  std::string web_auth_password_;
   configuration::EspHomeLegacyTextValue button_order_text_{};
   std::array<LegacyButtonTextSources, configuration::PANEL_CONFIG_MAX_SLOT_COUNT>
       legacy_button_texts_{};

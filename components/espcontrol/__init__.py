@@ -21,6 +21,8 @@ CONF_BUTTON_ORDER = "button_order"
 CONF_BUTTONS = "buttons"
 CONF_CONFIG = "config"
 CONF_SUBPAGE_CHUNKS = "subpage_chunks"
+CONF_WEB_AUTH_USERNAME = "web_auth_username"
+CONF_WEB_AUTH_PASSWORD = "web_auth_password"
 
 espcontrol_ns = cg.global_ns.namespace("espcontrol")
 EspControlApp = espcontrol_ns.class_("EspControlApp", cg.Component)
@@ -49,6 +51,8 @@ CONFIG_SCHEMA = cv.Schema(
         cv.GenerateID(CONF_ID): cv.declare_id(EspControlApp),
         cv.Optional(CONF_ACTION_RESPONSES, default=True): cv.boolean,
         cv.Optional(CONF_PANEL_CONFIG): PANEL_CONFIG_SCHEMA,
+        cv.Optional(CONF_WEB_AUTH_USERNAME, default=""): cv.string_strict,
+        cv.Optional(CONF_WEB_AUTH_PASSWORD, default=""): cv.sensitive(cv.string_strict),
     }
 ).extend(cv.COMPONENT_SCHEMA)
 
@@ -56,6 +60,8 @@ CONFIG_SCHEMA = cv.Schema(
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
     await cg.register_component(var, config)
+    cg.add(var.set_web_auth_credentials(
+        config[CONF_WEB_AUTH_USERNAME], config[CONF_WEB_AUTH_PASSWORD]))
 
     panel_config = config.get(CONF_PANEL_CONFIG)
     if panel_config is not None:
