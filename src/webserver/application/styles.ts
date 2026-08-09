@@ -76,8 +76,7 @@ export function installStylesModule(): GlobalDescriptors {
         ".sp-btn-icon{font-size:var(--btn-icon);line-height:1;color:#fff}" +
         ".sp-media-group-active{box-shadow:inset 0 0 0 3px var(--accent)}" +
         ".sp-btn-label{font-size:var(--btn-label);line-height:1.2;color:#fff;font-weight:var(--btn-label-weight,400);" +
-        "display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:var(--btn-lines);" +
-        "overflow:hidden;word-break:break-word;min-height:0}" +
+        "display:block;max-height:var(--btn-label-max-height);overflow:hidden;word-break:break-word;min-height:0}" +
         ".sp-sensor-badge{position:absolute;top:var(--sensor-top);right:var(--sensor-right);font-size:var(--sensor-fs);opacity:.5}" +
         ".sp-sensor-preview{display:flex;align-items:baseline;gap:.18em;color:#fff}" +
         ".sp-climate-temp-card .sp-sensor-preview{position:absolute;left:var(--btn-pad);top:var(--btn-pad)}" +
@@ -103,16 +102,15 @@ export function installStylesModule(): GlobalDescriptors {
         "padding:var(--btn-pad);z-index:1;pointer-events:none}" +
         ".sp-image-label-stack{position:relative;display:block}" +
         ".sp-image-label-text{font-size:var(--btn-label);line-height:1.2;font-weight:var(--btn-label-weight,400);" +
-        "display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:var(--btn-lines);" +
-        "overflow:hidden;word-break:break-word;min-height:0}" +
+        "display:block;max-height:var(--btn-label-max-height);overflow:hidden;word-break:break-word;min-height:0}" +
         ".sp-image-label-shadow{position:absolute;inset:1px -1px -1px 1px;color:rgba(0,0,0,.5)}" +
         ".sp-image-label-main{position:relative;color:#fff}" +
-        ".sp-btn-double .sp-image-label-text,.sp-btn-wide .sp-image-label-text,.sp-btn-extra-tall .sp-image-label-text,.sp-btn-extra-wide .sp-image-label-text,.sp-btn-big .sp-image-label-text,.sp-btn-extra-large .sp-image-label-text,.sp-btn-max-wide .sp-image-label-text,.sp-btn-max-tall .sp-image-label-text,.sp-btn-portrait-large .sp-image-label-text,.sp-btn-landscape-large .sp-image-label-text{-webkit-line-clamp:var(--btn-lines-dbl)}" +
+        ".sp-btn-double .sp-image-label-text,.sp-btn-wide .sp-image-label-text,.sp-btn-extra-tall .sp-image-label-text,.sp-btn-extra-wide .sp-image-label-text,.sp-btn-big .sp-image-label-text,.sp-btn-extra-large .sp-image-label-text,.sp-btn-max-wide .sp-image-label-text,.sp-btn-max-tall .sp-image-label-text,.sp-btn-portrait-large .sp-image-label-text,.sp-btn-landscape-large .sp-image-label-text{max-height:var(--btn-label-max-height-dbl)}" +
         ".sp-media-h-slider{position:absolute;left:8%;right:8%;bottom:10%;height:7.5%;border-radius:999px;" +
         "background:var(--screen-tertiary);overflow:hidden;pointer-events:none}" +
         ".sp-media-h-slider span{display:block;width:62%;height:100%;background:#fff;border-radius:999px}" +
         ".sp-media-position-time{z-index:1}" +
-        ".sp-media-now-title{font-size:calc(var(--btn-label)*1.75);line-height:1.08;color:#fff;font-weight:300;z-index:1;" +
+        ".sp-media-now-title{font-size:var(--media-title);line-height:1.08;color:#fff;font-weight:300;z-index:1;" +
         "display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;word-break:break-word}" +
         ".sp-media-now-artist{font-size:var(--btn-label);line-height:1.2;color:#fff;font-weight:300}" +
         ".sp-btn-big .sp-media-cover-details-title{font-size:var(--media-cover-artist)}" +
@@ -125,24 +123,20 @@ export function installStylesModule(): GlobalDescriptors {
         ".sp-media-cover-details-title{margin:var(--btn-pad) var(--btn-pad) 0}" +
         ".sp-btn-label-row.sp-media-cover-details-row{width:auto;margin:0 var(--btn-pad) var(--btn-pad)}" +
         ".sp-btn-double{grid-row:span 2}" +
-        ".sp-btn-double .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
-        ".sp-btn-double .sp-btn-label-row .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
+        ".sp-btn-double .sp-btn-label,.sp-btn-double .sp-btn-label-row .sp-btn-label{max-height:var(--btn-label-max-height-dbl)}" +
         ".sp-btn-double .sp-media-now-title{-webkit-line-clamp:2}" +
         ".sp-btn-wide{grid-column:span 2}" +
         ".sp-btn-wide .sp-media-now-title{-webkit-line-clamp:var(--btn-lines-dbl)}" +
         ".sp-btn-extra-tall{grid-row:span 3}" +
-        ".sp-btn-extra-tall .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
-        ".sp-btn-extra-tall .sp-btn-label-row .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
+        ".sp-btn-extra-tall .sp-btn-label,.sp-btn-extra-tall .sp-btn-label-row .sp-btn-label{max-height:var(--btn-label-max-height-dbl)}" +
         ".sp-btn-extra-tall .sp-media-now-title{-webkit-line-clamp:var(--btn-lines-dbl)}" +
         ".sp-btn-extra-wide{grid-column:span 3}" +
         ".sp-btn-extra-wide .sp-media-now-title{-webkit-line-clamp:var(--btn-lines-dbl)}" +
         ".sp-btn-big{grid-row:span 2;grid-column:span 2}" +
-        ".sp-btn-big .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
-        ".sp-btn-big .sp-btn-label-row .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
+        ".sp-btn-big .sp-btn-label,.sp-btn-big .sp-btn-label-row .sp-btn-label{max-height:var(--btn-label-max-height-dbl)}" +
         ".sp-btn-big .sp-media-now-title{-webkit-line-clamp:var(--btn-lines-dbl)}" +
         ".sp-btn-extra-large{grid-row:span 3;grid-column:span 3}" +
-        ".sp-btn-extra-large .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
-        ".sp-btn-extra-large .sp-btn-label-row .sp-btn-label{-webkit-line-clamp:var(--btn-lines-dbl)}" +
+        ".sp-btn-extra-large .sp-btn-label,.sp-btn-extra-large .sp-btn-label-row .sp-btn-label{max-height:var(--btn-label-max-height-dbl)}" +
         ".sp-btn-extra-large .sp-media-now-title{-webkit-line-clamp:var(--btn-lines-dbl)}" +
         ".sp-btn-big .sp-media-cover-details-title{-webkit-line-clamp:2}" +
         ".sp-btn-wide .sp-media-cover-details-title,.sp-btn-extra-wide .sp-media-cover-details-title{-webkit-line-clamp:2}" +
