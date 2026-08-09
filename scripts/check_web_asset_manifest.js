@@ -54,8 +54,11 @@ function verifyManifest(webRoot) {
   assert(fs.existsSync(bundlePath), "content-addressed web bundle is missing");
   const contents = fs.readFileSync(bundlePath);
   assert(sha256(contents) === bundle.sha256, "web bundle content does not match manifest digest");
-  assert(fs.readFileSync(path.join(webRoot, "embedded", "www.js"), "utf8") === contents.toString("utf8"),
-    "embedded editor must match the immutable bundle content");
+  const embedded = fs.readFileSync(path.join(webRoot, "embedded", "www.js"), "utf8");
+  assert(embedded.includes("__ESPCONTROL_START_EMBEDDED__"),
+    "embedded editor must expose its offline fallback entry point");
+  assert(embedded.includes(contents.toString("utf8")),
+    "embedded fallback must contain the immutable editor bundle");
   const bridge = fs.readFileSync(path.join(webRoot, "www.js"), "utf8");
   assert(bridge.includes("web-assets.json") && bridge.includes("firmwareVersions"),
     "hosted www.js must select an immutable bundle from the manifest");
@@ -103,6 +106,16 @@ async function verifyBridge() {
   assert(releaseLoaded.length === 1, "web bridge must load the supported stable firmware bundle");
   assert(releaseLoaded[0] === `https://assets.example/webserver/${manifest.bundles[0].path}?device=esp32-p4-86&v=v2.7.1`,
     "web bridge must select a bundle for an explicitly requested stable firmware version");
+
+  let fallbackStarts = 0;
+  sandbox.__ESPCONTROL_START_EMBEDDED__ = () => { fallbackStarts += 1; };
+  sandbox.document.currentScript.getAttribute = () =>
+    "https://assets.example/webserver/www.js?device=esp32-p4-86&v=v2.7.1";
+  sandbox.document.head.appendChild = (script) => script.onerror();
+  vm.runInContext(fs.readFileSync(path.join(WEB_ROOT, "www.js"), "utf8"), sandbox);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert(fallbackStarts === 1,
+    "web bridge must start the embedded editor when the immutable bundle fails to load");
 }
 
 async function main() {
