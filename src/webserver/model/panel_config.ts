@@ -61,10 +61,13 @@ function readU32(input: Uint8Array, offset: number): number {
 
 function sortedSlotEntries(values: Record<number, string>, label: string): Array<[number, string]> {
   if (!values || typeof values !== "object" || Array.isArray(values)) fail(`${label} must be an object`);
+  const slots = new Set<number>();
   const entries = Object.entries(values).map(([rawSlot, value]) => {
     const slot = Number(rawSlot);
     if (!Number.isInteger(slot) || slot < 1 || slot > PANEL_CONFIG_MAX_SLOT_COUNT) fail(`${label} has an invalid slot`);
     if (typeof value !== "string") fail(`${label} values must be strings`);
+    if (slots.has(slot)) fail(`${label} has duplicate slots`);
+    slots.add(slot);
     return [slot, value] as [number, string];
   });
   entries.sort(([left], [right]) => left - right);
@@ -132,7 +135,12 @@ export function decodePanelConfig(input: Uint8Array): PanelConfigDocument {
     readU32(input, 8) !== input.length - PANEL_CONFIG_HEADER_SIZE) fail("invalid PanelConfig document header");
   const recordCount = readU16(input, 12);
   if (recordCount > PANEL_CONFIG_MAX_RECORD_COUNT) fail("PanelConfig contains too many records");
-  const result: PanelConfigDocument = { deviceProfile: "", buttons: {}, subpages: {}, settings: {} };
+  const result: PanelConfigDocument = {
+    deviceProfile: "",
+    buttons: {},
+    subpages: {},
+    settings: Object.create(null) as Record<string, string>,
+  };
   let offset = PANEL_CONFIG_HEADER_SIZE;
   for (let recordIndex = 0; recordIndex < recordCount; recordIndex += 1) {
     if (offset + 3 > input.length) fail("truncated PanelConfig record");

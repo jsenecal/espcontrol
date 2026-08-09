@@ -39,5 +39,15 @@ export function runPanelConfigTests(fixture: PanelConfigFixture): void {
   const invalidUtf8 = encoded.slice();
   invalidUtf8[19] = 0xff;
   expectPanelConfigError(() => decodePanelConfig(invalidUtf8), "invalid UTF-8 must be rejected");
+  const collidingButtonSlots: Record<string, string> = { 1: "light.kitchen", "01": "light.hall" };
+  expectPanelConfigError(
+    () => encodePanelConfig({ ...document, buttons: collidingButtonSlots }),
+    "slot keys that normalize to the same value must be rejected",
+  );
+  const protoSettings = Object.create(null) as Record<string, string>;
+  protoSettings.__proto__ = "preserved";
+  const decodedProtoSettings = decodePanelConfig(encodePanelConfig({ ...document, settings: protoSettings }));
+  equal(Object.prototype.hasOwnProperty.call(decodedProtoSettings.settings, "__proto__"), true, "reserved setting names are preserved");
+  equal(decodedProtoSettings.settings.__proto__, "preserved", "reserved setting values round-trip");
   expectPanelConfigError(() => encodePanelConfig({ ...document, deviceProfile: "x".repeat(65) }), "oversized device profiles must be rejected");
 }

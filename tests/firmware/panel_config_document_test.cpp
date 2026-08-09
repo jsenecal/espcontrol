@@ -100,6 +100,17 @@ void malformed_documents_are_rejected() {
                 PanelConfigStatus::INVALID_ARGUMENT,
                 "duplicate button slots are rejected");
 
+  std::array<uint8_t, 20> too_small_buffer{};
+  PanelConfigWriter too_small_writer(too_small_buffer.data(),
+                                     too_small_buffer.size());
+  expect_status(too_small_writer.begin(), PanelConfigStatus::OK,
+                "small writer starts");
+  expect_status(too_small_writer.append_device_profile(bytes("a"), 1),
+                PanelConfigStatus::OK, "small writer records profile");
+  expect_status(too_small_writer.append_button(1, bytes("x"), 1),
+                PanelConfigStatus::BUFFER_TOO_SMALL,
+                "slot capacity failures report their buffer status");
+
   const uint8_t malformed[] = {
       0x45, 0x50, 0x43, 0x46, 0x01, 0x00, 0x10, 0x00, 0x04, 0x00,
       0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x7f, 0x01, 0x00, 'x',

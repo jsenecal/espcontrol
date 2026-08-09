@@ -223,9 +223,11 @@ private:
     if (!ready() || value == nullptr || slot_mask == 0 ||
         (*seen_slots & slot_mask) != 0 ||
         value_size > PANEL_CONFIG_MAX_RECORD_BODY_BYTES - 1 ||
-        !panel_config_valid_utf8(value, value_size) ||
-        !can_append(value_size + 1)) {
+        !panel_config_valid_utf8(value, value_size)) {
       return status_ = PanelConfigStatus::INVALID_ARGUMENT;
+    }
+    if (!can_append(value_size + 1)) {
+      return status_ = PanelConfigStatus::BUFFER_TOO_SMALL;
     }
     write_record_header(type, value_size + 1);
     output_[offset_++] = slot;
