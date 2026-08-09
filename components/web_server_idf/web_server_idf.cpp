@@ -288,9 +288,7 @@ esp_err_t AsyncWebServer::request_post_handler(httpd_req_t *r) {
       return server->handle_multipart_upload_(r, content_type_char);
 #endif
     } else {
-      ESP_LOGW(TAG, "Unsupported content type for POST: %s", content_type_char);
-      // fallback to get handler to support backward compatibility
-      return AsyncWebServer::request_handler(r);
+      return static_cast<AsyncWebServer *>(r->user_ctx)->handle_raw_body_(r, content_type_char);
     }
   }
 
@@ -326,6 +324,29 @@ esp_err_t AsyncWebServer::request_post_handler(httpd_req_t *r) {
 
   AsyncWebServerRequest req(r, std::move(post_query));
   return static_cast<AsyncWebServer *>(r->user_ctx)->request_handler_(&req);
+}
+
+esp_err_t AsyncWebServer::handle_raw_body_(httpd_req_t *r, const char *content_type) {
+  AsyncWebServerRequest req(r);
+  AsyncWebHandler *handler = nullptr;
+  for (auto *candidate : this->handlers_) {
+    if (candidate->canHandle(&req)) { handler = candidate; break; }
+  }
+  if (handler == nullptr) return this->request_handler_(&req);
+  const size_t total = r->content_len;
+  std::vector<uint8_t> buffer(std::min<size_t>(1024, total));
+  for (size_t index = 0; index < total;) {
+    const int received = httpd_req_recv(r, reinterpret_cast<char *>(buffer.data()),
+                                        std::min(total - index, buffer.size()));
+    if (received <= 0) {
+      httpd_resp_send_err(r, received == HTTPD_SOCK_ERR_TIMEOUT ? HTTPD_408_REQ_TIMEOUT : HTTPD_400_BAD_REQUEST, nullptr);
+      return received == HTTPD_SOCK_ERR_TIMEOUT ? ESP_ERR_TIMEOUT : ESP_FAIL;
+    }
+    handler->handleBody(&req, buffer.data(), static_cast<size_t>(received), index, total);
+    index += static_cast<size_t>(received);
+  }
+  handler->handleRequest(&req);
+  return ESP_OK;
 }
 
 esp_err_t AsyncWebServer::request_handler(httpd_req_t *r) {
