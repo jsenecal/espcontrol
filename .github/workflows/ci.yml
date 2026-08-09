@@ -108,6 +108,7 @@ jobs:
             src/webserver/entry.ts \
             docs/public/webserver/www.js \
             docs/public/webserver/*/www.js \
+            docs/public/webserver/embedded/www.js \
             docs/public/webserver/web-assets.json \
             docs/public/webserver/bundles; then
             echo "Generated icon files are already up to date."
@@ -123,6 +124,7 @@ jobs:
             src/webserver/entry.ts \
             docs/public/webserver/www.js \
             docs/public/webserver/*/www.js \
+            docs/public/webserver/embedded/www.js \
             docs/public/webserver/web-assets.json \
             docs/public/webserver/bundles
           git commit -m "Build generated icon files"

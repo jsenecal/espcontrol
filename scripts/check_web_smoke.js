@@ -226,7 +226,7 @@ assert.deepStrictEqual(plain(hooks.firmwareFailureStatusFor("Could not download 
 
 const manifest = JSON.parse(fs.readFileSync(DEVICE_MANIFEST, "utf8"));
 const freshOutput = freshWebOutputDir();
-const webOutput = path.join(freshOutput, "www.js");
+const webOutput = path.join(freshOutput, "embedded", "www.js");
 const generated = fs.readFileSync(webOutput, "utf8");
 
 const hostedSandbox = createWebSandbox();
@@ -1678,7 +1678,7 @@ assert.strictEqual(
 
 async function verifyLocalFirmwareProfileSelection() {
   const productionOutput = freshWebOutputDir({ testHooks: false });
-  const productionBundle = fs.readFileSync(path.join(productionOutput, "www.js"), "utf8");
+  const productionBundle = fs.readFileSync(path.join(productionOutput, "embedded", "www.js"), "utf8");
   const sandbox = createWebSandbox();
   const requested = [];
   sandbox.document.currentScript = null;

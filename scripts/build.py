@@ -40,6 +40,13 @@ MDI_CSS_URL = f"https://cdn.jsdelivr.net/npm/@mdi/font@{MDI_VERSION}/css/materia
 MDI_WEB_FONT = ROOT / "common" / "assets" / "fonts" / f"materialdesignicons-webfont-{MDI_VERSION}.ttf"
 WEB_SOURCE_DIR = ROOT / "src" / "webserver"
 
+# The hosted editor remains available to the development firmware plus the
+# current stable release and its four supported rollback releases. Keep this
+# list aligned with the GitHub Pages release catalogue in pages.yml.
+WEB_ASSET_SUPPORTED_FIRMWARE_VERSIONS = (
+    "dev", "v2.7.1", "v2.7.0", "v2.6.3", "v2.6.2", "v2.6.1",
+)
+
 # Fixed editor controls use a few MDI glyphs that are not selectable Product
 # Model icons. Keep their pinned codepoints here so rebuilding www.js remains
 # possible without reaching the MDI CDN. Product Model icon codepoints are
@@ -283,7 +290,7 @@ def run_generated_transaction_self_test():
         )
         if result.returncode != 0:
             raise BuildError(result.stderr.strip() or "Generated overlay self-test could not build a web bundle")
-        bundle = (bundle_root / "www.js").read_text(encoding="utf-8")
+        bundle = (bundle_root / "app.js").read_text(encoding="utf-8")
         if marker not in bundle:
             raise BuildError("Web bundle did not consume the staged generated overlay")
 
@@ -3988,7 +3995,8 @@ def build_www(check_only=False, output_dir=None, test_hooks=False):
             temporary_root.cleanup()
         raise BuildError(result.stderr.strip() or "esbuild failed while building web bundles")
 
-    bundle_text = (build_root / "www.js").read_text()
+    bundle_text = (build_root / "app.js").read_text()
+    bridge_text = (build_root / "www.js").read_text()
     bundle_sha256 = hashlib.sha256(bundle_text.encode("utf-8")).hexdigest()
     bundle_relative_path = Path("bundles") / bundle_sha256 / "www.js"
     manifest_text = json.dumps({
@@ -3998,15 +4006,18 @@ def build_www(check_only=False, output_dir=None, test_hooks=False):
             "sha256": bundle_sha256,
             "path": bundle_relative_path.as_posix(),
             "deviceProfiles": list(devices),
+            "firmwareVersions": list(WEB_ASSET_SUPPORTED_FIRMWARE_VERSIONS),
+            "webAssetVersion": 1,
         }],
     }, indent=2) + "\n"
 
-    outputs = [(build_root / "www.js", bundle_text)]
+    outputs = [(build_root / "www.js", bridge_text)]
     outputs.extend(
         (build_root / slug / "www.js", (build_root / slug / "www.js").read_text())
         for slug in devices
     )
     outputs.extend([
+        (build_root / "embedded" / "www.js", bundle_text),
         (build_root / bundle_relative_path, bundle_text),
         (build_root / "web-assets.json", manifest_text),
     ])

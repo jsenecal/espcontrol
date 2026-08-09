@@ -124,8 +124,12 @@ def test_public_device_capabilities(profile_slugs: list[str]) -> None:
 
 
 def test_generated_web(profiles: dict[str, dict]) -> None:
-    path = WEB_OUTPUT_DIR / "www.js"
-    assert path.is_file(), "shared generated web bundle is missing"
+    bridge_path = WEB_OUTPUT_DIR / "www.js"
+    path = WEB_OUTPUT_DIR / "embedded" / "www.js"
+    assert bridge_path.is_file(), "shared generated web bridge is missing"
+    assert path.is_file(), "embedded generated web bundle is missing"
+    bridge = bridge_path.read_text(encoding="utf-8")
+    assert "web-assets.json" in bridge, "shared hosted web URL does not use the asset manifest"
     text = path.read_text(encoding="utf-8")
 
     for slug, profile in profiles.items():
@@ -151,7 +155,7 @@ def test_generated_web(profiles: dict[str, dict]) -> None:
     for slug in profiles:
         for suffix in (".yaml", ".factory.yaml"):
             build = (ROOT / "builds" / f"{slug}{suffix}").read_text(encoding="utf-8")
-            assert 'docs/public/webserver/www.js"' in build, f"{slug}{suffix}: firmware does not embed shared web bundle"
+            assert 'docs/public/webserver/embedded/www.js"' in build, f"{slug}{suffix}: firmware does not embed its offline editor"
 
 
 def test_generated_yaml(profiles: dict[str, dict]) -> None:
