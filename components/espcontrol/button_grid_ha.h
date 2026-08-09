@@ -241,7 +241,7 @@ inline bool ha_get_state(const std::string &entity_id,
   }
   return ha_read_coordinator().get(
       entity_id, std::string(), std::move(callback), false,
-      HA_READ_INTERNAL_FREE_MIN_BYTES, HA_READ_INTERNAL_LARGEST_MIN_BYTES);
+      HA_READ_INTERNAL_FREE_MIN_BYTES, HA_READ_INTERNAL_LARGEST_MIN_BYTES, owner);
 }
 
 inline bool ha_subscribe_attribute(const std::string &entity_id,
@@ -263,5 +263,5 @@ inline bool ha_get_attribute(const std::string &entity_id,
   }
   return ha_read_coordinator().get(
       entity_id, attribute, std::move(callback), true,
-      HA_READ_INTERNAL_FREE_MIN_BYTES, HA_READ_INTERNAL_LARGEST_MIN_BYTES);
+      HA_READ_INTERNAL_FREE_MIN_BYTES, HA_READ_INTERNAL_LARGEST_MIN_BYTES, owner);
 }

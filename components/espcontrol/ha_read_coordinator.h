@@ -35,10 +35,11 @@ class HaReadCoordinator {
            Callback callback,
            bool has_attribute,
            size_t min_free,
-           size_t min_largest) {
+           size_t min_largest,
+           void *owner = nullptr) {
     if (!available() || entity_id.empty() || !callback) return false;
     if (!heap_probe_.available("Home Assistant state request", min_free, min_largest)) return false;
-    auto callback_ref = std::make_shared<Callback>(std::move(callback));
+    CallbackRef callback_ref{std::make_shared<Callback>(std::move(callback)), owner, owner_generation(owner)};
     if (callback_depth_ != 0 || !state_connected()) {
       return queue(entity_id, attribute, std::move(callback_ref), has_attribute);
     }
@@ -103,6 +104,7 @@ class HaReadCoordinator {
 
   void release_owner(void *owner) {
     if (!owner) return;
+    release_owner_generation(owner);
     if (callback_depth_ != 0) {
       pending_owner_releases_.push_back(owner);
       return;
@@ -111,12 +113,23 @@ class HaReadCoordinator {
   }
 
  private:
+  struct CallbackRef {
+    std::shared_ptr<Callback> callback;
+    void *owner = nullptr;
+    uint32_t owner_generation = 0;
+  };
+
   struct DeferredRequest {
     std::string entity_id;
     std::string attribute;
-    std::vector<std::shared_ptr<Callback>> callbacks;
+    std::vector<CallbackRef> callbacks;
     uint32_t generation = 0;
     bool has_attribute = false;
+  };
+
+  struct OwnerGeneration {
+    void *owner = nullptr;
+    uint32_t generation = 0;
   };
 
   struct SubscriptionRef {
@@ -127,9 +140,35 @@ class HaReadCoordinator {
 
   static constexpr size_t MAX_DEFERRED_REQUESTS = 64;
 
+  uint32_t owner_generation(void *owner) {
+    if (!owner) return 0;
+    for (const auto &entry : owner_generations_) {
+      if (entry.owner == owner) return entry.generation;
+    }
+    uint32_t generation = next_owner_generation_++;
+    if (generation == 0) generation = next_owner_generation_++;
+    owner_generations_.push_back({owner, generation});
+    return generation;
+  }
+
+  bool owner_generation_current(const CallbackRef &callback_ref) const {
+    if (!callback_ref.owner) return true;
+    for (const auto &entry : owner_generations_) {
+      if (entry.owner == callback_ref.owner) return entry.generation == callback_ref.owner_generation;
+    }
+    return false;
+  }
+
+  void release_owner_generation(void *owner) {
+    owner_generations_.erase(
+        std::remove_if(owner_generations_.begin(), owner_generations_.end(),
+                       [owner](const OwnerGeneration &entry) { return entry.owner == owner; }),
+        owner_generations_.end());
+  }
+
   bool queue(const std::string &entity_id,
              const std::string &attribute,
-             std::shared_ptr<Callback> callback,
+             CallbackRef callback,
              bool has_attribute) {
     for (auto &request : deferred_) {
       if (request.generation == generation_ &&
@@ -147,28 +186,31 @@ class HaReadCoordinator {
 
   void dispatch_one(std::string entity_id,
                     std::string attribute,
-                    std::shared_ptr<Callback> callback,
+                    CallbackRef callback_ref,
                     bool has_attribute,
                     uint32_t generation) {
     transport_.get(
         std::move(entity_id), has_attribute ? std::move(attribute) : std::string(),
-        [this, callback, generation](State state) {
-          if (generation == generation_) invoke(callback, state);
+        [this, callback_ref, generation](State state) {
+          if (generation == generation_ && owner_generation_current(callback_ref)) {
+            invoke(callback_ref.callback, state);
+          }
         });
   }
 
   void dispatch_many(std::string entity_id,
                      std::string attribute,
-                     std::vector<std::shared_ptr<Callback>> callbacks,
+                     std::vector<CallbackRef> callbacks,
                      bool has_attribute,
                      uint32_t generation) {
-    auto callback_refs =
-        std::make_shared<std::vector<std::shared_ptr<Callback>>>(std::move(callbacks));
+    auto callback_refs = std::make_shared<std::vector<CallbackRef>>(std::move(callbacks));
     transport_.get(
         std::move(entity_id), has_attribute ? std::move(attribute) : std::string(),
         [this, callback_refs, generation](State state) {
           if (generation != generation_) return;
-          for (const auto &callback : *callback_refs) invoke(callback, state);
+          for (const auto &callback_ref : *callback_refs) {
+            if (owner_generation_current(callback_ref)) invoke(callback_ref.callback, state);
+          }
         });
   }
 
@@ -228,7 +270,9 @@ class HaReadCoordinator {
   HeapProbe heap_probe_;
   std::vector<DeferredRequest> deferred_;
   std::vector<SubscriptionRef> subscriptions_;
+  std::vector<OwnerGeneration> owner_generations_;
   uint32_t generation_ = 1;
+  uint32_t next_owner_generation_ = 1;
   uint32_t pending_reset_mask_ = 0;
   std::vector<void *> pending_owner_releases_;
   uint8_t callback_depth_ = 0;

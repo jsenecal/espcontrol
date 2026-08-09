@@ -184,6 +184,24 @@ void attribute_requests_preserve_attribute() {
           "attribute read lost its attribute");
 }
 
+void released_owner_drops_pending_reads_even_if_its_address_is_reused() {
+  Coordinator coordinator;
+  int old_screen = 0;
+  int old_calls = 0;
+  int replacement_calls = 0;
+  require(coordinator.get("sensor.old", "", [&](std::string) { old_calls++; }, false, 10, 5,
+                          &old_screen),
+          "owned read should send");
+  coordinator.release_owner(&old_screen);
+  require(coordinator.get("sensor.replacement", "", [&](std::string) { replacement_calls++; },
+                          false, 10, 5, &old_screen),
+          "replacement owner should receive a fresh token");
+  coordinator.transport().deliver_read(0, "late");
+  coordinator.transport().deliver_read(1, "current");
+  require(old_calls == 0 && replacement_calls == 1,
+          "released owner delivered a callback after its address was reused");
+}
+
 }  // namespace
 
 int main() {
@@ -194,5 +212,6 @@ int main() {
   cancellation_is_safe_during_callback();
   stale_generations_do_not_deliver();
   attribute_requests_preserve_attribute();
+  released_owner_drops_pending_reads_even_if_its_address_is_reused();
   return EXIT_SUCCESS;
 }

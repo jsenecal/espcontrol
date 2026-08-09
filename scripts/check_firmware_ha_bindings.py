@@ -142,6 +142,9 @@ ATTRIBUTE_HELPER_PATTERN = re.compile(
 SUBSCRIPTION_TRACKING_PATTERN = re.compile(
     r"subscriptions_\.push_back\(\s*\{\s*callback_ref\s*,\s*scope(?:\s*,\s*owner)?\s*\}\s*\)"
 )
+DEFERRED_CALLBACK_FANOUT_PATTERN = re.compile(
+    r"for\s*\(\s*const\s+auto\s*&\s*callback(?:_ref)?\s*:\s*\*callback_refs\s*\)"
+)
 TODO_GET_ITEMS_HELPER_PATTERN = re.compile(
     r"inline\s+bool\s+todo_begin_get_items_request\s*\([^)]*\)\s*\{(?P<body>.*?)\n\}",
     re.DOTALL,
@@ -238,7 +241,7 @@ def firmware_ha_boundary_errors(firmware_dir: Path, root: Path) -> list[str]:
     if (
         "request.callbacks.push_back(std::move(callback))" not in read_boundary_text
         or "request.entity_id == entity_id" not in read_boundary_text
-        or "for (const auto &callback : *callback_refs)" not in read_boundary_text
+        or not DEFERRED_CALLBACK_FANOUT_PATTERN.search(read_boundary_text)
     ):
         errors.append(f"{rel}: fan out duplicate deferred Home Assistant reads")
     if not SUBSCRIPTION_TRACKING_PATTERN.search(coordinator_text):
