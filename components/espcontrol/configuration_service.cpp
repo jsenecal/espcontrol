@@ -206,6 +206,73 @@ ServiceLoadResult ConfigurationService::load(uint8_t *output,
           legacy.document_size};
 }
 
+ServiceLoadResult ConfigurationService::refresh_legacy_shadow(
+    uint8_t *output, size_t output_capacity) {
+  if (output == nullptr && output_capacity > 0) {
+    return {ServiceStatus::INVALID_ARGUMENT, StoreStatus::INVALID_ARGUMENT};
+  }
+
+  const LegacyLoadResult legacy = legacy_.load(output, output_capacity);
+  if (legacy.status == LegacyStatus::EMPTY) {
+    return {ServiceStatus::EMPTY, StoreStatus::EMPTY};
+  }
+  if (legacy.status == LegacyStatus::BUFFER_TOO_SMALL) {
+    return {ServiceStatus::BUFFER_TOO_SMALL, StoreStatus::EMPTY,
+            legacy.document_version, 0, legacy.document_size};
+  }
+  if (legacy.status != LegacyStatus::OK) {
+    return {ServiceStatus::LEGACY_READ_FAILED, StoreStatus::EMPTY,
+            legacy.document_version, 0, legacy.document_size};
+  }
+  if (!supports_version(legacy.document_version) ||
+      !document_is_valid(legacy.document_version, output,
+                         legacy.document_size)) {
+    return {supports_version(legacy.document_version)
+                ? ServiceStatus::INVALID_DOCUMENT
+                : ServiceStatus::UNSUPPORTED_VERSION,
+            StoreStatus::EMPTY, legacy.document_version, 0,
+            legacy.document_size};
+  }
+
+  std::vector<uint8_t> fallback;
+  const size_t encoded_capacity = store_.maximum_payload_size();
+  uint8_t *encoded = encoded_buffer(encoded_capacity, &fallback);
+  if (encoded == nullptr) {
+    return {ServiceStatus::STORE_FAILED, StoreStatus::WRITE_FAILED,
+            legacy.document_version, 0, legacy.document_size};
+  }
+  const LoadResult stored = store_.load(encoded, encoded_capacity);
+  const bool matches_native =
+      stored.ok() &&
+      stored.payload_size ==
+          CONFIGURATION_DOCUMENT_HEADER_SIZE + legacy.document_size &&
+      read_u32(encoded + DOCUMENT_MAGIC_OFFSET) == DOCUMENT_MAGIC &&
+      read_u16(encoded + DOCUMENT_VERSION_OFFSET) == legacy.document_version &&
+      read_u16(encoded + DOCUMENT_HEADER_SIZE_OFFSET) ==
+          CONFIGURATION_DOCUMENT_HEADER_SIZE &&
+      std::memcmp(encoded + CONFIGURATION_DOCUMENT_HEADER_SIZE, output,
+                  legacy.document_size) == 0;
+  if (matches_native) {
+    return {ServiceStatus::OK, stored.status, legacy.document_version,
+            stored.generation, legacy.document_size};
+  }
+  if (stored.status != StoreStatus::OK && stored.status != StoreStatus::EMPTY) {
+    return {ServiceStatus::STORE_FAILED, stored.status,
+            legacy.document_version, stored.generation, legacy.document_size};
+  }
+
+  const CommitResult committed = commit_document(
+      legacy.document_version, output, legacy.document_size);
+  if (!committed.ok()) {
+    return {ServiceStatus::STORE_FAILED, committed.status,
+            legacy.document_version, committed.generation,
+            legacy.document_size};
+  }
+  return {ServiceStatus::SYNCED_LEGACY, committed.status,
+          legacy.document_version, committed.generation,
+          legacy.document_size};
+}
+
 ServiceSaveResult ConfigurationService::save(uint16_t document_version,
                                              const uint8_t *document,
                                              size_t document_size) {
