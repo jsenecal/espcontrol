@@ -38,6 +38,7 @@ class PanelConfigWriteHandler final
                   size_t len, size_t index, size_t total) override {
     if (index == 0) {
       received_size_ = 0;
+      expected_size_ = total;
       body_valid_ = total > 0 && total <= document_capacity_;
     }
     if (!body_valid_ || data == nullptr || index != received_size_ ||
@@ -67,8 +68,8 @@ class PanelConfigWriteHandler final
       reset_upload();
       return;
     }
-    if (!body_valid_ || request->contentLength() == 0 ||
-        received_size_ != request->contentLength()) {
+    if (!body_valid_ || expected_size_ == 0 ||
+        received_size_ != expected_size_) {
       httpd_resp_send_err(raw_request, HTTPD_400_BAD_REQUEST,
                           "Invalid panel configuration body");
       reset_upload();
@@ -125,6 +126,7 @@ class PanelConfigWriteHandler final
 
   void reset_upload() {
     received_size_ = 0;
+    expected_size_ = 0;
     body_valid_ = false;
   }
 
@@ -146,6 +148,7 @@ class PanelConfigWriteHandler final
   const char *username_;
   const char *password_;
   size_t received_size_{0};
+  size_t expected_size_{0};
   bool body_valid_{false};
 };
 
