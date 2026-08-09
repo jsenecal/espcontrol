@@ -11,6 +11,21 @@ export {
 } from "./backup";
 
 export {
+  PANEL_CONFIG_DOCUMENT_VERSION,
+  PANEL_CONFIG_HEADER_SIZE,
+  PANEL_CONFIG_MAX_DEVICE_PROFILE_BYTES,
+  PANEL_CONFIG_MAX_RECORD_BODY_BYTES,
+  PANEL_CONFIG_MAX_RECORD_COUNT,
+  PANEL_CONFIG_MAX_SETTING_KEY_BYTES,
+  PANEL_CONFIG_MAX_SLOT_COUNT,
+  PanelConfigError,
+  decodePanelConfig,
+  encodePanelConfig,
+} from "./panel_config";
+
+export type { PanelConfigDocument } from "./panel_config";
+
+export {
   CARD_CONFIG_FIELDS,
   cardConfigChanged,
   cloneCardConfig,

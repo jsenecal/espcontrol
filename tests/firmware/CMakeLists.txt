@@ -78,6 +78,12 @@ target_compile_options(configuration_service_test PRIVATE -Wall -Wextra -Werror)
 target_include_directories(configuration_service_test PRIVATE ../../components/espcontrol)
 add_test(NAME configuration_service_test COMMAND configuration_service_test)
 
+add_executable(panel_config_document_test panel_config_document_test.cpp)
+target_compile_features(panel_config_document_test PRIVATE cxx_std_17)
+target_compile_options(panel_config_document_test PRIVATE -Wall -Wextra -Werror)
+target_include_directories(panel_config_document_test PRIVATE ../../components/espcontrol)
+add_test(NAME panel_config_document_test COMMAND panel_config_document_test)
+
 add_executable(espcontrol_app_core_test
   espcontrol_app_core_test.cpp
   ../../components/espcontrol/espcontrol_app_core.cpp
