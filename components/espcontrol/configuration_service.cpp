@@ -54,6 +54,14 @@ bool ConfigurationService::document_is_valid(uint16_t document_version,
          validator_->validate(document_version, document, document_size);
 }
 
+uint8_t *ConfigurationService::encoded_buffer(
+    size_t required_size, std::vector<uint8_t> *fallback) const {
+  if (scratch_buffer_ != nullptr && scratch_capacity_ >= required_size)
+    return scratch_buffer_;
+  fallback->resize(required_size);
+  return fallback->empty() ? nullptr : fallback->data();
+}
+
 size_t ConfigurationService::maximum_document_size() const {
   const size_t maximum_payload = store_.maximum_payload_size();
   return maximum_payload > CONFIGURATION_DOCUMENT_HEADER_SIZE
@@ -68,17 +76,19 @@ CommitResult ConfigurationService::commit_document(
     return {StoreStatus::PAYLOAD_TOO_LARGE, 0, document_size};
   }
 
-  std::vector<uint8_t> encoded(CONFIGURATION_DOCUMENT_HEADER_SIZE +
-                               document_size);
-  write_u32(encoded.data() + DOCUMENT_MAGIC_OFFSET, DOCUMENT_MAGIC);
-  write_u16(encoded.data() + DOCUMENT_VERSION_OFFSET, document_version);
-  write_u16(encoded.data() + DOCUMENT_HEADER_SIZE_OFFSET,
+  std::vector<uint8_t> fallback;
+  const size_t encoded_size = CONFIGURATION_DOCUMENT_HEADER_SIZE + document_size;
+  uint8_t *encoded = encoded_buffer(encoded_size, &fallback);
+  if (encoded == nullptr) return {StoreStatus::WRITE_FAILED, 0, document_size};
+  write_u32(encoded + DOCUMENT_MAGIC_OFFSET, DOCUMENT_MAGIC);
+  write_u16(encoded + DOCUMENT_VERSION_OFFSET, document_version);
+  write_u16(encoded + DOCUMENT_HEADER_SIZE_OFFSET,
             CONFIGURATION_DOCUMENT_HEADER_SIZE);
   if (document_size > 0) {
-    std::memcpy(encoded.data() + CONFIGURATION_DOCUMENT_HEADER_SIZE, document,
+    std::memcpy(encoded + CONFIGURATION_DOCUMENT_HEADER_SIZE, document,
                 document_size);
   }
-  return store_.commit(encoded.data(), encoded.size());
+  return store_.commit(encoded, encoded_size);
 }
 
 CommitResult ConfigurationService::commit_document_if_generation(
@@ -88,18 +98,19 @@ CommitResult ConfigurationService::commit_document_if_generation(
     return {StoreStatus::PAYLOAD_TOO_LARGE, 0, document_size};
   }
 
-  std::vector<uint8_t> encoded(CONFIGURATION_DOCUMENT_HEADER_SIZE +
-                               document_size);
-  write_u32(encoded.data() + DOCUMENT_MAGIC_OFFSET, DOCUMENT_MAGIC);
-  write_u16(encoded.data() + DOCUMENT_VERSION_OFFSET, document_version);
-  write_u16(encoded.data() + DOCUMENT_HEADER_SIZE_OFFSET,
+  std::vector<uint8_t> fallback;
+  const size_t encoded_size = CONFIGURATION_DOCUMENT_HEADER_SIZE + document_size;
+  uint8_t *encoded = encoded_buffer(encoded_size, &fallback);
+  if (encoded == nullptr) return {StoreStatus::WRITE_FAILED, 0, document_size};
+  write_u32(encoded + DOCUMENT_MAGIC_OFFSET, DOCUMENT_MAGIC);
+  write_u16(encoded + DOCUMENT_VERSION_OFFSET, document_version);
+  write_u16(encoded + DOCUMENT_HEADER_SIZE_OFFSET,
             CONFIGURATION_DOCUMENT_HEADER_SIZE);
   if (document_size > 0) {
-    std::memcpy(encoded.data() + CONFIGURATION_DOCUMENT_HEADER_SIZE, document,
+    std::memcpy(encoded + CONFIGURATION_DOCUMENT_HEADER_SIZE, document,
                 document_size);
   }
-  return store_.commit_if_generation(expected_generation, encoded.data(),
-                                     encoded.size());
+  return store_.commit_if_generation(expected_generation, encoded, encoded_size);
 }
 
 ServiceLoadResult ConfigurationService::load(uint8_t *output,
@@ -107,20 +118,21 @@ ServiceLoadResult ConfigurationService::load(uint8_t *output,
   if (output == nullptr && output_capacity > 0) {
     return {ServiceStatus::INVALID_ARGUMENT, StoreStatus::INVALID_ARGUMENT};
   }
-  std::vector<uint8_t> encoded(store_.maximum_payload_size());
-  const LoadResult stored = store_.load(
-      encoded.empty() ? nullptr : encoded.data(), encoded.size());
+  std::vector<uint8_t> fallback;
+  const size_t encoded_capacity = store_.maximum_payload_size();
+  uint8_t *encoded = encoded_buffer(encoded_capacity, &fallback);
+  const LoadResult stored = store_.load(encoded, encoded_capacity);
   if (stored.ok()) {
     if (stored.payload_size < CONFIGURATION_DOCUMENT_HEADER_SIZE ||
-        read_u32(encoded.data() + DOCUMENT_MAGIC_OFFSET) != DOCUMENT_MAGIC ||
-        read_u16(encoded.data() + DOCUMENT_HEADER_SIZE_OFFSET) !=
+        read_u32(encoded + DOCUMENT_MAGIC_OFFSET) != DOCUMENT_MAGIC ||
+        read_u16(encoded + DOCUMENT_HEADER_SIZE_OFFSET) !=
             CONFIGURATION_DOCUMENT_HEADER_SIZE) {
       return {ServiceStatus::INVALID_DOCUMENT, stored.status, 0,
               stored.generation, stored.payload_size};
     }
 
     const uint16_t version =
-        read_u16(encoded.data() + DOCUMENT_VERSION_OFFSET);
+        read_u16(encoded + DOCUMENT_VERSION_OFFSET);
     const size_t document_size =
         stored.payload_size - CONFIGURATION_DOCUMENT_HEADER_SIZE;
     if (!supports_version(version)) {
@@ -128,7 +140,7 @@ ServiceLoadResult ConfigurationService::load(uint8_t *output,
               stored.generation, document_size};
     }
     const uint8_t *document =
-        encoded.data() + CONFIGURATION_DOCUMENT_HEADER_SIZE;
+        encoded + CONFIGURATION_DOCUMENT_HEADER_SIZE;
     if (!document_is_valid(version, document, document_size)) {
       return {ServiceStatus::INVALID_DOCUMENT, stored.status, version,
               stored.generation, document_size};
@@ -142,7 +154,7 @@ ServiceLoadResult ConfigurationService::load(uint8_t *output,
               stored.generation, document_size};
     }
     if (document_size > 0) {
-      std::memcpy(output, document, document_size);
+      std::memmove(output, document, document_size);
     }
     return {ServiceStatus::OK, stored.status, version, stored.generation,
             document_size};

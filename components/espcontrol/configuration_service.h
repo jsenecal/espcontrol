@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <vector>
 
 #include "configuration_store.h"
 
@@ -100,8 +101,10 @@ class ConfigurationService {
  public:
   ConfigurationService(ConfigurationStore &store,
                        LegacyConfigurationAdapter &legacy,
-      const ConfigurationDocumentValidator *validator = nullptr)
-      : store_(store), legacy_(legacy), validator_(validator) {}
+      const ConfigurationDocumentValidator *validator = nullptr,
+      uint8_t *scratch_buffer = nullptr, size_t scratch_capacity = 0)
+      : store_(store), legacy_(legacy), validator_(validator),
+        scratch_buffer_(scratch_buffer), scratch_capacity_(scratch_capacity) {}
 
   ServiceLoadResult load(uint8_t *output, size_t output_capacity);
   ServiceSaveResult save(uint16_t document_version, const uint8_t *document,
@@ -129,10 +132,14 @@ class ConfigurationService {
   bool supports_version(uint16_t document_version) const;
   bool document_is_valid(uint16_t document_version, const uint8_t *document,
                          size_t document_size) const;
+  uint8_t *encoded_buffer(size_t required_size,
+                          std::vector<uint8_t> *fallback) const;
 
   ConfigurationStore &store_;
   LegacyConfigurationAdapter &legacy_;
   const ConfigurationDocumentValidator *validator_{nullptr};
+  uint8_t *scratch_buffer_{nullptr};
+  size_t scratch_capacity_{0};
 };
 
 }  // namespace espcontrol::configuration
