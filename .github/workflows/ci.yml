@@ -107,7 +107,9 @@ jobs:
             components/espcontrol/icons.h \
             src/webserver/entry.ts \
             docs/public/webserver/www.js \
-            docs/public/webserver/*/www.js; then
+            docs/public/webserver/*/www.js \
+            docs/public/webserver/web-assets.json \
+            docs/public/webserver/bundles; then
             echo "Generated icon files are already up to date."
             echo "changed=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -120,7 +122,9 @@ jobs:
             components/espcontrol/icons.h \
             src/webserver/entry.ts \
             docs/public/webserver/www.js \
-            docs/public/webserver/*/www.js
+            docs/public/webserver/*/www.js \
+            docs/public/webserver/web-assets.json \
+            docs/public/webserver/bundles
           git commit -m "Build generated icon files"
           git push
           echo "changed=true" >> "$GITHUB_OUTPUT"
