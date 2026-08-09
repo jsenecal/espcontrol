@@ -103,7 +103,9 @@ const bundleSize = {
 };
 assert.strictEqual(bundleSize.minified, fixture.bundleSize.minified,
   "shared minified migration baseline changed");
-assert(Math.abs(bundleSize.gzip - fixture.bundleSize.gzip) <= 1024,
+assert(
+  Math.abs(bundleSize.gzip - fixture.bundleSize.gzip) <=
+    (fixture.bundleSize.gzipTolerance || 1024),
   "shared gzip migration baseline changed beyond the supported compressor variation");
 
 console.log("Web migration characterization baseline checks passed.");
