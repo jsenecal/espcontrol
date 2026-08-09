@@ -27,6 +27,8 @@ PROJECT_NAME = "jtenniswood.espcontrol"
 ESPHOME_ENV = Path(__file__).resolve().parents[1] / ".github" / "esphome.env"
 RELEASE_WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "release.yml"
 PAGES_WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "pages.yml"
+FIRMWARE_COMPILE_WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "firmware-compile.yml"
+NIGHTLY_FIRMWARE_WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "nightly-firmware.yml"
 ROOT = Path(__file__).resolve().parents[1]
 RELEASE_SKILL = (
     Path(__file__).resolve().parents[1]
@@ -160,6 +162,24 @@ def test_release_workflow_uses_current_ota_output() -> None:
     assert "scripts/firmware_release.py verify-recovery" in workflow
     assert str(prepare_c6_firmware.C6_RELATIVE_PATH) in workflow
     assert "path: dist/firmware/" in workflow, "publishable firmware must use the dist boundary"
+
+
+def test_device_matrix_sparse_checkouts_include_product_model() -> None:
+    required_paths = (
+        "product/model_v2.json",
+        "scripts/product_model_v2.py",
+        "common/assets/icons.json",
+        "common/config/card_contract.json",
+        "common/config/entity_names.json",
+        "common/config/strings.*.txt",
+        "compatibility/fixtures/product_compatibility.json",
+    )
+    for workflow_path in (FIRMWARE_COMPILE_WORKFLOW, NIGHTLY_FIRMWARE_WORKFLOW):
+        workflow = workflow_path.read_text(encoding="utf-8")
+        for required_path in required_paths:
+            assert required_path in workflow, (
+                f"{workflow_path.name} sparse device-matrix checkout is missing {required_path}"
+            )
 
 
 def test_pages_excludes_draft_prereleases() -> None:
@@ -609,6 +629,7 @@ def test_public_pages_verification() -> None:
 def main() -> int:
     test_esphome_env_format()
     test_release_workflow_uses_current_ota_output()
+    test_device_matrix_sparse_checkouts_include_product_model()
     test_pages_excludes_draft_prereleases()
     test_release_skill_creates_selected_tag_before_draft()
     test_valid_files_and_directory()
