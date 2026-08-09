@@ -9,6 +9,7 @@
 #include "esphome/core/log.h"
 
 #include "panel_config_capabilities_endpoint.h"
+#include "panel_config_read_endpoint.h"
 
 namespace espcontrol {
 
@@ -92,6 +93,14 @@ void EspControlApp::setup() {
                refreshed.status != configuration::ServiceStatus::EMPTY) {
       ESP_LOGE(TAG, "Native configuration refresh failed (%u)",
                static_cast<unsigned>(refreshed.status));
+    }
+    const bool read_endpoint_registered =
+        configuration::register_panel_config_read_endpoint(
+            panel_config_service_, panel_config_document_buffer_,
+            PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
+    configuration::set_panel_config_read_supported(read_endpoint_registered);
+    if (!read_endpoint_registered) {
+      ESP_LOGW(TAG, "Native configuration read endpoint is unavailable");
     }
   }
   configuration::register_panel_config_capabilities_endpoint();
