@@ -7,6 +7,7 @@ import * as PreviewFeature from "./features/preview";
 import * as BackupFeature from "./features/backup";
 import * as SettingsFeature from "./features/settings";
 import * as AlarmDelayAudioController from "./features/alarm_delay_audio_controller";
+import * as ScreensaverController from "./features/screensaver_controller";
 import * as ClipboardFeature from "./features/clipboard";
 import * as UiTokens from "./state/ui_tokens";
 import * as AppState from "./state/app_state";
@@ -241,6 +242,7 @@ function startEspControl(): void {
     createBackupFeature: BackupFeature.createBackupFeature,
     createSettingsUiFeature: SettingsFeature.createSettingsUiFeature,
     createAlarmDelayAudioController: AlarmDelayAudioController.createAlarmDelayAudioController,
+    createScreensaverController: ScreensaverController.createScreensaverController,
     screensaverControlState: SettingsFeature.screensaverControlState,
     timedSettingLabel: SettingsFeature.timedSettingLabel,
     ...UiTokens,
