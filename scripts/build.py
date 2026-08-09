@@ -283,7 +283,7 @@ def run_generated_transaction_self_test():
         )
         if result.returncode != 0:
             raise BuildError(result.stderr.strip() or "Generated overlay self-test could not build a web bundle")
-        bundle = (bundle_root / "www.js").read_text(encoding="utf-8")
+        bundle = (bundle_root / "app.js").read_text(encoding="utf-8")
         if marker not in bundle:
             raise BuildError("Web bundle did not consume the staged generated overlay")
 
