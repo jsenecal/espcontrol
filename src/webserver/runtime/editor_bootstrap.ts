@@ -16,8 +16,8 @@ export type GlobalInstaller = (descriptors: GlobalDescriptors) => void;
 export function installEditorBootstrap(
   modules: readonly EditorBootstrapModule[],
   install: GlobalInstaller = installGlobals,
+  installed: Set<string> = new Set<string>(),
 ): void {
-  const installed = new Set<string>();
   for (const module of modules) {
     if (!module.name || installed.has(module.name)) {
       throw new Error(`Duplicate or unnamed editor bootstrap module: ${module.name || "(unnamed)"}`);

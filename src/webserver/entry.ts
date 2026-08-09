@@ -254,14 +254,13 @@ function startEspControl(): void {
       AppState.defaultTimezoneOptionsForDevice(DeviceConfig.deviceConfig),
   });
 
-  installEditorBootstrap(applicationBootstrapModules);
-  installEditorBootstrap(cardBootstrapModules);
-
+  const installedModules = new Set<string>();
+  installEditorBootstrap(applicationBootstrapModules, undefined, installedModules);
+  installEditorBootstrap(cardBootstrapModules, undefined, installedModules);
   if (__ESPCONTROL_TEST_HOOKS_ENABLED__) {
-    installEditorBootstrap(testHookBootstrapModules);
+    installEditorBootstrap(testHookBootstrapModules, undefined, installedModules);
   }
-
-  installEditorBootstrap([{ name: "app-start", install: installAppStartModule }]);
+  installEditorBootstrap([{ name: "app-start", install: installAppStartModule }], undefined, installedModules);
 }
 
 const deviceConfigReady = DeviceConfig.initializeDeviceConfig();

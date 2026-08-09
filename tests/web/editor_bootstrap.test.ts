@@ -16,11 +16,13 @@ export function runEditorBootstrapTests(): void {
   equal(calls.join(","), "store,preview", "bootstrap preserves declared controller order");
 
   let duplicateError = "";
+  const installed = new Set<string>();
   try {
-    installEditorBootstrap([modules[0]!, modules[0]!], () => undefined);
+    installEditorBootstrap([modules[0]!], () => undefined, installed);
+    installEditorBootstrap([modules[0]!], () => undefined, installed);
   } catch (error) {
     duplicateError = String(error);
   }
   equal(duplicateError.includes("Duplicate or unnamed"), true,
-    "bootstrap rejects accidental duplicate compatibility modules");
+    "bootstrap rejects duplicate compatibility modules across bootstrap phases");
 }
