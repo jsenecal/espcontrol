@@ -70,28 +70,48 @@ inline Family family_for_runtime_type(espcontrol::card_runtime::CardTypeId type)
   }
 }
 
+// Generated metadata selects a handwritten driver here; it never carries card
+// behavior. The singleton is the registry-service boundary for legacy helpers.
+class CardRuntimeRegistryService {
+ public:
+  Context context_for(const std::string &type, const std::string &mode,
+                      Surface surface = Surface::MAIN_GRID) const {
+    using namespace espcontrol::card_runtime;
+    Context context;
+    context.runtime = card_runtime_spec(card_type_id(type));
+    context.runtime.driver = resolve_card_driver(context.runtime.type, mode);
+    context.family = family_for_runtime_type(context.runtime.type);
+    context.surface = surface;
+    context.known = context.runtime.type != CardTypeId::UNKNOWN;
+    context.allow_in_subpage = has_capability(context.runtime, CAPABILITY_SUBPAGE);
+    // Todo was removed from the configurator but old saved cards remain
+    // supported through one explicit compatibility driver.
+    if (!context.known && type == "todo") {
+      context.family = Family::TODO;
+      context.known = true;
+      context.allow_in_subpage = true;
+      context.runtime.capabilities = static_cast<uint16_t>(
+          CAPABILITY_SUBSCRIPTIONS | CAPABILITY_ACTIONS | CAPABILITY_MODAL |
+          CAPABILITY_RUNTIME_ALLOCATION | CAPABILITY_SUBPAGE);
+      context.legacy_dispatch = true;
+    }
+    return context;
+  }
+
+  Registration registration_for(const std::string &type) const {
+    const Context context = context_for(type, "");
+    return registration(context.family, context.known, context.allow_in_subpage);
+  }
+};
+
+inline const CardRuntimeRegistryService &card_runtime_registry_service() {
+  static const CardRuntimeRegistryService service;
+  return service;
+}
+
 inline Context context_for(const std::string &type, const std::string &mode,
                            Surface surface = Surface::MAIN_GRID) {
-  using namespace espcontrol::card_runtime;
-  Context context;
-  context.runtime = card_runtime_spec(card_type_id(type));
-  context.runtime.driver = resolve_card_driver(context.runtime.type, mode);
-  context.family = family_for_runtime_type(context.runtime.type);
-  context.surface = surface;
-  context.known = context.runtime.type != CardTypeId::UNKNOWN;
-  context.allow_in_subpage = has_capability(context.runtime, CAPABILITY_SUBPAGE);
-  // Todo was removed from the configurator but old saved cards remain
-  // supported through one explicit compatibility driver.
-  if (!context.known && type == "todo") {
-    context.family = Family::TODO;
-    context.known = true;
-    context.allow_in_subpage = true;
-    context.runtime.capabilities = static_cast<uint16_t>(
-        CAPABILITY_SUBSCRIPTIONS | CAPABILITY_ACTIONS | CAPABILITY_MODAL |
-        CAPABILITY_RUNTIME_ALLOCATION | CAPABILITY_SUBPAGE);
-    context.legacy_dispatch = true;
-  }
-  return context;
+  return card_runtime_registry_service().context_for(type, mode, surface);
 }
 
 }  // namespace espcontrol::cards
@@ -112,9 +132,7 @@ inline espcontrol::cards::Context card_runtime_context(
 }
 
 inline espcontrol::cards::Registration card_runtime_registration(const std::string &type) {
-  const auto context = card_runtime_context(type);
-  return espcontrol::cards::registration(
-      context.family, context.known, context.allow_in_subpage);
+  return espcontrol::cards::card_runtime_registry_service().registration_for(type);
 }
 
 inline espcontrol::cards::Family card_runtime_family(const std::string &type) {

@@ -9,6 +9,12 @@ int main() {
   static_assert(MAX_GRID_SLOTS == ESPCONTROL_MAX_GRID_SLOTS);
   static_assert(MAX_SUBPAGE_ITEMS == MAX_GRID_SLOTS * MAX_GRID_SLOTS);
 
+  const auto &registry_service = espcontrol::cards::card_runtime_registry_service();
+  const auto service_media = registry_service.context_for("media", "");
+  if (!service_media.known || service_media.family != espcontrol::cards::Family::MEDIA) {
+    return EXIT_FAILURE;
+  }
+
   if (string_ref_limited(esphome::StringRef("calendar"), 4) != "cale") return EXIT_FAILURE;
   if (string_ref_limited(esphome::StringRef("clock"), 32) != "clock") return EXIT_FAILURE;
   if (decode_html_entities("Earth, Wind &amp; Fire") != "Earth, Wind & Fire") {
