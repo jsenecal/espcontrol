@@ -34,17 +34,20 @@ returned.
 The core store depends only on a narrow `StorageBackend`. The first live
 adapter uses an isolated `espcontrol_cfg` namespace in ESPHome's NVS
 partition. On the 7-inch P4, it reserves its fixed-size blobs from PSRAM at
-startup and writes them only at
-the store's explicit durability boundaries, preserving the two-slot protocol
-without a partition-table migration.
+startup and writes only each slot's used bytes at the store's explicit
+durability boundaries. This preserves the two-slot protocol without a
+partition-table migration or reserving the full in-memory slot capacity in
+NVS.
 
 Place `ConfigurationService` above that store. The service wraps each payload
 with an independently versioned document header, imports the existing entity
 configuration through `LegacyConfigurationAdapter` when the new store is
-empty, and persists that imported document immediately. New saves commit the
-atomic document first and then mirror the same version and content through the
-legacy adapter. A legacy mirror failure is reported separately while the new
-document remains durable.
+empty, and persists that imported document immediately. While the legacy
+entities remain authoritative, each boot refreshes the native shadow if the
+editor has changed those entities. New native saves commit the atomic document
+first and then mirror the same version and content through the legacy adapter.
+A legacy mirror failure is reported separately while the new document remains
+durable.
 
 Document schema validation and the HTTP API remain separate layers.
 

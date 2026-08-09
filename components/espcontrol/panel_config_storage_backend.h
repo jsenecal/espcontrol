@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
@@ -14,12 +15,19 @@ namespace espcontrol::configuration {
 // firmware unit tests.
 enum class BlobLoadStatus : uint8_t { OK, MISSING, FAILED };
 
+struct BlobLoadResult {
+  BlobLoadStatus status{BlobLoadStatus::FAILED};
+  size_t size{0};
+};
+
 class BlobStorage {
  public:
   virtual ~BlobStorage() = default;
 
-  virtual BlobLoadStatus load_blob(uint8_t slot, uint8_t *output,
-                                   size_t size) = 0;
+  // Loads at most capacity bytes and reports the durable blob length. The
+  // remaining buffer bytes must be filled with an erased value by the binding.
+  virtual BlobLoadResult load_blob(uint8_t slot, uint8_t *output,
+                                   size_t capacity) = 0;
   virtual bool save_blob(uint8_t slot, const uint8_t *data, size_t size) = 0;
   virtual bool sync() = 0;
 };
@@ -45,6 +53,7 @@ class BufferedBlobStorageBackend final : public StorageBackend {
     }
     loaded_.fill(false);
     dirty_.fill(false);
+    stored_sizes_.fill(0);
     return true;
   }
 
@@ -68,7 +77,16 @@ class BufferedBlobStorageBackend final : public StorageBackend {
         !load_slot(slot)) {
       return false;
     }
+    // ConfigurationStore clears the publication marker before replacing a
+    // slot. Persist that small invalid marker immediately rather than retain a
+    // previous, potentially much larger blob allocation in NVS.
+    if (offset == 0 && size == sizeof(uint32_t) &&
+        std::all_of(data, data + size,
+                    [](uint8_t value) { return value == 0; })) {
+      stored_sizes_[slot] = 0;
+    }
     if (size > 0) std::memcpy(slots_[slot] + offset, data, size);
+    stored_sizes_[slot] = std::max(stored_sizes_[slot], offset + size);
     dirty_[slot] = true;
     return true;
   }
@@ -76,7 +94,7 @@ class BufferedBlobStorageBackend final : public StorageBackend {
   bool sync() override {
     for (uint8_t slot = 0; slot < CONFIGURATION_SLOT_COUNT; ++slot) {
       if (!dirty_[slot]) continue;
-      if (!storage_.save_blob(slot, slots_[slot], SlotCapacity))
+      if (!storage_.save_blob(slot, slots_[slot], stored_sizes_[slot]))
         return false;
     }
     if (!storage_.sync()) return false;
@@ -99,11 +117,15 @@ class BufferedBlobStorageBackend final : public StorageBackend {
 
   bool load_slot(uint8_t slot) {
     if (loaded_[slot]) return true;
-    const BlobLoadStatus result =
+    const BlobLoadResult result =
         storage_.load_blob(slot, slots_[slot], SlotCapacity);
-    if (result == BlobLoadStatus::FAILED) return false;
-    if (result == BlobLoadStatus::MISSING)
+    if (result.status == BlobLoadStatus::FAILED ||
+        result.size > SlotCapacity) {
+      return false;
+    }
+    if (result.status == BlobLoadStatus::MISSING)
       std::memset(slots_[slot], 0xFF, SlotCapacity);
+    stored_sizes_[slot] = result.size;
     loaded_[slot] = true;
     return true;
   }
@@ -112,6 +134,7 @@ class BufferedBlobStorageBackend final : public StorageBackend {
   std::array<uint8_t *, CONFIGURATION_SLOT_COUNT> slots_{};
   std::array<bool, CONFIGURATION_SLOT_COUNT> loaded_{};
   std::array<bool, CONFIGURATION_SLOT_COUNT> dirty_{};
+  std::array<size_t, CONFIGURATION_SLOT_COUNT> stored_sizes_{};
 };
 
 }  // namespace espcontrol::configuration

@@ -82,6 +82,17 @@ void EspControlApp::setup() {
       ESP_LOGE(TAG, "Native configuration load failed (%u)",
                static_cast<unsigned>(loaded.status));
     }
+    const configuration::ServiceLoadResult refreshed =
+        panel_config_service_.refresh_legacy_shadow(
+            panel_config_document_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
+    if (refreshed.status == configuration::ServiceStatus::SYNCED_LEGACY) {
+      ESP_LOGI(TAG, "Refreshed native configuration shadow to generation %" PRIu32,
+               refreshed.generation);
+    } else if (!refreshed.ok() &&
+               refreshed.status != configuration::ServiceStatus::EMPTY) {
+      ESP_LOGE(TAG, "Native configuration refresh failed (%u)",
+               static_cast<unsigned>(refreshed.status));
+    }
   }
   configuration::register_panel_config_capabilities_endpoint();
 }

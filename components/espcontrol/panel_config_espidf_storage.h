@@ -17,8 +17,8 @@ namespace espcontrol::configuration {
 class EspIdfPanelConfigBlobStorage final : public BlobStorage {
  public:
   bool begin();
-  BlobLoadStatus load_blob(uint8_t slot, uint8_t *output,
-                           size_t size) override;
+  BlobLoadResult load_blob(uint8_t slot, uint8_t *output,
+                           size_t capacity) override;
   bool save_blob(uint8_t slot, const uint8_t *data, size_t size) override;
   bool sync() override;
 

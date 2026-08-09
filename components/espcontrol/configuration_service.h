@@ -40,6 +40,7 @@ class LegacyConfigurationAdapter {
 enum class ServiceStatus : uint8_t {
   OK,
   IMPORTED_LEGACY,
+  SYNCED_LEGACY,
   EMPTY,
   INVALID_ARGUMENT,
   BUFFER_TOO_SMALL,
@@ -107,6 +108,11 @@ class ConfigurationService {
         scratch_buffer_(scratch_buffer), scratch_capacity_(scratch_capacity) {}
 
   ServiceLoadResult load(uint8_t *output, size_t output_capacity);
+  // During compatibility releases the text entities remain authoritative.
+  // Refresh the native shadow on boot so editor changes made through the
+  // legacy API survive a later native-only firmware upgrade.
+  ServiceLoadResult refresh_legacy_shadow(uint8_t *output,
+                                          size_t output_capacity);
   ServiceSaveResult save(uint16_t document_version, const uint8_t *document,
                          size_t document_size);
   ServiceSaveResult save_if_generation(uint32_t expected_generation,
