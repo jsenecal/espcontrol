@@ -27,8 +27,8 @@
         "screen": {},
         "native_config": {
           "document_version": 1,
-          "device_profile": "esp32-p4-86",
-          "payload": "RVBDRgEAEABxAAAABQAAAAELAGVzcDMyLXA0LTg2AhYAAWxpZ2h0LmtpdGNoZW47S2l0Y2hlbgMZAAIxfExpdmluZyByb29tfGxpZ2h0LnNvZmEEFgAPYnV0dG9uX29uX2NvbG9yMDA3M0ZGBBIADGJ1dHRvbl9vcmRlcjEsMiwz"
+          "device_profile": "guition-esp32-p4-jc1060p470",
+          "payload": "RVBDRgEAEAC3AAAABgAAAAEbAGd1aXRpb24tZXNwMzItcDQtamMxMDYwcDQ3MAIlAAFsaWdodC5raXRjaGVuO0tpdGNoZW47QXV0bztBdXRvOzs7OzsCHgACc3dpdGNoLmZhbjtGYW47QXV0bztBdXRvOzs7OzsDIQABc2NlbmUubW92aWU7TW92aWU7QXV0bztBdXRvOzs7OzsEFgAPYnV0dG9uX29uX2NvbG9yRkY4ODAwBBAADGJ1dHRvbl9vcmRlcjEsMg=="
         }
       },
       "target": { "device": "guition-esp32-p4-jc1060p470", "slots": 15 },

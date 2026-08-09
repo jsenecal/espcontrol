@@ -3,7 +3,9 @@ import { createBackupFeature, type FeatureSubpage } from "../../src/webserver/fe
 import {
   buildSubpageGrid,
   cloneCardConfig,
+  decodePanelConfig,
   createPanelConfigBackupPayload,
+  decodePanelConfigBackupPayload,
   encodePanelConfig,
   parseLegacySubpageConfig,
   serializeLegacySubpageConfig,
@@ -143,7 +145,13 @@ export function runBackupFeatureTests(migrationFixture?: MigrationFixture): void
   const scenario = migrationFixture.scenarios.backup_restore;
   const restoredBackup = feature.normalizeBackupConfig(scenario.backup);
   const restored = feature.planBackupImport(restoredBackup, scenario.target);
+  const restoredNative = decodePanelConfig(decodePanelConfigBackupPayload(restoredBackup.native_config));
   equal(restored.warnings.length, scenario.expected.warning_count, "backup restore reports its target-size warning");
+  equal(restoredNative.deviceProfile, scenario.target.device, "native backup matches the readable backup device");
+  equal(restoredNative.settings.button_order, scenario.expected.button_order,
+    "native backup matches the readable backup order");
+  equal(restoredNative.settings.button_on_color, scenario.expected.button_on_color,
+    "native backup matches the readable backup active colour");
   equal(restored.button_order, scenario.expected.button_order, "backup restore preserves button order");
   equal(restored.config.button_on_color, scenario.expected.button_on_color, "backup restore preserves active colour");
   deepEqual(restored.buttons.slice(0, scenario.expected.button_entities.length).map((button) => button.entity),
