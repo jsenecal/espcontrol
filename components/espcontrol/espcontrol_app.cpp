@@ -97,7 +97,8 @@ void EspControlApp::setup() {
     const bool read_endpoint_registered =
         configuration::register_panel_config_read_endpoint(
             panel_config_service_, panel_config_document_buffer_,
-            PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
+            PANEL_CONFIG_STORAGE_SLOT_CAPACITY, web_auth_username_.c_str(),
+            web_auth_password_.c_str());
     configuration::set_panel_config_read_supported(read_endpoint_registered);
     if (!read_endpoint_registered) {
       ESP_LOGW(TAG, "Native configuration read endpoint is unavailable");
