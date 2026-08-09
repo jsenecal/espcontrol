@@ -1,6 +1,7 @@
 import { screensaverControlState, timedSettingLabel } from "../../src/webserver/features/settings";
 import { createAlarmDelayAudioController } from "../../src/webserver/features/alarm_delay_audio_controller";
 import { createScreensaverController } from "../../src/webserver/features/screensaver_controller";
+import { createCoverArtScreensaverController } from "../../src/webserver/features/cover_art_screensaver_controller";
 
 function equal<T>(actual: T, expected: T, message: string): void {
   if (actual !== expected) throw new Error(`${message}: expected ${String(expected)}, received ${String(actual)}`);
@@ -60,4 +61,31 @@ export function runSettingsFeatureTests(): void {
   equal(screensaver.setDimBrightness(clockMode, 200).dimBrightness, 100, "dim brightness is normalized");
   equal(screensaver.setClockBrightness(clockMode, "clockBrightnessNight", 0).clockBrightnessNight,
         35, "night brightness uses daytime brightness as its fallback");
+
+  const coverArt = createCoverArtScreensaverController({
+    delay: (value) => Math.max(0, Math.min(120, Number(value) || 0)),
+    trackOverlayDuration: (value) => Math.max(0, Number(value) || 0),
+  });
+  const coverArtInitial = {
+    enabled: false,
+    delay: 10,
+    trackOverlayDuration: 5,
+    hideExternalInput: true,
+    filteringEnabled: false,
+    attributeConditions: "",
+  };
+  equal(coverArt.uiState(coverArtInitial).contentVisible, false, "cover art settings hide when disabled");
+  const coverArtEnabled = coverArt.setEnabled(coverArtInitial, true);
+  equal(coverArt.uiState(coverArtEnabled).badgeVisible, true, "cover art badge shows when enabled");
+  equal(coverArt.setDelay(coverArtEnabled, 300).delay, 120, "cover art delay is normalized");
+  equal(coverArt.setShowExternalSources(coverArtEnabled, true).hideExternalInput, false,
+        "showing external sources clears the hide setting");
+  equal(coverArt.setFilteringEnabled({ ...coverArtEnabled, attributeConditions: "app_id=music" }, false).attributeConditions,
+        "", "turning filtering off clears its conditions");
+  equal(coverArt.initialState({ ...coverArtEnabled, filteringEnabled: true }).filteringEnabled, false,
+        "a freshly built empty filter starts disabled");
+  equal(coverArt.normalize({ ...coverArtEnabled, filteringEnabled: true }).filteringEnabled, true,
+        "an enabled empty filter remains visible while editing");
+  equal(coverArt.uiState(coverArt.setAttributeConditions(coverArtInitial, "media_content_type=music")).filterOptionsVisible,
+        true, "saved conditions keep filtering controls visible");
 }

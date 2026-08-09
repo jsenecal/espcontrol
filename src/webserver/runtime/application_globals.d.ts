@@ -432,6 +432,10 @@ declare global {
   var createMdiIcon: any;
   var createPanelConfigBackupPayload: any;
   var createRangeSlider: any;
+  var createCoverArtScreensaverController: any;
+  var _coverArtScreensaverController: any;
+  var coverArtScreensaverState: any;
+  var applyCoverArtScreensaverState: any;
   var createScreensaverThenControls: any;
   var createScreensaverController: any;
   var createSettingsUiFeature: any;
