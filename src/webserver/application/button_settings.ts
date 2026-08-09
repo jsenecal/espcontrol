@@ -1,11 +1,13 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createCardEditorDraftController } from "../features/card_editor_draft_controller";
+import { createCardEditorValidationController } from "../features/card_editor_validation_controller";
 export function installButtonSettingsModule(): GlobalDescriptors {
     var cardEditorDraftController: any = createCardEditorDraftController({
         "cloneCard": function (button: any) { return EspControlModel.cloneCardConfig(button); },
         "emptyCard": function () { return EspControlModel.emptyCardConfig(); },
     });
+    var cardEditorValidationController: any = createCardEditorValidationController();
     // ── Button settings panel (unified) ────────────────────────────────────
     function openCardSettings(this: any, slot?: any) {
         if (isConfigLocked())
@@ -176,7 +178,10 @@ export function installButtonSettingsModule(): GlobalDescriptors {
             input.addEventListener("change", maybeClearError);
         }
         function validateSettingsDraft(this: any) {
-            var firstInvalid: any = null;
+            var validation: any = cardEditorValidationController.validateRequiredFields(requiredFields.map(function (this: any, rule?: any) {
+                return { value: rule.input.value, active: !rule.isActive || rule.isActive() };
+            }));
+            var firstInvalid: any = validation.firstInvalidIndex >= 0 ? requiredFields[validation.firstInvalidIndex].input : null;
             for (var i: any = 0; i < requiredFields.length; i++) {
                 var rule: any = requiredFields[i];
                 if (rule.isActive && !rule.isActive()) {
@@ -187,8 +192,6 @@ export function installButtonSettingsModule(): GlobalDescriptors {
                     clearFieldError(rule.input);
                     continue;
                 }
-                if (!firstInvalid)
-                    firstInvalid = rule.input;
                 showFieldError(rule.input, rule.message);
             }
             if (!firstInvalid)
@@ -209,12 +212,7 @@ export function installButtonSettingsModule(): GlobalDescriptors {
                 button.setAttribute("aria-expanded", "true");
         }
         function validateConfigSize(this: any) {
-            if (c.isSub)
-                return true;
-            if (serializeButtonConfig(b).length <= 255)
-                return true;
-            showBanner("Card settings are too large to save. Shorten confirmation text, labels, or entity IDs.", "error");
-            return false;
+            return validateSaveLimits().reason !== "config-size";
         }
         function validateImageCardLimit(this: any) {
             var count: any = imageCardCountWithCandidate({
@@ -223,10 +221,24 @@ export function installButtonSettingsModule(): GlobalDescriptors {
                 slot: slot,
                 button: b,
             });
-            if (count <= imageSlotCapacity())
+            var validation: any = cardEditorValidationController.validateSave({
+                fields: [], isSubpage: c.isSub, serializedConfigLength: 0,
+                imageCardCount: count, imageCardCapacity: imageSlotCapacity(),
+            });
+            if (validation.reason !== "image-limit")
                 return true;
             showImageCardLimitBanner();
             return false;
+        }
+        function validateSaveLimits(this: any) {
+            var validation: any = cardEditorValidationController.validateSave({
+                fields: [], isSubpage: c.isSub, serializedConfigLength: serializeButtonConfig(b).length,
+                imageCardCount: 0, imageCardCapacity: imageSlotCapacity(),
+            });
+            if (validation.reason === "config-size") {
+                showBanner("Card settings are too large to save. Shorten confirmation text, labels, or entity IDs.", "error");
+            }
+            return validation;
         }
         function applyCardSizeConstraint(this: any, savedButton?: any) {
             var currentSize: any = c.sizes[slot] || CARD_SIZE_SINGLE;
