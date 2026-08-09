@@ -2,12 +2,20 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createCardEditorDraftController } from "../features/card_editor_draft_controller";
 import { createCardEditorValidationController } from "../features/card_editor_validation_controller";
+import { createCardEditorSaveController } from "../features/card_editor_save_controller";
 export function installButtonSettingsModule(): GlobalDescriptors {
     var cardEditorDraftController: any = createCardEditorDraftController({
         "cloneCard": function (button: any) { return EspControlModel.cloneCardConfig(button); },
         "emptyCard": function () { return EspControlModel.emptyCardConfig(); },
     });
     var cardEditorValidationController: any = createCardEditorValidationController();
+    var cardEditorSaveController: any = createCardEditorSaveController({
+        "emptyCard": function () { return EspControlModel.emptyCardConfig(); },
+        "copyCard": function (target: any, source: any) {
+            EspControlModel.copyCardConfig(target, source);
+            normalizeButtonConfig(target);
+        },
+    });
     // ── Button settings panel (unified) ────────────────────────────────────
     function openCardSettings(this: any, slot?: any) {
         if (isConfigLocked())
@@ -257,40 +265,25 @@ export function installButtonSettingsModule(): GlobalDescriptors {
             if (!state.settingsDraft || state.settingsDraft.key !== draftKey)
                 return false;
             var draft: any = state.settingsDraft;
-            var savedButton: any = liveButton;
-            var sizeChanged: any = false;
-            if (draft.isNew) {
-                var pos: any = draft.pos;
-                if (pos < 0 || pos >= c.maxSlots || c.grid[pos] !== 0) {
+            var saved: any = cardEditorSaveController.apply(draft, {
+                slot: slot, maxSlots: c.maxSlots, isSubpage: c.isSub,
+                grid: c.grid, buttons: c.buttons,
+            });
+            if (!saved.accepted) {
+                if (draft.isNew)
                     showBanner("That grid space is no longer available. Close this window and try again.", "error");
-                    return false;
-                }
-                while (c.buttons.length < slot) {
-                    c.buttons.push(emptyButtonConfig());
-                }
-                savedButton = c.buttons[slot - 1];
-                copyButtonConfig(savedButton, draft.button);
-                c.grid[pos] = slot;
-                sizeChanged = applyCardSizeConstraint(savedButton);
-                if (c.isSub) {
-                    saveSubpageConfig(state.editingSubpage);
-                }
-                else {
-                    postText(entityName("button_order"), serializeGrid(state.grid));
-                    saveButtonConfig(slot);
-                }
+                return false;
             }
-            else {
-                copyButtonConfig(liveButton, draft.button);
-                sizeChanged = applyCardSizeConstraint(liveButton);
-            }
+            var savedButton: any = saved.button;
+            var sizeChanged: any = applyCardSizeConstraint(savedButton);
             state.settingsDraft = null;
-            if (!draft.isNew && c.isSub) {
+            if (saved.saveSubpage) {
                 saveSubpageConfig(state.editingSubpage);
             }
-            else if (!draft.isNew) {
-                if (sizeChanged)
+            else {
+                if (saved.saveGrid || sizeChanged)
                     postText(entityName("button_order"), serializeGrid(state.grid));
+                if (saved.saveButton)
                 saveButtonConfig(slot);
             }
             var savedTypeDef: any = BUTTON_TYPES[savedButton.type || ""];
