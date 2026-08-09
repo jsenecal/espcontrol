@@ -657,6 +657,38 @@ inline void fan_control_refresh_card(FanCardCtx *ctx) {
   transient_status_label_show_if_changed(ctx->status_label, fan_status_text(ctx), false);
 }
 
+// Like the light modal, each binary control is one large toggle target.  This
+// keeps the control easy to use: tapping either icon always changes its state.
+inline void fan_control_toggle_modal_power() {
+  FanControlModalUi &ui = fan_control_modal_ui();
+  FanCardCtx *ctx = ui.active;
+  if (!ctx || !ctx->available) return;
+  ctx->on = !ctx->on;
+  fan_control_refresh_card(ctx);
+  fan_control_set_speed_value(ctx, ctx->on ? ctx->percentage : 0);
+  fan_control_apply_power(ctx);
+  send_fan_action(ctx->entity_id, ctx->on ? "fan.turn_on" : "fan.turn_off");
+}
+
+inline void fan_control_toggle_modal_oscillation() {
+  FanControlModalUi &ui = fan_control_modal_ui();
+  FanCardCtx *ctx = ui.active;
+  if (!ctx || !ctx->available) return;
+  ctx->oscillating = !ctx->oscillating;
+  fan_control_apply_oscillation(ctx);
+  send_fan_action(
+    ctx->entity_id, "fan.oscillate", "oscillating", ctx->oscillating ? "true" : "false");
+}
+
+inline void fan_control_toggle_modal_direction() {
+  FanControlModalUi &ui = fan_control_modal_ui();
+  FanCardCtx *ctx = ui.active;
+  if (!ctx || !ctx->available) return;
+  ctx->direction = ctx->direction == "reverse" ? "forward" : "reverse";
+  fan_control_apply_direction(ctx);
+  send_fan_action(ctx->entity_id, "fan.set_direction", "direction", ctx->direction.c_str());
+}
+
 inline void fan_control_refresh_modal(FanCardCtx *ctx) {
   FanControlModalUi &ui = fan_control_modal_ui();
   if (!ctx || ui.active != ctx || !ui.panel) return;
@@ -921,6 +953,8 @@ inline void fan_control_open_modal(FanCardCtx *ctx) {
     lv_obj_set_style_border_width(group, 0, LV_PART_MAIN);
     lv_obj_set_style_shadow_width(group, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(group, 0, LV_PART_MAIN);
+    control_modal_apply_pressed_fill(group);
+    lv_obj_add_flag(group, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_clear_flag(group, LV_OBJ_FLAG_SCROLLABLE);
   }
   ui.power_on_btn = fan_control_create_icon_button(ui.power_group, find_icon("Power"), ctx->icon_font);
@@ -929,36 +963,22 @@ inline void fan_control_open_modal(FanCardCtx *ctx) {
   ui.oscillation_off_btn = fan_control_create_icon_button(ui.oscillation_group, find_icon("Circle Outline"), ctx->icon_font);
   ui.direction_forward_btn = fan_control_create_icon_button(ui.direction_group, find_icon("Arrow Up"), ctx->icon_font);
   ui.direction_reverse_btn = fan_control_create_icon_button(ui.direction_group, find_icon("Arrow Down"), ctx->icon_font);
-
-  if (ui.power_on_btn) lv_obj_add_event_cb(ui.power_on_btn, [](lv_event_t *e) {
-    (void) e;
-    FanControlModalUi &ui = fan_control_modal_ui();
-    if (ui.active && ui.active->available) send_fan_action(ui.active->entity_id, "fan.turn_on");
+  lv_obj_t *binary_buttons[] = {
+    ui.power_on_btn, ui.power_off_btn,
+    ui.oscillation_on_btn, ui.oscillation_off_btn,
+    ui.direction_forward_btn, ui.direction_reverse_btn,
+  };
+  for (lv_obj_t *button : binary_buttons) {
+    if (button) lv_obj_clear_flag(button, LV_OBJ_FLAG_CLICKABLE);
+  }
+  lv_obj_add_event_cb(ui.power_group, [](lv_event_t *) {
+    fan_control_toggle_modal_power();
   }, LV_EVENT_CLICKED, nullptr);
-  if (ui.power_off_btn) lv_obj_add_event_cb(ui.power_off_btn, [](lv_event_t *e) {
-    (void) e;
-    FanControlModalUi &ui = fan_control_modal_ui();
-    if (ui.active && ui.active->available) send_fan_action(ui.active->entity_id, "fan.turn_off");
+  lv_obj_add_event_cb(ui.oscillation_group, [](lv_event_t *) {
+    fan_control_toggle_modal_oscillation();
   }, LV_EVENT_CLICKED, nullptr);
-  if (ui.oscillation_on_btn) lv_obj_add_event_cb(ui.oscillation_on_btn, [](lv_event_t *e) {
-    (void) e;
-    FanControlModalUi &ui = fan_control_modal_ui();
-    if (ui.active && ui.active->available) send_fan_action(ui.active->entity_id, "fan.oscillate", "oscillating", "true");
-  }, LV_EVENT_CLICKED, nullptr);
-  if (ui.oscillation_off_btn) lv_obj_add_event_cb(ui.oscillation_off_btn, [](lv_event_t *e) {
-    (void) e;
-    FanControlModalUi &ui = fan_control_modal_ui();
-    if (ui.active && ui.active->available) send_fan_action(ui.active->entity_id, "fan.oscillate", "oscillating", "false");
-  }, LV_EVENT_CLICKED, nullptr);
-  if (ui.direction_forward_btn) lv_obj_add_event_cb(ui.direction_forward_btn, [](lv_event_t *e) {
-    (void) e;
-    FanControlModalUi &ui = fan_control_modal_ui();
-    if (ui.active && ui.active->available) send_fan_action(ui.active->entity_id, "fan.set_direction", "direction", "forward");
-  }, LV_EVENT_CLICKED, nullptr);
-  if (ui.direction_reverse_btn) lv_obj_add_event_cb(ui.direction_reverse_btn, [](lv_event_t *e) {
-    (void) e;
-    FanControlModalUi &ui = fan_control_modal_ui();
-    if (ui.active && ui.active->available) send_fan_action(ui.active->entity_id, "fan.set_direction", "direction", "reverse");
+  lv_obj_add_event_cb(ui.direction_group, [](lv_event_t *) {
+    fan_control_toggle_modal_direction();
   }, LV_EVENT_CLICKED, nullptr);
 
   ui.speed_group = lv_obj_create(ui.panel);
