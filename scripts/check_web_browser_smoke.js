@@ -4458,6 +4458,7 @@ async function runCase(browser, testCase) {
   const page = await context.newPage();
   const errors = [];
   const posts = [];
+  const thirdPartyAssetRequests = [];
 
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
@@ -4466,6 +4467,13 @@ async function runCase(browser, testCase) {
   });
   page.on("request", (request) => {
     const requestUrl = new URL(request.url());
+    if (
+      ["cdn.jsdelivr.net", "fonts.googleapis.com", "cdn.buymeacoffee.com"].includes(
+        requestUrl.hostname,
+      )
+    ) {
+      thirdPartyAssetRequests.push(requestUrl.href);
+    }
     if (
       request.method() === "POST" &&
       requestUrl.hostname === "espcontrol.test"
@@ -4494,6 +4502,11 @@ async function runCase(browser, testCase) {
       errors,
       [],
       `${testCase.name}: browser errors were reported`,
+    );
+    assert.deepStrictEqual(
+      thirdPartyAssetRequests,
+      [],
+      `${testCase.name}: the editor should not need third-party CDN assets`,
     );
     assertNoLayoutBreaks(
       await measureCoreLayout(page),

@@ -14,6 +14,7 @@ Usage:
     python scripts/build.py icons --check # check icons only
     python scripts/build.py --self-test    # verify transactional publishing
 """
+import base64
 import json
 import os
 import re
@@ -35,6 +36,34 @@ from product_model_v2 import source_directory, source_path
 ROOT = Path(__file__).resolve().parent.parent
 MDI_VERSION = "7.4.47"
 MDI_CSS_URL = f"https://cdn.jsdelivr.net/npm/@mdi/font@{MDI_VERSION}/css/materialdesignicons.css"
+MDI_WEB_FONT = ROOT / "common" / "assets" / "fonts" / f"materialdesignicons-webfont-{MDI_VERSION}.ttf"
+WEB_SOURCE_DIR = ROOT / "src" / "webserver"
+
+# Fixed editor controls use a few MDI glyphs that are not selectable Product
+# Model icons. Keep their pinned codepoints here so rebuilding www.js remains
+# possible without reaching the MDI CDN. Product Model icon codepoints are
+# read directly from common/assets/icons.json below.
+WEB_FIXED_MDI_ICON_CODEPOINTS = {
+    "alarm": "F0020", "album": "F0025", "api": "F109B", "arrow-expand-all": "F004C",
+    "arrow-top-right": "F005C", "blur": "F00B5", "calendar": "F00ED", "calendar-clock": "F00F0",
+    "calendar-month": "F0E17", "cancel": "F073A", "card": "F0B6F", "card-outline": "F0B76",
+    "chip": "F061A", "clipboard-outline": "F014C", "clock": "F0954", "code-json": "F0626",
+    "content-copy": "F018F", "content-cut": "F0190", "content-paste": "F0192", "counter": "F0199",
+    "decimal": "F10A1", "domain": "F01D7", "drag": "F01DB", "eye-off-outline": "F06D1",
+    "eye-outline": "F06D0", "file": "F0214", "flag": "F023B", "folder-plus": "F0257",
+    "form-dropdown": "F1400", "format-text": "F0284", "function": "F0295", "gesture-tap-button": "F12A8",
+    "grid": "F02C1", "home-automation": "F07D1", "home-import-outline": "F0F9C", "hook": "F06E2",
+    "information-outline": "F02FD", "keyboard-return": "F0311", "label": "F0315", "lightbulb-on": "F06E8",
+    "link": "F0337", "loading": "F0772", "map-clock": "F0D1E", "map-marker-path": "F0D20",
+    "map-marker-question": "F0F07", "movie": "F0381", "movie-open": "F0FCE", "network": "F06F3",
+    "note": "F039A", "numeric": "F03A0", "pencil": "F03EB", "plex": "F06BA", "podcast": "F0994",
+    "post": "F1008", "restore": "F099B", "script": "F0BC1", "script-text-play": "F1727",
+    "select": "F0485", "spotify": "F04C7", "svg": "F0721", "switch": "F04E4", "sync": "F04E6",
+    "tab": "F04E9", "target": "F04FE", "text": "F09A8", "timer": "F13AB",
+    "toggle-switch": "F0521", "toggle-switch-variant": "F1A25", "toggle-switch-variant-off": "F1A26",
+    "tune-vertical": "F066A", "tune-vertical-variant": "F1543", "upload": "F0552", "video": "F0567",
+    "view-grid-plus": "F0F8D", "webhook": "F062F",
+}
 
 # ---------------------------------------------------------------------------
 # Shared paths
@@ -229,12 +258,21 @@ def run_generated_transaction_self_test():
             f'\n(globalThis as Record<string, unknown>)["{marker}"] = true;\n'
         )
         slug, config = next(iter(build_web_devices().items()))
+        original_urlopen = urllib.request.urlopen
+        try:
+            urllib.request.urlopen = lambda *_args, **_kwargs: (_ for _ in ()).throw(
+                AssertionError("web bundle build unexpectedly accessed the network")
+            )
+            embedded_mdi_styles = embedded_web_mdi_styles()
+        finally:
+            urllib.request.urlopen = original_urlopen
         bundle_root = root / "bundle"
         result = subprocess.run(
             ["node", str(ROOT / "scripts" / "build_web_bundle.js")],
             input=json.dumps({
                 "outputDir": str(bundle_root),
                 "devices": {slug: config},
+                "embeddedMdiStyles": embedded_mdi_styles,
                 "testHooks": False,
                 "overlays": {str(entry_path): entry_overlay},
             }),
@@ -3581,6 +3619,72 @@ def load_mdi_codepoints():
     }
 
 
+def web_mdi_icon_codepoints(data):
+    """Return the complete local glyph map required by the browser editor."""
+    codepoints = {
+        item["mdi"]: item["codepoint"].upper()
+        for item in icon_items(data)
+    }
+    codepoints.update(WEB_FIXED_MDI_ICON_CODEPOINTS)
+    return codepoints
+
+
+def web_mdi_icon_names(data, codepoints):
+    """Return every MDI glyph the browser editor can render.
+
+    The picker gets its names from the Product Model. A smaller set of fixed
+    controls and card badges is written directly in the editor source, so scan
+    those string literals too. Filtering them through the pinned MDI map keeps
+    unrelated UI text out of the font stylesheet.
+    """
+    names = {item["mdi"] for item in icon_items(data)}
+    for path in WEB_SOURCE_DIR.rglob("*.ts"):
+        source = path.read_text(encoding="utf-8")
+        names.update(
+            match.group(1)
+            for match in re.finditer(r"\bmdi-([a-z0-9-]+)\b", source)
+            if match.group(1) in codepoints
+        )
+        names.update(
+            match.group(1)
+            for match in re.finditer(r"['\"]([a-z][a-z0-9-]*)['\"]", source)
+            if match.group(1) in codepoints
+        )
+    return names
+
+
+def embedded_web_mdi_styles():
+    """Build the local icon font and CSS used by the browser bundle.
+
+    Browsers receive this as part of www.js, rather than requesting a CDN
+    stylesheet and font after the editor has started. This matters when a
+    display is reachable on the local network but cannot reach the Internet.
+    """
+    if not MDI_WEB_FONT.exists():
+        raise BuildError(f"Missing bundled web icon font: {MDI_WEB_FONT.relative_to(ROOT)}")
+
+    data = load_json(ICONS_JSON)
+    codepoints = web_mdi_icon_codepoints(data)
+    icon_names = web_mdi_icon_names(data, codepoints)
+    missing = sorted(name for name in icon_names if name not in codepoints)
+    if missing:
+        raise BuildError("Missing MDI codepoints for browser icons: " + ", ".join(missing))
+
+    font_data = base64.b64encode(MDI_WEB_FONT.read_bytes()).decode("ascii")
+    css = [
+        "@font-face{font-family:'Material Design Icons';src:url(data:font/ttf;base64,",
+        font_data,
+        ") format('truetype');font-weight:normal;font-style:normal;font-display:block}",
+        ".mdi{display:inline-block;font-family:'Material Design Icons';font-weight:normal;font-style:normal;line-height:1;text-rendering:auto;-webkit-font-smoothing:antialiased}",
+        ".mdi::before{display:inline-block}",
+    ]
+    css.extend(
+        f".mdi-{name}::before{{content:'\\\\{codepoints[name]}'}}"
+        for name in sorted(icon_names)
+    )
+    return "".join(css)
+
+
 def check_duplicate_icon_fields(data):
     errors = []
     seen = {}
@@ -3657,6 +3761,23 @@ def validate_icon_data(data):
             errors.append(f"{item['name']} references missing mdi-{mdi}")
         elif actual != expected:
             errors.append(f"{item['name']} / mdi-{mdi}: icons.json={actual}, MDI {MDI_VERSION}={expected}")
+
+    for mdi, actual in WEB_FIXED_MDI_ICON_CODEPOINTS.items():
+        expected = mdi_codepoints.get(mdi)
+        if expected is None:
+            errors.append(f"browser fixed icon mdi-{mdi} is missing from MDI {MDI_VERSION}")
+        elif actual != expected:
+            errors.append(
+                f"browser fixed icon mdi-{mdi}: local={actual}, MDI {MDI_VERSION}={expected}"
+            )
+
+    source_icons = web_mdi_icon_names(data, mdi_codepoints)
+    local_icons = web_mdi_icon_codepoints(data)
+    missing_local_icons = sorted(source_icons - local_icons.keys())
+    if missing_local_icons:
+        errors.append(
+            "browser icon codepoint map is missing: " + ", ".join(f"mdi-{name}" for name in missing_local_icons)
+        )
 
     return errors
 
@@ -3839,6 +3960,7 @@ def load_timezone_options():
 def build_www(check_only=False, output_dir=None, test_hooks=False):
     """Build one shared www.js containing the validated device profiles."""
     devices = build_web_devices()
+    embedded_mdi_styles = embedded_web_mdi_styles()
     temporary_root = None
     if output_dir is None:
         temporary_root = tempfile.TemporaryDirectory(prefix="espcontrol-www-")
@@ -3852,6 +3974,7 @@ def build_www(check_only=False, output_dir=None, test_hooks=False):
         input=json.dumps({
             "outputDir": str(build_root),
             "devices": devices,
+            "embeddedMdiStyles": embedded_mdi_styles,
             "testHooks": test_hooks,
             "overlays": GENERATED_TRANSACTION.overlays() if GENERATED_TRANSACTION is not None else {},
         }),

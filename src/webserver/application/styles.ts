@@ -29,9 +29,8 @@ export function installStylesModule(): GlobalDescriptors {
         ".sp-tab-docs::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:1px;background:var(--border)}" +
         ".sp-tab-docs .mdi{font-size:16px;line-height:1;opacity:.7}" +
         ".sp-page{display:none}.sp-page.active{display:block}" +
-        ".sp-support-btn{position:fixed;right:28px;bottom:28px;z-index:150;display:inline-block;line-height:0}" +
-        ".sp-support-link{display:block}" +
-        ".sp-support-btn img{height:60px;display:block;border-radius:999px}" +
+        ".sp-support-btn{position:fixed;right:28px;bottom:28px;z-index:150;display:inline-block}" +
+        ".sp-support-link{display:block;padding:10px 16px;border-radius:999px;background:#ffdd00;color:#101010;font-size:13px;font-weight:700;line-height:1;text-decoration:none;box-shadow:0 3px 12px rgba(0,0,0,.25)}" +
         ".sp-support-btn.sp-support-hidden{display:none}" +
         ".fade-in{animation:fadeIn .3s ease}" +
         "@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}" +
