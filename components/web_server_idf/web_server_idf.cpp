@@ -334,6 +334,10 @@ esp_err_t AsyncWebServer::handle_raw_body_(httpd_req_t *r, const char *content_t
   }
   if (handler == nullptr) return this->request_handler_(&req);
   const size_t total = r->content_len;
+  if (total > handler->maximumBodySize()) {
+    httpd_resp_send_err(r, HTTPD_400_BAD_REQUEST, "Request body is too large");
+    return ESP_FAIL;
+  }
   std::vector<uint8_t> buffer(std::min<size_t>(1024, total));
   for (size_t index = 0; index < total;) {
     const int received = httpd_req_recv(r, reinterpret_cast<char *>(buffer.data()),

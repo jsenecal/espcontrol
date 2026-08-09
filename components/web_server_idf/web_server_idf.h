@@ -262,6 +262,7 @@ class AsyncWebHandler {
                             size_t len, bool final) {}
   // NOLINTNEXTLINE(readability-identifier-naming)
   virtual void handleBody(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {}
+  virtual size_t maximumBodySize() const { return SIZE_MAX; }
   // NOLINTNEXTLINE(readability-identifier-naming)
   virtual bool isRequestHandlerTrivial() const { return true; }
 };

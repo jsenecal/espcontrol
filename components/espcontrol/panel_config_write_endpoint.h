@@ -33,6 +33,7 @@ class PanelConfigWriteHandler final
     const esphome::StringRef url = request->url_to(url_buffer);
     return std::strcmp(url.c_str(), "/api/v1/config") == 0;
   }
+  size_t maximumBodySize() const override { return document_capacity_; }
 
   void handleBody(esphome::web_server_idf::AsyncWebServerRequest *, uint8_t *data,
                   size_t len, size_t index, size_t total) override {
