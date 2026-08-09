@@ -3,6 +3,7 @@
 #include "espcontrol_app_core.h"
 
 using espcontrol::AppLifecycleState;
+using espcontrol::DisplayLifecycleState;
 using espcontrol::DisplayMode;
 using espcontrol::DisplayRequestSource;
 using espcontrol::EspControlAppCore;
@@ -13,6 +14,9 @@ int main() {
   if (app.run_once() || app.stop()) return EXIT_FAILURE;
   if (!app.start() || app.start()) return EXIT_FAILURE;
   if (app.lifecycle_state() != AppLifecycleState::RUNNING) return EXIT_FAILURE;
+  if (app.display_lifecycle().state() != DisplayLifecycleState::RUNNING) {
+    return EXIT_FAILURE;
+  }
 
   auto &display = app.display();
   if (!display.request(DisplayRequestSource::MANUAL_SLEEP,
@@ -23,10 +27,14 @@ int main() {
     return EXIT_FAILURE;
   }
 
-  if (!app.run_once() || !app.run_once() || app.loop_count() != 2) {
+  if (!app.run_once() || !app.run_once() || app.loop_count() != 2 ||
+      app.display_lifecycle().loop_count() != 2) {
     return EXIT_FAILURE;
   }
-  if (!app.stop() || app.stop() || app.run_once()) return EXIT_FAILURE;
+  if (!app.stop() || app.stop() || app.run_once() ||
+      app.display_lifecycle().state() != DisplayLifecycleState::STOPPED) {
+    return EXIT_FAILURE;
+  }
   if (app.lifecycle_state() != AppLifecycleState::STOPPED) return EXIT_FAILURE;
   return EXIT_SUCCESS;
 }
