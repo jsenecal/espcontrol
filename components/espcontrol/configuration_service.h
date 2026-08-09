@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <vector>
 
 #include "configuration_store.h"
 
@@ -39,6 +40,7 @@ class LegacyConfigurationAdapter {
 enum class ServiceStatus : uint8_t {
   OK,
   IMPORTED_LEGACY,
+  SYNCED_LEGACY,
   EMPTY,
   INVALID_ARGUMENT,
   BUFFER_TOO_SMALL,
@@ -100,10 +102,17 @@ class ConfigurationService {
  public:
   ConfigurationService(ConfigurationStore &store,
                        LegacyConfigurationAdapter &legacy,
-      const ConfigurationDocumentValidator *validator = nullptr)
-      : store_(store), legacy_(legacy), validator_(validator) {}
+      const ConfigurationDocumentValidator *validator = nullptr,
+      uint8_t *scratch_buffer = nullptr, size_t scratch_capacity = 0)
+      : store_(store), legacy_(legacy), validator_(validator),
+        scratch_buffer_(scratch_buffer), scratch_capacity_(scratch_capacity) {}
 
   ServiceLoadResult load(uint8_t *output, size_t output_capacity);
+  // During compatibility releases the text entities remain authoritative.
+  // Refresh the native shadow on boot so editor changes made through the
+  // legacy API survive a later native-only firmware upgrade.
+  ServiceLoadResult refresh_legacy_shadow(uint8_t *output,
+                                          size_t output_capacity);
   ServiceSaveResult save(uint16_t document_version, const uint8_t *document,
                          size_t document_size);
   ServiceSaveResult save_if_generation(uint32_t expected_generation,
@@ -117,6 +126,10 @@ class ConfigurationService {
   }
 
   size_t maximum_document_size() const;
+  void set_scratch_buffer(uint8_t *scratch_buffer, size_t scratch_capacity) {
+    scratch_buffer_ = scratch_buffer;
+    scratch_capacity_ = scratch_capacity;
+  }
 
  private:
   CommitResult commit_document(uint16_t document_version,
@@ -129,10 +142,14 @@ class ConfigurationService {
   bool supports_version(uint16_t document_version) const;
   bool document_is_valid(uint16_t document_version, const uint8_t *document,
                          size_t document_size) const;
+  uint8_t *encoded_buffer(size_t required_size,
+                          std::vector<uint8_t> *fallback) const;
 
   ConfigurationStore &store_;
   LegacyConfigurationAdapter &legacy_;
   const ConfigurationDocumentValidator *validator_{nullptr};
+  uint8_t *scratch_buffer_{nullptr};
+  size_t scratch_capacity_{0};
 };
 
 }  // namespace espcontrol::configuration

@@ -122,6 +122,31 @@ bool legacy_is_imported_once() {
          std::equal(expected.begin(), expected.end(), output.begin());
 }
 
+bool legacy_editor_changes_refresh_the_native_shadow() {
+  MemoryBackend backend(256);
+  ConfigurationStore store(backend);
+  FakeLegacy legacy;
+  legacy.value = bytes("initial-editor-document");
+  ConfigurationService service(store, legacy);
+  std::array<uint8_t, 64> output{};
+  if (!service.load(output.data(), output.size()).imported_legacy()) {
+    return false;
+  }
+
+  legacy.value = bytes("updated-editor-document");
+  const ServiceLoadResult refreshed =
+      service.refresh_legacy_shadow(output.data(), output.size());
+  if (refreshed.status != ServiceStatus::SYNCED_LEGACY ||
+      refreshed.generation != 2 || legacy.mirror_calls != 0) {
+    return false;
+  }
+
+  output.fill(0);
+  const ServiceLoadResult loaded = service.load(output.data(), output.size());
+  return loaded.status == ServiceStatus::OK && loaded.generation == 2 &&
+         std::equal(legacy.value.begin(), legacy.value.end(), output.begin());
+}
+
 bool saves_are_durable_before_the_legacy_mirror() {
   MemoryBackend backend(256);
   ConfigurationStore store(backend);
@@ -293,6 +318,7 @@ bool panel_config_validator_rejects_invalid_legacy_imports() {
 int main() {
   const bool passed =
       legacy_is_imported_once() &&
+      legacy_editor_changes_refresh_the_native_shadow() &&
       saves_are_durable_before_the_legacy_mirror() &&
       failed_durable_save_never_updates_legacy() &&
       successful_save_dual_writes() &&

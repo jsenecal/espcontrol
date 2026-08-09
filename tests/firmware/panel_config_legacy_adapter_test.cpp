@@ -1,0 +1,120 @@
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <string>
+
+#include "panel_config_document.h"
+#include "panel_config_legacy_adapter.h"
+
+namespace {
+
+using espcontrol::configuration::LegacyStatus;
+using espcontrol::configuration::LegacyTextValue;
+using espcontrol::configuration::PanelConfigLegacyAdapter;
+using espcontrol::configuration::PanelConfigReader;
+using espcontrol::configuration::PanelConfigRecord;
+using espcontrol::configuration::PanelConfigRecordType;
+using espcontrol::configuration::PanelConfigStatus;
+using espcontrol::configuration::PanelConfigWriter;
+
+class FakeText final : public LegacyTextValue {
+ public:
+  explicit FakeText(std::string state = {}) : state_(std::move(state)) {}
+  const std::string &value() const override { return state_; }
+  bool set_value(const char *value, size_t value_size) override {
+    if (value == nullptr && value_size > 0) return false;
+    state_.assign(value, value_size);
+    return true;
+  }
+
+ private:
+  std::string state_;
+};
+
+bool imports_legacy_button_subpage_and_order() {
+  FakeText order("2,1");
+  FakeText button("light.kitchen;Kitchen");
+  FakeText subpage_a("media.living_room;");
+  FakeText subpage_b("media.office");
+  std::array<LegacyTextValue *, PanelConfigLegacyAdapter::MAX_SUBPAGE_CHUNKS>
+      chunks{};
+  chunks[0] = &subpage_a;
+  chunks[1] = &subpage_b;
+
+  PanelConfigLegacyAdapter adapter;
+  adapter.set_device_profile("guition-esp32-p4-jc1060p470");
+  adapter.set_button_order(&order);
+  adapter.set_button(1, &button, chunks);
+  std::array<uint8_t, 512> document{};
+  const auto loaded = adapter.load(document.data(), document.size());
+  if (loaded.status != LegacyStatus::OK || loaded.document_size == 0)
+    return false;
+
+  PanelConfigReader reader(document.data(), loaded.document_size);
+  if (reader.begin() != PanelConfigStatus::OK) return false;
+  bool button_found = false;
+  bool subpage_found = false;
+  bool order_found = false;
+  PanelConfigRecord record;
+  while (reader.next(&record) == PanelConfigStatus::OK) {
+    if (record.type == PanelConfigRecordType::BUTTON && record.slot == 1)
+      button_found = std::string(reinterpret_cast<const char *>(record.value),
+                                 record.value_size) == "light.kitchen;Kitchen";
+    if (record.type == PanelConfigRecordType::SUBPAGE && record.slot == 1)
+      subpage_found =
+          std::string(reinterpret_cast<const char *>(record.value), record.value_size) ==
+          "media.living_room;media.office";
+    if (record.type == PanelConfigRecordType::SETTING)
+      order_found =
+          std::string(reinterpret_cast<const char *>(record.key), record.key_size) ==
+              "button_order" &&
+          std::string(reinterpret_cast<const char *>(record.value), record.value_size) ==
+              "2,1";
+  }
+  return button_found && subpage_found && order_found;
+}
+
+bool native_document_mirrors_back_to_legacy_entities() {
+  FakeText order("old");
+  FakeText button("old");
+  FakeText subpage_a("old");
+  FakeText subpage_b("old");
+  std::array<LegacyTextValue *, PanelConfigLegacyAdapter::MAX_SUBPAGE_CHUNKS>
+      chunks{};
+  chunks[0] = &subpage_a;
+  chunks[1] = &subpage_b;
+  PanelConfigLegacyAdapter adapter;
+  adapter.set_device_profile("profile");
+  adapter.set_button_order(&order);
+  adapter.set_button(1, &button, chunks);
+
+  std::array<uint8_t, 512> document{};
+  PanelConfigWriter writer(document.data(), document.size());
+  size_t document_size = 0;
+  if (writer.begin() != PanelConfigStatus::OK ||
+      writer.append_device_profile(reinterpret_cast<const uint8_t *>("profile"),
+                                   7) != PanelConfigStatus::OK ||
+      writer.append_button(1, reinterpret_cast<const uint8_t *>("new-button"),
+                           10) != PanelConfigStatus::OK ||
+      writer.append_subpage(1,
+                            reinterpret_cast<const uint8_t *>("123456789"),
+                            9) != PanelConfigStatus::OK ||
+      writer.append_setting(reinterpret_cast<const uint8_t *>("button_order"),
+                            12, reinterpret_cast<const uint8_t *>("1"), 1) !=
+          PanelConfigStatus::OK ||
+      writer.finish(&document_size) != PanelConfigStatus::OK) {
+    return false;
+  }
+  return adapter.mirror(1, document.data(), document_size) &&
+         button.value() == "new-button" && subpage_a.value() == "123456789" &&
+         subpage_b.value().empty() && order.value() == "1";
+}
+
+}  // namespace
+
+int main() {
+  return imports_legacy_button_subpage_and_order() &&
+                 native_document_mirrors_back_to_legacy_entities()
+             ? 0
+             : 1;
+}
