@@ -15,6 +15,7 @@ Usage:
     python scripts/build.py --self-test    # verify transactional publishing
 """
 import base64
+import hashlib
 import json
 import os
 import re
@@ -3987,15 +3988,41 @@ def build_www(check_only=False, output_dir=None, test_hooks=False):
             temporary_root.cleanup()
         raise BuildError(result.stderr.strip() or "esbuild failed while building web bundles")
 
-    if output_dir is not None:
-        print(f"Built shared www.js bundle and {len(devices)} compatibility loader(s) in {build_root}")
-        return []
+    bundle_text = (build_root / "www.js").read_text()
+    bundle_sha256 = hashlib.sha256(bundle_text.encode("utf-8")).hexdigest()
+    bundle_relative_path = Path("bundles") / bundle_sha256 / "www.js"
+    manifest_text = json.dumps({
+        "schemaVersion": 1,
+        "bundles": [{
+            "id": bundle_sha256,
+            "sha256": bundle_sha256,
+            "path": bundle_relative_path.as_posix(),
+            "deviceProfiles": list(devices),
+        }],
+    }, indent=2) + "\n"
 
-    outputs = [(WWW_OUTPUT_DIR / "www.js", (build_root / "www.js").read_text())]
+    outputs = [(build_root / "www.js", bundle_text)]
     outputs.extend(
-        (WWW_OUTPUT_DIR / slug / "www.js", (build_root / slug / "www.js").read_text())
+        (build_root / slug / "www.js", (build_root / slug / "www.js").read_text())
         for slug in devices
     )
+    outputs.extend([
+        (build_root / bundle_relative_path, bundle_text),
+        (build_root / "web-assets.json", manifest_text),
+    ])
+
+    if output_dir is not None:
+        for path, generated in outputs:
+            if not path.exists() or path.read_text() != generated:
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text(generated, encoding="utf-8")
+        print(f"Built shared www.js bundle, immutable asset, and {len(devices)} compatibility loader(s) in {build_root}")
+        return []
+
+    outputs = [
+        (WWW_OUTPUT_DIR / path.relative_to(build_root), generated)
+        for path, generated in outputs
+    ]
     dirty = [
         str(path.relative_to(WWW_OUTPUT_DIR))
         for path, generated in outputs
