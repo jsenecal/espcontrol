@@ -99,7 +99,7 @@ function firmwareRegistrations() {
       registrations.set(type, family);
     }
   }
-  const registryStart = source.indexOf("class CardRuntimeRegistryService", end);
+  const registryStart = source.indexOf("class CardRuntimeRegistryService", start);
   const legacyStart = registryStart >= 0 ? registryStart : end;
   const legacyBody = source.slice(legacyStart, source.indexOf("return context;", legacyStart));
   for (const match of legacyBody.matchAll(/type == "([^"]+)"\)[\s\S]*?context\.family = Family::([A-Z_]+);/g)) {
