@@ -2,6 +2,7 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createBackupImportController } from "../features/backup_import_controller";
 import { createBackupExportController } from "../features/backup_export_controller";
+import { createBackupRestoreController } from "../features/backup_restore_controller";
 export function installAppBackupModule(): GlobalDescriptors {
     // ── Export / Import ────────────────────────────────────────────────────
     var backupExportController: any = createBackupExportController({
@@ -50,6 +51,15 @@ export function installAppBackupModule(): GlobalDescriptors {
         "getGridCols": function () { return GRID_COLS; },
         "setGridCols": function (gridCols: any) { GRID_COLS = gridCols; },
         "planBackupImport": function (data: any, target: any) { return planBackupImport(data, target); },
+    });
+    var backupRestoreController: any = createBackupRestoreController({
+        "plan": function (backup: any, target: any) { return backupImportController.plan(backup, target); },
+        "warnings": function (plannedImport: any) { return plannedImport.backupPlan.warnings; },
+        "showBanner": showBanner,
+        "setPostThrottle": setPostThrottle,
+        "resetPostQueueError": resetPostQueueError,
+        "postQueueIdle": postQueueIdle,
+        "postQueueHadError": postQueueHadError,
     });
     function downloadBackupConfig(this: any, data?: any) {
         var json: any = JSON.stringify(data, null, 2);
@@ -163,7 +173,6 @@ export function installAppBackupModule(): GlobalDescriptors {
         input.type = "file";
         input.accept = ".json";
         input.style.display = "none";
-        var importPostThrottleMs: any = 75;
         function cleanupInput(this: any) {
             if (input.parentNode)
                 input.parentNode.removeChild(input);
@@ -189,25 +198,10 @@ export function installAppBackupModule(): GlobalDescriptors {
                     cleanupInput();
                     return;
                 }
-                var backupPlan: any;
-                var importedSettings: any;
-                var importedGridCols: any;
-                try {
-                    var plannedImport: any = backupImportController.plan(data, { device: DEVICE_ID, slots: NUM_SLOTS });
-                    importedSettings = plannedImport.importedSettings;
-                    importedGridCols = plannedImport.importedGridCols;
-                    backupPlan = plannedImport.backupPlan;
-                }
-                catch (e) {
-                    showBanner((e as any).backupMessage || "Invalid config file \u2014 missing required fields", "error");
-                    cleanupInput();
-                    return;
-                }
-                for (var warningIdx: any = 0; warningIdx < backupPlan.warnings.length; warningIdx++) {
-                    showBanner(backupPlan.warnings[warningIdx], "warning");
-                }
-                setPostThrottle(importPostThrottleMs);
-                resetPostQueueError();
+                function applyBackupRestorePlan(this: any, plannedImport: any) {
+                var importedSettings: any = plannedImport.importedSettings;
+                var importedGridCols: any = plannedImport.importedGridCols;
+                var backupPlan: any = plannedImport.backupPlan;
                 postText(entityName("button_on_color"), backupPlan.config.button_on_color);
                 for (var i: any = 0; i < NUM_SLOTS; i++) {
                     var b: any = backupPlan.buttons[i];
@@ -469,11 +463,8 @@ export function installAppBackupModule(): GlobalDescriptors {
                 renderPreview();
                 renderButtonSettings();
                 switchTab("screen");
-                setPostThrottle(0);
-                postQueueIdle().then(function (this: any) {
-                    if (!postQueueHadError())
-                        showBanner("Configuration imported successfully", "success");
-                });
+                }
+                backupRestoreController.restore(data, { device: DEVICE_ID, slots: NUM_SLOTS }, applyBackupRestorePlan);
                 cleanupInput();
             };
             reader.readAsText(input.files[0]);
