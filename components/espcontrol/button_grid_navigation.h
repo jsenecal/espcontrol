@@ -2,6 +2,8 @@
 
 // Internal implementation detail for button_grid.h. Include button_grid.h from device YAML.
 
+#include "grid_navigation_service.h"
+
 // ── Home Assistant-driven home-screen navigation ─────────────────────
 
 struct NavigationHomeTargetEntry {
@@ -30,14 +32,22 @@ struct NavigationSubpageEntry {
 
 inline void navigation_release_subpage_runtime(NavigationSubpageEntry &entry);
 
+using ButtonGridNavigationService =
+    GridNavigationService<NavigationHomeTargetEntry, NavigationSubpageEntry>;
+
+inline ButtonGridNavigationService &grid_navigation_service() {
+  static ButtonGridNavigationService service;
+  return service;
+}
+
+// Compatibility accessors for existing grid code. New runtime ownership lives
+// in GridNavigationService so it can be migrated independently of the UI.
 inline std::vector<NavigationHomeTargetEntry> &navigation_home_targets() {
-  static std::vector<NavigationHomeTargetEntry> entries;
-  return entries;
+  return grid_navigation_service().home_targets();
 }
 
 inline std::vector<NavigationSubpageEntry> &navigation_subpages() {
-  static std::vector<NavigationSubpageEntry> entries;
-  return entries;
+  return grid_navigation_service().subpages();
 }
 
 inline std::string navigation_trim(const std::string &value) {
@@ -85,7 +95,7 @@ inline bool navigation_return_home(lv_obj_t *main_page_obj) {
 }
 
 inline void navigation_clear_home_targets() {
-  navigation_home_targets().clear();
+  grid_navigation_service().clear_home_targets();
 }
 
 inline void navigation_clear_subpages() {
@@ -95,7 +105,7 @@ inline void navigation_clear_subpages() {
       lv_obj_del(entry.screen);
     }
   }
-  navigation_subpages().clear();
+  grid_navigation_service().clear_subpages();
   clock_bar_clear_button_grid_pages();
 }
 
