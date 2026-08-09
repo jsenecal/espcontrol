@@ -476,6 +476,7 @@ declare global {
   var emptyButtonConfig: any;
   var emptyCardConfig: any;
   var encodeConfigField: any;
+  var encodePanelConfig: any;
   var encodeSubpageField: any;
   var ensureEntityDropdown: any;
   var ensureInternalRelaySelection: any;

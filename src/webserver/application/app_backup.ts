@@ -59,29 +59,24 @@ export function installAppBackupModule(): GlobalDescriptors {
         URL.revokeObjectURL(url);
     }
     function addNativeConfigToBackup(this: any, data?: any) {
-        if (typeof fetch !== "function")
-            return Promise.resolve(data);
-        return fetch("/api/v1/capabilities", { cache: "no-store" })
-            .then(function (response: any) {
-                if (!response.ok)
-                    return null;
-                return response.json();
-            })
-            .then(function (capabilities: any) {
-                if (!capabilities || !capabilities.configuration || capabilities.configuration.read !== true)
-                    return data;
-                return fetch("/api/v1/config", { cache: "no-store" })
-                    .then(function (response: any) {
-                        if (!response.ok)
-                            return null;
-                        return response.arrayBuffer();
-                    })
-                    .then(function (buffer: any) {
-                        if (buffer)
-                            data.native_config = createPanelConfigBackupPayload(new Uint8Array(buffer));
-                        return data;
-                    });
-            });
+        var nativeDocument: any = {
+            deviceProfile: DEVICE_ID,
+            buttons: {},
+            subpages: {},
+            settings: { button_order: data.button_order || "" },
+        };
+        for (var index: any = 0; index < state.buttons.length; index++) {
+            var buttonConfig: any = serializeButtonConfig(state.buttons[index]);
+            if (buttonConfig)
+                nativeDocument.buttons[index + 1] = buttonConfig;
+        }
+        for (var slot in state.subpages) {
+            var subpageConfig: any = serializeSubpageConfig(state.subpages[slot]);
+            if (subpageConfig)
+                nativeDocument.subpages[slot] = subpageConfig;
+        }
+        data.native_config = createPanelConfigBackupPayload(encodePanelConfig(nativeDocument));
+        return data;
     }
     function exportConfig(this: any) {
         var data: any = createBackupConfig({
@@ -167,9 +162,7 @@ export function installAppBackupModule(): GlobalDescriptors {
                 schedule_clock_text_color: normalizeHexColor(state.scheduleClockTextColor, "FFFFFF"),
             },
         });
-        addNativeConfigToBackup(data)
-            .catch(function () { return data; })
-            .then(downloadBackupConfig);
+        downloadBackupConfig(addNativeConfigToBackup(data));
     }
     function importConfig(this: any) {
         var input: any = document.createElement("input");
