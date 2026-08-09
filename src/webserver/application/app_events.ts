@@ -1,12 +1,17 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { createReconnectController } from "../features/reconnect";
 export function installAppEventsModule(): GlobalDescriptors {
+    var reconnectController: any = createReconnectController({
+        "eventStreamEnabled": function () { return eventStreamEnabled(); },
+        "loadInitialState": function (handleState: any, markConnected: any) { loadInitialState(handleState, markConnected); },
+        "createEventSource": function () { return new EventSource("/events"); },
+        "getActiveSource": function () { return _eventSource; },
+        "setActiveSource": function (source: any) { _eventSource = source; },
+        "schedule": function (callback: any, delayMs: any) { return setTimeout(callback, delayMs); },
+    });
     // ── SSE ────────────────────────────────────────────────────────────────
     function connectEvents(this: any) {
-        if (_eventSource) {
-            _eventSource.close();
-            _eventSource = null;
-        }
         function markConnected(this: any) {
             resetStateForConnection(state);
             orderReceived = false;
@@ -24,14 +29,9 @@ export function installAppEventsModule(): GlobalDescriptors {
             refreshFirmwareVersion();
             refreshScreensaverTimeout();
         }
-        function handleDisconnected(this: any, source?: any) {
+        function handleDisconnected(this: any) {
             setConfigLocked(true, "Reconnecting to device\u2026");
             showBanner("Reconnecting to device\u2026", "offline");
-            if (source.readyState === 2) {
-                source.close();
-                _eventSource = null;
-                setTimeout(connectEvents, 5000);
-            }
         }
         var sseHandlers: any = createSseHandlers();
         applySseHandlerAliases(sseHandlers);
@@ -109,22 +109,12 @@ export function installAppEventsModule(): GlobalDescriptors {
             }
             console.log("[state] unhandled:", id, val);
         }
-        if (!eventStreamEnabled()) {
-            loadInitialState(handleState, markConnected);
-            return;
-        }
-        var source: any = new EventSource("/events");
-        _eventSource = source;
-        source.addEventListener("open", markConnected);
-        source.addEventListener("error", function (this: any) {
-            handleDisconnected(source);
-        });
-        source.addEventListener("ping", handleWebServerPingEvent);
-        source.addEventListener("state", function (this: any, e?: any) {
-            var d: any = parseEntityEventData(e.data);
-            if (!d)
-                return;
-            handleState(d);
+        reconnectController.connect({
+            "onConnected": markConnected,
+            "onDisconnected": handleDisconnected,
+            "onPing": handleWebServerPingEvent,
+            "parseState": function (e: any) { return parseEntityEventData(e.data); },
+            "onState": handleState,
         });
     }
     return {
