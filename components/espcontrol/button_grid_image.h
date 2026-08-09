@@ -18,7 +18,6 @@
 constexpr uint32_t IMAGE_CARD_STARTUP_RETRY_MS = 45000;
 constexpr uint32_t IMAGE_CARD_RETRY_INTERVAL_MS = 2000;
 constexpr uint32_t IMAGE_CARD_API_RETRY_INTERVAL_MS = 250;
-constexpr uint32_t IMAGE_CARD_MIN_REPEAT_REFRESH_MS = 30000;
 constexpr uint32_t IMAGE_CARD_MODAL_REFRESH_DELAY_MS = 1000;
 constexpr uint32_t IMAGE_CARD_MODAL_REQUEST_DELAY_MS = 100;
 constexpr uint32_t IMAGE_CARD_MODAL_CLEANUP_DELAY_MS = 100;
@@ -71,6 +70,8 @@ struct ImageCardCtx {
   bool access_token_request_pending = false;
   bool media_artwork = false;
   bool media_artwork_suppressed = false;
+  bool media_artwork_refresh_forced = false;
+  bool media_artwork_remote_refresh_pending = false;
   lv_obj_t *media_overlay = nullptr;
   bool media_overlay_artwork_tint = false;
   std::function<void()> media_artwork_applied;
@@ -519,6 +520,8 @@ inline void image_card_clear_media_artwork(ImageCardCtx *ctx) {
   ctx->pending_fallback_picture.clear();
   ctx->media_artwork_sources.clear();
   ctx->media_artwork_retry_mask = 0;
+  ctx->media_artwork_refresh_forced = false;
+  ctx->media_artwork_remote_refresh_pending = false;
   if (ctx->media_artwork_timer) {
     lv_timer_del(ctx->media_artwork_timer);
     ctx->media_artwork_timer = nullptr;
@@ -861,6 +864,8 @@ inline void reset_image_card_pool(const GridConfig &cfg) {
     contexts[i].access_token_request_pending = false;
     contexts[i].media_artwork = false;
     contexts[i].media_artwork_suppressed = false;
+    contexts[i].media_artwork_refresh_forced = false;
+    contexts[i].media_artwork_remote_refresh_pending = false;
     contexts[i].media_overlay = nullptr;
     contexts[i].media_overlay_artwork_tint = false;
     contexts[i].media_artwork_applied = nullptr;
@@ -1438,7 +1443,8 @@ inline void image_card_handle_media_artwork_picture(ImageCardCtx *ctx,
                                                     esphome::StringRef picture,
                                                     bool local);
 inline void image_card_request_picture(ImageCardCtx *ctx);
-inline void image_card_request_media_artwork(ImageCardCtx *ctx);
+inline void image_card_request_media_artwork(ImageCardCtx *ctx,
+                                             bool force_refresh = false);
 inline bool image_card_context_current(ImageCardCtx *ctx,
                                        const std::string &entity_id,
                                        uint32_t generation);
@@ -1446,7 +1452,8 @@ inline bool image_card_context_current(ImageCardCtx *ctx,
 inline void image_card_request_current_picture(ImageCardCtx *ctx) {
   if (!ctx) return;
   if (ctx->media_artwork) {
-    image_card_request_media_artwork(ctx);
+    image_card_request_media_artwork(
+      ctx, ctx->media_artwork_retry_mask != 0);
   } else {
     image_card_request_picture(ctx);
   }
@@ -1459,14 +1466,17 @@ inline void image_card_refresh_current_picture(ImageCardCtx *ctx) {
   if (!ctx) return;
   if (ctx->media_artwork) {
     ctx->media_artwork_retry_mask = 0;
-    ctx->media_artwork_sources.clear();
     ctx->pending_fallback_picture.clear();
     if (ctx->media_artwork_timer) {
       lv_timer_del(ctx->media_artwork_timer);
       ctx->media_artwork_timer = nullptr;
     }
   }
-  image_card_request_current_picture(ctx);
+  if (ctx->media_artwork) {
+    image_card_request_media_artwork(ctx, true);
+  } else {
+    image_card_request_current_picture(ctx);
+  }
 }
 
 inline void image_card_schedule_picture_retry(ImageCardCtx *ctx, uint32_t delay_ms) {
@@ -2054,14 +2064,7 @@ inline void image_card_handle_picture(ImageCardCtx *ctx, esphome::StringRef pict
         ctx->media_artwork, ctx->media_artwork_retry_mask)) {
     ctx->next_picture_retry_ms = 0;
   }
-  uint32_t now = esphome::millis();
   bool source_changed = ctx->source_url != url;
-  if (ctx->image_ready && ctx->source_url == url && ctx->last_download_completed_ms != 0 &&
-      (uint32_t)(now - ctx->last_download_completed_ms) < IMAGE_CARD_MIN_REPEAT_REFRESH_MS) {
-    ESP_LOGD("image_card", "Skipping recent image refresh for %s", ctx->entity_id.c_str());
-    image_card_log_diagnostics(ctx, "picture-recent-refresh-skipped");
-    return;
-  }
   ctx->source_url = url;
   image_card_log_diagnostics(ctx, "picture-url-ready");
   if (image_card_modal_active_for(ctx)) {
@@ -2074,11 +2077,21 @@ inline void image_card_handle_picture(ImageCardCtx *ctx, esphome::StringRef pict
 
 inline void image_card_process_media_artwork(ImageCardCtx *ctx) {
   if (!ctx || !ctx->active || !ctx->media_artwork) return;
+  const bool refresh_forced = ctx->media_artwork_refresh_forced;
+  const bool prefer_refreshed_remote =
+    refresh_forced || ctx->media_artwork_remote_refresh_pending;
+  ctx->media_artwork_refresh_forced = false;
+  ctx->media_artwork_remote_refresh_pending = false;
   const espcontrol::artwork::SourceSelection selection =
-      ctx->media_artwork_sources.select(ctx->source_url, false);
+      ctx->media_artwork_sources.select(ctx->source_url, prefer_refreshed_remote);
   const std::string &chosen = selection.primary;
   if (chosen.empty()) {
     image_card_clear_media_artwork(ctx);
+    return;
+  }
+  if (!espcontrol::artwork::artwork_selection_needs_download(
+          refresh_forced, chosen == ctx->source_url)) {
+    image_card_log_diagnostics(ctx, "media-artwork-unchanged");
     return;
   }
   image_card_handle_picture(ctx, esphome::StringRef(chosen));
@@ -2112,6 +2125,9 @@ inline void image_card_handle_media_artwork_picture(ImageCardCtx *ctx,
   bool source_changed = ctx->media_artwork_sources.update(
       local, url,
       espcontrol::artwork::RemoteUpdatePolicy::PRESERVE_LOCAL);
+  if (!local && !url.empty() && url != ctx->source_url) {
+    ctx->media_artwork_remote_refresh_pending = true;
+  }
   if (local) {
     if (!url.empty() && url != ctx->source_url) ctx->startup_download_errors = 0;
     if (!url.empty()) ctx->pending_fallback_picture.clear();
@@ -2122,8 +2138,7 @@ inline void image_card_handle_media_artwork_picture(ImageCardCtx *ctx,
     }
   }
   if (!espcontrol::artwork::artwork_response_needs_processing(
-          source_changed, ctx->download_active,
-          ctx->media_artwork_timer != nullptr)) {
+          source_changed, ctx->media_artwork_refresh_forced)) {
     return;
   }
   if (espcontrol::artwork::source_response_can_apply_immediately(local, !url.empty())) {
@@ -2138,8 +2153,10 @@ inline void image_card_handle_media_artwork_picture(ImageCardCtx *ctx,
   image_card_schedule_media_artwork_process(ctx);
 }
 
-inline void image_card_request_media_artwork(ImageCardCtx *ctx) {
+inline void image_card_request_media_artwork(ImageCardCtx *ctx, bool force_refresh) {
   if (!ctx || !ctx->active || !ctx->media_artwork || ctx->entity_id.empty()) return;
+  ctx->media_artwork_refresh_forced =
+    ctx->media_artwork_refresh_forced || force_refresh;
   const std::string entity_id = ctx->entity_id;
   const uint32_t generation = ha_subscription_generation();
   uint8_t request_mask = espcontrol::artwork::artwork_source_request_mask(
@@ -2258,6 +2275,8 @@ inline bool image_card_bind_runtime(BtnSlot &s, const ParsedCfg &p,
   ctx->modal_fit = image_card_modal_fit_enabled(p);
   ctx->media_artwork = false;
   ctx->media_artwork_suppressed = false;
+  ctx->media_artwork_refresh_forced = false;
+  ctx->media_artwork_remote_refresh_pending = false;
   ctx->media_overlay = nullptr;
   ctx->pending_fallback_picture.clear();
   ctx->media_artwork_retry_mask = 0;

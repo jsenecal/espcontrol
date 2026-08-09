@@ -13,6 +13,7 @@ using espcontrol::artwork::artwork_source_mark_received;
 using espcontrol::artwork::artwork_source_request_mask;
 using espcontrol::artwork::artwork_picture_response_clears_retry;
 using espcontrol::artwork::artwork_response_needs_processing;
+using espcontrol::artwork::artwork_selection_needs_download;
 using espcontrol::artwork::source_response_can_apply_immediately;
 using espcontrol::cover_art::RuntimeState;
 using espcontrol::cover_art::media_card_artwork_suppressed;
@@ -64,13 +65,34 @@ int main() {
   assert(!source_response_can_apply_immediately(false, true));
   assert(!source_response_can_apply_immediately(true, false));
 
-  // Repeated callbacks must not restart artwork work that is already pending,
-  // while changed sources and idle recovery attempts must still be processed.
-  assert(!artwork_response_needs_processing(false, true, false));
-  assert(!artwork_response_needs_processing(false, false, true));
-  assert(artwork_response_needs_processing(false, false, false));
-  assert(artwork_response_needs_processing(true, true, false));
-  assert(artwork_response_needs_processing(true, false, true));
+  // Ordinary player-state updates with the same artwork remain no-ops. Only a
+  // changed source or an explicit reconnect/recovery refresh is processed.
+  assert(!artwork_response_needs_processing(false, false));
+  assert(artwork_response_needs_processing(false, true));
+  assert(artwork_response_needs_processing(true, false));
+  assert(artwork_response_needs_processing(true, true));
+  assert(!artwork_selection_needs_download(false, true));
+  assert(artwork_selection_needs_download(false, false));
+  assert(artwork_selection_needs_download(true, true));
+
+  // A state update with the same selected local artwork does not download it
+  // again. Reconnect and attribute-read retry use the forced path instead.
+  sources.clear();
+  assert(sources.update(false, "remote-stable"));
+  assert(sources.update(true, "local-stable"));
+  selected = sources.select("local-stable", false);
+  assert(selected.primary == "local-stable");
+  assert(!artwork_selection_needs_download(false,
+                                            selected.primary == "local-stable"));
+  assert(artwork_selection_needs_download(true,
+                                          selected.primary == "local-stable"));
+
+  // Empty responses are a real artwork update. Once both sources are empty,
+  // the caller must clear/cancel the currently displayed artwork.
+  assert(sources.update(false, "", RemoteUpdatePolicy::PRESERVE_LOCAL));
+  assert(sources.update(true, ""));
+  selected = sources.select("local-stable", false);
+  assert(selected.primary.empty());
 
   // A partial queue failure retries only the source that failed. Reads that
   // were already accepted must not accumulate duplicate deferred callbacks.
