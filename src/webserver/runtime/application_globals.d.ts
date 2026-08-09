@@ -434,6 +434,7 @@ declare global {
   var createRangeSlider: any;
   var createScreensaverThenControls: any;
   var createSettingsUiFeature: any;
+  var createAlarmDelayAudioController: any;
   var createSseHandlers: any;
   var createTimeInput: any;
   var ctx: any;

@@ -8,6 +8,29 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         textSpan: textSpan,
         createDisclosureChevron: createDisclosureChevron,
     });
+    var _alarmDelayAudioController: any = createAlarmDelayAudioController({
+        announcement: normalizeAlarmDelayAnnouncement,
+        beepVolume: normalizeAlarmDelayBeepVolume,
+        finalCountdown: normalizeAlarmDelayFinalCountdown,
+    });
+    function alarmDelayAudioState(this: any) {
+        return {
+            audioEnabled: !!state.alarmDelayAudioOn,
+            ttsEnabled: !!state.alarmDelayTtsOn,
+            entryAnnouncement: state.alarmDelayEntryAnnouncement,
+            exitAnnouncement: state.alarmDelayExitAnnouncement,
+            beepVolume: state.alarmDelayBeepVolume,
+            finalCountdown: state.alarmDelayFinalCountdown,
+        };
+    }
+    function applyAlarmDelayAudioState(this: any, next?: any) {
+        state.alarmDelayAudioOn = next.audioEnabled;
+        state.alarmDelayTtsOn = next.ttsEnabled;
+        state.alarmDelayEntryAnnouncement = next.entryAnnouncement;
+        state.alarmDelayExitAnnouncement = next.exitAnnouncement;
+        state.alarmDelayBeepVolume = next.beepVolume;
+        state.alarmDelayFinalCountdown = next.finalCountdown;
+    }
     function settingsStatusHeader(this: any, title?: any) {
         return _settingsUiFeature.settingsStatusHeader(title);
     }
@@ -25,22 +48,24 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         }
     }
     function syncAlarmDelayAudioUi(this: any) {
+        var audioState: any = alarmDelayAudioState();
+        var uiState: any = _alarmDelayAudioController.uiState(audioState);
         if (els.setAlarmDelayAudioToggle)
             els.setAlarmDelayAudioToggle.checked = !!state.alarmDelayAudioOn;
         if (els.setAlarmDelayTtsToggle)
             els.setAlarmDelayTtsToggle.checked = !!state.alarmDelayTtsOn;
         if (els.alarmDelayAudioOptions)
-            els.alarmDelayAudioOptions.style.display = state.alarmDelayAudioOn ? "" : "none";
+            els.alarmDelayAudioOptions.style.display = uiState.audioOptionsVisible ? "" : "none";
         if (els.alarmDelayTtsOptions)
-            els.alarmDelayTtsOptions.style.display = state.alarmDelayAudioOn && state.alarmDelayTtsOn ? "" : "none";
+            els.alarmDelayTtsOptions.style.display = uiState.ttsOptionsVisible ? "" : "none";
         syncInput(els.setAlarmDelayEntryAnnouncement, state.alarmDelayEntryAnnouncement);
         syncInput(els.setAlarmDelayExitAnnouncement, state.alarmDelayExitAnnouncement);
         if (els.setAlarmDelayBeepVolume)
-            els.setAlarmDelayBeepVolume.value = String(Math.round(state.alarmDelayBeepVolume * 100));
+            els.setAlarmDelayBeepVolume.value = String(uiState.beepVolumePercent);
         if (els.setAlarmDelayBeepVolumeVal)
-            els.setAlarmDelayBeepVolumeVal.textContent = Math.round(state.alarmDelayBeepVolume * 100) + "%";
+            els.setAlarmDelayBeepVolumeVal.textContent = uiState.beepVolumePercent + "%";
         if (els.setAlarmDelayFinalCountdown)
-            els.setAlarmDelayFinalCountdown.value = String(state.alarmDelayFinalCountdown);
+            els.setAlarmDelayFinalCountdown.value = String(uiState.finalCountdown);
     }
     function buildAlarmDelayAudioSettingsCard(this: any) {
         if (!(CFG.features && CFG.features.alarmDelayAudio))
@@ -50,7 +75,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         body.appendChild(master.row);
         els.setAlarmDelayAudioToggle = master.input;
         master.input.addEventListener("change", function (this: any) {
-            state.alarmDelayAudioOn = this.checked;
+            applyAlarmDelayAudioState(_alarmDelayAudioController.setAudioEnabled(alarmDelayAudioState(), this.checked));
             postAlarmDelayAudio(state.alarmDelayAudioOn);
             syncAlarmDelayAudioUi();
         });
@@ -61,7 +86,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         options.appendChild(tts.row);
         els.setAlarmDelayTtsToggle = tts.input;
         tts.input.addEventListener("change", function (this: any) {
-            state.alarmDelayTtsOn = this.checked;
+            applyAlarmDelayAudioState(_alarmDelayAudioController.setTtsEnabled(alarmDelayAudioState(), this.checked));
             postAlarmDelayTts(state.alarmDelayTtsOn);
             syncAlarmDelayAudioUi();
         });
@@ -79,7 +104,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
             input.maxLength = 120;
             input.value = value;
             input.addEventListener("change", function (this: any) {
-                var normalized: any = normalizeAlarmDelayAnnouncement(this.value, fallback);
+                var normalized: any = _alarmDelayAudioController.setAnnouncement(alarmDelayAudioState(), stateKey, this.value, fallback)[stateKey];
                 this.value = normalized;
                 state[stateKey] = normalized;
                 postValue(normalized);
@@ -106,11 +131,12 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         volume.range.max = "100";
         volume.range.step = "5";
         volume.range.addEventListener("input", function (this: any) {
-            state.alarmDelayBeepVolume = normalizeAlarmDelayBeepVolume(parseFloat(this.value) / 100);
+            applyAlarmDelayAudioState(_alarmDelayAudioController.setBeepVolume(alarmDelayAudioState(), parseFloat(this.value) / 100));
             volume.val.textContent = Math.round(state.alarmDelayBeepVolume * 100) + "%";
         });
         volume.range.addEventListener("change", function (this: any) {
-            postAlarmDelayBeepVolume(normalizeAlarmDelayBeepVolume(parseFloat(this.value) / 100));
+            applyAlarmDelayAudioState(_alarmDelayAudioController.setBeepVolume(alarmDelayAudioState(), parseFloat(this.value) / 100));
+            postAlarmDelayBeepVolume(state.alarmDelayBeepVolume);
         });
         options.appendChild(volume.wrap);
         els.setAlarmDelayBeepVolume = volume.range;
@@ -128,7 +154,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         countdown.step = "1";
         countdown.value = String(state.alarmDelayFinalCountdown);
         countdown.addEventListener("change", function (this: any) {
-            state.alarmDelayFinalCountdown = normalizeAlarmDelayFinalCountdown(this.value);
+            applyAlarmDelayAudioState(_alarmDelayAudioController.setFinalCountdown(alarmDelayAudioState(), this.value));
             this.value = String(state.alarmDelayFinalCountdown);
             postAlarmDelayFinalCountdown(state.alarmDelayFinalCountdown);
         });
@@ -375,6 +401,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
     }
     return {
         "_settingsUiFeature": liveGlobal(() => _settingsUiFeature, (value?: any) => { _settingsUiFeature = value; }),
+        "_alarmDelayAudioController": liveGlobal(() => _alarmDelayAudioController, (value?: any) => { _alarmDelayAudioController = value; }),
         "settingsStatusHeader": staticGlobal(settingsStatusHeader),
         "appendSettingsSection": staticGlobal(appendSettingsSection),
         "openVoiceServicesSettings": staticGlobal(openVoiceServicesSettings),
