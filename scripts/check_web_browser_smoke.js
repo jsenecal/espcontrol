@@ -2302,9 +2302,15 @@ async function assertFanOptionalLightSettings(page, label) {
 
   await page.getByRole("button", { name: "Optional Light" }).click();
   const lightEntity = page.locator("#sp-inp-fan-light-entity");
-  await lightEntity.fill("light.bedroom_fan");
-  await lightEntity.press("Tab");
-  await lightTab.waitFor({ state: "visible" });
+  await lightEntity.evaluate((input) => {
+    input.value = "light.bedroom_fan";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await page.waitForFunction(() => {
+    const input = document.querySelector("#sp-inp-fan-tab-light");
+    return input instanceof HTMLInputElement && !input.disabled;
+  });
   assert.strictEqual(
     await lightTab.isChecked(),
     true,
@@ -2325,7 +2331,9 @@ async function assertFanOptionalLightSettings(page, label) {
     `${label}: Light tab should be movable with the other fan tabs`,
   );
 
-  await page.locator("#sp-inp-fan-tab-light").uncheck();
+  await page
+    .locator('.sp-light-tab-row[data-tab="light"] .sp-toggle-track')
+    .click();
   assert.strictEqual(
     await page.locator("#sp-inp-fan-tab-light").isChecked(),
     false,

@@ -124,12 +124,17 @@ export function registerFanCardTypes(): GlobalDescriptors {
                 rerender: false,
             },
         });
-        function saveLightEntity(this: any) {
+        function syncLightEntity(this: any) {
             setFanLightEntity(b, lightEntityField.input.value);
+            b._modalSettingsOpen = true;
             b._fanOptionalLightOpen = true;
             helpers.saveField("options", b.options);
+        }
+        function saveLightEntity(this: any) {
+            syncLightEntity();
             renderButtonSettings();
         }
+        lightEntityField.input.addEventListener("input", syncLightEntity);
         lightEntityField.input.addEventListener("change", saveLightEntity);
         lightEntityField.input.addEventListener("blur", saveLightEntity);
         lightEntityField.input.addEventListener("keydown", function (this: any, event?: any) {
