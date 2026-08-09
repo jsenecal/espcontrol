@@ -18,6 +18,7 @@ CONF_ACTION_RESPONSES = "action_responses"
 CONF_PANEL_CONFIG = "panel_config"
 CONF_DEVICE_PROFILE = "device_profile"
 CONF_BUTTON_ORDER = "button_order"
+CONF_BUTTON_ON_COLOR = "button_on_color"
 CONF_BUTTONS = "buttons"
 CONF_CONFIG = "config"
 CONF_SUBPAGE_CHUNKS = "subpage_chunks"
@@ -40,6 +41,7 @@ PANEL_CONFIG_SCHEMA = cv.Schema(
     {
         cv.Required(CONF_DEVICE_PROFILE): cv.string_strict,
         cv.Required(CONF_BUTTON_ORDER): cv.use_id(text.Text),
+        cv.Optional(CONF_BUTTON_ON_COLOR): cv.use_id(text.Text),
         cv.Required(CONF_BUTTONS): cv.All(
             cv.ensure_list(PANEL_CONFIG_BUTTON_SCHEMA), cv.Length(min=1, max=32)
         ),
@@ -68,6 +70,9 @@ async def to_code(config):
         cg.add(var.set_panel_config_device_profile(panel_config[CONF_DEVICE_PROFILE]))
         button_order = await cg.get_variable(panel_config[CONF_BUTTON_ORDER])
         cg.add(var.set_panel_config_button_order(button_order))
+        if CONF_BUTTON_ON_COLOR in panel_config:
+            button_on_color = await cg.get_variable(panel_config[CONF_BUTTON_ON_COLOR])
+            cg.add(var.set_panel_config_button_on_color(button_on_color))
         for slot, button_sources in enumerate(panel_config[CONF_BUTTONS], start=1):
             button = await cg.get_variable(button_sources[CONF_CONFIG])
             subpages = [

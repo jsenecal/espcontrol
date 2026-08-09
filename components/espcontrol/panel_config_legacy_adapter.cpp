@@ -8,6 +8,7 @@ namespace espcontrol::configuration {
 namespace {
 
 constexpr char BUTTON_ORDER_KEY[] = "button_order";
+constexpr char BUTTON_ON_COLOR_KEY[] = "button_on_color";
 
 bool append_text(std::array<uint8_t, PANEL_CONFIG_MAX_RECORD_BODY_BYTES - 1>
                      *output,
@@ -96,6 +97,14 @@ bool PanelConfigLegacyAdapter::write_document(uint8_t *output,
           button_order_->value().size()) != PanelConfigStatus::OK) {
     return false;
   }
+  if (button_on_color_ != nullptr && !button_on_color_->value().empty() &&
+      writer.append_setting(
+          reinterpret_cast<const uint8_t *>(BUTTON_ON_COLOR_KEY),
+          sizeof(BUTTON_ON_COLOR_KEY) - 1,
+          reinterpret_cast<const uint8_t *>(button_on_color_->value().data()),
+          button_on_color_->value().size()) != PanelConfigStatus::OK) {
+    return false;
+  }
   return writer.finish(document_size) == PanelConfigStatus::OK;
 }
 
@@ -114,6 +123,8 @@ bool PanelConfigLegacyAdapter::mirror_document(const uint8_t *document,
   // Clear known values first. Missing records intentionally mean that the
   // corresponding old entity is empty in the native document.
   if (!button_order_->set_value("", 0)) return false;
+  if (button_on_color_ != nullptr && !button_on_color_->set_value("", 0))
+    return false;
   for (ButtonSources &sources : buttons_) {
     if (sources.button != nullptr && !sources.button->set_value("", 0))
       return false;
@@ -156,6 +167,14 @@ bool PanelConfigLegacyAdapter::mirror_document(const uint8_t *document,
                std::memcmp(record.key, BUTTON_ORDER_KEY, record.key_size) == 0) {
       if (!button_order_->set_value(reinterpret_cast<const char *>(record.value),
                                     record.value_size)) {
+        return false;
+      }
+    } else if (record.type == PanelConfigRecordType::SETTING &&
+               record.key_size == sizeof(BUTTON_ON_COLOR_KEY) - 1 &&
+               std::memcmp(record.key, BUTTON_ON_COLOR_KEY, record.key_size) == 0) {
+      if (button_on_color_ != nullptr &&
+          !button_on_color_->set_value(
+              reinterpret_cast<const char *>(record.value), record.value_size)) {
         return false;
       }
     }
