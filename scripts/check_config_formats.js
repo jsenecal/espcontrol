@@ -2297,6 +2297,56 @@ assert.strictEqual(
   "fan control tabs normalize invalid and duplicate values"
 );
 
+assert.strictEqual(
+  hooks.normalizeFanControlOptions("fan_light_entity=light.bedroom_fan"),
+  "fan_light_entity=light.bedroom_fan",
+  "configured fan light uses the automatic visible-tab default"
+);
+assert.strictEqual(
+  hooks.normalizeFanControlOptions("fan_light_entity=light.bedroom_fan,fan_tabs=power%7Cspeed%7Cpreset%7Coscillation%7Cdirection"),
+  "fan_light_entity=light.bedroom_fan,fan_tabs=power%7Cspeed%7Cpreset%7Coscillation%7Cdirection",
+  "configured fan light preserves an explicitly disabled Light tab"
+);
+assert.strictEqual(
+  hooks.normalizeFanControlOptions("fan_tabs=light%7Cspeed"),
+  "fan_tabs=speed",
+  "fan control drops Light when no separate light entity is configured"
+);
+assert.strictEqual(
+  hooks.normalizeFanControlOptions("fan_tabs=light"),
+  "fan_tabs=power",
+  "fan control keeps Power when removing its only Light tab"
+);
+const fanLightModal = { options: "" };
+hooks.setFanLightEntity(fanLightModal, "light.bedroom_fan");
+assert.strictEqual(fanLightModal.options, "fan_light_entity=light.bedroom_fan", "configuring a fan light enables its tab automatically");
+assert.deepStrictEqual(
+  Array.from(hooks.fanControlTabs(fanLightModal)),
+  ["power", "speed", "preset", "oscillation", "direction", "light"],
+  "configured fan light appears after the default fan tabs"
+);
+hooks.setFanControlTabs(fanLightModal, ["light", "speed", "power"]);
+assert.strictEqual(
+  fanLightModal.options,
+  "fan_light_entity=light.bedroom_fan,fan_tabs=light%7Cspeed%7Cpower",
+  "fan light tab can be reordered with the other fan tabs"
+);
+const lightOnlyFanModal = { options: "fan_light_entity=light.bedroom_fan,fan_tabs=light" };
+hooks.setFanLightEntity(lightOnlyFanModal, "");
+assert.strictEqual(
+  lightOnlyFanModal.options,
+  "fan_tabs=power",
+  "clearing a light-only fan tab preserves the Power fallback"
+);
+hooks.setFanControlTabs(fanLightModal, ["power", "speed", "preset", "oscillation", "direction"]);
+assert.strictEqual(
+  fanLightModal.options,
+  "fan_light_entity=light.bedroom_fan,fan_tabs=power%7Cspeed%7Cpreset%7Coscillation%7Cdirection",
+  "fan light tab can be disabled without clearing its entity"
+);
+hooks.setFanLightEntity(fanLightModal, "");
+assert.strictEqual(fanLightModal.options, "", "clearing the fan light removes its tab setting");
+
 assertButtonRoundTrip(hooks, "fan oscillation card", {
   entity: "fan.bedroom",
   label: "Oscillation",

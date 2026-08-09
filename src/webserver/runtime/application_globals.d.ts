@@ -69,6 +69,7 @@ declare global {
   var EspControlModel: any;
   var FALLBACK_TIMEZONE_OPTION: any;
   var FAN_CARD_METADATA: any;
+  var FAN_LIGHT_ENTITY_OPTION: any;
   var FAN_CONTROL_TABS_OPTION: any;
   var FAN_CONTROL_TYPE_OPTIONS: any;
   var FAVICON_SVG: any;
@@ -514,6 +515,7 @@ declare global {
   var fanControlTabDefinitions: any;
   var fanControlTabs: any;
   var fanControlTabsAreDefault: any;
+  var fanLightEntity: any;
   var fanTypeFactory: any;
   var fieldLabel: any;
   var fieldWithControl: any;
@@ -1061,6 +1063,7 @@ declare global {
   var setDateTimeCardMode: any;
   var setDoorWindowActiveColorEnabled: any;
   var setFanControlTabs: any;
+  var setFanLightEntity: any;
   var setFanControlType: any;
   var setFavicon: any;
   var setFirmwareUpdateInfo: any;

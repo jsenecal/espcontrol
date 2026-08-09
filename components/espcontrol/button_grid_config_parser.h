@@ -50,7 +50,8 @@ constexpr const char *LIGHT_CONTROL_DEFAULT_TABS_VALUE = "power|brightness|tempe
 constexpr const char *COVER_CONTROL_TABS_OPTION = card_runtime_option_name_cover_tabs();
 constexpr const char *CLIMATE_CONTROL_TABS_OPTION = "climate_tabs";
 constexpr const char *CLIMATE_CONTROL_DEFAULT_TABS_VALUE = "temperature|mode|preset|fan|swing";
-constexpr const char *FAN_CONTROL_TABS_OPTION = "fan_tabs";
+constexpr const char *FAN_CONTROL_TABS_OPTION = card_runtime_option_name_fan_tabs();
+constexpr const char *FAN_LIGHT_ENTITY_OPTION = card_runtime_option_name_fan_light_entity();
 constexpr const char *FAN_CONTROL_DEFAULT_TABS_VALUE = "power|speed|preset|oscillation|direction";
 constexpr const char *LABEL_DISPLAY_OPTION = card_runtime_option_name_label_display();
 constexpr const char *NUMBER_DISPLAY_OPTION = card_runtime_option_name_number_display();
@@ -560,7 +561,7 @@ inline std::string normalize_climate_control_tabs_value(const std::string &value
 
 inline bool fan_control_tab_token_valid(const std::string &value) {
   return value == "power" || value == "speed" || value == "preset" ||
-         value == "oscillation" || value == "direction";
+         value == "oscillation" || value == "direction" || value == "light";
 }
 
 inline std::string normalize_fan_control_tabs_value(const std::string &value) {
@@ -583,10 +584,33 @@ inline std::string normalize_fan_control_tabs_value(const std::string &value) {
 }
 
 inline std::string fan_control_card_options_normalized(const std::string &options) {
-  std::string tabs = normalize_fan_control_tabs_value(
-    cfg_option_value(options, FAN_CONTROL_TABS_OPTION));
-  if (tabs == FAN_CONTROL_DEFAULT_TABS_VALUE) return "";
-  return std::string(FAN_CONTROL_TABS_OPTION) + "=" + encode_compact_field(tabs);
+  std::string light_entity = cfg_option_value(options, FAN_LIGHT_ENTITY_OPTION);
+  std::string tabs_value = cfg_option_value(options, FAN_CONTROL_TABS_OPTION);
+  std::string tabs = normalize_fan_control_tabs_value(tabs_value);
+  if (light_entity.empty()) {
+    std::vector<std::string> filtered;
+    for (const auto &tab : split_config_fields(tabs, '|')) {
+      if (tab != "light") filtered.push_back(tab);
+    }
+    tabs.clear();
+    for (const auto &tab : filtered) {
+      if (!tabs.empty()) tabs += "|";
+      tabs += tab;
+    }
+    if (tabs.empty()) tabs = "power";
+  }
+  std::string default_tabs = FAN_CONTROL_DEFAULT_TABS_VALUE;
+  if (!light_entity.empty()) default_tabs += "|light";
+  if (tabs_value.empty()) tabs = default_tabs;
+  std::string out;
+  if (!light_entity.empty()) {
+    out = std::string(FAN_LIGHT_ENTITY_OPTION) + "=" + encode_compact_field(light_entity);
+  }
+  if (tabs != default_tabs) {
+    if (!out.empty()) out += ",";
+    out += std::string(FAN_CONTROL_TABS_OPTION) + "=" + encode_compact_field(tabs);
+  }
+  return out;
 }
 
 inline bool image_card_label_enabled(const ParsedCfg &p) {

@@ -250,6 +250,10 @@ constexpr const char *card_runtime_option_name_fan_tabs() {
   return CARD_CONTRACT_OPTION_NAME_FAN_TABS;
 }
 
+constexpr const char *card_runtime_option_name_fan_light_entity() {
+  return CARD_CONTRACT_OPTION_NAME_FAN_LIGHT_ENTITY;
+}
+
 constexpr const char *card_runtime_option_name_label_display() {
   return CARD_CONTRACT_OPTION_NAME_LABEL_DISPLAY;
 }
