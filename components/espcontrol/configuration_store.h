@@ -1,5 +1,6 @@
 #pragma once
 
+#include <atomic>
 #include <cstddef>
 #include <cstdint>
 
@@ -92,6 +93,7 @@ class ConfigurationStore {
                            size_t size);
 
   StorageBackend &backend_;
+  std::atomic_flag commit_lock_ = ATOMIC_FLAG_INIT;
 };
 
 }  // namespace espcontrol::configuration

@@ -17,6 +17,18 @@ constexpr size_t PAYLOAD_SIZE_OFFSET = 12;
 constexpr size_t CHECKSUM_OFFSET = 16;
 constexpr size_t CHECKSUM_CHUNK_SIZE = 64;
 
+class CommitLockGuard {
+ public:
+  explicit CommitLockGuard(std::atomic_flag &lock) : lock_(lock) {
+    while (lock_.test_and_set(std::memory_order_acquire)) {
+    }
+  }
+  ~CommitLockGuard() { lock_.clear(std::memory_order_release); }
+
+ private:
+  std::atomic_flag &lock_;
+};
+
 uint16_t read_u16(const uint8_t *data) {
   return static_cast<uint16_t>(data[0]) |
          (static_cast<uint16_t>(data[1]) << 8);
@@ -198,6 +210,10 @@ CommitResult ConfigurationStore::commit_internal(bool enforce_generation,
                                                  uint32_t expected_generation,
                                                  const uint8_t *payload,
                                                  size_t payload_size) {
+  // A conditional save may originate from concurrent HTTP callbacks. Keep the
+  // slot inspection, generation check, write, and verification together so a
+  // stale request cannot pass the check before another save is published.
+  CommitLockGuard lock(commit_lock_);
   if (payload_size > 0 && payload == nullptr) {
     return {StoreStatus::INVALID_ARGUMENT};
   }
