@@ -5,6 +5,7 @@ import { createCoverArtScreensaverController } from "../../src/webserver/feature
 import { createMediaPlaybackController } from "../../src/webserver/features/media_playback_controller";
 import { createVoiceServicesController } from "../../src/webserver/features/voice_services_controller";
 import { createClockBarController } from "../../src/webserver/features/clock_bar_controller";
+import { createScreenScheduleController } from "../../src/webserver/features/screen_schedule_controller";
 
 function equal<T>(actual: T, expected: T, message: string): void {
   if (actual !== expected) throw new Error(`${message}: expected ${String(expected)}, received ${String(actual)}`);
@@ -126,4 +127,25 @@ export function runSettingsFeatureTests(): void {
   const clockBarDisabled = clockBar.setEnabled(clockBarInitial, false);
   equal(clockBarDisabled.selectedItem, "", "disabling the clock bar closes its selected preview item");
   equal(clockBar.uiState(clockBarDisabled).badgeVisible, false, "disabled clock bar hides its status badge");
+
+  const schedule = createScreenScheduleController({
+    trigger: (value) => ["disabled", "time", "sensor"].includes(String(value)) ? String(value) : "disabled",
+    sensorActivation: (value) => value === "on" ? "on" : "off",
+    hour: (value, fallback) => Math.max(0, Math.min(23, Number.isFinite(Number(value)) ? Math.round(Number(value)) : fallback)),
+    mode: (value) => ["screen_off", "screen_dimmed", "clock"].includes(String(value)) ? String(value) : "screen_off",
+    wakeTimeout: (value) => Math.max(10, Number(value) || 10),
+    wakeBrightness: (value) => Math.max(1, Math.min(100, Number(value) || 1)),
+    dimmedBrightness: (value) => Math.max(1, Math.min(100, Number(value) || 1)),
+    clockBrightness: (value) => Math.max(1, Math.min(100, Number(value) || 1)),
+  });
+  const scheduleInitial = {
+    trigger: "time", sensorActivation: "off", onHour: 6, offHour: 23, mode: "screen_off",
+    wakeTimeout: 30, wakeBrightness: 100, dimmedBrightness: 25, clockBrightness: 20,
+  };
+  equal(schedule.uiState(scheduleInitial).timeControlsVisible, true, "time schedules show their hour controls");
+  equal(schedule.uiState(schedule.setTrigger(scheduleInitial, "sensor")).sensorControlsVisible, true,
+        "sensor schedules show their sensor controls");
+  equal(schedule.uiState(schedule.setMode(scheduleInitial, "clock")).clockOptionsVisible, true,
+        "clock schedules show their clock options");
+  equal(schedule.setOnHour(scheduleInitial, 28).onHour, 23, "schedule hours stay within a day");
 }

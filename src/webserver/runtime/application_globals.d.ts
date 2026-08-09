@@ -59,6 +59,10 @@ declare global {
   var CLOCK_BAR_NIGHT_MODE_UNAVAILABLE: any;
   var CLOCK_BAR_TIME_UNAVAILABLE: any;
   var CLOCK_BAR_UNAVAILABLE: any;
+  var createScreenScheduleController: any;
+  var _screenScheduleController: any;
+  var screenScheduleControllerState: any;
+  var applyScreenScheduleControllerState: any;
   var COVER_CONTROL_TABS_OPTION: any;
   var ClipboardFeature: any;
   var DATE_TIME_CARD_METADATA: any;
