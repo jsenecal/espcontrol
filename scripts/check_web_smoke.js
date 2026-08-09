@@ -77,8 +77,11 @@ function assertGeneratedConfigValue(slug, generated, key, value) {
 
 const hooks = loadHooks();
 assert(hooks, "web test hooks were not exported");
+const previewStylesSource = fs.readFileSync(path.join(ROOT, "src", "webserver", "application", "styles.ts"), "utf8");
 const scheduleSettingsSource = fs.readFileSync(path.join(ROOT, "src", "webserver", "application", "settings_schedule_section.ts"), "utf8");
 const screensaverSettingsSource = fs.readFileSync(path.join(ROOT, "src", "webserver", "application", "settings_page.ts"), "utf8");
+assert(previewStylesSource.includes("max-height:var(--btn-label-max-height)"), "button labels wrap within the device-matched label area");
+assert(!previewStylesSource.includes("-webkit-line-clamp:var(--btn-lines);"), "button labels do not show browser ellipses when clipped");
 assert(scheduleSettingsSource.includes('entityName("screen_schedule_sensor_entity")'), "Night Schedule posts its dedicated sensor entity");
 assert(scheduleSettingsSource.includes("state.scheduleSensorEntity"), "Night Schedule input receives its dedicated sensor value");
 assert(screensaverSettingsSource.includes('entityName("presence_sensor_entity")'), "Screensaver keeps posting its existing presence entity");

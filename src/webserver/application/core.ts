@@ -86,8 +86,12 @@ export function installCore(): GlobalDescriptors {
         r.setProperty("--media-cover-title", scaledCqw(btn.coverArtTitleSize, scale));
         r.setProperty("--media-cover-artist", scaledCqw(btn.coverArtArtistSize, scale));
         r.setProperty("--btn-label-weight", String(btn.labelWeight || 400));
-        r.setProperty("--btn-lines", String(btn.labelLines || 1));
-        r.setProperty("--btn-lines-dbl", String(btn.labelLinesDouble || btn.labelLines || 1));
+        var labelLines: any = btn.labelLines || 1;
+        var labelLinesDouble: any = btn.labelLinesDouble || labelLines;
+        r.setProperty("--btn-lines", String(labelLines));
+        r.setProperty("--btn-lines-dbl", String(labelLinesDouble));
+        r.setProperty("--btn-label-max-height", scaledCqw(btn.labelSize * 1.2 * labelLines, scale));
+        r.setProperty("--btn-label-max-height-dbl", scaledCqw(btn.labelSize * 1.2 * labelLinesDouble, scale));
         r.setProperty("--sensor-top", scaledCqw(sensorBadge.top, scale));
         r.setProperty("--sensor-right", scaledCqw(sensorBadge.right, scale));
         r.setProperty("--sensor-fs", scaledCqw(sensorBadge.fontSize, scale));
