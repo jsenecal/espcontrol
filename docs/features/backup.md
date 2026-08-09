@@ -17,6 +17,6 @@ Backup files are versioned so newer EspControl releases can keep importing older
 
 EspControl keeps old saved card strings readable during upgrades. That means cards created before newer card options or compact subpage storage were added should still load, display, and export correctly after an update.
 
-New backup exports continue to use `version: 2` with `format: "espcontrol.backup"`. If you import an older backup, EspControl updates the internal card details as needed, but it does not require you to manually rebuild the setup.
+New backup exports continue to use `version: 2` with `format: "espcontrol.backup"`. On panels that support the new native configuration service, the readable JSON file also includes a `native_config` section. It records the panel profile, document version, and an encoded copy of the native configuration so a future firmware version can restore it exactly. Panels without that service continue to export and import the same compatible JSON backup.
 
 When importing a backup from a different-sized panel, EspControl keeps the saved card order where it can and rearranges cards that no longer fit the target screen. Subpages are moved with their parent card when the parent card is kept.

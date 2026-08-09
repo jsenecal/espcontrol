@@ -18,6 +18,13 @@ export interface PanelConfigDocument {
   settings: Record<string, string>;
 }
 
+/** Readable JSON representation of a native PanelConfig document in a backup. */
+export interface PanelConfigBackupPayload {
+  document_version: number;
+  device_profile: string;
+  payload: string;
+}
+
 export class PanelConfigError extends Error {
   constructor(message: string) {
     super(message);
@@ -26,6 +33,42 @@ export class PanelConfigError extends Error {
 }
 
 function fail(message: string): never { throw new PanelConfigError(message); }
+
+const BASE64_ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+function encodeBase64(input: Uint8Array): string {
+  let output = "";
+  for (let offset = 0; offset < input.length; offset += 3) {
+    const first = input[offset]!;
+    const second = input[offset + 1];
+    const third = input[offset + 2];
+    output += BASE64_ALPHABET[first >>> 2]!;
+    output += BASE64_ALPHABET[((first & 0x03) << 4) | ((second || 0) >>> 4)]!;
+    output += second === undefined ? "=" : BASE64_ALPHABET[((second & 0x0f) << 2) | ((third || 0) >>> 6)]!;
+    output += third === undefined ? "=" : BASE64_ALPHABET[third & 0x3f]!;
+  }
+  return output;
+}
+
+function decodeBase64(value: unknown): Uint8Array {
+  if (typeof value !== "string" || value.length === 0 || value.length % 4 !== 0 ||
+      !/^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(value)) {
+    fail("PanelConfig backup payload is not valid base64");
+  }
+  const padding = value.endsWith("==") ? 2 : value.endsWith("=") ? 1 : 0;
+  const output = new Uint8Array((value.length / 4) * 3 - padding);
+  let writeOffset = 0;
+  for (let offset = 0; offset < value.length; offset += 4) {
+    const first = BASE64_ALPHABET.indexOf(value[offset]!);
+    const second = BASE64_ALPHABET.indexOf(value[offset + 1]!);
+    const third = value[offset + 2] === "=" ? 0 : BASE64_ALPHABET.indexOf(value[offset + 2]!);
+    const fourth = value[offset + 3] === "=" ? 0 : BASE64_ALPHABET.indexOf(value[offset + 3]!);
+    output[writeOffset++] = (first << 2) | (second >>> 4);
+    if (value[offset + 2] !== "=") output[writeOffset++] = ((second & 0x0f) << 4) | (third >>> 2);
+    if (value[offset + 3] !== "=") output[writeOffset++] = ((third & 0x03) << 6) | fourth;
+  }
+  return output;
+}
 
 function encodeString(value: string, label: string, maxLength: number, allowEmpty = true): Uint8Array {
   if (typeof value !== "string" || (!allowEmpty && value.length === 0)) {
@@ -171,4 +214,30 @@ export function decodePanelConfig(input: Uint8Array): PanelConfigDocument {
   }
   if (offset !== input.length || !result.deviceProfile) fail("incomplete PanelConfig document");
   return result;
+}
+
+export function createPanelConfigBackupPayload(document: Uint8Array): PanelConfigBackupPayload {
+  const decoded = decodePanelConfig(document);
+  return {
+    document_version: PANEL_CONFIG_DOCUMENT_VERSION,
+    device_profile: decoded.deviceProfile,
+    payload: encodeBase64(document),
+  };
+}
+
+export function decodePanelConfigBackupPayload(value: unknown): Uint8Array {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    fail("PanelConfig backup section is invalid");
+  }
+  const payload = value as Partial<PanelConfigBackupPayload>;
+  if (payload.document_version !== PANEL_CONFIG_DOCUMENT_VERSION ||
+      typeof payload.device_profile !== "string" || payload.device_profile.length === 0) {
+    fail("PanelConfig backup version or device profile is invalid");
+  }
+  const document = decodeBase64(payload.payload);
+  const decoded = decodePanelConfig(document);
+  if (decoded.deviceProfile !== payload.device_profile) {
+    fail("PanelConfig backup device profile does not match its document");
+  }
+  return document;
 }

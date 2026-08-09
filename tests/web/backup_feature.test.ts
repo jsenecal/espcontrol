@@ -3,6 +3,8 @@ import { createBackupFeature, type FeatureSubpage } from "../../src/webserver/fe
 import {
   buildSubpageGrid,
   cloneCardConfig,
+  createPanelConfigBackupPayload,
+  encodePanelConfig,
   parseLegacySubpageConfig,
   serializeLegacySubpageConfig,
   subpageOrderForSerialize,
@@ -78,6 +80,20 @@ export function runBackupFeatureTests(): void {
   });
   equal(backup.button_order, "1,2d", "backup preserves exact size tokens");
   equal(backup.subpage_objects["1"]?.back_label, "Return", "backup preserves subpage back labels");
+
+  const nativeDocument = encodePanelConfig({
+    deviceProfile: "panel-a",
+    buttons: { 1: "light.kitchen" },
+    subpages: {},
+    settings: { button_order: "1" },
+  });
+  const nativeBackup = feature.createBackupConfig({
+    device: "panel-a",
+    buttons: [],
+    native_config: createPanelConfigBackupPayload(nativeDocument),
+  });
+  equal(nativeBackup.native_config?.device_profile, "panel-a", "native backup records its device profile");
+  equal(nativeBackup.native_config?.document_version, 1, "native backup records its document version");
 
   const plan = feature.planBackupImport(backup, { device: "panel-b", slots: 3 });
   equal(plan.warnings.length, 2, "cross-device and slot-count warnings are retained");

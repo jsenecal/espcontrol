@@ -1,6 +1,11 @@
 import type { CardConfig } from "../contracts/types";
 import { cloneCardConfig, emptyCardConfig } from "./card";
 import {
+  createPanelConfigBackupPayload,
+  decodePanelConfigBackupPayload,
+  type PanelConfigBackupPayload,
+} from "./panel_config";
+import {
   markSpannedCells,
   serializeGridOrder,
   sizeFitsAt,
@@ -37,6 +42,7 @@ export interface NormalizedBackupEnvelope {
   subpage_objects: Record<string, StructuredSubpageConfig>;
   settings: Record<string, unknown> | null;
   screen: Record<string, unknown> | null;
+  native_config?: PanelConfigBackupPayload;
 }
 
 export interface BackupSnapshotEnvelope {
@@ -47,6 +53,7 @@ export interface BackupSnapshotEnvelope {
   button_on_color?: string;
   settings?: Record<string, unknown>;
   screen?: Record<string, unknown>;
+  native_config?: PanelConfigBackupPayload | null;
 }
 
 export interface BackupUsedSlot {
@@ -95,6 +102,13 @@ export function validateBackupEnvelope(data: unknown): Record<string, unknown> {
   if (!Array.isArray(data.buttons)) {
     throw backupConfigError("Invalid config file - missing required fields");
   }
+  if (data.native_config !== undefined && data.native_config !== null) {
+    try {
+      decodePanelConfigBackupPayload(data.native_config);
+    } catch (error) {
+      throw backupConfigError((error as Error).message || "Invalid native configuration backup");
+    }
+  }
 
   return data;
 }
@@ -129,6 +143,9 @@ export function createBackupEnvelope(
     subpage_objects: outputs.subpage_objects || {},
     settings: snapshot.settings || {},
     screen: snapshot.screen || {},
+    ...(snapshot.native_config
+      ? { native_config: createPanelConfigBackupPayload(decodePanelConfigBackupPayload(snapshot.native_config)) }
+      : {}),
   };
 }
 
@@ -151,6 +168,9 @@ export function normalizeBackupEnvelope(
     screen: isRecord(data.screen)
       ? data.screen
       : (isRecord(data.settings) && isRecord(data.settings.screen) ? data.settings.screen : null),
+    ...(data.native_config
+      ? { native_config: createPanelConfigBackupPayload(decodePanelConfigBackupPayload(data.native_config)) }
+      : {}),
   };
 }
 
