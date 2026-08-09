@@ -19,11 +19,13 @@ export {
   PANEL_CONFIG_MAX_SETTING_KEY_BYTES,
   PANEL_CONFIG_MAX_SLOT_COUNT,
   PanelConfigError,
+  createPanelConfigBackupPayload,
+  decodePanelConfigBackupPayload,
   decodePanelConfig,
   encodePanelConfig,
 } from "./panel_config";
 
-export type { PanelConfigDocument } from "./panel_config";
+export type { PanelConfigBackupPayload, PanelConfigDocument } from "./panel_config";
 
 export {
   CARD_CONFIG_FIELDS,

@@ -1,5 +1,7 @@
 import {
   decodePanelConfig,
+  createPanelConfigBackupPayload,
+  decodePanelConfigBackupPayload,
   encodePanelConfig,
   PanelConfigError,
   type PanelConfigDocument,
@@ -50,4 +52,13 @@ export function runPanelConfigTests(fixture: PanelConfigFixture): void {
   equal(Object.prototype.hasOwnProperty.call(decodedProtoSettings.settings, "__proto__"), true, "reserved setting names are preserved");
   equal(decodedProtoSettings.settings.__proto__, "preserved", "reserved setting values round-trip");
   expectPanelConfigError(() => encodePanelConfig({ ...document, deviceProfile: "x".repeat(65) }), "oversized device profiles must be rejected");
+
+  const backup = createPanelConfigBackupPayload(encoded);
+  equal(backup.document_version, 1, "backup records the native document version");
+  equal(backup.device_profile, document.deviceProfile, "backup records the native device profile");
+  deepEqual(decodePanelConfigBackupPayload(backup), encoded, "backup payload restores the exact document bytes");
+  expectPanelConfigError(
+    () => decodePanelConfigBackupPayload({ ...backup, device_profile: "another-panel" }),
+    "backup profile must match the encoded document",
+  );
 }
