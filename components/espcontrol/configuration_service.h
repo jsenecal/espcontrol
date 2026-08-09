@@ -79,6 +79,18 @@ struct ServiceSaveResult {
   }
 };
 
+// A service integration can select the native document it understands without
+// changing the durable two-slot store. Leaving this unset preserves the
+// compatibility service's existing v1 envelope behaviour during migration.
+class ConfigurationDocumentValidator {
+ public:
+  virtual ~ConfigurationDocumentValidator() = default;
+
+  virtual bool supports_version(uint16_t document_version) const = 0;
+  virtual bool validate(uint16_t document_version, const uint8_t *document,
+                        size_t document_size) const = 0;
+};
+
 // Owns the transition between legacy preference fields and the versioned,
 // checksummed document. The durable store is always committed before the
 // compatibility mirror, so an interrupted legacy write cannot lose the new
@@ -86,8 +98,9 @@ struct ServiceSaveResult {
 class ConfigurationService {
  public:
   ConfigurationService(ConfigurationStore &store,
-                       LegacyConfigurationAdapter &legacy)
-      : store_(store), legacy_(legacy) {}
+                       LegacyConfigurationAdapter &legacy,
+      const ConfigurationDocumentValidator *validator = nullptr)
+      : store_(store), legacy_(legacy), validator_(validator) {}
 
   ServiceLoadResult load(uint8_t *output, size_t output_capacity);
   ServiceSaveResult save(uint16_t document_version, const uint8_t *document,
@@ -104,9 +117,13 @@ class ConfigurationService {
   CommitResult commit_document(uint16_t document_version,
                                const uint8_t *document,
                                size_t document_size);
+  bool supports_version(uint16_t document_version) const;
+  bool document_is_valid(uint16_t document_version, const uint8_t *document,
+                         size_t document_size) const;
 
   ConfigurationStore &store_;
   LegacyConfigurationAdapter &legacy_;
+  const ConfigurationDocumentValidator *validator_{nullptr};
 };
 
 }  // namespace espcontrol::configuration
