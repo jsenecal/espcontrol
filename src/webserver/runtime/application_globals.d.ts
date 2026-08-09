@@ -434,8 +434,13 @@ declare global {
   var createRangeSlider: any;
   var createCoverArtScreensaverController: any;
   var createMediaPlaybackController: any;
+  var createVoiceServicesController: any;
   var _coverArtScreensaverController: any;
   var _mediaPlaybackController: any;
+  var _voiceServicesController: any;
+  var voiceServicesState: any;
+  var applyVoiceServicesState: any;
+  var voiceServicesUiState: any;
   var mediaPlaybackState: any;
   var applyMediaPlaybackState: any;
   var coverArtScreensaverState: any;

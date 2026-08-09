@@ -3,6 +3,7 @@ import { createAlarmDelayAudioController } from "../../src/webserver/features/al
 import { createScreensaverController } from "../../src/webserver/features/screensaver_controller";
 import { createCoverArtScreensaverController } from "../../src/webserver/features/cover_art_screensaver_controller";
 import { createMediaPlaybackController } from "../../src/webserver/features/media_playback_controller";
+import { createVoiceServicesController } from "../../src/webserver/features/voice_services_controller";
 
 function equal<T>(actual: T, expected: T, message: string): void {
   if (actual !== expected) throw new Error(`${message}: expected ${String(expected)}, received ${String(actual)}`);
@@ -104,4 +105,15 @@ export function runSettingsFeatureTests(): void {
   equal(changedEntity.coverArtEntity, "media_player.kitchen", "cover art entity is updated");
   equal(changedEntity.sleepPreventionEntity, "media_player.kitchen",
         "cover art entity remains mirrored to sleep prevention");
+
+  const voiceServices = createVoiceServicesController();
+  const voiceInitial = { supported: true, enabled: false };
+  equal(voiceServices.uiState(voiceInitial).settingsVisible, true,
+        "supported Voice Services appear in settings");
+  equal(voiceServices.uiState(voiceInitial).iconVisible, false,
+        "disabled Voice Services hide their preview icon");
+  equal(voiceServices.uiState(voiceServices.setEnabled(voiceInitial, true)).iconVisible, true,
+        "enabling Voice Services updates the preview icon");
+  equal(voiceServices.uiState({ supported: false, enabled: true }).clockBarItemVisible, false,
+        "unsupported Voice Services stay out of the clock bar");
 }
