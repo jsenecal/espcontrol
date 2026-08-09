@@ -257,6 +257,7 @@ declare global {
   var applyPageTitle: any;
   var applyScreensaverTimeoutState: any;
   var applySpans: any;
+  var addNativeConfigToBackup: any;
   var applySseHandlerAliases: any;
   var applySubpageConfigStateEvent: any;
   var applySubpagePresetConfig: any;
@@ -428,6 +429,7 @@ declare global {
   var createHourSelect: any;
   var createInitialState: any;
   var createMdiIcon: any;
+  var createPanelConfigBackupPayload: any;
   var createRangeSlider: any;
   var createScreensaverThenControls: any;
   var createSettingsUiFeature: any;
@@ -448,6 +450,7 @@ declare global {
   var defaultClockBarTemperatureEntity: any;
   var defaultTimezoneCardEntity: any;
   var defaultTimezoneOptions: any;
+  var downloadBackupConfig: any;
   var defaultTimezoneOptionsForDevice: any;
   var deleteButtons: any;
   var deleteSlot: any;
@@ -473,6 +476,7 @@ declare global {
   var emptyButtonConfig: any;
   var emptyCardConfig: any;
   var encodeConfigField: any;
+  var encodePanelConfig: any;
   var encodeSubpageField: any;
   var ensureEntityDropdown: any;
   var ensureInternalRelaySelection: any;

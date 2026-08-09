@@ -46,6 +46,41 @@ export function installAppBackupModule(): GlobalDescriptors {
         var layout: any = isPortraitRotation(rotation) && CFG.portrait ? CFG.portrait : CFG;
         return layout.cols || CFG.cols;
     }
+    function downloadBackupConfig(this: any, data?: any) {
+        var json: any = JSON.stringify(data, null, 2);
+        var blob: any = new Blob([json], { type: "application/json" });
+        var url: any = URL.createObjectURL(blob);
+        var a: any = document.createElement("a");
+        a.href = url;
+        a.download = backupExportFileName();
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+    function addNativeConfigToBackup(this: any, data?: any) {
+        var nativeDocument: any = {
+            deviceProfile: DEVICE_ID,
+            buttons: {},
+            subpages: {},
+            settings: {
+                button_order: data.button_order || "",
+                button_on_color: data.button_on_color || "",
+            },
+        };
+        for (var index: any = 0; index < state.buttons.length; index++) {
+            var buttonConfig: any = serializeButtonConfig(state.buttons[index]);
+            if (buttonConfig)
+                nativeDocument.buttons[index + 1] = buttonConfig;
+        }
+        for (var slot in state.subpages) {
+            var subpageConfig: any = serializeSubpageConfig(state.subpages[slot]);
+            if (subpageConfig)
+                nativeDocument.subpages[slot] = subpageConfig;
+        }
+        data.native_config = createPanelConfigBackupPayload(encodePanelConfig(nativeDocument));
+        return data;
+    }
     function exportConfig(this: any) {
         var data: any = createBackupConfig({
             device: DEVICE_ID,
@@ -130,17 +165,7 @@ export function installAppBackupModule(): GlobalDescriptors {
                 schedule_clock_text_color: normalizeHexColor(state.scheduleClockTextColor, "FFFFFF"),
             },
         });
-        var json: any = JSON.stringify(data, null, 2);
-        var blob: any = new Blob([json], { type: "application/json" });
-        var url: any = URL.createObjectURL(blob);
-        var name: any = backupExportFileName();
-        var a: any = document.createElement("a");
-        a.href = url;
-        a.download = name;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        downloadBackupConfig(addNativeConfigToBackup(data));
     }
     function importConfig(this: any) {
         var input: any = document.createElement("input");
@@ -476,6 +501,8 @@ export function installAppBackupModule(): GlobalDescriptors {
         "backupExportScreenSizeSlug": staticGlobal(backupExportScreenSizeSlug),
         "backupExportFileDate": staticGlobal(backupExportFileDate),
         "backupExportFileName": staticGlobal(backupExportFileName),
+        "downloadBackupConfig": staticGlobal(downloadBackupConfig),
+        "addNativeConfigToBackup": staticGlobal(addNativeConfigToBackup),
         "normalizeImportedPanelSettings": staticGlobal(normalizeImportedPanelSettings),
         "gridColsForImportedSettings": staticGlobal(gridColsForImportedSettings),
         "exportConfig": staticGlobal(exportConfig),
