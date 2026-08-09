@@ -122,7 +122,7 @@ bool legacy_is_imported_once() {
          std::equal(expected.begin(), expected.end(), output.begin());
 }
 
-bool legacy_editor_changes_refresh_the_native_shadow() {
+bool partial_migration_refreshes_the_native_shadow() {
   MemoryBackend backend(256);
   ConfigurationStore store(backend);
   FakeLegacy legacy;
@@ -147,7 +147,7 @@ bool legacy_editor_changes_refresh_the_native_shadow() {
          std::equal(legacy.value.begin(), legacy.value.end(), output.begin());
 }
 
-bool saves_are_durable_before_the_legacy_mirror() {
+bool failed_legacy_mirror_keeps_the_native_save_durable() {
   MemoryBackend backend(256);
   ConfigurationStore store(backend);
   FakeLegacy legacy;
@@ -318,8 +318,8 @@ bool panel_config_validator_rejects_invalid_legacy_imports() {
 int main() {
   const bool passed =
       legacy_is_imported_once() &&
-      legacy_editor_changes_refresh_the_native_shadow() &&
-      saves_are_durable_before_the_legacy_mirror() &&
+      partial_migration_refreshes_the_native_shadow() &&
+      failed_legacy_mirror_keeps_the_native_save_durable() &&
       failed_durable_save_never_updates_legacy() &&
       successful_save_dual_writes() &&
       conditional_save_rejects_a_stale_generation() &&

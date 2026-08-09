@@ -10,6 +10,22 @@ import {
   subpageOrderForSerialize,
 } from "../../src/webserver/model";
 
+interface MigrationFixture {
+  readonly scenarios: {
+    readonly backup_restore: {
+      readonly backup: Record<string, unknown>;
+      readonly target: { readonly device: string; readonly slots: number };
+      readonly expected: {
+        readonly warning_count: number;
+        readonly button_order: string;
+        readonly button_on_color: string;
+        readonly button_entities: readonly string[];
+        readonly subpage_slots: readonly string[];
+      };
+    };
+  };
+}
+
 function equal<T>(actual: T, expected: T, message: string): void {
   if (actual !== expected) throw new Error(`${message}: expected ${String(expected)}, received ${String(actual)}`);
 }
@@ -52,7 +68,7 @@ const feature = createBackupFeature({
   },
 });
 
-export function runBackupFeatureTests(): void {
+export function runBackupFeatureTests(migrationFixture?: MigrationFixture): void {
   const backup = feature.createBackupConfig({
     device: "panel-a",
     slots: 2,
@@ -122,4 +138,16 @@ export function runBackupFeatureTests(): void {
     failure = String((error as Error & { backupMessage?: string }).backupMessage || "");
   }
   equal(failure, "Backup was created by a newer version of EspControl", "future backup error remains exact");
+
+  if (!migrationFixture) return;
+  const scenario = migrationFixture.scenarios.backup_restore;
+  const restoredBackup = feature.normalizeBackupConfig(scenario.backup);
+  const restored = feature.planBackupImport(restoredBackup, scenario.target);
+  equal(restored.warnings.length, scenario.expected.warning_count, "backup restore reports its target-size warning");
+  equal(restored.button_order, scenario.expected.button_order, "backup restore preserves button order");
+  equal(restored.config.button_on_color, scenario.expected.button_on_color, "backup restore preserves active colour");
+  deepEqual(restored.buttons.slice(0, scenario.expected.button_entities.length).map((button) => button.entity),
+    scenario.expected.button_entities, "backup restore preserves button records");
+  deepEqual(Object.keys(restored.subpages), scenario.expected.subpage_slots,
+    "backup restore preserves structured subpages");
 }

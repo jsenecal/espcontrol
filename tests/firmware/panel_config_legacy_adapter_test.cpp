@@ -83,7 +83,7 @@ bool imports_legacy_button_subpage_and_order() {
   return button_found && subpage_found && order_found && on_color_found;
 }
 
-bool native_document_mirrors_back_to_legacy_entities() {
+bool native_document_mirrors_back_to_legacy_entities_for_downgrade() {
   FakeText order("old");
   FakeText on_color("old-color");
   FakeText button("old");
@@ -129,7 +129,7 @@ bool native_document_mirrors_back_to_legacy_entities() {
 
 int main() {
   return imports_legacy_button_subpage_and_order() &&
-                 native_document_mirrors_back_to_legacy_entities()
+                 native_document_mirrors_back_to_legacy_entities_for_downgrade()
              ? 0
              : 1;
 }

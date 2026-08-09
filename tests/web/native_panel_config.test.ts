@@ -4,7 +4,25 @@ import {
   type NativePanelConfigRequest,
   type NativePanelConfigResponse,
 } from "../../src/webserver/features/native_panel_config";
-import { encodePanelConfig } from "../../src/webserver/model";
+import { decodePanelConfig, encodePanelConfig, type PanelConfigDocument } from "../../src/webserver/model";
+
+interface MigrationFixture {
+  readonly scenarios: {
+    readonly downgrade: {
+      readonly native_document: PanelConfigDocument;
+      readonly legacy_entities: Record<string, string>;
+    };
+    readonly partial_migration: {
+      readonly native_document: PanelConfigDocument;
+      readonly legacy_entity_update: { readonly collection: "buttons"; readonly key: number; readonly value: string };
+      readonly expected_document: PanelConfigDocument;
+    };
+    readonly failed_legacy_mirror: {
+      readonly document: PanelConfigDocument;
+      readonly expected_result: "mirror-failed";
+    };
+  };
+}
 
 function equal<T>(actual: T, expected: T, message: string): void {
   if (actual !== expected) throw new Error(`${message}: expected ${String(expected)}, received ${String(actual)}`);
@@ -37,7 +55,7 @@ function response(
   };
 }
 
-export async function runNativePanelConfigTests(): Promise<void> {
+export async function runNativePanelConfigTests(migrationFixture?: MigrationFixture): Promise<void> {
   const partialDocument = updateNativePanelConfigDocument({
     deviceProfile: "panel-a",
     buttons: { 1: "old-button", 2: "preserved-button" },
@@ -88,4 +106,35 @@ export async function runNativePanelConfigTests(): Promise<void> {
     json: async () => ({ configuration: { read: false, write: false, document_versions: [] } }),
   }));
   equal(await legacyClient.save((current) => current), "unsupported", "legacy firmware stays on the entity path");
+
+  if (!migrationFixture) return;
+  const downgrade = migrationFixture.scenarios.downgrade;
+  const downgradedDocument = decodePanelConfig(encodePanelConfig(downgrade.native_document));
+  equal(downgradedDocument.buttons[1], downgrade.legacy_entities.button_config_1,
+    "downgrade fixture retains the first button's legacy value");
+  equal(downgradedDocument.subpages[1], downgrade.legacy_entities.button_subpage_config_1,
+    "downgrade fixture retains the first subpage's legacy value");
+  equal(downgradedDocument.settings.button_on_color, downgrade.legacy_entities.button_on_color,
+    "downgrade fixture retains the active colour");
+  equal(downgradedDocument.settings.button_order, downgrade.legacy_entities.button_order,
+    "downgrade fixture retains button order");
+
+  const partialMigration = migrationFixture.scenarios.partial_migration;
+  deepEqual(updateNativePanelConfigDocument(
+    partialMigration.native_document,
+    partialMigration.native_document.deviceProfile,
+    partialMigration.legacy_entity_update.collection,
+    partialMigration.legacy_entity_update.key,
+    partialMigration.legacy_entity_update.value,
+  ), partialMigration.expected_document, "partial migration preserves native records that legacy firmware cannot see");
+
+  const mirrorScenario = migrationFixture.scenarios.failed_legacy_mirror;
+  const mirrorScenarioDocument = encodePanelConfig(mirrorScenario.document);
+  const fixtureMirrorClient = createNativePanelConfigClient(async (path, request) => {
+    if (path === "/api/v1/capabilities") return response(200);
+    if (request?.method === "PUT") return response(202);
+    return response(200, mirrorScenarioDocument, "\"1\"");
+  });
+  equal(await fixtureMirrorClient.save((current) => current), mirrorScenario.expected_result,
+    "failed legacy mirrors keep the native document durable but block a downgrade claim");
 }
