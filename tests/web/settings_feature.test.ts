@@ -2,6 +2,7 @@ import { screensaverControlState, timedSettingLabel } from "../../src/webserver/
 import { createAlarmDelayAudioController } from "../../src/webserver/features/alarm_delay_audio_controller";
 import { createScreensaverController } from "../../src/webserver/features/screensaver_controller";
 import { createCoverArtScreensaverController } from "../../src/webserver/features/cover_art_screensaver_controller";
+import { createMediaPlaybackController } from "../../src/webserver/features/media_playback_controller";
 
 function equal<T>(actual: T, expected: T, message: string): void {
   if (actual !== expected) throw new Error(`${message}: expected ${String(expected)}, received ${String(actual)}`);
@@ -88,4 +89,19 @@ export function runSettingsFeatureTests(): void {
         "an enabled empty filter remains visible while editing");
   equal(coverArt.uiState(coverArt.setAttributeConditions(coverArtInitial, "media_content_type=music")).filterOptionsVisible,
         true, "saved conditions keep filtering controls visible");
+
+  const mediaPlayback = createMediaPlaybackController();
+  const playbackInitial = {
+    sleepPreventionEnabled: true,
+    sleepPreventionEntity: "media_player.living_room",
+    coverArtEntity: "media_player.living_room",
+  };
+  equal(mediaPlayback.uiState(playbackInitial).sleepPreventionEnabled, true,
+        "sleep prevention state is shared by every settings surface");
+  equal(mediaPlayback.setSleepPreventionEnabled(playbackInitial, false).sleepPreventionEnabled, false,
+        "sleep prevention toggle updates its shared state");
+  const changedEntity = mediaPlayback.setCoverArtEntity(playbackInitial, "media_player.kitchen");
+  equal(changedEntity.coverArtEntity, "media_player.kitchen", "cover art entity is updated");
+  equal(changedEntity.sleepPreventionEntity, "media_player.kitchen",
+        "cover art entity remains mirrored to sleep prevention");
 }

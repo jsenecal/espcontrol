@@ -19,7 +19,7 @@ export function installSettingsCoverArtSectionModule(): GlobalDescriptors {
         var sleepPreventionToggle: any = toggleRow("Keep Screen Awake During Playback", "sp-set-ss-media-sleep-prevention", state.mediaPlayerSleepPreventionOn);
         coverArtScreensaverSettingsBody.appendChild(sleepPreventionToggle.row);
         sleepPreventionToggle.input.addEventListener("change", function (this: any) {
-            state.mediaPlayerSleepPreventionOn = this.checked;
+            applyMediaPlaybackState(_mediaPlaybackController.setSleepPreventionEnabled(mediaPlaybackState(), this.checked));
             syncMediaPlayerSleepPreventionUi();
             syncCoverArtScreensaverUi();
             postMediaPlayerSleepPrevention(state.mediaPlayerSleepPreventionOn);
@@ -33,8 +33,7 @@ export function installSettingsCoverArtSectionModule(): GlobalDescriptors {
         coverArtOnlyOptions.appendChild(coverArtEntityField);
         bindTextPost(coverArtEntityInp, entityName("screen_saver_cover_art_entity"), {
             onBlur: function (this: any, value?: any) {
-                state.coverArtMediaPlayerEntity = value;
-                state.mediaPlayerSleepPreventionEntity = value;
+                applyMediaPlaybackState(_mediaPlaybackController.setCoverArtEntity(mediaPlaybackState(), value));
             },
             post: function (this: any, value?: any) {
                 postCoverArtMediaPlayerEntity(value);
