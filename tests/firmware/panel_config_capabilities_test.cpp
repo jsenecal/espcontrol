@@ -10,6 +10,7 @@ int main() {
   size_t capabilities_size = 0;
   const bool passed = PANEL_CONFIG_API_VERSION == 1 &&
                       PANEL_CONFIG_WEB_ASSET_VERSION == 1 &&
+                      std::strcmp(PANEL_CONFIG_WEB_ASSET_DELIVERY, "manifest") == 0 &&
                       write_panel_config_capabilities_json(
                           capabilities.data(), capabilities.size(),
                           &capabilities_size) &&
@@ -19,6 +20,8 @@ int main() {
                       std::strstr(capabilities.data(), "\"read\":false") != nullptr &&
                       std::strstr(capabilities.data(), "\"write\":false") != nullptr &&
                       std::strstr(capabilities.data(), "\"web_assets\"") != nullptr &&
+                      std::strstr(capabilities.data(), "\"delivery\":\"manifest\"") !=
+                          nullptr &&
                       !write_panel_config_capabilities_json(nullptr,
                                                             capabilities.size(),
                                                             &capabilities_size);
