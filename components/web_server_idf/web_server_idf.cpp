@@ -333,6 +333,7 @@ esp_err_t AsyncWebServer::handle_raw_body_(httpd_req_t *r, const char *content_t
     if (candidate->canHandle(&req)) { handler = candidate; break; }
   }
   if (handler == nullptr) return this->request_handler_(&req);
+  if (!handler->canReceiveBody(&req)) return ESP_OK;
   const size_t total = r->content_len;
   if (total > handler->maximumBodySize()) {
     httpd_resp_send_err(r, HTTPD_400_BAD_REQUEST, "Request body is too large");

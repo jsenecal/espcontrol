@@ -34,6 +34,15 @@ class PanelConfigWriteHandler final
     return std::strcmp(url.c_str(), "/api/v1/config") == 0;
   }
   size_t maximumBodySize() const override { return document_capacity_; }
+  bool canReceiveBody(esphome::web_server_idf::AsyncWebServerRequest *request) override {
+#ifdef USE_WEBSERVER_AUTH
+    if (!request->authenticate(username_, password_)) {
+      request->requestAuthentication();
+      return false;
+    }
+#endif
+    return true;
+  }
 
   void handleBody(esphome::web_server_idf::AsyncWebServerRequest *, uint8_t *data,
                   size_t len, size_t index, size_t total) override {
