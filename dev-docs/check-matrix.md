@@ -33,6 +33,7 @@ This detailed routing table is generated directly from `scripts/check_tasks_data
 | `device-manifest` | product, firmware | Yes | deterministic | — | — | `common/assets/**`<br>`devices/**`<br>`builds/**`<br>`scripts/check_device_manifest.py` | — | `python3 scripts/check_tasks.py run-task device-manifest` |
 | `device-manifest-output` | product, firmware, docs | Yes | deterministic | — | — | `common/assets/**`<br>`devices/catalog.json`<br>`scripts/generate_device_manifest.py` | — | `python3 scripts/check_tasks.py run-task device-manifest-output` |
 | `product-schema` | product | Yes | deterministic | — | — | `common/config/**`<br>`devices/**`<br>`scripts/check_product_schema.py` | — | `npm run check:product-schema` |
+| `product-model-v2` | product | Yes | deterministic | — | — | `product/model_v2.json`<br>`common/config/**`<br>`common/assets/icons.json`<br>`compatibility/fixtures/product_compatibility.json`<br>`devices/catalog.json`<br>`devices/manifest.json`<br>`scripts/product_model_v2.py`<br>`scripts/check_product_model_v2.py` | — | `npm run check:product-model-v2` |
 | `product-snapshot` | product | Yes | deterministic | — | — | `common/config/**`<br>`common/assets/**`<br>`devices/**`<br>`compatibility/**` | — | `npm run check:product-snapshot` |
 | `local-artifacts` | workflow | No | never | — | — | `scripts/check_local_artifacts.py` | — | `npm run check:local-artifacts` |
 | `local-esphome` | firmware, workflow | No | never | — | — | `scripts/local_esphome.py` | — | `npm run check:local-esphome` |
