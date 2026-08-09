@@ -166,33 +166,67 @@ export function installConfigModalTabOptionsModule(): GlobalDescriptors {
             { value: "preset", label: "Preset" },
             { value: "oscillation", label: "Oscillation" },
             { value: "direction", label: "Direction" },
+            { value: "light", label: "Light" },
         ];
     }
     function fanControlDefaultTabs(this: any) {
-        return fanControlTabDefinitions().map(function (this: any, tab?: any) { return tab.value; });
+        return ["power", "speed", "preset", "oscillation", "direction"];
     }
     function normalizeFanControlTabs(this: any, value?: any) {
         return normalizeTabList(value, fanControlTabDefinitions(), fanControlDefaultTabs(), "power");
     }
     function fanControlTabs(this: any, b?: any) {
-        return normalizeFanControlTabs(configOptionValue(b && b.options, FAN_CONTROL_TABS_OPTION));
+        var configuredTabs: any = configOptionValue(b && b.options, FAN_CONTROL_TABS_OPTION);
+        var tabs: any = normalizeFanControlTabs(configuredTabs);
+        if (!configuredTabs && fanLightEntity(b))
+            tabs.push("light");
+        return tabs;
     }
     function fanControlTabsAreDefault(this: any, tabs?: any) {
         return tabListIsDefault(normalizeFanControlTabs((tabs || []).join("|")), fanControlDefaultTabs());
     }
+    function fanLightEntity(this: any, b?: any) {
+        return String(configOptionValue(b && b.options, FAN_LIGHT_ENTITY_OPTION) || "").trim();
+    }
     function normalizeFanControlOptions(this: any, options?: any) {
-        var tabs: any = normalizeFanControlTabs(configOptionValue(options, FAN_CONTROL_TABS_OPTION));
-        return fanControlTabsAreDefault(tabs)
-            ? ""
-            : setConfigOptionValue("", FAN_CONTROL_TABS_OPTION, tabs.join("|"));
+        var lightEntity: any = String(configOptionValue(options, FAN_LIGHT_ENTITY_OPTION) || "").trim();
+        var configuredTabs: any = configOptionValue(options, FAN_CONTROL_TABS_OPTION);
+        var tabs: any = normalizeFanControlTabs(configuredTabs);
+        if (!lightEntity)
+            tabs = tabs.filter(function (this: any, tab?: any) { return tab !== "light"; });
+        if (!lightEntity && tabs.length === 0)
+            tabs = ["power"];
+        var defaultTabs: any = fanControlDefaultTabs();
+        if (lightEntity)
+            defaultTabs = defaultTabs.concat(["light"]);
+        var out: any = "";
+        if (lightEntity)
+            out = setConfigOptionValue(out, FAN_LIGHT_ENTITY_OPTION, lightEntity);
+        var effectiveTabs: any = configuredTabs ? tabs : defaultTabs;
+        if (!tabListIsDefault(effectiveTabs, defaultTabs))
+            out = setConfigOptionValue(out, FAN_CONTROL_TABS_OPTION, effectiveTabs.join("|"));
+        return out;
     }
     function setFanControlTabs(this: any, b?: any, tabs?: any) {
         if (!b)
             return "";
         tabs = normalizeFanControlTabs((tabs || []).join("|"));
-        b.options = fanControlTabsAreDefault(tabs)
-            ? setConfigOptionValue(b.options, FAN_CONTROL_TABS_OPTION, "")
-            : setConfigOptionValue(b.options, FAN_CONTROL_TABS_OPTION, tabs.join("|"));
+        b.options = setConfigOptionValue(b.options, FAN_CONTROL_TABS_OPTION, tabs.join("|"));
+        b.options = normalizeFanControlOptions(b.options);
+        return b.options;
+    }
+    function setFanLightEntity(this: any, b?: any, entity?: any) {
+        if (!b)
+            return "";
+        var previous: any = fanLightEntity(b);
+        var next: any = String(entity || "").trim();
+        b.options = setConfigOptionValue(b.options, FAN_LIGHT_ENTITY_OPTION, next);
+        if (next && !previous) {
+            var tabs: any = fanControlTabs(b);
+            if (tabs.indexOf("light") < 0)
+                tabs.push("light");
+            b.options = setConfigOptionValue(b.options, FAN_CONTROL_TABS_OPTION, tabs.join("|"));
+        }
         b.options = normalizeFanControlOptions(b.options);
         return b.options;
     }
@@ -260,10 +294,12 @@ export function installConfigModalTabOptionsModule(): GlobalDescriptors {
         orderedDefinitions.forEach(function (this: any, definition?: any) {
             var tabIndex: any = tabs.indexOf(definition.value);
             var visible: any = tabIndex >= 0;
+            var available: any = !config.tabAvailable || config.tabAvailable(b, definition.value);
             var row: any = document.createElement("div");
             row.className = "sp-light-tab-row";
+            row.classList.toggle("sp-disabled", !available);
             row.setAttribute("data-tab", definition.value);
-            row.draggable = true;
+            row.draggable = available;
             var controls: any = document.createElement("div");
             controls.className = "sp-light-tab-controls";
             var drag: any = document.createElement("button");
@@ -279,6 +315,8 @@ export function installConfigModalTabOptionsModule(): GlobalDescriptors {
             moveDown.type = "button";
             moveDown.className = "sp-light-tab-move mdi mdi-chevron-down";
             moveDown.setAttribute("aria-label", "Move " + definition.label + " down");
+            moveUp.disabled = !available;
+            moveDown.disabled = !available;
             controls.appendChild(drag);
             controls.appendChild(moveUp);
             controls.appendChild(moveDown);
@@ -294,12 +332,15 @@ export function installConfigModalTabOptionsModule(): GlobalDescriptors {
             input.type = "checkbox";
             input.id = helpers.idPrefix + config.idPrefix + definition.value;
             input.checked = visible;
+            input.disabled = !available;
             var track: any = document.createElement("span");
             track.className = "sp-toggle-track";
             toggle.appendChild(input);
             toggle.appendChild(track);
             row.appendChild(toggle);
             input.addEventListener("change", function (this: any) {
+                if (!available)
+                    return;
                 if (!this.checked) {
                     var visibleCount: any = listRows().filter(function (this: any, item?: any) {
                         var itemInput: any = item.querySelector("input[type=checkbox]");
@@ -315,6 +356,8 @@ export function installConfigModalTabOptionsModule(): GlobalDescriptors {
             moveUp.addEventListener("click", function (this: any) { moveRow(row, -1); });
             moveDown.addEventListener("click", function (this: any) { moveRow(row, 1); });
             row.addEventListener("dragstart", function (this: any, event?: any) {
+                if (!available)
+                    return;
                 row.classList.add("sp-dragging");
                 event.dataTransfer.effectAllowed = "move";
                 event.dataTransfer.setData("text/plain", definition.value);
@@ -368,8 +411,10 @@ export function installConfigModalTabOptionsModule(): GlobalDescriptors {
         "normalizeFanControlTabs": staticGlobal(normalizeFanControlTabs),
         "fanControlTabs": staticGlobal(fanControlTabs),
         "fanControlTabsAreDefault": staticGlobal(fanControlTabsAreDefault),
+        "fanLightEntity": staticGlobal(fanLightEntity),
         "normalizeFanControlOptions": staticGlobal(normalizeFanControlOptions),
         "setFanControlTabs": staticGlobal(setFanControlTabs),
+        "setFanLightEntity": staticGlobal(setFanLightEntity),
         "renderModalTabSettings": staticGlobal(renderModalTabSettings),
     };
 }

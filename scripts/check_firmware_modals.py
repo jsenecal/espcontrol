@@ -880,6 +880,27 @@ def firmware_fan_modal_context_lifecycle_errors(root: Path) -> list[str]:
     return errors
 
 
+def firmware_fan_light_fallback_errors(root: Path) -> list[str]:
+    path = root / "components" / "espcontrol" / "button_grid_fan.h"
+    if not path.exists():
+        return [
+            "components/espcontrol/button_grid_fan.h: keep the separate light tab available when the fan is unavailable"
+        ]
+
+    text = path.read_text(encoding="utf-8")
+    required = (
+        'if (ctx->type == "fan_control" && fan_light_supported(ctx)) return true;',
+        'if (!ctx || (!ctx->available && !fan_light_supported(ctx))) return;',
+        "ctx->light_available = !ha_state_unavailable_ref(state);",
+        "if (ui.active == ctx && fan_control_visible_tabs(ctx).count == 0) fan_control_hide_modal();",
+    )
+    if any(requirement not in text for requirement in required):
+        return [
+            "components/espcontrol/button_grid_fan.h: keep the separate light tab available when the fan is unavailable"
+        ]
+    return []
+
+
 def firmware_climate_modal_context_lifecycle_errors(root: Path) -> list[str]:
     firmware_dir = root / "components" / "espcontrol"
     climate_path = firmware_dir / "button_grid_climate.h"
@@ -1073,6 +1094,7 @@ def run_scan() -> int:
     errors.extend(firmware_climate_step_errors(ROOT))
     errors.extend(firmware_climate_option_selection_errors(ROOT))
     errors.extend(firmware_fan_modal_context_lifecycle_errors(ROOT))
+    errors.extend(firmware_fan_light_fallback_errors(ROOT))
     errors.extend(firmware_climate_modal_context_lifecycle_errors(ROOT))
     errors.extend(firmware_cover_modal_context_lifecycle_errors(ROOT))
     errors.extend(firmware_media_modal_context_lifecycle_errors(ROOT))
@@ -1509,6 +1531,24 @@ def expect_fan_modal_context_lifecycle_errors(
             assert not errors, f"{name}: expected no errors, got {errors!r}"
 
 
+def expect_fan_light_fallback_errors(
+    name: str, fan_text: str, expected: tuple[str, ...]
+) -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        path = root / "components" / "espcontrol" / "button_grid_fan.h"
+        path.parent.mkdir(parents=True)
+        path.write_text(fan_text, encoding="utf-8")
+
+        errors = firmware_fan_light_fallback_errors(root)
+        for item in expected:
+            assert any(item in error for error in errors), (
+                f"{name}: missing {item!r} in {errors!r}"
+            )
+        if not expected:
+            assert not errors, f"{name}: expected no errors, got {errors!r}"
+
+
 def expect_climate_modal_context_lifecycle_errors(
     name: str,
     climate_text: str,
@@ -1667,6 +1707,42 @@ def run_self_test() -> int:
         valid_fan_cleanup,
         "fan_close_modals_for_context(ctx);\n",
         ("invalidate fan modals on main-grid and subpage cleanup",),
+    )
+    valid_fan_light_fallback = (
+        "inline bool fan_control_supported(FanCardCtx *ctx) {\n"
+        "  if (ctx->type == \"fan_control\" && fan_light_supported(ctx)) return true;\n"
+        "}\n"
+        "inline void fan_control_open_modal(FanCardCtx *ctx) {\n"
+        "  if (!ctx || (!ctx->available && !fan_light_supported(ctx))) return;\n"
+        "}\n"
+        "inline void subscribe_fan_card_state(FanCardCtx *ctx) {\n"
+        "  ctx->light_available = !ha_state_unavailable_ref(state);\n"
+        "  ctx->light_on = ctx->light_available && is_entity_on_ref(state);\n"
+        "  refresh();\n"
+        "  FanControlModalUi &ui = fan_control_modal_ui();\n"
+        "  if (ui.active == ctx && fan_control_visible_tabs(ctx).count == 0) fan_control_hide_modal();\n"
+        "}\n"
+    )
+    expect_fan_light_fallback_errors(
+        "fan light remains available without the fan",
+        valid_fan_light_fallback,
+        (),
+    )
+    expect_fan_light_fallback_errors(
+        "fan light modal requires fan availability",
+        valid_fan_light_fallback.replace(
+            "if (!ctx || (!ctx->available && !fan_light_supported(ctx))) return;",
+            "if (!ctx || !ctx->available) return;",
+        ),
+        ("keep the separate light tab available",),
+    )
+    expect_fan_light_fallback_errors(
+        "fan light modal remains open when its last tab disappears",
+        valid_fan_light_fallback.replace(
+            "  if (ui.active == ctx && fan_control_visible_tabs(ctx).count == 0) fan_control_hide_modal();\n",
+            "",
+        ),
+        ("keep the separate light tab available",),
     )
     valid_climate_cleanup = (
         "inline void delete_climate_control_context(ClimateControlCtx *ctx) {\n"

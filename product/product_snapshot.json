@@ -3488,9 +3488,23 @@
         ],
         "options": [
           {
+            "name": "fan_light_entity",
+            "label": "Light Entity",
+            "kind": "text",
+            "omitDefault": true
+          },
+          {
             "name": "fan_tabs",
             "label": "Visible Tabs",
             "kind": "text",
+            "values": [
+              "power",
+              "speed",
+              "preset",
+              "oscillation",
+              "direction",
+              "light"
+            ],
             "defaultValue": "power|speed|preset|oscillation|direction",
             "omitDefault": true
           }
@@ -3531,6 +3545,7 @@
           },
           "unknownOptions": "drop",
           "canonicalOptionOrder": [
+            "fan_light_entity",
             "fan_tabs"
           ],
           "optionHook": "normalize_fan_options"

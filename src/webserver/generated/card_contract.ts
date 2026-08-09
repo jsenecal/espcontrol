@@ -1842,9 +1842,23 @@ export const CARD_CONTRACT_CARDS: Readonly<Record<string, CardTypeSpec>> = {
     ],
     "options": [
       {
+        "name": "fan_light_entity",
+        "label": "Light Entity",
+        "kind": "text",
+        "omitDefault": true
+      },
+      {
         "name": "fan_tabs",
         "label": "Visible Tabs",
         "kind": "text",
+        "values": [
+          "power",
+          "speed",
+          "preset",
+          "oscillation",
+          "direction",
+          "light"
+        ],
         "defaultValue": "power|speed|preset|oscillation|direction",
         "omitDefault": true
       }
@@ -1885,6 +1899,7 @@ export const CARD_CONTRACT_CARDS: Readonly<Record<string, CardTypeSpec>> = {
       },
       "unknownOptions": "drop",
       "canonicalOptionOrder": [
+        "fan_light_entity",
         "fan_tabs"
       ],
       "optionHook": "normalize_fan_options"
@@ -4438,6 +4453,7 @@ export const CARD_CONTRACT_OPTION_NAMES: Readonly<Record<string, string>> = {
   "cover_position": "cover_position",
   "cover_tabs": "cover_tabs",
   "date_time_mode": "date_time_mode",
+  "fan_light_entity": "fan_light_entity",
   "fan_tabs": "fan_tabs",
   "garage_mode": "garage_mode",
   "gate_mode": "gate_mode",

@@ -26,7 +26,7 @@ This generated reference lists stable setup facts from the shared card contract.
 | Fans | fan_oscillate | fan | Yes | Fans (fan_speed) | None | Visible |
 | Fans | fan_preset | fan | Yes | Fans (fan_speed) | None | Visible |
 | Fans | fan_speed | fan | Yes | Own picker item | None | Visible |
-| Fans | fan_control | fan | Yes | Fans (fan_speed) | Visible Tabs | Visible |
+| Fans | fan_control | fan | Yes | Fans (fan_speed) | Light Entity; Visible Tabs: power, speed, preset, oscillation, direction, light | Visible |
 | Fans | fan_switch | fan | Yes | Fans (fan_speed) | None | Visible |
 | Garage Door | garage | cover | Yes | Own picker item | Interaction: default, open, close; Display: label, status; Confirmation Required: default, off, on, both; Message; Confirm Button; Cancel Button | Visible |
 | Gate | gate | cover | Yes | Own picker item | Interaction: default, open, close, stop; Display: label, status | Visible |

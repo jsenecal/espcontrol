@@ -52,6 +52,7 @@ export function installConfigOptionCoreModule(): GlobalDescriptors {
     var LIGHT_CONTROL_TABS_OPTION: any = cardContractOptionName("light_tabs");
     var COVER_CONTROL_TABS_OPTION: any = cardContractOptionName("cover_tabs");
     var CLIMATE_CONTROL_TABS_OPTION: any = cardContractOptionName("climate_tabs");
+    var FAN_LIGHT_ENTITY_OPTION: any = cardContractOptionName("fan_light_entity");
     var FAN_CONTROL_TABS_OPTION: any = cardContractOptionName("fan_tabs");
     var IMAGE_SLOT_CAPACITY: any = Math.max(0, parseInt(CFG.imageSlotCapacity, 10) || 0);
     function largeNumbersExplicitlyDisabled(this: any, options?: any) {
@@ -145,6 +146,7 @@ export function installConfigOptionCoreModule(): GlobalDescriptors {
         "LIGHT_CONTROL_TABS_OPTION": liveGlobal(() => LIGHT_CONTROL_TABS_OPTION, (value?: any) => { LIGHT_CONTROL_TABS_OPTION = value; }),
         "COVER_CONTROL_TABS_OPTION": liveGlobal(() => COVER_CONTROL_TABS_OPTION, (value?: any) => { COVER_CONTROL_TABS_OPTION = value; }),
         "CLIMATE_CONTROL_TABS_OPTION": liveGlobal(() => CLIMATE_CONTROL_TABS_OPTION, (value?: any) => { CLIMATE_CONTROL_TABS_OPTION = value; }),
+        "FAN_LIGHT_ENTITY_OPTION": liveGlobal(() => FAN_LIGHT_ENTITY_OPTION, (value?: any) => { FAN_LIGHT_ENTITY_OPTION = value; }),
         "FAN_CONTROL_TABS_OPTION": liveGlobal(() => FAN_CONTROL_TABS_OPTION, (value?: any) => { FAN_CONTROL_TABS_OPTION = value; }),
         "IMAGE_SLOT_CAPACITY": liveGlobal(() => IMAGE_SLOT_CAPACITY, (value?: any) => { IMAGE_SLOT_CAPACITY = value; }),
         "largeNumbersExplicitlyDisabled": staticGlobal(largeNumbersExplicitlyDisabled),
