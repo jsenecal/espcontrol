@@ -425,7 +425,9 @@ inline bool fan_preset_active(const std::string &value) {
 }
 
 inline bool fan_control_supported(FanCardCtx *ctx) {
-  if (!ctx || !ctx->available) return false;
+  if (!ctx) return false;
+  if (ctx->type == "fan_control" && fan_light_supported(ctx)) return true;
+  if (!ctx->available) return false;
   if (ctx->type == "fan_oscillate") return ctx->oscillation_known;
   if (ctx->type == "fan_direction") return ctx->direction_known;
   if (ctx->type == "fan_preset") return !ctx->preset_modes.empty();
@@ -976,7 +978,7 @@ inline void fan_control_hide_modal() {
 }
 
 inline void fan_control_open_modal(FanCardCtx *ctx) {
-  if (!ctx || !ctx->available) return;
+  if (!ctx || (!ctx->available && !fan_light_supported(ctx))) return;
   FanControlVisibleTabs visible_tabs = fan_control_visible_tabs(ctx);
   if (visible_tabs.count == 0) return;
   ControlModalShell shell = control_modal_open_shell(

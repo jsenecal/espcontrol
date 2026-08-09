@@ -10,13 +10,17 @@ const fixtures = JSON.parse(fs.readFileSync(
   path.join(ROOT, "compatibility", "fixtures", "product_compatibility.json"),
   "utf8",
 ));
+const migrationFixture = JSON.parse(fs.readFileSync(
+  path.join(ROOT, "compatibility", "fixtures", "panel_config_migration_v1.json"),
+  "utf8",
+));
 
 describe("backup compatibility", () => {
   const { runBackupFeatureTests } = loadTypescriptTest("tests/web/backup_feature.test.ts");
   const { runBackupCompatibilityTests } = loadTypescriptTest("tests/web/backup_compatibility.test.ts");
 
   test("creates and imports current backups", () => {
-    runBackupFeatureTests();
+    runBackupFeatureTests(migrationFixture);
   });
 
   test("accepts the shared legacy backup fixture", () => {
