@@ -1351,6 +1351,8 @@ inline void subscribe_fan_card_state(FanCardCtx *ctx) {
           ctx->light_available = !ha_state_unavailable_ref(state);
           ctx->light_on = ctx->light_available && is_entity_on_ref(state);
           refresh();
+          FanControlModalUi &ui = fan_control_modal_ui();
+          if (ui.active == ctx && fan_control_visible_tabs(ctx).count == 0) fan_control_hide_modal();
         })
     );
   }

@@ -891,6 +891,8 @@ def firmware_fan_light_fallback_errors(root: Path) -> list[str]:
     required = (
         'if (ctx->type == "fan_control" && fan_light_supported(ctx)) return true;',
         'if (!ctx || (!ctx->available && !fan_light_supported(ctx))) return;',
+        "ctx->light_available = !ha_state_unavailable_ref(state);",
+        "if (ui.active == ctx && fan_control_visible_tabs(ctx).count == 0) fan_control_hide_modal();",
     )
     if any(requirement not in text for requirement in required):
         return [
@@ -1713,6 +1715,13 @@ def run_self_test() -> int:
         "inline void fan_control_open_modal(FanCardCtx *ctx) {\n"
         "  if (!ctx || (!ctx->available && !fan_light_supported(ctx))) return;\n"
         "}\n"
+        "inline void subscribe_fan_card_state(FanCardCtx *ctx) {\n"
+        "  ctx->light_available = !ha_state_unavailable_ref(state);\n"
+        "  ctx->light_on = ctx->light_available && is_entity_on_ref(state);\n"
+        "  refresh();\n"
+        "  FanControlModalUi &ui = fan_control_modal_ui();\n"
+        "  if (ui.active == ctx && fan_control_visible_tabs(ctx).count == 0) fan_control_hide_modal();\n"
+        "}\n"
     )
     expect_fan_light_fallback_errors(
         "fan light remains available without the fan",
@@ -1724,6 +1733,14 @@ def run_self_test() -> int:
         valid_fan_light_fallback.replace(
             "if (!ctx || (!ctx->available && !fan_light_supported(ctx))) return;",
             "if (!ctx || !ctx->available) return;",
+        ),
+        ("keep the separate light tab available",),
+    )
+    expect_fan_light_fallback_errors(
+        "fan light modal remains open when its last tab disappears",
+        valid_fan_light_fallback.replace(
+            "  if (ui.active == ctx && fan_control_visible_tabs(ctx).count == 0) fan_control_hide_modal();\n",
+            "",
         ),
         ("keep the separate light tab available",),
     )
