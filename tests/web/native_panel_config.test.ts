@@ -52,6 +52,9 @@ export async function runNativePanelConfigTests(): Promise<void> {
   }, "one changed record preserves the configuration still arriving from the device");
   deepEqual(updateNativePanelConfigDocument(partialDocument, "panel-a", "buttons", 1, "").buttons,
     { 2: "preserved-button" }, "an empty record clears only that record");
+  deepEqual(updateNativePanelConfigDocument(partialDocument, "panel-a", "settings", "button_on_color", "0088FF").settings,
+    { button_order: "1,2", future_setting: "preserved", button_on_color: "0088FF" },
+    "appearance settings use the same native document without replacing future settings");
 
   const requests: Array<{ path: string; request?: NativePanelConfigRequest }> = [];
   const client = createNativePanelConfigClient(async (path, request) => {
