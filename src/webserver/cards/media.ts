@@ -120,14 +120,6 @@ export function registerMediaCardTypes(): GlobalDescriptors {
                 ["play_pause", "Play/Pause"],
             ],
         },
-        coverArtAction: {
-            label: "Press Action",
-            inputId: "media-cover-art-action",
-            options: [
-                ["play_pause", "Play/Pause"],
-                ["control_modal", "All Controls"],
-            ],
-        },
         controlLabelDisplay: {
             label: "Label",
             inputId: "media-control-label-display",
@@ -550,16 +542,6 @@ export function registerMediaCardTypes(): GlobalDescriptors {
                     helpers.idPrefix + "media-cover-art-card-settings",
                     false);
                 var cardSettings: any = cardSettingsDisclosure.section;
-                helpers.renderCardSegmentControl(cardSettings, b, helpers, {
-                    segment: Object.assign({}, MEDIA_CARD_METADATA.coverArtAction, {
-                        inputId: helpers.idPrefix + "media-cover-art-action",
-                        value: function (this: any) { return mediaCoverArtAction(b); },
-                        onSelect: function (this: any, button?: any, cardHelpers?: any, value?: any) {
-                            setMediaCoverArtAction(button, value);
-                            cardHelpers.saveField("options", button.options);
-                        },
-                    }),
-                });
                 var detailsToggle: any = helpers.toggleRow(
                     "Show Track Details",
                     helpers.idPrefix + "media-cover-art-details",

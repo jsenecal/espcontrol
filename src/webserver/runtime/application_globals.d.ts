@@ -110,7 +110,6 @@ declare global {
   var LOCK_CARD_METADATA: any;
   var MAX_CLOCK_BAR_TEMPERATURES: any;
   var MEDIA_CARD_METADATA: any;
-  var MEDIA_COVER_ART_ACTION_OPTION: any;
   var MEDIA_COVER_ART_DETAILS_OPTION: any;
   var MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION: any;
   var MEDIA_COVER_ART_OPTION: any;
@@ -676,7 +675,6 @@ declare global {
   var markSpannedCells: any;
   var mdiIcon: any;
   var mediaBehaviorSpec: any;
-  var mediaCoverArtAction: any;
   var mediaCoverArtDetailsEnabled: any;
   var mediaCoverArtSecondaryEntity: any;
   var mediaDefaultMode: any;
@@ -769,7 +767,6 @@ declare global {
   var normalizeLightControlType: any;
   var normalizeLockMode: any;
   var normalizeMediaLabelDisplayMode: any;
-  var normalizeMediaCoverArtAction: any;
   var normalizeMediaNumberDisplayMode: any;
   var normalizeMediaOptions: any;
   var normalizeCardSizeForConfig: any;
@@ -1070,7 +1067,6 @@ declare global {
   var setLightControlTabs: any;
   var setLightControlType: any;
   var setMediaLabelDisplayMode: any;
-  var setMediaCoverArtAction: any;
   var setMediaCoverArtDetailsEnabled: any;
   var setMediaCoverArtSecondaryEntity: any;
   var setMediaNumberDisplayMode: any;

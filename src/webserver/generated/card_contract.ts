@@ -2645,25 +2645,6 @@ export const CARD_CONTRACT_CARDS: Readonly<Record<string, CardTypeSpec>> = {
         ]
       },
       {
-        "name": "cover_art_action",
-        "label": "Press Action",
-        "kind": "choice",
-        "values": [
-          "play_pause",
-          "control_modal"
-        ],
-        "defaultValue": "play_pause",
-        "omitDefault": true,
-        "applicability": [
-          {
-            "source": "field",
-            "name": "sensor",
-            "operator": "equals",
-            "value": "cover_art"
-          }
-        ]
-      },
-      {
         "name": "cover_art_details",
         "label": "Show Track Details",
         "kind": "flag",
@@ -2871,7 +2852,6 @@ export const CARD_CONTRACT_CARDS: Readonly<Record<string, CardTypeSpec>> = {
       "canonicalOptionOrder": [
         "label_display",
         "number_display",
-        "cover_art_action",
         "cover_art_details",
         "cover_art_secondary_entity",
         "speaker_group_entity",
@@ -4452,7 +4432,6 @@ export const CARD_CONTRACT_OPTION_NAMES: Readonly<Record<string, string>> = {
   "confirm_yes": "confirm_yes",
   "confirmation_mode": "confirmation_mode",
   "confirmation_required": "confirmation_required",
-  "cover_art_action": "cover_art_action",
   "cover_art_details": "cover_art_details",
   "cover_art_secondary_entity": "cover_art_secondary_entity",
   "cover_mode": "cover_mode",

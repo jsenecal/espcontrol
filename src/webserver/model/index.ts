@@ -167,9 +167,9 @@ export {
 export type {
   MediaCardConfigV1,
   MediaCardMode,
+  MediaCoverArtAction,
   MediaControlLabelDisplay,
   MediaControlNumberDisplay,
-  MediaCoverArtAction,
   MediaNowPlayingControl,
   MediaStateDisplay,
 } from "./media_card";

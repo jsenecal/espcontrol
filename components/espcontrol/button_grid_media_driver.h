@@ -355,10 +355,8 @@ inline bool media_driver_bind_data(
       subscribe_media_cover_art(now_playing, config.entity);
     }
     MediaControlCtx *control = nullptr;
-    if (mode == "cover_art" &&
-        media_cover_art_press_action(config) == "control_modal") {
-      control = media_driver_create_control(
-        slot, config, context, environment);
+    if (mode == "cover_art") {
+      control = media_driver_create_control(slot, config, context, environment);
       if (control) control->highlight_playing = false;
     }
     if (mode == "cover_art") {
@@ -410,18 +408,10 @@ inline bool media_driver_handle_click(
   } else if (mode == "now_playing" && config.precision == "play_pause") {
     send_media_playback_action(config.entity, "play_pause");
   } else if (mode == "cover_art") {
-    if (media_cover_art_press_action(config) == "control_modal") {
-      MediaControlCtx *control = button
-        ? static_cast<MediaControlCtx *>(lv_obj_get_user_data(button)) : nullptr;
-      if (!control) control = grid_media_control_runtime_for_owner(button);
-      if (control) media_control_open_modal(control);
-    } else {
-      ImageCardCtx *art = button
-        ? static_cast<ImageCardCtx *>(lv_obj_get_user_data(button)) : nullptr;
-      send_media_playback_action(
-        art && !art->entity_id.empty() ? art->entity_id : config.entity,
-        "play_pause");
-    }
+    MediaControlCtx *control = button
+      ? static_cast<MediaControlCtx *>(lv_obj_get_user_data(button)) : nullptr;
+    if (!control) control = grid_media_control_runtime_for_owner(button);
+    if (control) media_control_open_modal(control);
   } else if (media_playback_button_mode(mode)) {
     send_media_playback_action(config.entity, mode);
   }
