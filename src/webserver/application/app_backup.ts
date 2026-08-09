@@ -63,7 +63,10 @@ export function installAppBackupModule(): GlobalDescriptors {
             deviceProfile: DEVICE_ID,
             buttons: {},
             subpages: {},
-            settings: { button_order: data.button_order || "" },
+            settings: {
+                button_order: data.button_order || "",
+                button_on_color: data.button_on_color || "",
+            },
         };
         for (var index: any = 0; index < state.buttons.length; index++) {
             var buttonConfig: any = serializeButtonConfig(state.buttons[index]);

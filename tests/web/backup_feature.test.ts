@@ -95,6 +95,14 @@ export function runBackupFeatureTests(): void {
   equal(nativeBackup.native_config?.device_profile, "panel-a", "native backup records its device profile");
   equal(nativeBackup.native_config?.document_version, 1, "native backup records its document version");
 
+  const newerNativeDocument = feature.normalizeBackupConfig({
+    version: 2,
+    format: "espcontrol.backup",
+    buttons: [],
+    native_config: { document_version: 2, device_profile: "future-panel", payload: "future" },
+  });
+  equal(newerNativeDocument.native_config, undefined, "newer native payloads do not block readable backup import");
+
   const plan = feature.planBackupImport(backup, { device: "panel-b", slots: 3 });
   equal(plan.warnings.length, 2, "cross-device and slot-count warnings are retained");
   equal(plan.buttons.length, 3, "backup expands to the target slot count");
