@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { createBackupImportController } from "../features/backup_import_controller";
 export function installAppBackupModule(): GlobalDescriptors {
     // ── Export / Import ────────────────────────────────────────────────────
     function backupExportScreenSizeSlug(this: any, value?: any) {
@@ -46,6 +47,14 @@ export function installAppBackupModule(): GlobalDescriptors {
         var layout: any = isPortraitRotation(rotation) && CFG.portrait ? CFG.portrait : CFG;
         return layout.cols || CFG.cols;
     }
+    var backupImportController: any = createBackupImportController({
+        "normalizeBackup": function (data: any) { return normalizeBackupConfig(data); },
+        "normalizeSettings": function (settings: any) { return normalizeImportedPanelSettings(settings); },
+        "gridColsForSettings": function (settings: any) { return gridColsForImportedSettings(settings); },
+        "getGridCols": function () { return GRID_COLS; },
+        "setGridCols": function (gridCols: any) { GRID_COLS = gridCols; },
+        "planBackupImport": function (data: any, target: any) { return planBackupImport(data, target); },
+    });
     function downloadBackupConfig(this: any, data?: any) {
         var json: any = JSON.stringify(data, null, 2);
         var blob: any = new Blob([json], { type: "application/json" });
@@ -202,17 +211,10 @@ export function installAppBackupModule(): GlobalDescriptors {
                 var importedSettings: any;
                 var importedGridCols: any;
                 try {
-                    var normalizedBackup: any = normalizeBackupConfig(data);
-                    importedSettings = normalizeImportedPanelSettings(normalizedBackup.settings);
-                    importedGridCols = gridColsForImportedSettings(importedSettings);
-                    var previousGridCols: any = GRID_COLS;
-                    GRID_COLS = importedGridCols;
-                    try {
-                        backupPlan = planBackupImport(data, { device: DEVICE_ID, slots: NUM_SLOTS });
-                    }
-                    finally {
-                        GRID_COLS = previousGridCols;
-                    }
+                    var plannedImport: any = backupImportController.plan(data, { device: DEVICE_ID, slots: NUM_SLOTS });
+                    importedSettings = plannedImport.importedSettings;
+                    importedGridCols = plannedImport.importedGridCols;
+                    backupPlan = plannedImport.backupPlan;
                 }
                 catch (e) {
                     showBanner((e as any).backupMessage || "Invalid config file \u2014 missing required fields", "error");
