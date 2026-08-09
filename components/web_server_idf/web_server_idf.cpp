@@ -244,6 +244,17 @@ void AsyncWebServer::begin() {
     };
     httpd_register_uri_handler(this->server_, &handler_post);
 
+    // Native configuration documents use PUT so browsers can make an
+    // optimistic, generation-guarded replacement without treating it as a
+    // form submission. Route it through the same raw-body dispatcher as POST.
+    const httpd_uri_t handler_put = {
+        .uri = "",
+        .method = HTTP_PUT,
+        .handler = AsyncWebServer::request_post_handler,
+        .user_ctx = this,
+    };
+    httpd_register_uri_handler(this->server_, &handler_put);
+
     const httpd_uri_t handler_options = {
         .uri = "",
         .method = HTTP_OPTIONS,
