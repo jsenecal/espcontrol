@@ -17,6 +17,12 @@ target_include_directories(button_grid_foundations_test PRIVATE
 )
 add_test(NAME button_grid_foundations_test COMMAND button_grid_foundations_test)
 
+add_executable(grid_navigation_service_test grid_navigation_service_test.cpp)
+target_compile_features(grid_navigation_service_test PRIVATE cxx_std_17)
+target_compile_options(grid_navigation_service_test PRIVATE -Wall -Wextra -Werror)
+target_include_directories(grid_navigation_service_test PRIVATE ../../components/espcontrol)
+add_test(NAME grid_navigation_service_test COMMAND grid_navigation_service_test)
+
 add_executable(alarm_delay_audio_test alarm_delay_audio_test.cpp)
 target_compile_features(alarm_delay_audio_test PRIVATE cxx_std_17)
 target_compile_options(alarm_delay_audio_test PRIVATE -Wall -Wextra -Werror)
