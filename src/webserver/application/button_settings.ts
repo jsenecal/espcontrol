@@ -1,6 +1,11 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { createCardEditorDraftController } from "../features/card_editor_draft_controller";
 export function installButtonSettingsModule(): GlobalDescriptors {
+    var cardEditorDraftController: any = createCardEditorDraftController({
+        "cloneCard": function (button: any) { return EspControlModel.cloneCardConfig(button); },
+        "emptyCard": function () { return EspControlModel.emptyCardConfig(); },
+    });
     // ── Button settings panel (unified) ────────────────────────────────────
     function openCardSettings(this: any, slot?: any) {
         if (isConfigLocked())
@@ -83,17 +88,12 @@ export function installButtonSettingsModule(): GlobalDescriptors {
             return;
         var slot: any = c.selected[0];
         var bIdx: any = slot - 1;
-        var pendingNewDraft: any = !!(state.settingsDraft &&
-            state.settingsDraft.isNew &&
-            state.settingsDraft.slot === slot &&
-            state.settingsDraft.isSub === c.isSub &&
-            (!c.isSub || state.settingsDraft.homeSlot === state.editingSubpage));
+        var location: any = { slot: slot, homeSlot: state.editingSubpage, isSub: c.isSub };
+        var pendingNewDraft: any = cardEditorDraftController.matchesNewDraft(state.settingsDraft, location);
         if (bIdx < 0 || (!pendingNewDraft && bIdx >= c.buttons.length))
             return;
         var liveButton: any = pendingNewDraft ? null : c.buttons[bIdx];
-        var draftKey: any = pendingNewDraft
-            ? state.settingsDraft!.key
-            : (c.isSub ? "sub:" + state.editingSubpage : "main") + ":" + slot;
+        var draftKey: any = pendingNewDraft ? state.settingsDraft!.key : cardEditorDraftController.keyFor(location);
         function cloneButtonConfig(this: any, src?: any) {
             return EspControlModel.cloneCardConfig(src);
         }
@@ -101,16 +101,8 @@ export function installButtonSettingsModule(): GlobalDescriptors {
             EspControlModel.copyCardConfig(target, src);
             normalizeButtonConfig(target);
         }
-        if (!pendingNewDraft && (!state.settingsDraft || state.settingsDraft.key !== draftKey)) {
-            state.settingsDraft = {
-                key: draftKey,
-                slot: slot,
-                homeSlot: state.editingSubpage,
-                isSub: c.isSub,
-                dirty: false,
-                button: cloneButtonConfig(liveButton),
-            };
-        }
+        if (!pendingNewDraft)
+            state.settingsDraft = cardEditorDraftController.ensureExistingDraft(state.settingsDraft, location, liveButton);
         var b: any = state.settingsDraft!.button;
         var isNewDraft: any = !!state.settingsDraft!.isNew;
         var title: any = document.createElement("div");
@@ -122,9 +114,7 @@ export function installButtonSettingsModule(): GlobalDescriptors {
         var idPrefix: any = c.isSub ? "sp-sp-inp-" : "sp-inp-";
         var requiredFields: any = [];
         function markDraftDirty(this: any) {
-            if (state.settingsDraft && state.settingsDraft.key === draftKey) {
-                state.settingsDraft.dirty = true;
-            }
+            cardEditorDraftController.markDirty(state.settingsDraft, draftKey);
         }
         function saveField(this: any, field?: any, val?: any) {
             markDraftDirty();

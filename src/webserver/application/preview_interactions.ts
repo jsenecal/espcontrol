@@ -1,6 +1,11 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { createCardEditorDraftController } from "../features/card_editor_draft_controller";
 export function installPreviewInteractionsModule(): GlobalDescriptors {
+    var cardEditorDraftController: any = createCardEditorDraftController({
+        "cloneCard": function (button: any) { return EspControlModel.cloneCardConfig(button); },
+        "emptyCard": function () { return EspControlModel.emptyCardConfig(); },
+    });
     // ── Preview event delegation & drag ────────────────────────────────────
     function clearPlaceholder(this: any) {
         if (previewPlaceholder) {
@@ -367,20 +372,12 @@ export function installPreviewInteractionsModule(): GlobalDescriptors {
         return EspControlModel.emptyCardConfig(type);
     }
     function newCardDraftKey(this: any, isSub?: any, homeSlot?: any, pos?: any, slot?: any) {
-        return (isSub ? "sub:" + homeSlot : "main") + ":new:" + pos + ":" + slot;
+        return cardEditorDraftController.newDraft({ slot: slot, homeSlot: homeSlot, isSub: isSub, pos: pos }).key;
     }
     function beginNewCardDraft(this: any, pos?: any, slot?: any, isSub?: any) {
-        state.settingsDraft = {
-            key: newCardDraftKey(isSub, state.editingSubpage, pos, slot),
-            slot: slot,
-            homeSlot: state.editingSubpage,
-            isSub: isSub,
-            isNew: true,
-            pos: pos,
-            dirty: false,
-            typeSelected: false,
-            button: emptyButtonConfig(),
-        };
+        state.settingsDraft = cardEditorDraftController.newDraft({
+            slot: slot, homeSlot: state.editingSubpage, isSub: isSub, pos: pos,
+        });
         if (isSub) {
             state.subpageSelectedSlots = [slot];
             state.subpageLastClicked = slot;
