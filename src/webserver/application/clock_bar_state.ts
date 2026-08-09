@@ -20,6 +20,16 @@ export function installClockBarStateModule(): GlobalDescriptors {
     function clockBarUiState(this: any) {
         return _clockBarController.uiState(clockBarControllerState());
     }
+    function setClockBarEnabled(this: any, enabled?: any) {
+        var current: any = clockBarControllerState();
+        var next: any = _clockBarController.setEnabled(current, enabled);
+        // The editor belongs to the selected preview item. Close it before the
+        // controller removes that selection, otherwise its modal can outlive
+        // the Clock Bar that contained the item.
+        if (!next.enabled && current.selectedItem)
+            hideSettingsOverlay();
+        applyClockBarControllerState(next);
+    }
     function clockBarVisibleInPreview(this: any) {
         return clockBarUiState().previewVisible;
     }
@@ -236,6 +246,7 @@ export function installClockBarStateModule(): GlobalDescriptors {
         "clockBarControllerState": staticGlobal(clockBarControllerState),
         "applyClockBarControllerState": staticGlobal(applyClockBarControllerState),
         "clockBarUiState": staticGlobal(clockBarUiState),
+        "setClockBarEnabled": staticGlobal(setClockBarEnabled),
         "clockBarVisibleInPreview": staticGlobal(clockBarVisibleInPreview),
         "timezonePrefersFahrenheit": staticGlobal(timezonePrefersFahrenheit),
         "temperatureUnitSymbol": staticGlobal(temperatureUnitSymbol),

@@ -441,6 +441,7 @@ declare global {
   var _voiceServicesController: any;
   var _clockBarController: any;
   var clockBarControllerState: any;
+  var setClockBarEnabled: any;
   var applyClockBarControllerState: any;
   var clockBarUiState: any;
   var voiceServicesState: any;

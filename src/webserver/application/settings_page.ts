@@ -192,7 +192,7 @@ export function installSettingsPageModule(): GlobalDescriptors {
         clockBarBody.appendChild(clockBar.row);
         els.setClockBarToggle = clockBar.input;
         clockBar.input.addEventListener("change", function (this: any) {
-            applyClockBarControllerState(_clockBarController.setEnabled(clockBarControllerState(), this.checked));
+            setClockBarEnabled(this.checked);
             state._clockBarStateValues = { local: state.clockBarOn };
             syncClockBarUi();
             postClockBar(state.clockBarOn);
