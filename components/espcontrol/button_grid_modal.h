@@ -4,6 +4,8 @@
 
 // Shared control modal helpers.
 
+#include "control_modal_service.h"
+
 constexpr lv_coord_t CONTROL_MODAL_REFERENCE_SIDE_PX = DISPLAY_MODAL_REFERENCE_SIDE_PX;
 constexpr lv_coord_t CONTROL_MODAL_ARC_STROKE_REF_PX = DISPLAY_MODAL_ARC_STROKE_REF_PX;
 constexpr lv_coord_t CONTROL_MODAL_BACK_BUTTON_REF_PX = DISPLAY_MODAL_BACK_BUTTON_REF_PX;
@@ -12,31 +14,6 @@ constexpr lv_coord_t CONTROL_MODAL_INSET_REF_PX = DISPLAY_MODAL_INSET_REF_PX;
 constexpr lv_coord_t CONTROL_MODAL_CONTROLS_GAP_REF_PX = DISPLAY_MODAL_CONTROLS_GAP_REF_PX;
 constexpr lv_coord_t CONTROL_MODAL_CONTROLS_DOWN_REF_PX = DISPLAY_MODAL_CONTROLS_DOWN_REF_PX;
 constexpr lv_coord_t CONTROL_MODAL_TITLE_GAP_REF_PX = DISPLAY_MODAL_TITLE_GAP_REF_PX;
-
-enum class ControlModalKind {
-  NONE,
-  MEDIA_VOLUME,
-  CLIMATE,
-  SWITCH_CONFIRMATION,
-  OPTION_SELECT,
-  FAN_PRESET,
-  FAN_CONTROL,
-  NETWORK_STATUS,
-  ALARM_PIN,
-  ALARM_CONTROL,
-  IMAGE_CARD,
-  TODO_LIST,
-  COVER_CONTROL,
-  LIGHT_CONTROL,
-  MEDIA_CONTROL,
-};
-
-using ControlModalCloseCallback = void (*)();
-
-enum class ControlModalDismissPolicy {
-  DISMISS,
-  PRESERVE_DURING_DISPLAY_TAKEOVER,
-};
 
 enum class ControlModalPresentation {
   ARC_CONTROL,
@@ -99,27 +76,25 @@ inline ControlModalDefinition control_modal_definition(ControlModalKind kind) {
   return {};
 }
 
-struct ControlModalActive {
-  ControlModalKind kind = ControlModalKind::NONE;
-  lv_obj_t *overlay = nullptr;
-  ControlModalCloseCallback close_callback = nullptr;
-  ControlModalDismissPolicy dismiss_policy = ControlModalDismissPolicy::DISMISS;
-  uint32_t close_guard_until_ms = 0;
-  bool closing = false;
-};
+using ControlModalActive = ControlModalActiveState<lv_obj_t>;
+using ControlModalNestedActive = ControlModalNestedActiveState<lv_obj_t>;
+using ButtonGridModalService = ControlModalStateService<lv_obj_t>;
+
+inline ButtonGridModalService &control_modal_service() {
+  static ButtonGridModalService service;
+  return service;
+}
 
 inline ControlModalActive &control_modal_active() {
-  static ControlModalActive active;
-  return active;
+  return control_modal_service().active();
 }
 
 inline void control_modal_reset_active() {
-  control_modal_active() = ControlModalActive();
+  control_modal_service().reset_active();
 }
 
 inline void control_modal_clear_active(ControlModalKind kind) {
-  ControlModalActive &active = control_modal_active();
-  if (active.kind == kind) control_modal_reset_active();
+  control_modal_service().clear_active(kind);
 }
 
 inline void control_modal_delete_overlay(ControlModalKind kind, lv_obj_t *&overlay) {
@@ -132,13 +107,7 @@ inline void control_modal_delete_overlay(ControlModalKind kind, lv_obj_t *&overl
 inline void control_modal_set_active(ControlModalKind kind, lv_obj_t *overlay,
                                      ControlModalCloseCallback close_callback,
                                      ControlModalDismissPolicy dismiss_policy) {
-  ControlModalActive &active = control_modal_active();
-  active.kind = kind;
-  active.overlay = overlay;
-  active.close_callback = close_callback;
-  active.dismiss_policy = dismiss_policy;
-  active.close_guard_until_ms = 0;
-  active.closing = false;
+  control_modal_service().set_active(kind, overlay, close_callback, dismiss_policy);
 }
 
 inline bool control_modal_close_guard_active(const ControlModalActive &active) {
@@ -147,19 +116,16 @@ inline bool control_modal_close_guard_active(const ControlModalActive &active) {
 }
 
 inline void control_modal_block_close_for(uint32_t delay_ms) {
-  ControlModalActive &active = control_modal_active();
-  if (active.kind == ControlModalKind::NONE || delay_ms == 0) return;
-  active.close_guard_until_ms = lv_tick_get() + delay_ms;
+  control_modal_service().block_close_for(lv_tick_get(), delay_ms);
 }
 
 inline void control_modal_close_active_internal(bool honor_close_guard) {
-  ControlModalActive &active = control_modal_active();
-  if (active.kind == ControlModalKind::NONE || active.closing) return;
-  if (honor_close_guard && control_modal_close_guard_active(active)) return;
-
-  ControlModalKind closing_kind = active.kind;
-  void (*close_callback)() = active.close_callback;
-  active.closing = true;
+  ControlModalKind closing_kind = ControlModalKind::NONE;
+  ControlModalCloseCallback close_callback = nullptr;
+  if (!control_modal_service().begin_active_close(
+          lv_tick_get(), honor_close_guard, &closing_kind, &close_callback)) {
+    return;
+  }
   if (close_callback) close_callback();
   if (control_modal_active().kind == closing_kind) control_modal_reset_active();
 }
@@ -267,28 +233,20 @@ struct ControlModalNestedShell {
   lv_obj_t *panel = nullptr;
 };
 
-struct ControlModalNestedActive {
-  lv_obj_t *overlay = nullptr;
-  ControlModalCloseCallback close_callback = nullptr;
-  bool closing = false;
-};
-
 struct ControlModalToastShell {
   lv_obj_t *box = nullptr;
 };
 
 inline ControlModalNestedActive &control_modal_nested_active() {
-  static ControlModalNestedActive active;
-  return active;
+  return control_modal_service().nested_active();
 }
 
 inline void control_modal_reset_nested_menu() {
-  control_modal_nested_active() = ControlModalNestedActive();
+  control_modal_service().reset_nested_menu();
 }
 
 inline void control_modal_clear_nested_menu(lv_obj_t *overlay) {
-  ControlModalNestedActive &active = control_modal_nested_active();
-  if (active.overlay == overlay) control_modal_reset_nested_menu();
+  control_modal_service().clear_nested_menu(overlay);
 }
 
 inline void control_modal_delete_nested_overlay(lv_obj_t *&overlay) {
@@ -299,12 +257,11 @@ inline void control_modal_delete_nested_overlay(lv_obj_t *&overlay) {
 }
 
 inline void control_modal_close_nested_menu() {
-  ControlModalNestedActive &active = control_modal_nested_active();
-  if (!active.overlay || active.closing) return;
-
-  lv_obj_t *closing_overlay = active.overlay;
-  ControlModalCloseCallback close_callback = active.close_callback;
-  active.closing = true;
+  lv_obj_t *closing_overlay = nullptr;
+  ControlModalCloseCallback close_callback = nullptr;
+  if (!control_modal_service().begin_nested_close(&closing_overlay, &close_callback)) {
+    return;
+  }
   if (close_callback) close_callback();
   else if (closing_overlay) lv_obj_del(closing_overlay);
   if (control_modal_nested_active().overlay == closing_overlay) control_modal_reset_nested_menu();
