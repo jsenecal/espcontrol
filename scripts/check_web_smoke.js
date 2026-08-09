@@ -255,6 +255,8 @@ assert.strictEqual(
   false,
   "S3 exposes Cover Art only through the Media subtype list",
 );
+assertGeneratedConfigValue("guition-esp32-s3-4848s040", generated, "mediaTitleSize", 7.083333);
+assert(previewStylesSource.includes(".sp-media-now-title{font-size:var(--media-title)"), "media titles use their dedicated preview size");
 
 for (const [slug, device] of Object.entries(manifest.devices || {})) {
   assertGeneratedConfigValue(slug, generated, "slots", device.slots);
