@@ -480,7 +480,7 @@ export default defineConfig({
         items: [
           { text: 'Contributing', link: '/reference/contributing' },
           { text: 'Collect USB Logs', link: '/reference/collect-usb-logs' },
-          { text: 'C6 WiFi Recovery', link: '/getting-started/c6-recovery' },
+          { text: 'Wifi Issues', link: '/getting-started/c6-recovery' },
           { text: 'Icon Reference', link: '/reference/icons' },
           { text: 'Language Support', link: '/reference/language-support' },
           { text: 'Request Device Support', link: '/reference/request-device-support' },
