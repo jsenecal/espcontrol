@@ -3687,7 +3687,7 @@ def embedded_web_mdi_styles():
         ".mdi::before{display:inline-block}",
     ]
     css.extend(
-        f".mdi-{name}::before{{content:'\\\\{codepoints[name]}'}}"
+        f".mdi-{name}::before{{content:'\\{codepoints[name]}'}}"
         for name in sorted(icon_names)
     )
     return "".join(css)
