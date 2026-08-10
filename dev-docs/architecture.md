@@ -82,6 +82,8 @@ modal-state services. The navigation and modal-state slots have fixed capacity s
 LVGL-specific types remain in the UI layer with a bounded, reviewable memory
 budget. Firmware UI accesses those services only after the core starts; the
 standalone host-test fallbacks are excluded from firmware images.
+`EspControlApp` starts the core before WiFi so the 250-priority boot automations
+also use the core-owned Home Assistant binding.
 
 ## Build-Time Flow
 
