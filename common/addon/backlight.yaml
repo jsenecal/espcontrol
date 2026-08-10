@@ -306,23 +306,35 @@ script:
             - script.execute: hide_clock_view
           else:
             - script.execute: hide_clock_view
-            - delay: 100ms
-            - lambda: |-
-                if (!id(espcontrol_app).display().transition_is_current(
-                      static_cast<uint32_t>(generation), espcontrol::DisplayMode::ACTIVE)) {
-                  id(display_mode_effect_active).stop();
-                }
+            # The cover-art overlay is already hidden before this effect runs.
+            # Do not hold the controls screen for the clock-screen settling
+            # delay: the large artwork has just triggered a full redraw and a
+            # direct hand-off makes the dismissal feel substantially quicker.
+            - if:
+                condition:
+                  lambda: 'return previous_mode != static_cast<int>(espcontrol::DisplayMode::COVER_ART);'
+                then:
+                  - delay: 100ms
+                  - lambda: |-
+                      if (!id(espcontrol_app).display().transition_is_current(
+                            static_cast<uint32_t>(generation), espcontrol::DisplayMode::ACTIVE)) {
+                        id(display_mode_effect_active).stop();
+                      }
             - if:
                 condition:
                   lambda: 'return lv_scr_act() == id(screen_off_page)->obj;'
                 then:
                   - script.execute: navigate_after_api
-            - delay: 50ms
-            - lambda: |-
-                if (!id(espcontrol_app).display().transition_is_current(
-                      static_cast<uint32_t>(generation), espcontrol::DisplayMode::ACTIVE)) {
-                  id(display_mode_effect_active).stop();
-                }
+            - if:
+                condition:
+                  lambda: 'return previous_mode != static_cast<int>(espcontrol::DisplayMode::COVER_ART);'
+                then:
+                  - delay: 50ms
+                  - lambda: |-
+                      if (!id(espcontrol_app).display().transition_is_current(
+                            static_cast<uint32_t>(generation), espcontrol::DisplayMode::ACTIVE)) {
+                        id(display_mode_effect_active).stop();
+                      }
             - script.execute: clock_bar_apply
             - script.execute: backlight_apply_brightness
 
