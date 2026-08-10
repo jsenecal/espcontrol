@@ -56,7 +56,11 @@ void EspControlApp::set_panel_config_button(
 }
 
 void EspControlApp::setup() {
-  core_.start();
+  if (core_.start()) {
+    cards::set_card_runtime_registry_service(&core_.card_runtime_registry());
+  } else {
+    ESP_LOGE(TAG, "Application core failed to start");
+  }
   if (!legacy_config_.configured()) {
     ESP_LOGW(TAG, "Native configuration sources are not configured");
   } else if (!panel_config_blobs_.begin()) {
@@ -125,6 +129,9 @@ void EspControlApp::setup() {
 
 void EspControlApp::loop() { core_.run_once(); }
 
-void EspControlApp::on_shutdown() { core_.stop(); }
+void EspControlApp::on_shutdown() {
+  cards::set_card_runtime_registry_service(nullptr);
+  core_.stop();
+}
 
 }  // namespace espcontrol

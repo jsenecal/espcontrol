@@ -71,7 +71,7 @@ inline Family family_for_runtime_type(espcontrol::card_runtime::CardTypeId type)
 }
 
 // Generated metadata selects a handwritten driver here; it never carries card
-// behavior. The singleton is the registry-service boundary for legacy helpers.
+// behavior.
 class CardRuntimeRegistryService {
  public:
   Context context_for(const std::string &type, const std::string &mode,
@@ -104,7 +104,25 @@ class CardRuntimeRegistryService {
   }
 };
 
+// The application core binds its owned registry during setup. Existing card
+// helpers continue to use this accessor while callers migrate to the explicit
+// core service. The local fallback keeps standalone parsing and host tests
+// independent of ESPHome application setup.
+inline const CardRuntimeRegistryService *&card_runtime_registry_binding() {
+  static const CardRuntimeRegistryService *service = nullptr;
+  return service;
+}
+
+inline void set_card_runtime_registry_service(
+    const CardRuntimeRegistryService *service) {
+  card_runtime_registry_binding() = service;
+}
+
 inline const CardRuntimeRegistryService &card_runtime_registry_service() {
+  if (const CardRuntimeRegistryService *service =
+          card_runtime_registry_binding()) {
+    return *service;
+  }
   static const CardRuntimeRegistryService service;
   return service;
 }
