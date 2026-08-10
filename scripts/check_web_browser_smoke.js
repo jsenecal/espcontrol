@@ -2646,9 +2646,9 @@ async function assertMediaCoverArtSettingsPanels(page, label) {
   assert.strictEqual(await page.locator("#sp-inp-media-mode").inputValue(), "cover_art", `${label}: existing Cover Art card should retain its subtype`);
   assert.strictEqual(await page.locator("#sp-inp-entity").inputValue(), "media_player.living", `${label}: existing Cover Art card should retain its entity`);
   assert.deepStrictEqual(
-    await page.locator("#sp-inp-media-mode option").evaluateAll((options) => options.slice(0, 2).map((option) => option.value)),
-    ["control_modal", "cover_art"],
-    `${label}: Media Type should start with All Controls followed by Cover Art`,
+    await page.locator("#sp-inp-media-mode option").evaluateAll((options) => options.slice(0, 3).map((option) => option.value)),
+    ["control_modal", "cover_art", "playlist"],
+    `${label}: Media Type should place Track, Album or Playlist below Cover Art`,
   );
   assert.strictEqual(
     await page.locator("#sp-inp-media-mode").locator('option[value="cover_art"]').textContent(),
@@ -2659,9 +2659,9 @@ async function assertMediaCoverArtSettingsPanels(page, label) {
     await page
       .locator("#sp-inp-media-mode option")
       .evaluateAll((options) => options
-        .filter((option) => ["play_pause", "previous", "next", "volume", "playlist"].includes(option.value))
+        .filter((option) => ["play_pause", "previous", "next", "volume"].includes(option.value))
         .map((option) => option.textContent)),
-    ["Play/Pause", "Previous", "Next", "Volume", "Track, Album or Playlist"],
+    ["Play/Pause", "Previous", "Next", "Volume"],
     `${label}: Media action types should use their concise names`,
   );
 

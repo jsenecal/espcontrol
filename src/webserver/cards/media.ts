@@ -72,6 +72,7 @@ export function registerMediaCardTypes(): GlobalDescriptors {
         var options: any = [
             ["control_modal", "All Controls"],
             ["cover_art", "Cover Art"],
+            ["playlist", "Track, Album or Playlist"],
             ["speaker_group", "Speaker Group"],
             ["play_pause", "Play/Pause"],
             ["previous", "Previous"],
@@ -79,7 +80,6 @@ export function registerMediaCardTypes(): GlobalDescriptors {
             ["volume", "Volume"],
             ["position", "Track Position"],
             ["now_playing", "Now Playing"],
-            ["playlist", "Track, Album or Playlist"],
         ];
         return mediaCoverArtCardsSupported() ? options : options.filter(function (this: any, option?: any) {
             return option[0] !== "cover_art";
