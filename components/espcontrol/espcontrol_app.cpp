@@ -9,6 +9,7 @@
 #include "esphome/core/log.h"
 
 #include "panel_config_capabilities_endpoint.h"
+#include "configuration_release_policy.h"
 #include "panel_config_read_endpoint.h"
 #include "panel_config_write_endpoint.h"
 
@@ -82,7 +83,8 @@ void EspControlApp::setup() {
     ESP_LOGE(TAG, "Application core failed to start");
   }
   if (!core_.configure_configuration_service(
-          panel_config_store_, legacy_config_, &panel_config_validator_)) {
+          panel_config_store_, legacy_config_, &panel_config_validator_,
+          configuration::PANEL_CONFIG_LEGACY_MODE)) {
     ESP_LOGE(TAG, "Native configuration service is already configured");
     register_panel_config_endpoints();
     return;
@@ -128,21 +130,25 @@ void EspControlApp::setup() {
       ESP_LOGE(TAG, "Native configuration load failed (%u)",
                static_cast<unsigned>(loaded.status));
     }
-    const configuration::ServiceLoadResult refreshed =
-        panel_config_service->refresh_legacy_shadow(
-            panel_config_document_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
-    if (refreshed.status == configuration::ServiceStatus::SYNCED_LEGACY) {
-      ESP_LOGI(TAG, "Refreshed native configuration shadow to generation %" PRIu32,
-               refreshed.generation);
-    } else if (!refreshed.ok() &&
-               refreshed.status != configuration::ServiceStatus::EMPTY) {
-      ESP_LOGE(TAG, "Native configuration refresh failed (%u)",
-               static_cast<unsigned>(refreshed.status));
+    configuration::ServiceLoadResult live_document = loaded;
+    if (panel_config_service->legacy_writes_enabled()) {
+      const configuration::ServiceLoadResult refreshed =
+          panel_config_service->refresh_legacy_shadow(
+              panel_config_document_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
+      if (refreshed.status == configuration::ServiceStatus::SYNCED_LEGACY) {
+        ESP_LOGI(TAG, "Refreshed native configuration shadow to generation %" PRIu32,
+                 refreshed.generation);
+      } else if (!refreshed.ok() &&
+                 refreshed.status != configuration::ServiceStatus::EMPTY) {
+        ESP_LOGE(TAG, "Native configuration refresh failed (%u)",
+                 static_cast<unsigned>(refreshed.status));
+      }
+      if (refreshed.ok()) live_document = refreshed;
     }
-    if (refreshed.ok() &&
-        !legacy_config_.apply(refreshed.document_version,
+    if (live_document.ok() &&
+        !legacy_config_.apply(live_document.document_version,
                               panel_config_document_buffer_,
-                              refreshed.document_size)) {
+                              live_document.document_size)) {
       ESP_LOGE(TAG, "Native configuration could not update the live grid");
     }
   }

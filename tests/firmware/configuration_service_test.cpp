@@ -240,6 +240,42 @@ bool runtime_is_updated_even_if_the_legacy_mirror_fails() {
          runtime.applied == expected;
 }
 
+bool read_import_only_preserves_upgrade_import_without_legacy_writes() {
+  MemoryBackend backend(256);
+  ConfigurationStore store(backend);
+  FakeLegacy legacy;
+  FakeRuntime runtime;
+  ConfigurationService service(
+      store, legacy, nullptr, nullptr, 0,
+      LegacyConfigurationMode::READ_IMPORT_ONLY);
+  service.set_runtime_adapter(&runtime);
+  const std::vector<uint8_t> expected = bytes("native-only-save");
+  if (!service.save_current(expected.data(), expected.size()).ok() ||
+      service.legacy_writes_enabled() || legacy.mirror_calls != 0 ||
+      runtime.apply_calls != 1 || runtime.applied != expected) {
+    return false;
+  }
+  legacy.value = bytes("older-legacy-value");
+  std::array<uint8_t, 64> output{};
+  const ServiceLoadResult native = service.load(output.data(), output.size());
+  if (!native.ok() || native.document_size != expected.size() ||
+      !std::equal(expected.begin(), expected.end(), output.begin())) {
+    return false;
+  }
+
+  MemoryBackend upgrade_backend(256);
+  ConfigurationStore upgrade_store(upgrade_backend);
+  FakeLegacy upgrade_legacy;
+  upgrade_legacy.value = bytes("upgrade-legacy-value");
+  ConfigurationService upgrade_service(
+      upgrade_store, upgrade_legacy, nullptr, nullptr, 0,
+      LegacyConfigurationMode::READ_IMPORT_ONLY);
+  output.fill(0);
+  const ServiceLoadResult imported =
+      upgrade_service.load(output.data(), output.size());
+  return imported.imported_legacy() && upgrade_legacy.mirror_calls == 0;
+}
+
 bool conditional_save_rejects_a_stale_generation() {
   MemoryBackend backend(256);
   ConfigurationStore store(backend);
@@ -371,6 +407,7 @@ int main() {
       successful_save_dual_writes() &&
       successful_save_updates_the_native_runtime() &&
       runtime_is_updated_even_if_the_legacy_mirror_fails() &&
+      read_import_only_preserves_upgrade_import_without_legacy_writes() &&
       conditional_save_rejects_a_stale_generation() &&
       version_and_buffer_failures_are_explicit() &&
       malformed_store_document_is_not_treated_as_legacy() &&

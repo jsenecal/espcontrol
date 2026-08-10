@@ -98,7 +98,9 @@ class EspControlAppCore {
   bool configure_configuration_service(
       configuration::ConfigurationStore &store,
       configuration::LegacyConfigurationAdapter &legacy,
-      const configuration::ConfigurationDocumentValidator *validator = nullptr);
+      const configuration::ConfigurationDocumentValidator *validator = nullptr,
+      configuration::LegacyConfigurationMode legacy_mode =
+          configuration::LegacyConfigurationMode::DUAL_WRITE);
   bool has_configuration_service() const {
     return configuration_service_.has_value();
   }
