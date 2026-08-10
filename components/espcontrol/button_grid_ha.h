@@ -7,6 +7,7 @@
 
 #include "ha_read_coordinator.h"
 #include "home_assistant_binding_service.h"
+#include "espcontrol_app_core.h"
 
 #ifdef ESP_PLATFORM
 #include "esp_heap_caps.h"
