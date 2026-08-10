@@ -103,6 +103,7 @@ import { registerFanCardTypes } from "./cards/fan";
 import { registerGarageCardTypes } from "./cards/garage";
 import { registerGateCardTypes } from "./cards/gate";
 import { registerImageCardTypes } from "./cards/image";
+import { registerWifiQrCardTypes } from "./cards/wifi_qr";
 import { registerInternalCardTypes } from "./cards/internal";
 import { registerLawnMowerCardTypes } from "./cards/lawn_mower";
 import { registerLightTemperatureCardTypes } from "./cards/light_temperature";
@@ -214,6 +215,7 @@ const cardBootstrapModules: readonly EditorBootstrapModule[] = [
   { name: "card-garage", install: registerGarageCardTypes },
   { name: "card-gate", install: registerGateCardTypes },
   { name: "card-image", install: registerImageCardTypes },
+  { name: "card-wifi-qr", install: registerWifiQrCardTypes },
   { name: "card-internal", install: registerInternalCardTypes },
   { name: "card-lawn-mower", install: registerLawnMowerCardTypes },
   { name: "card-light-temperature", install: registerLightTemperatureCardTypes },

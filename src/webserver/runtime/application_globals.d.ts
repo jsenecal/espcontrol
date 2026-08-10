@@ -792,6 +792,12 @@ declare global {
   var normalizeHour: any;
   var normalizeImageModalMode: any;
   var normalizeImageOptions: any;
+  var normalizeWifiQrConfig: any;
+  var wifiQrSsid: any;
+  var wifiQrPassword: any;
+  var wifiQrSecurity: any;
+  var wifiQrHidden: any;
+  var validWifiQrPassword: any;
   var normalizeInternalRelayMode: any;
   var normalizeLanguage: any;
   var normalizeLawnMowerConfig: any;

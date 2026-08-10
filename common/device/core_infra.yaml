@@ -10,6 +10,11 @@ esphome:
   # (Hebrew, Arabic) render in visual order.
   build_flags:
     - "-DLV_USE_BIDI=1"
+    # Wi-Fi Share uses LVGL's local QR renderer. Keep these shared so a saved
+    # card behaves identically on every supported display.
+    - "-DLV_USE_QRCODE=1"
+    - "-DLV_USE_CANVAS=1"
+    - "-DLV_USE_IMAGE=1"
     - '-DESPCONTROL_DEVICE_SLUG=\"${device_slug}\"'
 
 api:
