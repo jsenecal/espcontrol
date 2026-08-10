@@ -157,6 +157,10 @@ def test_generated_web(profiles: dict[str, dict]) -> None:
         for suffix in (".yaml", ".factory.yaml"):
             build = (ROOT / "builds" / f"{slug}{suffix}").read_text(encoding="utf-8")
             assert 'docs/public/webserver/embedded/www.js"' in build, f"{slug}{suffix}: firmware does not embed its offline editor"
+        factory = (ROOT / "builds" / f"{slug}.factory.yaml").read_text(encoding="utf-8")
+        assert "webserver/www.js?device=${device_slug}&v=${firmware_version}" in factory, (
+            f"{slug}.factory.yaml: release firmware does not request its compatible hosted editor"
+        )
 
 
 def test_generated_yaml(profiles: dict[str, dict]) -> None:
