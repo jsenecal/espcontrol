@@ -73,6 +73,7 @@ function verifyManifest(webRoot) {
 async function verifyBridge() {
   const manifest = readJson(path.join(WEB_ROOT, "web-assets.json"));
   const loaded = [];
+  let cleanedFallbackPath = "";
   const sandbox = {
     URL,
     Promise,
@@ -86,6 +87,7 @@ async function verifyBridge() {
       head: { appendChild(script) { loaded.push(script.src); } },
     },
     window: { location: { href: "http://panel.example/" } },
+    history: { replaceState(_state, _title, path) { cleanedFallbackPath = path; } },
     fetch(url) {
       if (String(url).endsWith("web-assets.json")) {
         return Promise.resolve({ ok: true, json: () => Promise.resolve(manifest) });
@@ -130,6 +132,8 @@ async function verifyBridge() {
   await new Promise((resolve) => setImmediate(resolve));
   assert(cleanFallbackStarts.length === 0,
     "web bridge must skip the hosted bundle after a clean embedded fallback reload");
+  assert(cleanedFallbackPath === "/",
+    "web bridge must remove the one-time clean fallback flag from the address");
   sandbox.window.location.href = "http://panel.example/";
 }
 
