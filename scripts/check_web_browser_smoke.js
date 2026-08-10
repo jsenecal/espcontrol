@@ -2170,6 +2170,7 @@ async function assertNewMediaCardDefaults(page, posts, label) {
   if ((await emptyCell.count()) === 0) return;
 
   const before = posts.length;
+  const pos = await emptyCell.getAttribute("data-pos");
   await emptyCell.click();
   await page.waitForSelector(".sp-settings-overlay.sp-visible");
   await page.getByRole("button", { name: "Media card type" }).click();
@@ -2181,9 +2182,9 @@ async function assertNewMediaCardDefaults(page, posts, label) {
     `${label}: a new Media card should default to Cover Art`,
   );
   assert.strictEqual(
-    await page.locator("#sp-inp-label").inputValue(),
+    await page.locator(`.sp-main [data-pos="${pos}"] .sp-image-label-main`).textContent(),
     "Cover Art",
-    `${label}: a new Cover Art card should use its generated label`,
+    `${label}: a new Cover Art card preview should use its generated label`,
   );
 
   await page.locator(".sp-settings-close").click();
