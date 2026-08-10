@@ -11,7 +11,11 @@ The public npm check commands are entry points for the dependency-aware task
 graph. Focused commands include their declared prerequisites automatically,
 while the product, fast, CI, all, and release commands run complete assurance
 profiles. The task graph is the only supported check route, so it provides one
-auditable definition of release coverage.
+auditable definition of release coverage. Its release profile includes firmware
+host-service tests, cross-language saved-configuration parity, browser journeys,
+device-matrix validation, generated outputs, docs, and release manifests. The
+release workflow then compiles every supported firmware target from that same
+source revision before publishing.
 
 Use `python3 scripts/check_tasks.py list` to see registered tasks or
 `python3 scripts/check_tasks.py plan fast --explain` to preview a profile without
