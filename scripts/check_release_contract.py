@@ -15,6 +15,7 @@ DEVICE_MANIFEST = ROOT / "devices" / "manifest.json"
 WEB_MANIFEST = ROOT / "docs" / "public" / "webserver" / "web-assets.json"
 DOCUMENT_HEADER = ROOT / "components" / "espcontrol" / "panel_config_document.h"
 CAPABILITIES_HEADER = ROOT / "components" / "espcontrol" / "panel_config_capabilities.h"
+COMPATIBILITY_POLICY = ROOT / "components" / "espcontrol" / "configuration_release_policy.h"
 
 
 def read_json(path: Path) -> dict:
@@ -56,6 +57,24 @@ def verify() -> None:
     )
     assert bundle.get("deviceProfiles") == device_slugs, (
         "web-asset device profiles disagree with generated device manifest"
+    )
+    compatibility = contract.get("panelConfigCompatibility")
+    assert isinstance(compatibility, dict), "release contract lacks PanelConfig compatibility policy"
+    assert compatibility.get("phase") in {"dual-write", "read-import-only"}, (
+        "PanelConfig compatibility phase is invalid"
+    )
+    assert compatibility.get("dualWriteStableReleases") == 2, (
+        "PanelConfig compatibility policy must retain two dual-write stable releases"
+    )
+    assert compatibility.get("readImportOnlyStableReleases") == 1, (
+        "PanelConfig compatibility policy must retain one read/import-only stable release"
+    )
+    expected_mode = {
+        "dual-write": "LegacyConfigurationMode::DUAL_WRITE",
+        "read-import-only": "LegacyConfigurationMode::READ_IMPORT_ONLY",
+    }[compatibility["phase"]]
+    assert expected_mode in COMPATIBILITY_POLICY.read_text(encoding="utf-8"), (
+        "firmware PanelConfig compatibility policy disagrees with release contract"
     )
 
 

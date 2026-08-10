@@ -29,6 +29,16 @@ explicit migration path, compatibility fixture, release note, and rollback plan.
 - Do not require users to resave cards after updating unless the release notes
   clearly call out the migration.
 
+### PanelConfig release lifecycle
+
+`product/release_contract.json` declares the PanelConfig compatibility phase,
+and `configuration_release_policy.h` is the checked firmware projection of that
+choice. Keep `dual-write` for two stable releases. For the following stable
+release, change both declarations to `read-import-only`: new native saves stop
+mirroring legacy text entities, while an older panel's text configuration can
+still be imported once. Retire legacy reads only after that read/import-only
+release has shipped and its upgrade coverage has been confirmed.
+
 ## Required Migration Shape
 
 Every compatibility-affecting change needs:

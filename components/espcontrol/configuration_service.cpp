@@ -295,7 +295,8 @@ ServiceSaveResult ConfigurationService::save(uint16_t document_version,
     return {ServiceStatus::STORE_FAILED, committed.status, document_version,
             committed.generation, document_size};
   }
-  const bool mirrored = legacy_.mirror(document_version, document, document_size);
+  const bool mirrored = !legacy_writes_enabled() ||
+                        legacy_.mirror(document_version, document, document_size);
   const bool applied = runtime_ == nullptr ||
                        runtime_->apply(document_version, document, document_size);
   if (!applied) {
@@ -336,7 +337,8 @@ ServiceSaveResult ConfigurationService::save_if_generation(
     return {ServiceStatus::STORE_FAILED, committed.status, document_version,
             committed.generation, document_size};
   }
-  const bool mirrored = legacy_.mirror(document_version, document, document_size);
+  const bool mirrored = !legacy_writes_enabled() ||
+                        legacy_.mirror(document_version, document, document_size);
   const bool applied = runtime_ == nullptr ||
                        runtime_->apply(document_version, document, document_size);
   if (!applied) {
