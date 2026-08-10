@@ -2,6 +2,7 @@
 
 #include <cstdint>
 
+#include "button_grid_card_runtime.h"
 #include "display_lifecycle_service.h"
 
 namespace espcontrol {
@@ -27,6 +28,13 @@ class EspControlAppCore {
   DisplayLifecycleService &display_lifecycle() { return display_lifecycle_; }
   const DisplayLifecycleService &display_lifecycle() const { return display_lifecycle_; }
 
+  cards::CardRuntimeRegistryService &card_runtime_registry() {
+    return card_runtime_registry_;
+  }
+  const cards::CardRuntimeRegistryService &card_runtime_registry() const {
+    return card_runtime_registry_;
+  }
+
   // Compatibility facade for ESPHome YAML while display ownership migrates to
   // the explicit lifecycle service.
   DisplayModeController &display() { return display_lifecycle_.controller(); }
@@ -38,6 +46,7 @@ class EspControlAppCore {
   AppLifecycleState lifecycle_state_{AppLifecycleState::CONSTRUCTED};
   uint32_t loop_count_{0};
   DisplayLifecycleService display_lifecycle_{};
+  cards::CardRuntimeRegistryService card_runtime_registry_{};
 };
 
 }  // namespace espcontrol

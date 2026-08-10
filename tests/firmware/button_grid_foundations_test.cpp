@@ -15,6 +15,16 @@ int main() {
     return EXIT_FAILURE;
   }
 
+  espcontrol::cards::CardRuntimeRegistryService explicit_registry;
+  espcontrol::cards::set_card_runtime_registry_service(&explicit_registry);
+  if (&espcontrol::cards::card_runtime_registry_service() != &explicit_registry) {
+    return EXIT_FAILURE;
+  }
+  espcontrol::cards::set_card_runtime_registry_service(nullptr);
+  if (&espcontrol::cards::card_runtime_registry_service() == &explicit_registry) {
+    return EXIT_FAILURE;
+  }
+
   if (string_ref_limited(esphome::StringRef("calendar"), 4) != "cale") return EXIT_FAILURE;
   if (string_ref_limited(esphome::StringRef("clock"), 32) != "clock") return EXIT_FAILURE;
   if (decode_html_entities("Earth, Wind &amp; Fire") != "Earth, Wind & Fire") {

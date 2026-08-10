@@ -27,6 +27,11 @@ int main() {
     return EXIT_FAILURE;
   }
 
+  const auto media = app.card_runtime_registry().context_for("media", "");
+  if (!media.known || media.family != espcontrol::cards::Family::MEDIA) {
+    return EXIT_FAILURE;
+  }
+
   if (!app.run_once() || !app.run_once() || app.loop_count() != 2 ||
       app.display_lifecycle().loop_count() != 2) {
     return EXIT_FAILURE;

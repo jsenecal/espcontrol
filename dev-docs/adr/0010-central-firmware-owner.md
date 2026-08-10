@@ -20,11 +20,13 @@ firmware services. ESPHome calls the application boundary for setup, loop, and
 shutdown. Device YAML keeps the stable `espcontrol_app` ID and acts as a wiring
 and compatibility layer rather than owning service state.
 
-The first migrated service is `DisplayModeController`. Existing display
-behaviour and method names are unchanged; YAML reaches the controller through
-`id(espcontrol_app).display()`. Later service migrations extend this owner one
-focused pull request at a time and must not introduce generated `id(...)`
-references into compiled modules.
+`DisplayModeController` and the card-runtime registry are migrated services.
+Existing display behaviour and method names are unchanged; YAML reaches the
+controller through `id(espcontrol_app).display()`. Existing card helpers use a
+compatibility binding to the core-owned registry while they migrate to explicit
+service access. Later service migrations extend this owner one focused pull
+request at a time and must not introduce generated `id(...)` references into
+compiled modules.
 
 The application core remains independent of ESPHome so ownership and lifecycle
 are covered by executable host tests.
