@@ -54,6 +54,8 @@ class EspControlApp : public esphome::Component {
   }
 
  private:
+  void register_panel_config_endpoints();
+
   struct LegacyButtonTextSources {
     configuration::EspHomeLegacyTextValue button;
     std::array<configuration::EspHomeLegacyTextValue,
