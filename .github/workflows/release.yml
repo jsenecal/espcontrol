@@ -339,12 +339,39 @@ jobs:
           RELEASE_TAG: ${{ inputs.release_tag }}
         run: python3 scripts/release_changelog.py "${RELEASE_TAG}" --output dist/release-notes.md
 
-      - name: Verify complete distribution
+      - name: Record release source provenance
         env:
           RELEASE_TAG: ${{ inputs.release_tag }}
+          SOURCE_SHA: ${{ needs.preflight.outputs.source_sha }}
         run: |
           mapfile -t DEVICE_SLUGS < <(python3 scripts/device_matrix.py release | jq -r '.include[].slug')
           mapfile -t RECOVERY_SLUGS < <(python3 scripts/device_matrix.py release | jq -r '.include[] | select(.recovery) | .slug')
+          python3 scripts/firmware_release.py generate-release-manifest \
+            --version "${RELEASE_TAG}" \
+            --dir dist/firmware \
+            --slugs "${DEVICE_SLUGS[@]}" \
+            --recovery-slugs "${RECOVERY_SLUGS[@]}" \
+            --source-revision "${SOURCE_SHA}" \
+            --release-contract product/release_contract.json \
+            --web-manifest docs/public/webserver/web-assets.json \
+            --web-root docs/public/webserver
+
+      - name: Verify complete distribution
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          SOURCE_SHA: ${{ needs.preflight.outputs.source_sha }}
+        run: |
+          mapfile -t DEVICE_SLUGS < <(python3 scripts/device_matrix.py release | jq -r '.include[].slug')
+          mapfile -t RECOVERY_SLUGS < <(python3 scripts/device_matrix.py release | jq -r '.include[] | select(.recovery) | .slug')
+          python3 scripts/firmware_release.py verify-release-manifest \
+            --version "${RELEASE_TAG}" \
+            --dir dist/firmware \
+            --slugs "${DEVICE_SLUGS[@]}" \
+            --recovery-slugs "${RECOVERY_SLUGS[@]}" \
+            --source-revision "${SOURCE_SHA}" \
+            --release-contract product/release_contract.json \
+            --web-manifest docs/public/webserver/web-assets.json \
+            --web-root docs/public/webserver
           python3 scripts/firmware_release.py verify-bundle \
             --version "${RELEASE_TAG}" \
             --dir dist/firmware \
@@ -390,4 +417,8 @@ jobs:
             --slugs "${DEVICE_SLUGS[@]}" \
             --recovery-slugs "${RECOVERY_SLUGS[@]}" \
             --repo "${GITHUB_REPOSITORY}" \
-            --notes dist/release-notes.md
+            --notes dist/release-notes.md \
+            --source-revision "${{ needs.preflight.outputs.source_sha }}" \
+            --release-contract product/release_contract.json \
+            --web-manifest docs/public/webserver/web-assets.json \
+            --web-root docs/public/webserver

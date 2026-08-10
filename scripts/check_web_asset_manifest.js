@@ -9,9 +9,7 @@ const vm = require("vm");
 const ROOT = path.resolve(__dirname, "..");
 const WEB_ROOT = path.join(ROOT, "docs", "public", "webserver");
 const DEVICE_MANIFEST_PATH = path.join(ROOT, "devices", "manifest.json");
-const SUPPORTED_FIRMWARE_VERSIONS = [
-  "dev", "v2.7.1", "v2.7.0", "v2.6.3", "v2.6.2", "v2.6.1",
-];
+const BUILD_SCRIPT_PATH = path.join(ROOT, "scripts", "build.py");
 
 function sha256(content) {
   return crypto.createHash("sha256").update(content).digest("hex");
@@ -27,6 +25,15 @@ function assert(condition, message) {
 
 function expectedProfiles() {
   return Object.keys(readJson(DEVICE_MANIFEST_PATH).devices);
+}
+
+function expectedFirmwareVersions() {
+  const source = fs.readFileSync(BUILD_SCRIPT_PATH, "utf8");
+  const match = source.match(
+    /^WEB_ASSET_SUPPORTED_FIRMWARE_VERSIONS = \(\n([\s\S]*?)^\)/m,
+  );
+  assert(match, "build source must declare web asset firmware versions");
+  return [...match[1].matchAll(/"([^"]+)"/g)].map((item) => item[1]);
 }
 
 function verifyManifest(webRoot) {
@@ -46,7 +53,7 @@ function verifyManifest(webRoot) {
   assert(Array.isArray(bundle.deviceProfiles), "web bundle must declare device profiles");
   assert(JSON.stringify(bundle.deviceProfiles) === JSON.stringify(expectedProfiles()),
     "web bundle device profiles must match the device manifest");
-  assert(JSON.stringify(bundle.firmwareVersions) === JSON.stringify(SUPPORTED_FIRMWARE_VERSIONS),
+  assert(JSON.stringify(bundle.firmwareVersions) === JSON.stringify(expectedFirmwareVersions()),
     "web bundle must declare the development and supported stable firmware versions");
   assert(bundle.webAssetVersion === 1, "web bundle must declare its web asset version");
 
