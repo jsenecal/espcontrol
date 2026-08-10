@@ -33,7 +33,10 @@ explicit migration path, compatibility fixture, release note, and rollback plan.
 
 `product/release_contract.json` declares the PanelConfig compatibility phase,
 and `configuration_release_policy.h` is the checked firmware projection of that
-choice. Keep `dual-write` for two stable releases. For the following stable
+choice. Keep `dual-write` for two stable releases. The release preflight reads
+the immutable `release-manifest.json` assets from published stable releases and
+rejects a move to `read-import-only` until two consecutive releases with the
+same PanelConfig document version prove that window. For the following stable
 release, change both declarations to `read-import-only`: new native saves stop
 mirroring legacy text entities, while an older panel's text configuration can
 still be imported once. Retire legacy reads only after that read/import-only

@@ -168,6 +168,8 @@ def test_release_workflow_uses_current_ota_output() -> None:
     assert "scripts/firmware_release.py publish-draft" in workflow
     assert "--source-revision" in workflow
     assert "scripts/firmware_release.py verify-recovery" in workflow
+    assert "scripts/check_release_contract.py --github-repository" in workflow
+    assert "GH_TOKEN: ${{ github.token }}" in workflow
     assert str(prepare_c6_firmware.C6_RELATIVE_PATH) in workflow
     assert "path: dist/firmware/" in workflow, "publishable firmware must use the dist boundary"
 
