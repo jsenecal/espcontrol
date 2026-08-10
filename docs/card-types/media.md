@@ -12,32 +12,32 @@ A Media card controls a Home Assistant `media_player` entity. It can work as a s
 
 ## Setting Up a Media Card
 
-1. Select a card and change its type to **Media**.
-2. Choose the media **Type**:
+1. Select a card and change its type to **Media**. New Media cards start as **Cover Art**.
+2. Choose the media **Type** if you want a different layout or action:
    - **All Controls**
+   - **Cover Art**
+   - **Track, Album or Playlist**
    - **Speaker Group**
-   - **Play/Pause Button**
-   - **Previous Button**
-   - **Next Button**
-   - **Volume Button**
+   - **Play/Pause**
+   - **Previous**
+   - **Next**
+   - **Volume**
    - **Track Position**
    - **Now Playing**
-   - **Cover Art**
-   - **Media Content**
 3. Enter the media player entity, for example `media_player.living_room`.
 4. Set a label or icon if the selected type shows those fields.
 
 If Home Assistant reports the media player as unavailable, the card keeps its normal appearance. A card set to show the live state can still say **Unavailable**, and controls will work again when Home Assistant can accept actions for the player.
 
-## Playback Buttons
+## Playback Controls
 
-**Play/Pause Button**, **Previous Button**, and **Next Button** send the matching Home Assistant media player action when tapped.
+**Play/Pause**, **Previous**, and **Next** send the matching Home Assistant media player action when tapped.
 
 For Play/Pause, you can choose whether the card shows its fixed label or the live state, such as **Playing** or **Paused**.
 
-## Volume Button
+## Volume
 
-The Volume Button shows the current volume percentage. Tapping it opens a volume control popup on the panel, where you can adjust the volume without leaving the current page.
+The Volume card shows the current volume percentage. Tapping it opens a volume control popup on the panel, where you can adjust the volume without leaving the current page.
 
 For media players that support setting an exact volume, the popup dial is draggable. Some integrations, including Android TV Remote, only support volume-up and volume-down commands. For those players, the dial remains a live volume indicator and the **−** and **+** buttons adjust the volume one device-defined step at a time.
 
@@ -218,9 +218,9 @@ For example, `10%`, `25%`, and `40%` has a group level of `25%`. Moving Group Vo
 - Change membership and volume in Home Assistant and confirm the panel updates.
 - Reconnect or restart a speaker and confirm its state returns without reopening the card.
 
-## Media Content
+## Track, Album or Playlist
 
-Media Content is a shortcut for anything Home Assistant can play with the `media_player.play_media` action. It is not tied to Spotify, Music Assistant, Plex, Jellyfin, Sonos, or any other specific music system.
+Track, Album or Playlist is a shortcut for anything Home Assistant can play with the `media_player.play_media` action. It is not tied to Spotify, Music Assistant, Plex, Jellyfin, Sonos, or any other specific music system.
 
 Use it for playlists, radio stations, albums, saved favorites, channels, podcasts, or other playable media items.
 
@@ -235,7 +235,7 @@ Enter:
 
 EspControl sends the media content type as `playlist` automatically. The important part is that the media content ID works in Home Assistant first.
 
-When Home Assistant reports the currently playing `media_content_id`, the Playlist Button highlights only while that configured playlist or media item is playing. Some integrations do not report this value reliably; in that case EspControl can start the playlist, but it may not be able to confirm that the specific playlist is active.
+When Home Assistant reports the currently playing `media_content_id`, the Track, Album or Playlist card highlights only while that configured playlist or media item is playing. Some integrations do not report this value reliably; in that case EspControl can start the playlist, but it may not be able to confirm that the specific playlist is active.
 
 ### Find the Media Content ID
 
@@ -340,7 +340,7 @@ If the Home Assistant test starts the right playlist, use the same `media_conten
 
 ### Troubleshooting
 
-If tapping the Media Content button does not start playback:
+If tapping the Track, Album or Playlist card does not start playback:
 
 - Make sure the button has an **ID**. EspControl requires this before saving.
 - Test the same values with `media_player.play_media` in Home Assistant.
