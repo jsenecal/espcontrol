@@ -2659,10 +2659,10 @@ async function assertMediaCoverArtSettingsPanels(page, label) {
     await page
       .locator("#sp-inp-media-mode option")
       .evaluateAll((options) => options
-        .filter((option) => ["play_pause", "previous", "next", "volume"].includes(option.value))
+        .filter((option) => ["play_pause", "previous", "next", "volume", "playlist"].includes(option.value))
         .map((option) => option.textContent)),
-    ["Play/Pause", "Previous", "Next", "Volume"],
-    `${label}: Media action types should not include the word Button`,
+    ["Play/Pause", "Previous", "Next", "Volume", "Track, Album or Playlist"],
+    `${label}: Media action types should use their concise names`,
   );
 
   const cardSettings = page.locator(".sp-settings-modal .sp-disclosure").filter({

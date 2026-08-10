@@ -79,7 +79,7 @@ export function registerMediaCardTypes(): GlobalDescriptors {
             ["volume", "Volume"],
             ["position", "Track Position"],
             ["now_playing", "Now Playing"],
-            ["playlist", "Media Content"],
+            ["playlist", "Track, Album or Playlist"],
         ];
         return mediaCoverArtCardsSupported() ? options : options.filter(function (this: any, option?: any) {
             return option[0] !== "cover_art";
