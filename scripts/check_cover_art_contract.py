@@ -159,6 +159,29 @@ for required in (
         raise SystemExit("P4 JPEG workspace must be released after image buffer allocation failure")
 
 image_cards = (ROOT / "components" / "espcontrol" / "button_grid_image.h").read_text(encoding="utf-8")
+for required in (
+    "RefreshBatch media_artwork_refresh",
+    "media_artwork_refresh.begin(",
+    "media_artwork_refresh.complete()",
+    "Ignoring stale media artwork response",
+):
+    if required not in image_cards:
+        raise SystemExit(f"Media artwork refresh-batch contract missing: {required}")
+screen_cover_art = (ROOT / "common" / "device" / "screen_cover_art.yaml").read_text(encoding="utf-8")
+for required in (
+    "artwork_refresh.begin(",
+    "artwork_refresh.receive(",
+    "artwork_refresh.finish();",
+):
+    if required not in screen_cover_art:
+        raise SystemExit(f"Cover-art screensaver refresh-batch contract missing: {required}")
+image_decoder = (ROOT / "components" / "artwork_image" / "image_decoder.cpp").read_text(encoding="utf-8")
+for required in (
+    "if (!this->buffer_ || offset > this->size_)",
+    "return nullptr;",
+):
+    if required not in image_decoder:
+        raise SystemExit(f"Artwork download-buffer null-safety contract missing: {required}")
 overlay_tint_start = image_cards.find("inline void image_card_apply_media_overlay_tint(")
 overlay_tint_end = image_cards.find("\ninline void image_card_apply_downloaded", overlay_tint_start)
 if overlay_tint_start < 0 or overlay_tint_end < 0:

@@ -26,6 +26,56 @@ constexpr uint8_t artwork_source_mask(bool local) {
   return local ? ARTWORK_SOURCE_LOCAL : ARTWORK_SOURCE_REMOTE;
 }
 
+// Tracks one paired Home Assistant artwork read. The two attributes are
+// delivered independently, so consumers must not allow the first reply to
+// start an image request that the companion reply immediately replaces.
+struct RefreshBatch {
+  uint32_t generation{0};
+  uint8_t expected_mask{0};
+  uint8_t received_mask{0};
+  bool forced{false};
+
+  uint32_t begin(uint8_t expected, bool force_refresh) {
+    ++this->generation;
+    if (this->generation == 0) ++this->generation;
+    this->expected_mask = expected;
+    this->received_mask = 0;
+    this->forced = force_refresh;
+    return this->generation;
+  }
+
+  bool accepts(uint32_t request_generation, bool local) const {
+    return this->expected_mask != 0 && request_generation == this->generation &&
+           (this->expected_mask & artwork_source_mask(local)) != 0;
+  }
+
+  bool receive(uint32_t request_generation, bool local) {
+    if (!this->accepts(request_generation, local)) return false;
+    this->received_mask |= artwork_source_mask(local);
+    return true;
+  }
+
+  bool complete() const {
+    return this->expected_mask != 0 &&
+           (this->received_mask & this->expected_mask) == this->expected_mask;
+  }
+
+  bool active() const { return this->expected_mask != 0; }
+
+  bool finish() {
+    if (!this->active()) return false;
+    this->expected_mask = 0;
+    this->received_mask = 0;
+    return true;
+  }
+
+  void reset() {
+    this->expected_mask = 0;
+    this->received_mask = 0;
+    this->forced = false;
+  }
+};
+
 // A zero retry mask means this is a normal refresh and both sources should be
 // requested. A non-zero mask contains only the source reads that previously
 // failed to queue.

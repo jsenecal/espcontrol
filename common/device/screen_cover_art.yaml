@@ -1040,6 +1040,11 @@ script:
     mode: restart
     then:
       - delay: !lambda 'return espcontrol::cover_art::CACHED_ARTWORK_DEBOUNCE_MS;'
+      - lambda: |-
+          // Attribute subscriptions are delivered independently. Finalise the
+          // paired read once so the remote/local companion callback cannot
+          // start a second artwork request while the first is active.
+          id(cover_art_runtime).artwork_refresh.finish();
       - if:
           condition:
             lambda: |-
@@ -2475,7 +2480,17 @@ script:
                 return;
               }
 
-              if (id(cover_art_runtime).sources.get(local) == url) {
+              const bool source_changed = id(cover_art_runtime).sources.get(local) != url;
+              if (source_changed && !id(cover_art_runtime).artwork_refresh.active()) {
+                id(cover_art_runtime).artwork_refresh.begin(
+                  espcontrol::artwork::ARTWORK_SOURCE_BOTH, false);
+              }
+              if (id(cover_art_runtime).artwork_refresh.active()) {
+                id(cover_art_runtime).artwork_refresh.receive(
+                  id(cover_art_runtime).artwork_refresh.generation, local);
+              }
+
+              if (!source_changed) {
                 const bool process_cached =
                     !url.empty() &&
                     id(espcontrol_app).display().target_mode_is(espcontrol::DisplayMode::COVER_ART) &&
