@@ -17,6 +17,7 @@ from threading import Thread
 
 import firmware_release
 import prepare_c6_firmware
+import prepare_release_web_assets
 
 
 SLUG = "guition-esp32-s3-4848s040"
@@ -201,6 +202,20 @@ def test_release_skill_creates_selected_tag_before_draft() -> None:
     assert skill.index('TAG="vX.Y.Z"') < tag_creation
     assert skill.index('TAG="vX.Y.Z-beta.N"') < tag_creation
     assert skill.index('gh release create "$TAG"', tag_creation) > tag_creation
+
+
+def test_release_preparation_adds_the_tag_before_tagging() -> None:
+    skill = RELEASE_SKILL.read_text(encoding="utf-8")
+    assert skill.index("prepare_release_web_assets.py") < skill.index('git tag -a "$TAG"')
+    with TemporaryDirectory() as tmp:
+        build_script = Path(tmp) / "build.py"
+        build_script.write_text(
+            'WEB_ASSET_SUPPORTED_FIRMWARE_VERSIONS = (\n    "dev",\n    "v1.0.0",\n)\n',
+            encoding="utf-8",
+        )
+        assert prepare_release_web_assets.prepare(build_script, "v1.1.0") is True
+        assert prepare_release_web_assets.prepare(build_script, "v1.1.0") is False
+        assert '    "v1.1.0",\n    "v1.0.0",' in build_script.read_text(encoding="utf-8")
 
 
 def make_release_files(base: Path, slug: str = SLUG, version: str = VERSION) -> tuple[Path, Path, Path]:
