@@ -87,18 +87,16 @@ void EspControlApp::apply_boot_configuration() {
   // Do not retain the document captured during setup: a browser save can
   // complete before this timeout runs, and the newest durable document must
   // always win over startup restoration. The boot buffer is intentionally
-  // separate from the HTTP request buffer so this reload cannot race a PUT.
-  const configuration::ServiceLoadResult loaded = panel_config_service->load(
-      boot_configuration_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
+  // separate from the HTTP request buffer. ConfigurationService serializes
+  // this reload and live apply with HTTP saves so neither its scratch buffer
+  // nor the running grid can be reverted by an older startup document.
+  const configuration::ServiceLoadResult loaded =
+      panel_config_service->load_and_apply_runtime(
+          boot_configuration_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
   if (!loaded.ok()) {
     ESP_LOGE(TAG, "Native configuration could not reload for the live grid (%u)",
              static_cast<unsigned>(loaded.status));
     return;
-  }
-  if (!legacy_config_.apply(loaded.document_version,
-                            boot_configuration_buffer_,
-                            loaded.document_size)) {
-    ESP_LOGE(TAG, "Native configuration could not update the live grid");
   }
 }
 
