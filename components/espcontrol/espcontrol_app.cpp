@@ -77,7 +77,7 @@ void EspControlApp::register_panel_config_endpoints() {
 }
 
 void EspControlApp::apply_boot_configuration() {
-  if (!boot_configuration_pending_ || panel_config_document_buffer_ == nullptr)
+  if (!boot_configuration_pending_ || boot_configuration_buffer_ == nullptr)
     return;
 
   boot_configuration_pending_ = false;
@@ -86,16 +86,17 @@ void EspControlApp::apply_boot_configuration() {
   if (panel_config_service == nullptr) return;
   // Do not retain the document captured during setup: a browser save can
   // complete before this timeout runs, and the newest durable document must
-  // always win over startup restoration.
+  // always win over startup restoration. The boot buffer is intentionally
+  // separate from the HTTP request buffer so this reload cannot race a PUT.
   const configuration::ServiceLoadResult loaded = panel_config_service->load(
-      panel_config_document_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
+      boot_configuration_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
   if (!loaded.ok()) {
     ESP_LOGE(TAG, "Native configuration could not reload for the live grid (%u)",
              static_cast<unsigned>(loaded.status));
     return;
   }
   if (!legacy_config_.apply(loaded.document_version,
-                            panel_config_document_buffer_,
+                            boot_configuration_buffer_,
                             loaded.document_size)) {
     ESP_LOGE(TAG, "Native configuration could not update the live grid");
   }
@@ -128,8 +129,10 @@ void EspControlApp::setup() {
     ESP_LOGE(TAG, "Native configuration storage is unavailable");
   } else {
 #ifdef USE_ESP32
+    // Two fixed slots back the atomic store; the scratch, HTTP request, and
+    // delayed boot-application buffers must not overlap each other.
     constexpr size_t panel_config_memory_size =
-        PANEL_CONFIG_STORAGE_SLOT_CAPACITY * 4;
+        PANEL_CONFIG_STORAGE_SLOT_CAPACITY * 5;
     panel_config_memory_ = static_cast<uint8_t *>(
         heap_caps_malloc(panel_config_memory_size,
                          MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT));
@@ -146,6 +149,8 @@ void EspControlApp::setup() {
         PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
     panel_config_document_buffer_ =
         panel_config_memory_ + PANEL_CONFIG_STORAGE_SLOT_CAPACITY * 3;
+    boot_configuration_buffer_ =
+        panel_config_memory_ + PANEL_CONFIG_STORAGE_SLOT_CAPACITY * 4;
     const configuration::ServiceLoadResult loaded = panel_config_service->load(
         panel_config_document_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
     if (loaded.status == configuration::ServiceStatus::IMPORTED_LEGACY) {
