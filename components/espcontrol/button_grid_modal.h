@@ -5,6 +5,7 @@
 // Shared control modal helpers.
 
 #include "control_modal_service.h"
+#include "espcontrol_app_core.h"
 
 constexpr lv_coord_t CONTROL_MODAL_REFERENCE_SIDE_PX = DISPLAY_MODAL_REFERENCE_SIDE_PX;
 constexpr lv_coord_t CONTROL_MODAL_ARC_STROKE_REF_PX = DISPLAY_MODAL_ARC_STROKE_REF_PX;
@@ -81,6 +82,9 @@ using ControlModalNestedActive = ControlModalNestedActiveState<lv_obj_t>;
 using ButtonGridModalService = ControlModalStateService<lv_obj_t>;
 
 inline ButtonGridModalService &control_modal_service() {
+  if (auto *core = espcontrol::active_espcontrol_app_core()) {
+    return core->modal_state_service<ButtonGridModalService>();
+  }
   static ButtonGridModalService service;
   return service;
 }

@@ -38,6 +38,7 @@ bool EspControlAppCore::run_once() {
 bool EspControlAppCore::stop() {
   if (lifecycle_state_ != AppLifecycleState::RUNNING) return false;
   if (!display_lifecycle_.stop()) return false;
+  modal_state_service_.reset();
   grid_navigation_service_.reset();
   if (active_espcontrol_app_core() == this) active_espcontrol_app_core() = nullptr;
   set_home_assistant_callback_owner_service(nullptr);
