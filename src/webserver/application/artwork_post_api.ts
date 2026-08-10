@@ -4,6 +4,9 @@ export function installArtworkPostApiModule(): GlobalDescriptors {
     function postPresenceSensorEntity(this: any, value?: any) {
         return postTextWithObjectIds(entityName("presence_sensor_entity"), entityObjectIds("presence_sensor_entity"), value);
     }
+    function postScreensaverCameraEntity(this: any, value?: any) {
+        return postTextWithObjectIds(entityName("screen_saver_camera_entity"), entityObjectIds("screen_saver_camera_entity"), value);
+    }
     function postMediaPlayerSleepPrevention(this: any, on?: any) {
         return postSwitchWithObjectIds(entityName("screen_saver_media_player_sleep_prevention"), entityObjectIds("screen_saver_media_player_sleep_prevention"), on);
     }
@@ -57,6 +60,7 @@ export function installArtworkPostApiModule(): GlobalDescriptors {
     }
     return {
         "postPresenceSensorEntity": staticGlobal(postPresenceSensorEntity),
+        "postScreensaverCameraEntity": staticGlobal(postScreensaverCameraEntity),
         "postMediaPlayerSleepPrevention": staticGlobal(postMediaPlayerSleepPrevention),
         "postMediaPlayerSleepPreventionEntity": staticGlobal(postMediaPlayerSleepPreventionEntity),
         "postCoverArtScreensaver": staticGlobal(postCoverArtScreensaver),

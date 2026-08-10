@@ -14,7 +14,10 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         finalCountdown: normalizeAlarmDelayFinalCountdown,
     });
     var _screensaverController: any = createScreensaverController({
-        action: normalizeScreensaverAction,
+        action: function (value: any) {
+            var action: any = normalizeScreensaverAction(value);
+            return action === "camera" && !(CFG.features && CFG.features.cameraScreensaver) ? "off" : action;
+        },
         dimBrightness: normalizeScreensaverDimmedBrightness,
         clockBrightness: normalizeClockBrightness,
     });
@@ -250,6 +253,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         var mode: any = controlState.mode;
         var clockDisplay: any = controlState.clockVisible ? "" : "none";
         var dimDisplay: any = controlState.dimVisible ? "" : "none";
+        var cameraDisplay: any = controlState.cameraVisible ? "" : "none";
         var automaticBrightness: any = normalizeBrightnessMode(state.brightnessMode) !== "manual";
         state.clockScreensaverOn = mode === "clock";
         syncClockBarUi();
@@ -261,6 +265,12 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         syncOptionalClockBrightness(els.setSensorClockBrightnessField, els.setSensorDimBrightnessField || els.setSensorClockField, clockDisplay);
         syncOptionalClockBrightness(els.setDimBrightnessField, els.setClockField, dimDisplay);
         syncOptionalClockBrightness(els.setSensorDimBrightnessField, els.setSensorClockField, dimDisplay);
+        if (els.setScreensaverCameraField)
+            els.setScreensaverCameraField.style.display = cameraDisplay;
+        if (els.setSensorScreensaverCameraField)
+            els.setSensorScreensaverCameraField.style.display = cameraDisplay;
+        syncInput(els.setScreensaverCamera, state.screensaverCameraEntity);
+        syncInput(els.setSensorScreensaverCamera, state.screensaverCameraEntity);
         if (els.setManualDimBrightnessField)
             els.setManualDimBrightnessField.style.display = automaticBrightness ? "none" : "";
         if (els.setAutomaticDimBrightnessField)
@@ -381,6 +391,7 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
             { value: "off", label: "Display Off" },
             { value: "dim", label: "Screen Dimmed" },
             { value: "clock", label: "Clock" },
+            ...(CFG.features && CFG.features.cameraScreensaver ? [{ value: "camera", label: "Camera" }] : []),
         ].forEach(function (this: any, opt?: any) {
             var o: any = document.createElement("option");
             o.value = opt.value;
@@ -395,6 +406,20 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
             postClockScreensaver(state.clockScreensaverOn);
         });
         clockField.appendChild(clockSelect);
+        var cameraField: any = document.createElement("div");
+        cameraField.className = "sp-field";
+        cameraField.style.display = _screensaverController.uiState(screensaverState()).cameraVisible ? "" : "none";
+        var cameraId: any = selectId === "sp-set-sensor-clock-mode"
+            ? "sp-set-sensor-screensaver-camera"
+            : "sp-set-screensaver-camera";
+        cameraField.appendChild(fieldLabel("Camera Entity", cameraId));
+        var cameraInput: any = entityInput(cameraId, state.screensaverCameraEntity,
+            "Camera or image entity", ["camera", "image"]);
+        cameraField.appendChild(cameraInput);
+        bindTextPost(cameraInput, entityName("screen_saver_camera_entity"), {
+            post: postScreensaverCameraEntity,
+            onBlur: function (value: any) { state.screensaverCameraEntity = value; },
+        });
         var dimBrightnessField: any = document.createElement("div");
         dimBrightnessField.style.display = _screensaverController.uiState(screensaverState()).dimVisible ? "" : "none";
         var manualDimBrightnessField: any = document.createElement("div");
@@ -456,6 +481,8 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
         return {
             clockField: clockField,
             clockSelect: clockSelect,
+            cameraField: cameraField,
+            cameraInput: cameraInput,
             dimBrightnessField: dimBrightnessField,
             manualDimBrightnessField: manualDimBrightnessField,
             automaticDimBrightnessField: automaticDimBrightnessField,

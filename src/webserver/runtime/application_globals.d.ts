@@ -915,6 +915,7 @@ declare global {
   var postNumberWithObjectIds: any;
   var postOptional: any;
   var postPresenceSensorEntity: any;
+  var postScreensaverCameraEntity: any;
   var postQueueHadError: any;
   var postQueueIdle: any;
   var postQuiet: any;
