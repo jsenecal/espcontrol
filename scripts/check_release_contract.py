@@ -63,7 +63,9 @@ def self_test() -> None:
     verify()
     original = PRODUCT_MODEL.read_text(encoding="utf-8")
     try:
-        PRODUCT_MODEL.write_text(original.replace('"modelVersion": 2', '"modelVersion": 99'), encoding="utf-8")
+        product_model = json.loads(original)
+        product_model["modelVersion"] = int(product_model["modelVersion"]) + 1
+        PRODUCT_MODEL.write_text(json.dumps(product_model, indent=2) + "\n", encoding="utf-8")
         try:
             verify()
         except AssertionError as error:
