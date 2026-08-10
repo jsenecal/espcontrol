@@ -12,6 +12,7 @@ export function registerWeatherCardTypes(): GlobalDescriptors {
             onChange: function (this: any, b?: any, helpers?: any) {
                 b.precision = this.value;
                 helpers.saveField("precision", b.precision);
+                renderButtonSettings();
             },
         },
         entity: {
@@ -89,23 +90,14 @@ export function registerWeatherCardTypes(): GlobalDescriptors {
             b.precision = normalizeWeatherCardMode(b.precision);
         },
         renderSettings: function (this: any, panel?: any, b?: any, slot?: any, helpers?: any) {
-            var modeField: any = helpers.renderCardModeSelector(panel, b, helpers, WEATHER_CARD_METADATA);
-            var modeSelect: any = modeField.select;
+            helpers.renderCardModeSelector(panel, b, helpers, WEATHER_CARD_METADATA);
             helpers.renderCardEntityField(panel, b, helpers, WEATHER_CARD_METADATA);
+            if (!weatherCardIsForecastMode(b))
+                return;
             var labelControl: any = helpers.renderCardTextField(panel, b, helpers, WEATHER_CARD_METADATA.labelField);
-            var labelField: any = labelControl.field;
             var labelInp: any = labelControl.input;
-            var largeNumbersToggle: any = helpers.renderCardLargeNumbersToggle(panel, b, helpers, WEATHER_CARD_METADATA);
-            function syncForecastFields(this: any) {
-                var forecast: any = weatherCardIsForecastMode(b);
-                labelField.style.display = forecast ? "" : "none";
-                labelInp.placeholder = "e.g. " + weatherCardDefaultForecastLabel(b);
-                helpers.syncCardLargeNumbersToggle(largeNumbersToggle, b, helpers, forecast);
-            }
-            modeSelect.addEventListener("change", function (this: any) {
-                syncForecastFields();
-            });
-            syncForecastFields();
+            labelInp.placeholder = "e.g. " + weatherCardDefaultForecastLabel(b);
+            helpers.renderCardLargeNumbersToggle(panel, b, helpers, WEATHER_CARD_METADATA);
         },
         renderPreview: function (this: any, b?: any, helpers?: any) {
             if (weatherCardIsForecastMode(b)) {
