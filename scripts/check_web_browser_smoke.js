@@ -2350,6 +2350,14 @@ async function assertAllCardSettingsGrouped(page, posts, label) {
       );
     }
 
+    if (cardOption.value === "weather") {
+      assert.strictEqual(
+        await page.locator(".sp-settings-modal .sp-panel > .sp-disclosure").count(),
+        0,
+        `${label}: Weather current conditions should not show empty Card Settings`,
+      );
+    }
+
     const typeSelect = page.locator(
       '.sp-settings-modal .sp-panel > [data-sp-card-primary="type"] select',
     );
@@ -2369,6 +2377,13 @@ async function assertAllCardSettingsGrouped(page, posts, label) {
       for (const typeValue of typeOptions) {
         await typeSelect.selectOption(typeValue);
         await assertGrouped(`${cardOption.label} / ${typeValue || "default"}`);
+        if (cardOption.value === "weather" && typeValue) {
+          assert.strictEqual(
+            await page.locator(".sp-settings-modal .sp-panel > .sp-disclosure").count(),
+            1,
+            `${label}: Weather forecasts should group their extra settings`,
+          );
+        }
       }
     }
 
