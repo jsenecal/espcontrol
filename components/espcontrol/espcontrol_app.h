@@ -55,6 +55,7 @@ class EspControlApp : public esphome::Component {
 
  private:
   void register_panel_config_endpoints();
+  void initialize_native_configuration();
   void apply_boot_configuration();
 
   struct LegacyButtonTextSources {

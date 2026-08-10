@@ -106,6 +106,14 @@ void EspControlApp::setup() {
   } else {
     ESP_LOGE(TAG, "Application core failed to start");
   }
+
+  // NVS work and the legacy snapshot can be expensive on a populated panel.
+  // Schedule it after ESPHome has completed every component setup so it cannot
+  // run while the display or OTA boot validation is still coming up.
+  this->set_timeout(1000, [this]() { this->initialize_native_configuration(); });
+}
+
+void EspControlApp::initialize_native_configuration() {
   if (!core_.configure_configuration_service(
           panel_config_store_, legacy_config_, &panel_config_validator_,
           configuration::PANEL_CONFIG_LEGACY_MODE)) {
