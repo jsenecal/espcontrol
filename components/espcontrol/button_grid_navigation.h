@@ -3,6 +3,7 @@
 // Internal implementation detail for button_grid.h. Include button_grid.h from device YAML.
 
 #include "grid_navigation_service.h"
+#include "espcontrol_app_core.h"
 
 // ── Home Assistant-driven home-screen navigation ─────────────────────
 
@@ -36,6 +37,10 @@ using ButtonGridNavigationService =
     GridNavigationService<NavigationHomeTargetEntry, NavigationSubpageEntry>;
 
 inline ButtonGridNavigationService &grid_navigation_service() {
+  if (espcontrol::EspControlAppCore *core =
+          espcontrol::active_espcontrol_app_core()) {
+    return core->grid_navigation_service<ButtonGridNavigationService>();
+  }
   static ButtonGridNavigationService service;
   return service;
 }
