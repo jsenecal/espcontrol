@@ -85,8 +85,14 @@ inline ButtonGridModalService &control_modal_service() {
   if (auto *core = espcontrol::active_espcontrol_app_core()) {
     return core->modal_state_service<ButtonGridModalService>();
   }
+#ifdef ESP_PLATFORM
+  // Firmware UI work begins only after EspControlAppCore starts. Keeping the
+  // contract strict avoids a second permanent modal-state allocation.
+  std::abort();
+#else
   static ButtonGridModalService service;
   return service;
+#endif
 }
 
 inline ControlModalActive &control_modal_active() {
