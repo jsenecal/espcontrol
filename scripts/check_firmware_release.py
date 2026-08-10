@@ -170,6 +170,9 @@ def test_release_workflow_uses_current_ota_output() -> None:
     assert "scripts/firmware_release.py verify-recovery" in workflow
     assert "scripts/check_release_contract.py --github-repository" in workflow
     assert "GH_TOKEN: ${{ github.token }}" in workflow
+    assert "CMake ${CMAKE_VERSION} is older than the required version 3.20" in workflow
+    assert '"cmake==3.31.10"' in workflow
+    assert "npx playwright install --with-deps chromium" in workflow
     assert str(prepare_c6_firmware.C6_RELATIVE_PATH) in workflow
     assert "path: dist/firmware/" in workflow, "publishable firmware must use the dist boundary"
 
