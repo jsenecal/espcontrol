@@ -1,8 +1,10 @@
 #pragma once
 
 #include <cstdint>
+#include <optional>
 
 #include "button_grid_card_runtime.h"
+#include "configuration_service.h"
 #include "display_lifecycle_service.h"
 
 namespace espcontrol {
@@ -35,6 +37,22 @@ class EspControlAppCore {
     return card_runtime_registry_;
   }
 
+  // Storage and legacy text adapters are device wiring concerns, while the
+  // configuration service itself has one application-owned lifetime.
+  bool configure_configuration_service(
+      configuration::ConfigurationStore &store,
+      configuration::LegacyConfigurationAdapter &legacy,
+      const configuration::ConfigurationDocumentValidator *validator = nullptr);
+  bool has_configuration_service() const {
+    return configuration_service_.has_value();
+  }
+  configuration::ConfigurationService *configuration_service() {
+    return configuration_service_ ? &*configuration_service_ : nullptr;
+  }
+  const configuration::ConfigurationService *configuration_service() const {
+    return configuration_service_ ? &*configuration_service_ : nullptr;
+  }
+
   // Compatibility facade for ESPHome YAML while display ownership migrates to
   // the explicit lifecycle service.
   DisplayModeController &display() { return display_lifecycle_.controller(); }
@@ -47,6 +65,7 @@ class EspControlAppCore {
   uint32_t loop_count_{0};
   DisplayLifecycleService display_lifecycle_{};
   cards::CardRuntimeRegistryService card_runtime_registry_{};
+  std::optional<configuration::ConfigurationService> configuration_service_;
 };
 
 }  // namespace espcontrol

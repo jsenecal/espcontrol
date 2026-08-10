@@ -59,15 +59,13 @@ class EspControlApp : public esphome::Component {
         subpages{};
   };
 
-  EspControlAppCore core_{};
   configuration::PanelConfigLegacyAdapter legacy_config_{};
   configuration::PanelConfigDocumentValidator panel_config_validator_{};
   configuration::EspIdfPanelConfigBlobStorage panel_config_blobs_{};
   configuration::BufferedBlobStorageBackend<PANEL_CONFIG_STORAGE_SLOT_CAPACITY>
       panel_config_backend_{panel_config_blobs_};
   configuration::ConfigurationStore panel_config_store_{panel_config_backend_};
-  configuration::ConfigurationService panel_config_service_{
-      panel_config_store_, legacy_config_, &panel_config_validator_};
+  EspControlAppCore core_{};
   uint8_t *panel_config_memory_{nullptr};
   uint8_t *panel_config_document_buffer_{nullptr};
   std::string web_auth_username_;
