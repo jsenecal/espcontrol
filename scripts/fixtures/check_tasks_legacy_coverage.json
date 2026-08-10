@@ -42,6 +42,6 @@
     "backup-contract", "model-contract", "state-contract", "device-api", "preview-features",
     "web-smoke", "web-asset-manifest", "firmware-card-runtime",
     "firmware-release", "device-profiles", "release-confidence", "release-changelog",
-    "card-contract-outputs", "card-runtime-coverage", "device-slots", "public-firmware-script", "docs-build"
+    "card-contract-outputs", "card-runtime-coverage", "device-slots", "public-firmware-script", "release-contract", "docs-build"
   ]
 }
