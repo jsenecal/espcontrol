@@ -81,6 +81,7 @@ def verify() -> None:
 def self_test() -> None:
     verify()
     original = PRODUCT_MODEL.read_text(encoding="utf-8")
+    original_policy = COMPATIBILITY_POLICY.read_text(encoding="utf-8")
     try:
         product_model = json.loads(original)
         product_model["modelVersion"] = int(product_model["modelVersion"]) + 1
@@ -93,6 +94,22 @@ def self_test() -> None:
             raise AssertionError("mismatched Product Model version was accepted")
     finally:
         PRODUCT_MODEL.write_text(original, encoding="utf-8")
+    try:
+        COMPATIBILITY_POLICY.write_text(
+            original_policy.replace(
+                "LegacyConfigurationMode::DUAL_WRITE",
+                "LegacyConfigurationMode::READ_IMPORT_ONLY",
+            ),
+            encoding="utf-8",
+        )
+        try:
+            verify()
+        except AssertionError as error:
+            assert "firmware PanelConfig compatibility policy" in str(error)
+        else:
+            raise AssertionError("mismatched PanelConfig compatibility policy was accepted")
+    finally:
+        COMPATIBILITY_POLICY.write_text(original_policy, encoding="utf-8")
 
 
 if __name__ == "__main__":
