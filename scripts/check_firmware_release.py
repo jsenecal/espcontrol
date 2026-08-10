@@ -30,6 +30,10 @@ PAGES_WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" /
 FIRMWARE_COMPILE_WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "firmware-compile.yml"
 NIGHTLY_FIRMWARE_WORKFLOW = Path(__file__).resolve().parents[1] / ".github" / "workflows" / "nightly-firmware.yml"
 ROOT = Path(__file__).resolve().parents[1]
+RELEASE_CONTRACT = ROOT / "product" / "release_contract.json"
+WEB_MANIFEST = ROOT / "docs" / "public" / "webserver" / "web-assets.json"
+WEB_ROOT = WEB_MANIFEST.parent
+SOURCE_REVISION = "a" * 40
 RELEASE_SKILL = (
     Path(__file__).resolve().parents[1]
     / ".agents"
@@ -157,8 +161,11 @@ def test_release_workflow_uses_current_ota_output() -> None:
     assert "types: [published]" not in workflow, "public releases must not start an incomplete firmware build"
     assert "required: true" in workflow, "release workflow must require an explicit draft tag"
     assert "scripts/firmware_release.py verify-draft" in workflow
+    assert "scripts/firmware_release.py generate-release-manifest" in workflow
+    assert "scripts/firmware_release.py verify-release-manifest" in workflow
     assert "scripts/firmware_release.py verify-bundle" in workflow
     assert "scripts/firmware_release.py publish-draft" in workflow
+    assert "--source-revision" in workflow
     assert "scripts/firmware_release.py verify-recovery" in workflow
     assert str(prepare_c6_firmware.C6_RELATIVE_PATH) in workflow
     assert "path: dist/firmware/" in workflow, "publishable firmware must use the dist boundary"
@@ -236,10 +243,59 @@ def make_recovery_files(
     return recovery_manifest, recovery, c6_firmware, normal_factory, normal_ota
 
 
+def web_manifest_for(base: Path, device_profiles: list[str]) -> Path:
+    data = json.loads(WEB_MANIFEST.read_text(encoding="utf-8"))
+    data["bundles"][0]["deviceProfiles"] = device_profiles
+    data["bundles"][0]["firmwareVersions"] = [VERSION]
+    path = base.parent / "web-assets.json"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    return path
+
+
+def record_release_provenance(
+    base: Path, slugs: list[str], recovery_slugs: list[str] | None = None
+) -> None:
+    web_manifest = web_manifest_for(base, slugs)
+    firmware_release.generate_release_manifest(
+        base,
+        slugs,
+        VERSION,
+        SOURCE_REVISION,
+        RELEASE_CONTRACT,
+        web_manifest,
+        WEB_ROOT,
+        recovery_slugs,
+    )
+
+
+def publish_release(
+    base: Path,
+    slugs: list[str],
+    notes: Path,
+    github: FakeGitHub,
+    recovery_slugs: list[str] | None = None,
+) -> None:
+    web_manifest = web_manifest_for(base, slugs)
+    firmware_release.publish_draft_release(
+        base,
+        slugs,
+        VERSION,
+        "owner/repo",
+        notes,
+        recovery_slugs,
+        SOURCE_REVISION,
+        RELEASE_CONTRACT,
+        web_manifest,
+        WEB_ROOT,
+        gh_runner=github,
+    )
+
+
 def test_recovery_manifest_and_payload_verification() -> None:
     with TemporaryDirectory() as tmp:
         base = Path(tmp)
         recovery_manifest, recovery, c6, normal_factory, normal_ota = make_recovery_files(base)
+        web_manifest = web_manifest_for(base, [RECOVERY_SLUG])
         run_ok([
             "verify-recovery",
             "--slug", RECOVERY_SLUG,
@@ -249,6 +305,17 @@ def test_recovery_manifest_and_payload_verification() -> None:
             "--c6-firmware", str(c6),
             "--normal-factory", str(normal_factory),
             "--normal-ota", str(normal_ota),
+        ])
+        run_ok([
+            "generate-release-manifest",
+            "--version", VERSION,
+            "--dir", str(base),
+            "--slugs", RECOVERY_SLUG,
+            "--recovery-slugs", RECOVERY_SLUG,
+            "--source-revision", SOURCE_REVISION,
+            "--release-contract", str(RELEASE_CONTRACT),
+            "--web-manifest", str(web_manifest),
+            "--web-root", str(WEB_ROOT),
         ])
         run_ok([
             "verify-bundle",
@@ -525,6 +592,37 @@ def test_release_inventory_rejects_extra_files() -> None:
             raise AssertionError("release inventory accepted an unexpected build file")
 
 
+def test_release_provenance_rejects_a_different_source_revision() -> None:
+    with TemporaryDirectory() as tmp:
+        base = Path(tmp)
+        make_release_files(base)
+        record_release_provenance(base, [SLUG])
+        web_manifest = web_manifest_for(base, [SLUG])
+        firmware_release.verify_release_manifest(
+            base,
+            [SLUG],
+            VERSION,
+            SOURCE_REVISION,
+            RELEASE_CONTRACT,
+            web_manifest,
+            WEB_ROOT,
+        )
+        try:
+            firmware_release.verify_release_manifest(
+                base,
+                [SLUG],
+                VERSION,
+                "b" * 40,
+                RELEASE_CONTRACT,
+                web_manifest,
+                WEB_ROOT,
+            )
+        except firmware_release.FirmwareReleaseError:
+            pass
+        else:
+            raise AssertionError("release manifest accepted a different source revision")
+
+
 def test_draft_release_publishes_only_after_remote_asset_verification() -> None:
     with TemporaryDirectory() as tmp:
         root = Path(tmp)
@@ -534,9 +632,8 @@ def test_draft_release_publishes_only_after_remote_asset_verification() -> None:
         notes = root / "release-notes.md"
         notes.write_text("Verified release notes\n", encoding="utf-8")
         github = FakeGitHub(VERSION)
-        firmware_release.publish_draft_release(
-            base, [SLUG], VERSION, "owner/repo", notes, gh_runner=github
-        )
+        record_release_provenance(base, [SLUG])
+        publish_release(base, [SLUG], notes, github)
         assert github.draft is False
         assert [call[:2] for call in github.calls] == [
             ["release", "view"],
@@ -556,11 +653,11 @@ def test_published_or_mismatched_asset_release_stays_unpublished() -> None:
         notes = root / "release-notes.md"
         notes.write_text("Verified release notes\n", encoding="utf-8")
 
+        record_release_provenance(base, [SLUG])
+
         already_published = FakeGitHub(VERSION, draft=False)
         try:
-            firmware_release.publish_draft_release(
-                base, [SLUG], VERSION, "owner/repo", notes, gh_runner=already_published
-            )
+            publish_release(base, [SLUG], notes, already_published)
         except firmware_release.FirmwareReleaseError:
             pass
         else:
@@ -569,9 +666,7 @@ def test_published_or_mismatched_asset_release_stays_unpublished() -> None:
 
         wrong_size = FakeGitHub(VERSION, wrong_size=True)
         try:
-            firmware_release.publish_draft_release(
-                base, [SLUG], VERSION, "owner/repo", notes, gh_runner=wrong_size
-            )
+            publish_release(base, [SLUG], notes, wrong_size)
         except firmware_release.FirmwareReleaseError:
             pass
         else:
