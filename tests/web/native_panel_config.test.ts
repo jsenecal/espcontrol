@@ -119,6 +119,8 @@ export async function runNativePanelConfigTests(migrationFixture?: MigrationFixt
   });
   equal(await reconnectingClient.discover(), false,
     "an editor reconnecting during initialization sees native config as temporarily unavailable");
+  equal(reconnectingClient.retryable(), true,
+    "a missing capabilities endpoint is retried after deferred initialization");
   nativeInitializationComplete = true;
   equal(await reconnectingClient.save((current) => current), "saved",
     "a later save rediscovers native configuration after initialization completes");

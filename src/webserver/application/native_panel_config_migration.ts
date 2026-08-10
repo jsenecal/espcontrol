@@ -28,7 +28,7 @@ export function installNativePanelConfigMigrationModule(): GlobalDescriptors {
         return result;
     }
     function scheduleNativePanelConfigSave(this: any, update?: any) {
-        if (!nativePanelConfigMigrationSupported()) {
+        if (!nativePanelConfigMigrationSupported() && !_nativePanelConfigClient.retryable()) {
             beginNativePanelConfigMigration();
             return null;
         }

@@ -64,17 +64,28 @@ function supportedCapabilities(value: unknown): boolean {
 
 export class NativePanelConfigClient {
   private supported_ = false;
+  private retryable_ = false;
   private discovery_: Promise<boolean> | null = null;
 
   constructor(private readonly fetch_: NativePanelConfigFetch) {}
 
   supported(): boolean { return this.supported_; }
+  retryable(): boolean { return this.retryable_; }
 
   async discover(): Promise<boolean> {
     if (this.discovery_) return this.discovery_;
     this.discovery_ = this.fetch_("/api/v1/capabilities", { cache: "no-store" })
-      .then(async (response) => response.ok && supportedCapabilities(await response.json()))
-      .catch(() => false)
+      .then(async (response) => {
+        // A 404 or 503 can occur during the short deferred firmware setup.
+        // A valid legacy capabilities response, however, must remain on the
+        // entity fallback path without waiting for another native request.
+        this.retryable_ = response.status === 404 || response.status === 503;
+        return response.ok && supportedCapabilities(await response.json());
+      })
+      .catch(() => {
+        this.retryable_ = false;
+        return false;
+      })
       .then((supported) => {
         this.supported_ = supported;
         // A device can be between its ESPHome setup and its deferred native
