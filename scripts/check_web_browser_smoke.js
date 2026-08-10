@@ -2189,6 +2189,12 @@ async function assertNewMediaCardDefaults(page, posts, label) {
     "Cover Art",
     `${label}: a new Cover Art card preview should use its generated label`,
   );
+  await page.locator("#sp-inp-media-mode").selectOption("play_pause");
+  assert.strictEqual(
+    await page.locator("#sp-inp-label").inputValue(),
+    "Play/Pause",
+    `${label}: leaving Cover Art should refresh the generated label`,
+  );
 
   await page.locator(".sp-settings-close").click();
   await page.waitForFunction(() => {

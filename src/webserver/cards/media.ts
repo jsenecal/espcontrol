@@ -380,7 +380,7 @@ export function registerMediaCardTypes(): GlobalDescriptors {
                             b.label = mediaActionLabel(b.sensor);
                             helpers.saveField("label", b.label);
                         }
-                        if ((oldMode === "control_modal" || oldMode === "speaker_group") &&
+                        if ((oldMode === "control_modal" || oldMode === "speaker_group" || oldMode === "cover_art") &&
                             b.sensor !== "control_modal" && b.sensor !== "speaker_group" &&
                             mediaLabelIsGenerated(b.label)) {
                             b.label = mediaActionLabel(b.sensor);
