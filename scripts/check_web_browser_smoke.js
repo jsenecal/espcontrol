@@ -4616,6 +4616,14 @@ async function runCase(browser, testCase) {
       [],
       `${testCase.name}: the editor should not need third-party CDN assets`,
     );
+    const iconStyle = await page.evaluate(() => {
+      const style = document.getElementById("espcontrol-local-web-assets");
+      return style ? style.textContent || "" : "";
+    });
+    assert(
+      iconStyle.includes(".mdi-cog::before{content:'\\F0493'}"),
+      `${testCase.name}: the local icon stylesheet should use a CSS codepoint escape`,
+    );
     assertNoLayoutBreaks(
       await measureCoreLayout(page),
       testCase.name,
