@@ -1,7 +1,12 @@
 #pragma once
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
+#include <cstdlib>
+#include <new>
 #include <optional>
+#include <type_traits>
 
 #include "button_grid_card_runtime.h"
 #include "configuration_service.h"
@@ -9,6 +14,53 @@
 #include "home_assistant_binding_service.h"
 
 namespace espcontrol {
+
+// UI-owned service types can carry LVGL handles, so the core cannot name them
+// directly without taking on framework dependencies. This fixed-capacity slot
+// gives one such service an explicit application-owned lifetime instead.
+class FixedRuntimeServiceSlot {
+ public:
+  static constexpr size_t CAPACITY = 128;
+
+  FixedRuntimeServiceSlot() = default;
+  ~FixedRuntimeServiceSlot() { reset(); }
+  FixedRuntimeServiceSlot(const FixedRuntimeServiceSlot &) = delete;
+  FixedRuntimeServiceSlot &operator=(const FixedRuntimeServiceSlot &) = delete;
+
+  template<typename Service>
+  Service &get_or_create() {
+    static_assert(sizeof(Service) <= CAPACITY,
+                  "runtime service exceeds the fixed core slot capacity");
+    static_assert(alignof(Service) <= alignof(std::max_align_t),
+                  "runtime service alignment exceeds the fixed core slot");
+    const void *type = service_type<Service>();
+    if (type_ == nullptr) {
+      new (storage_.data()) Service();
+      type_ = type;
+      destroy_ = [](void *storage) { static_cast<Service *>(storage)->~Service(); };
+    } else if (type_ != type) {
+      std::abort();
+    }
+    return *static_cast<Service *>(static_cast<void *>(storage_.data()));
+  }
+
+  void reset() {
+    if (destroy_ != nullptr) destroy_(storage_.data());
+    type_ = nullptr;
+    destroy_ = nullptr;
+  }
+
+ private:
+  template<typename Service>
+  static const void *service_type() {
+    static const int marker = 0;
+    return &marker;
+  }
+
+  alignas(std::max_align_t) std::array<uint8_t, CAPACITY> storage_{};
+  const void *type_{nullptr};
+  void (*destroy_)(void *){nullptr};
+};
 
 enum class AppLifecycleState : uint8_t {
   CONSTRUCTED,
@@ -21,6 +73,8 @@ enum class AppLifecycleState : uint8_t {
 // executable in host tests.
 class EspControlAppCore {
  public:
+  ~EspControlAppCore();
+
   bool start();
   bool run_once();
   bool stop();
@@ -61,6 +115,11 @@ class EspControlAppCore {
     return home_assistant_callback_owner_;
   }
 
+  template<typename NavigationService>
+  NavigationService &grid_navigation_service() {
+    return grid_navigation_service_.get_or_create<NavigationService>();
+  }
+
   // Compatibility facade for ESPHome YAML while display ownership migrates to
   // the explicit lifecycle service.
   DisplayModeController &display() { return display_lifecycle_.controller(); }
@@ -75,6 +134,12 @@ class EspControlAppCore {
   cards::CardRuntimeRegistryService card_runtime_registry_{};
   std::optional<configuration::ConfigurationService> configuration_service_;
   HomeAssistantCallbackOwnerService home_assistant_callback_owner_{};
+  FixedRuntimeServiceSlot grid_navigation_service_{};
 };
+
+inline EspControlAppCore *&active_espcontrol_app_core() {
+  static EspControlAppCore *core = nullptr;
+  return core;
+}
 
 }  // namespace espcontrol

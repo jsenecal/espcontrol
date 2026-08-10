@@ -17,7 +17,12 @@ target_include_directories(button_grid_foundations_test PRIVATE
 )
 add_test(NAME button_grid_foundations_test COMMAND button_grid_foundations_test)
 
-add_executable(grid_navigation_service_test grid_navigation_service_test.cpp)
+add_executable(grid_navigation_service_test
+  grid_navigation_service_test.cpp
+  ../../components/espcontrol/espcontrol_app_core.cpp
+  ../../components/espcontrol/configuration_service.cpp
+  ../../components/espcontrol/configuration_store.cpp
+)
 target_compile_features(grid_navigation_service_test PRIVATE cxx_std_17)
 target_compile_options(grid_navigation_service_test PRIVATE -Wall -Wextra -Werror)
 target_include_directories(grid_navigation_service_test PRIVATE ../../components/espcontrol)

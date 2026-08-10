@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "espcontrol_app_core.h"
+#include "grid_navigation_service.h"
 
 using espcontrol::AppLifecycleState;
 using espcontrol::DisplayLifecycleState;
@@ -47,6 +48,16 @@ class EmptyLegacy final
   }
   bool mirror(uint16_t, const uint8_t *, size_t) override { return true; }
 };
+
+struct HomeTarget {
+  int slot = 0;
+};
+
+struct Subpage {
+  int slot = 0;
+};
+
+using NavigationService = GridNavigationService<HomeTarget, Subpage>;
 
 }  // namespace
 
@@ -100,6 +111,13 @@ int main() {
     }
   }
   if (app.home_assistant_callback_owner().callback_owner() != nullptr) {
+    return EXIT_FAILURE;
+  }
+
+  NavigationService &navigation = app.grid_navigation_service<NavigationService>();
+  navigation.home_targets().push_back({1});
+  navigation.subpages().push_back({2});
+  if (navigation.home_target_count() != 1 || navigation.subpage_count() != 1) {
     return EXIT_FAILURE;
   }
 
