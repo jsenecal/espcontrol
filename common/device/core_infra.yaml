@@ -20,8 +20,11 @@ lvgl:
     widgets:
       - qrcode:
           id: wifi_qr_feature_probe
-          text: ""
-          size: 1
+          # LVGL requires a non-empty payload and enough pixels to render its
+          # smallest QR matrix. The hidden widget only enables QR support for
+          # the cards that create their own QR code on demand.
+          text: "EspControl"
+          size: 64
           hidden: true
 
 api:
