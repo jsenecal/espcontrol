@@ -2163,6 +2163,41 @@ async function assertEmptyCellSettings(page, posts, label) {
   );
 }
 
+async function assertNewMediaCardDefaults(page, posts, label) {
+  const emptyCell = page
+    .locator(".sp-empty-cell:not(.sp-info-only-hidden)")
+    .first();
+  if ((await emptyCell.count()) === 0) return;
+
+  const before = posts.length;
+  await emptyCell.click();
+  await page.waitForSelector(".sp-settings-overlay.sp-visible");
+  await page.getByRole("button", { name: "Media card type" }).click();
+  await page.locator("#sp-inp-media-mode").waitFor({ state: "visible" });
+
+  assert.strictEqual(
+    await page.locator("#sp-inp-media-mode").inputValue(),
+    "cover_art",
+    `${label}: a new Media card should default to Cover Art`,
+  );
+  assert.strictEqual(
+    await page.locator("#sp-inp-label").inputValue(),
+    "Cover Art",
+    `${label}: a new Cover Art card should use its generated label`,
+  );
+
+  await page.locator(".sp-settings-close").click();
+  await page.waitForFunction(() => {
+    const overlay = document.querySelector(".sp-settings-overlay");
+    return overlay && !overlay.classList.contains("sp-visible");
+  });
+  assert.strictEqual(
+    posts.length,
+    before,
+    `${label}: checking new Media card defaults should not post a card`,
+  );
+}
+
 async function assertAllCardSettingsGrouped(page, posts, label) {
   await page.getByRole("tab", { name: "Screen" }).click();
   await page.waitForSelector("#sp-screen.sp-page.active");
@@ -4563,6 +4598,7 @@ async function runCase(browser, testCase) {
     }
     await assertInternalControlsPanel(page, posts, testCase.name);
     await assertEmptyCellSettings(page, posts, testCase.name);
+    await assertNewMediaCardDefaults(page, posts, testCase.name);
     if (testCase.exerciseInteractions) {
       await assertClockBarEditorSmoke(page, posts, testCase.name);
       await assertBackupImportSmoke(page, posts, testCase);
