@@ -3996,6 +3996,7 @@ def build_www(check_only=False, output_dir=None, test_hooks=False):
         raise BuildError(result.stderr.strip() or "esbuild failed while building web bundles")
 
     bundle_text = (build_root / "app.js").read_text()
+    embedded_text = (build_root / "embedded.js").read_text()
     bridge_text = (build_root / "www.js").read_text()
     bundle_sha256 = hashlib.sha256(bundle_text.encode("utf-8")).hexdigest()
     bundle_relative_path = Path("bundles") / bundle_sha256 / "www.js"
@@ -4017,7 +4018,7 @@ def build_www(check_only=False, output_dir=None, test_hooks=False):
         for slug in devices
     )
     outputs.extend([
-        (build_root / "embedded" / "www.js", bundle_text),
+        (build_root / "embedded" / "www.js", embedded_text),
         (build_root / bundle_relative_path, bundle_text),
         (build_root / "web-assets.json", manifest_text),
     ])
