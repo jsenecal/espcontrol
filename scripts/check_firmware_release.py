@@ -207,15 +207,30 @@ def test_release_skill_creates_selected_tag_before_draft() -> None:
 def test_release_preparation_adds_the_tag_before_tagging() -> None:
     skill = RELEASE_SKILL.read_text(encoding="utf-8")
     assert skill.index("prepare_release_web_assets.py") < skill.index('git tag -a "$TAG"')
+    assert skill.index("python3 scripts/build.py\n") < skill.index("python3 scripts/build.py --check")
+    assert "gh pr create --base main" in skill
+    assert "git push origin main" not in skill
     with TemporaryDirectory() as tmp:
         build_script = Path(tmp) / "build.py"
         build_script.write_text(
             'WEB_ASSET_SUPPORTED_FIRMWARE_VERSIONS = (\n    "dev",\n    "v1.0.0",\n)\n',
             encoding="utf-8",
         )
-        assert prepare_release_web_assets.prepare(build_script, "v1.1.0") is True
-        assert prepare_release_web_assets.prepare(build_script, "v1.1.0") is False
-        assert '    "v1.1.0",\n    "v1.0.0",' in build_script.read_text(encoding="utf-8")
+        releases = [
+            {"tagName": "v1.0.0", "isDraft": False, "isPrerelease": False},
+            {"tagName": "v0.9.0", "isDraft": False, "isPrerelease": False},
+            {"tagName": "v1.1.0-beta.1", "isDraft": False, "isPrerelease": True},
+        ]
+        assert prepare_release_web_assets.prepare(build_script, "v1.1.0", releases) is True
+        assert prepare_release_web_assets.prepare(build_script, "v1.1.0", releases) is False
+        assert (
+            '    "dev",\n    "v1.1.0",\n    "v1.0.0",\n    "v0.9.0",\n'
+            '    "v1.1.0-beta.1",'
+        ) in build_script.read_text(encoding="utf-8")
+
+        assert prepare_release_web_assets.prepare(build_script, "v1.2.0-beta.1", releases) is True
+        assert '    "v1.2.0-beta.1",' in build_script.read_text(encoding="utf-8")
+        assert '    "v1.1.0-beta.1",' not in build_script.read_text(encoding="utf-8")
 
 
 def make_release_files(base: Path, slug: str = SLUG, version: str = VERSION) -> tuple[Path, Path, Path]:

@@ -84,17 +84,22 @@ TAG="vX.Y.Z"
 ```
 
 ```bash
+git switch -c "jtenniswood/prepare-web-assets-${TAG#v}"
 python3 scripts/prepare_release_web_assets.py "$TAG"
+python3 scripts/build.py
 python3 scripts/build.py --check
 npm run check:release-preflight
 git add scripts/build.py docs/public/webserver
 git commit -m "Prepare web assets for $TAG"
-git push origin main
+git push -u origin HEAD
+gh pr create --base main --title "Prepare web assets for $TAG" --body "Adds $TAG to the declared immutable web bundle compatibility list."
 ```
 
 Do this before tagging: the tag must point at the source revision that already
-declares its compatible web bundle. If the tag is already present, the helper
-does not change the version list.
+declares its compatible web bundle. Have that preparation PR reviewed and
+merged, then return to `main` and pull the merged revision before creating the
+release tag. The helper retains `dev`, the five current stable releases, and
+the latest pre-release only.
 
 ### 4. Create the Tag and Draft Release
 
