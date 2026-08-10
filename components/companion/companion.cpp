@@ -78,6 +78,7 @@ void CompanionService::loop() {
     this->pairing_code_.clear();
     this->pairing_expires_at_ = 0;
   }
+  companion_refresh_cards_if_requested();
 }
 
 void CompanionService::dump_config() {
@@ -197,6 +198,16 @@ bool CompanionService::authenticate_(const std::vector<std::string> &parts) {
   return true;
 }
 
+std::string CompanionService::pairing_verification_code() const {
+  uint8_t fingerprint[32]{};
+  mbedtls_sha256(this->identity_.certificate, this->identity_.certificate_len,
+                fingerprint, 0);
+  std::string code = hex(fingerprint, 6);
+  code.insert(8, "-");
+  code.insert(4, "-");
+  return code;
+}
+
 void CompanionService::handle_message_(int socket_fd, const std::string &message) {
   const auto parts = split(message, '|');
   if (parts.empty()) return;
@@ -298,6 +309,9 @@ void CompanionService::revoke_pairing() {
 
 void begin_companion_pairing() { if (global_companion_service) global_companion_service->begin_pairing(); }
 std::string companion_pairing_code() { return global_companion_service ? global_companion_service->pairing_code() : ""; }
+std::string companion_pairing_verification_code() {
+  return global_companion_service ? global_companion_service->pairing_verification_code() : "";
+}
 bool companion_pairing_active() { return global_companion_service && global_companion_service->pairing_active(); }
 void revoke_companion_pairing() { if (global_companion_service) global_companion_service->revoke_pairing(); }
 

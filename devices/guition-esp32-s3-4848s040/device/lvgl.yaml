@@ -90,7 +90,9 @@ lvgl:
               - lambda: |-
                   esphome::companion::begin_companion_pairing();
                   const std::string code = esphome::companion::companion_pairing_code();
-                  lv_label_set_text(id(companion_pairing_code_label), code.c_str());
+                  const std::string verification = esphome::companion::companion_pairing_verification_code();
+                  const std::string message = code + "\nVerify: " + verification;
+                  lv_label_set_text(id(companion_pairing_code_label), message.c_str());
                   lv_obj_clear_flag(id(companion_pairing_code_label), LV_OBJ_FLAG_HIDDEN);
 
       - label:

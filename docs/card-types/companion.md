@@ -11,8 +11,8 @@ Companion cards are a proof-of-concept card type for the **4-inch 4848S040** pan
 
 1. Flash the Companion Cards test firmware to a 4848S040.
 2. On the Mac, open the `EspControl Companion` project in Xcode, choose your Personal Team for signing, and run the menu-bar app.
-3. On the display, tap the laptop icon in the top bar. It shows a short-lived code in the form `ABCD-EFGH`.
-4. Enter the panel address and code in the Mac app, then choose which installed apps it may launch.
+3. On the display, tap the laptop icon in the top bar. It shows a short-lived code in the form `ABCD-EFGH` and a Verify code.
+4. Enter the panel address, pairing code, and Verify code in the Mac app. The app checks the Verify code against the panel certificate before it sends the pairing code, then choose which installed apps it may launch.
 
 The Mac stores the pairing credential in Keychain and pins the panel's locally generated certificate. If you forget the panel from the Mac app, pair it again before Companion cards will work.
 

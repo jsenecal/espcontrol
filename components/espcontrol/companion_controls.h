@@ -13,12 +13,18 @@
 #include "esphome/components/web_server_idf/web_server_idf.h"
 #endif
 
+#ifdef USE_LVGL
+#include "esphome/components/lvgl/lvgl_esphome.h"
+#endif
+
 struct CompanionAction {
   std::string id;
   std::string label;
 };
 
 using CompanionActionSender = std::function<bool(const std::string &, const std::string &)>;
+
+inline void companion_request_card_refresh();
 
 inline std::vector<CompanionAction> &companion_actions() {
   static std::vector<CompanionAction> actions;
@@ -41,6 +47,7 @@ inline void companion_set_actions(std::vector<CompanionAction> actions) {
       return action.id.empty() || action.id.size() > 96 || action.label.size() > 96;
     }), actions.end());
   companion_actions() = std::move(actions);
+  companion_request_card_refresh();
 }
 
 inline uint32_t companion_next_request_number() {
@@ -48,7 +55,10 @@ inline uint32_t companion_next_request_number() {
   return ++request_number;
 }
 
-inline void companion_set_connected(bool connected) { companion_connected() = connected; }
+inline void companion_set_connected(bool connected) {
+  companion_connected() = connected;
+  companion_request_card_refresh();
+}
 
 inline void register_companion_action_sender(CompanionActionSender sender) {
   companion_action_sender() = std::move(sender);
@@ -61,6 +71,72 @@ inline bool companion_action_available(const std::string &action_id) {
     return action.id == action_id;
   });
 }
+
+#ifdef USE_LVGL
+struct CompanionCardRef {
+  lv_obj_t *button = nullptr;
+  std::string action_id;
+};
+
+inline std::vector<CompanionCardRef> &companion_card_refs() {
+  static std::vector<CompanionCardRef> refs;
+  return refs;
+}
+
+inline bool &companion_card_refresh_requested() {
+  static bool requested = false;
+  return requested;
+}
+
+inline void companion_forget_card(lv_obj_t *button) {
+  auto &refs = companion_card_refs();
+  refs.erase(std::remove_if(refs.begin(), refs.end(), [button](const CompanionCardRef &ref) {
+    return ref.button == button;
+  }), refs.end());
+}
+
+inline void companion_card_deleted(lv_event_t *event) {
+  companion_forget_card(static_cast<lv_obj_t *>(lv_event_get_target(event)));
+}
+
+inline void companion_track_card(lv_obj_t *button, const std::string &action_id) {
+  if (!button) return;
+  auto &refs = companion_card_refs();
+  auto existing = std::find_if(refs.begin(), refs.end(), [button](const CompanionCardRef &ref) {
+    return ref.button == button;
+  });
+  if (existing != refs.end()) {
+    existing->action_id = action_id;
+    return;
+  }
+  refs.push_back({button, action_id});
+  lv_obj_add_event_cb(button, companion_card_deleted, LV_EVENT_DELETE, nullptr);
+}
+
+inline void companion_request_card_refresh() { companion_card_refresh_requested() = true; }
+
+inline void companion_refresh_cards_if_requested() {
+  if (!companion_card_refresh_requested()) return;
+  companion_card_refresh_requested() = false;
+  auto &refs = companion_card_refs();
+  for (auto it = refs.begin(); it != refs.end();) {
+    if (!it->button || !lv_obj_is_valid(it->button)) {
+      it = refs.erase(it);
+      continue;
+    }
+    if (companion_action_available(it->action_id)) {
+      lv_obj_clear_state(it->button, LV_STATE_DISABLED);
+    } else {
+      lv_obj_add_state(it->button, LV_STATE_DISABLED);
+    }
+    ++it;
+  }
+}
+#else
+inline void companion_track_card(void *, const std::string &) {}
+inline void companion_request_card_refresh() {}
+inline void companion_refresh_cards_if_requested() {}
+#endif
 
 inline bool invoke_companion_action(const std::string &action_id,
                                     const std::string &request_id) {

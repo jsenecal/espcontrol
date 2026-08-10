@@ -290,6 +290,20 @@ inline bool basic_action_driver_bind_subpage(
   using Driver = card_runtime::CardDriverId;
   if (!basic_action_driver_matches(context, config)) return false;
   switch (context.runtime.driver) {
+    case Driver::COMPANION: {
+      ParsedCfg *click = grid_delete_with_owner(slot.btn, new ParsedCfg(config));
+      lv_obj_add_event_cb(slot.btn, [](lv_event_t *event) {
+        ParsedCfg *card = static_cast<ParsedCfg *>(lv_event_get_user_data(event));
+        if (!card) return;
+        char request_id[24];
+        snprintf(request_id, sizeof(request_id), "sub-%08lx",
+                 static_cast<unsigned long>(companion_next_request_number()));
+        if (!invoke_companion_action(card->entity, request_id)) {
+          ESP_LOGW("companion", "Action unavailable: %s", card->entity.c_str());
+        }
+      }, LV_EVENT_CLICKED, click);
+      break;
+    }
     case Driver::SCREEN_LOCK:
       lv_obj_add_event_cb(slot.btn, [](lv_event_t *) {
         screen_lock_toggle();

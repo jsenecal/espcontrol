@@ -39,6 +39,7 @@ class CompanionService final : public Component {
   // eight-letter code, invalidates any unfinished attempt and expires quickly.
   void begin_pairing();
   const std::string &pairing_code() const { return this->pairing_code_; }
+  std::string pairing_verification_code() const;
   bool pairing_active() const;
   void revoke_pairing();
 
@@ -71,6 +72,7 @@ class CompanionService final : public Component {
 // WebSocket service to the generic grid code.
 void begin_companion_pairing();
 std::string companion_pairing_code();
+std::string companion_pairing_verification_code();
 bool companion_pairing_active();
 void revoke_companion_pairing();
 

@@ -156,6 +156,7 @@ inline void setup_companion_card(BtnSlot &s, const ParsedCfg &p) {
   lv_label_set_text(s.text_lbl, label.c_str());
   const char *icon = (p.icon.empty() || p.icon == "Auto") ? find_icon("Monitor") : find_icon(p.icon.c_str());
   lv_label_set_text(s.icon_lbl, icon);
+  companion_track_card(s.btn, p.entity);
   const bool available = companion_action_available(p.entity);
   if (available) {
     lv_obj_clear_state(s.btn, LV_STATE_DISABLED);
