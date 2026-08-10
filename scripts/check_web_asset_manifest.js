@@ -57,11 +57,15 @@ function verifyManifest(webRoot) {
   const embedded = fs.readFileSync(path.join(webRoot, "embedded", "www.js"), "utf8");
   assert(embedded.includes("__ESPCONTROL_START_EMBEDDED__"),
     "embedded editor must expose its offline fallback entry point");
+  assert(embedded.includes("__ESPCONTROL_RELOAD_EMBEDDED__"),
+    "embedded editor must expose a clean fallback reload entry point");
   assert(embedded.includes(contents.toString("utf8")),
     "embedded fallback must contain the immutable editor bundle");
   const bridge = fs.readFileSync(path.join(webRoot, "www.js"), "utf8");
   assert(bridge.includes("web-assets.json") && bridge.includes("firmwareVersions"),
     "hosted www.js must select an immutable bundle from the manifest");
+  assert(bridge.includes("espcontrol_fallback"),
+    "hosted www.js must honor a clean embedded fallback reload");
 }
 
 async function verifyBridge() {
@@ -116,6 +120,15 @@ async function verifyBridge() {
   await new Promise((resolve) => setImmediate(resolve));
   assert(fallbackStarts === 1,
     "web bridge must start the embedded editor when the immutable bundle fails to load");
+
+  const cleanFallbackStarts = [];
+  sandbox.window.location.href = "http://panel.example/?espcontrol_fallback=1";
+  sandbox.document.head.appendChild = (script) => cleanFallbackStarts.push(script.src);
+  vm.runInContext(fs.readFileSync(path.join(WEB_ROOT, "www.js"), "utf8"), sandbox);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert(cleanFallbackStarts.length === 0,
+    "web bridge must skip the hosted bundle after a clean embedded fallback reload");
+  sandbox.window.location.href = "http://panel.example/";
 }
 
 async function main() {

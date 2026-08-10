@@ -75,15 +75,15 @@ function legacyDeviceLoader(slug) {
 }
 
 function webAssetBridge() {
-  return `(()=>{const c=document.currentScript,s=c&&c.getAttribute("src"),u=new URL(s||"/webserver/www.js",window.location.href),q=u.search,p=u.searchParams.get("device")||"",v=u.searchParams.get("v")||"",z=()=>{const g=globalThis.__ESPCONTROL_START_EMBEDDED__;typeof g==="function"&&g()},l=x=>fetch(x,{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null),m=l(new URL("web-assets.json",u)),f=v?Promise.resolve(null):l("/espcontrol/version.json"),a=l("/api/v1/capabilities");Promise.all([m,f,a]).then(([M,F,A])=>{const d=p||String(F&&F.device_slug||""),w=v||String(F&&(F.firmware_version||F.version)||""),x=A&&A.web_assets&&Array.isArray(A.web_assets.versions)?A.web_assets.versions:[],b=M&&Array.isArray(M.bundles)?M.bundles:[],e=b.find(B=>(!d||Array.isArray(B.deviceProfiles)&&B.deviceProfiles.includes(d))&&(!w||!Array.isArray(B.firmwareVersions)||B.firmwareVersions.includes(w))&&(!x.length||!B.webAssetVersion||x.includes(B.webAssetVersion)));if(!e||typeof e.path!=="string"){z();return}const n=new URL(e.path,u),t=document.createElement("script");n.search=q,t.src=n.href,t.onerror=z,document.head.appendChild(t)}).catch(z)})();\n`;
+  return `(()=>{const c=document.currentScript,s=c&&c.getAttribute("src"),u=new URL(s||"/webserver/www.js",window.location.href),q=u.search,p=u.searchParams.get("device")||"",v=u.searchParams.get("v")||"",z=()=>{const g=globalThis.__ESPCONTROL_START_EMBEDDED__;typeof g==="function"&&g()};if(new URL(window.location.href).searchParams.has("espcontrol_fallback")){z();return}const l=x=>fetch(x,{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null),m=l(new URL("web-assets.json",u)),f=v?Promise.resolve(null):l("/espcontrol/version.json"),a=l("/api/v1/capabilities");Promise.all([m,f,a]).then(([M,F,A])=>{const d=p||String(F&&F.device_slug||""),w=v||String(F&&(F.firmware_version||F.version)||""),x=A&&A.web_assets&&Array.isArray(A.web_assets.versions)?A.web_assets.versions:[],b=M&&Array.isArray(M.bundles)?M.bundles:[],e=b.find(B=>(!d||Array.isArray(B.deviceProfiles)&&B.deviceProfiles.includes(d))&&(!w||!Array.isArray(B.firmwareVersions)||B.firmwareVersions.includes(w))&&(!x.length||!B.webAssetVersion||x.includes(B.webAssetVersion)));if(!e||typeof e.path!=="string"){z();return}const n=new URL(e.path,u),t=document.createElement("script");n.search=q,t.src=n.href,t.onerror=z,document.head.appendChild(t)}).catch(z)})();\n`;
 }
 
 function protectedApp(bundle) {
-  return `(()=>{if(globalThis.__ESPCONTROL_UI_STARTED__)return;try{${bundle}}catch(e){const t=globalThis.__ESPCONTROL_START_EMBEDDED__;typeof t==="function"&&t();throw e}})();\n`;
+  return `(()=>{if(globalThis.__ESPCONTROL_UI_STARTED__)return;try{${bundle}}catch(e){const r=globalThis.__ESPCONTROL_RELOAD_EMBEDDED__;typeof r==="function"&&r();throw e}})();\n`;
 }
 
 function embeddedFallback(bundle) {
-  return `(()=>{let e=!1;const t=()=>{if(e)return;e=!0;${bundle}};globalThis.__ESPCONTROL_START_EMBEDDED__=t;setTimeout(()=>{globalThis.__ESPCONTROL_UI_STARTED__||t()},1500)})();\n`;
+  return `(()=>{let e=!1;const t=()=>{if(e)return;e=!0;globalThis.__ESPCONTROL_USING_EMBEDDED__=!0;${bundle}},r=()=>{if(globalThis.__ESPCONTROL_USING_EMBEDDED__){t();return}try{const u=new URL(window.location.href);u.searchParams.set("espcontrol_fallback","1");window.location.replace(u.href)}catch(_){t()}};globalThis.__ESPCONTROL_START_EMBEDDED__=t;globalThis.__ESPCONTROL_RELOAD_EMBEDDED__=r;setTimeout(()=>{globalThis.__ESPCONTROL_UI_STARTED__||t()},1500)})();\n`;
 }
 
 async function main() {

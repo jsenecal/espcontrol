@@ -130,6 +130,7 @@ declare const __ESPCONTROL_TEST_HOOKS_ENABLED__: boolean;
 
 const startupState = globalThis as typeof globalThis & {
   __ESPCONTROL_START_EMBEDDED__?: () => void;
+  __ESPCONTROL_RELOAD_EMBEDDED__?: () => void;
   __ESPCONTROL_UI_STARTED__?: boolean;
 };
 
@@ -289,6 +290,11 @@ function startEspControl(): void {
 function startEmbeddedFallback(error: unknown): void {
   console.error("Unable to start EspControl", error);
   startupState.__ESPCONTROL_UI_STARTED__ = false;
+  const reload = startupState.__ESPCONTROL_RELOAD_EMBEDDED__;
+  if (typeof reload === "function") {
+    reload();
+    return;
+  }
   const start = startupState.__ESPCONTROL_START_EMBEDDED__;
   if (typeof start === "function") start();
 }
