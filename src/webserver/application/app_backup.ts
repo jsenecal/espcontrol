@@ -1,25 +1,22 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createBackupImportController } from "../features/backup_import_controller";
+import { createBackupExportController } from "../features/backup_export_controller";
+import { createBackupRestoreController } from "../features/backup_restore_controller";
 export function installAppBackupModule(): GlobalDescriptors {
     // ── Export / Import ────────────────────────────────────────────────────
+    var backupExportController: any = createBackupExportController({
+        "serializeButtonConfig": function (button: any) { return serializeButtonConfig(button); },
+        "serializeSubpageConfig": function (subpage: any) { return serializeSubpageConfig(subpage); },
+    });
     function backupExportScreenSizeSlug(this: any, value?: any) {
-        value = String(value || "").trim().toLowerCase();
-        if (!value)
-            return "screen";
-        value = value.replace(/\binches\b/g, "inch").replace(/\bin\b/g, "inch");
-        value = value.replace(/[^a-z0-9.]+/g, "-").replace(/^-+|-+$/g, "");
-        return value || "screen";
+        return backupExportController.screenSizeSlug(value);
     }
     function backupExportFileDate(this: any, value?: any) {
-        return value.getFullYear() + "-" +
-            String(value.getMonth() + 1).padStart(2, "0") + "-" +
-            String(value.getDate()).padStart(2, "0");
+        return backupExportController.fileDate(value);
     }
     function backupExportFileName(this: any, value?: any) {
-        var date: any = value || new Date();
-        return "espcontrol-" + backupExportScreenSizeSlug(CFG.screenSize) + "-" +
-            backupExportFileDate(date) + ".json";
+        return backupExportController.fileName(CFG.screenSize, value);
     }
     function normalizeImportedPanelSettings(this: any, settings?: any) {
         if (!settings)
@@ -55,6 +52,15 @@ export function installAppBackupModule(): GlobalDescriptors {
         "setGridCols": function (gridCols: any) { GRID_COLS = gridCols; },
         "planBackupImport": function (data: any, target: any) { return planBackupImport(data, target); },
     });
+    var backupRestoreController: any = createBackupRestoreController({
+        "plan": function (backup: any, target: any) { return backupImportController.plan(backup, target); },
+        "warnings": function (plannedImport: any) { return plannedImport.backupPlan.warnings; },
+        "showBanner": showBanner,
+        "setPostThrottle": setPostThrottle,
+        "resetPostQueueError": resetPostQueueError,
+        "postQueueIdle": postQueueIdle,
+        "postQueueHadError": postQueueHadError,
+    });
     function downloadBackupConfig(this: any, data?: any) {
         var json: any = JSON.stringify(data, null, 2);
         var blob: any = new Blob([json], { type: "application/json" });
@@ -68,27 +74,13 @@ export function installAppBackupModule(): GlobalDescriptors {
         URL.revokeObjectURL(url);
     }
     function addNativeConfigToBackup(this: any, data?: any) {
-        var nativeDocument: any = {
-            deviceProfile: DEVICE_ID,
-            buttons: {},
-            subpages: {},
-            settings: {
-                button_order: data.button_order || "",
-                button_on_color: data.button_on_color || "",
-            },
-        };
-        for (var index: any = 0; index < state.buttons.length; index++) {
-            var buttonConfig: any = serializeButtonConfig(state.buttons[index]);
-            if (buttonConfig)
-                nativeDocument.buttons[index + 1] = buttonConfig;
-        }
-        for (var slot in state.subpages) {
-            var subpageConfig: any = serializeSubpageConfig(state.subpages[slot]);
-            if (subpageConfig)
-                nativeDocument.subpages[slot] = subpageConfig;
-        }
-        data.native_config = createPanelConfigBackupPayload(encodePanelConfig(nativeDocument));
-        return data;
+        return backupExportController.addNativeConfig(data, {
+            "deviceProfile": DEVICE_ID,
+            "buttons": state.buttons,
+            "subpages": state.subpages,
+            "buttonOrder": data.button_order,
+            "buttonOnColor": data.button_on_color,
+        });
     }
     function exportConfig(this: any) {
         var data: any = createBackupConfig({
@@ -149,6 +141,8 @@ export function installAppBackupModule(): GlobalDescriptors {
                 clock_brightness_day: state.clockBrightnessDay,
                 clock_brightness_night: state.clockBrightnessNight,
                 screensaver_dimmed_brightness: normalizeScreensaverDimmedBrightness(state.screensaverDimmedBrightness),
+                screensaver_dimmed_brightness_day: normalizeScreensaverDimmedBrightness(state.screensaverDimmedBrightnessDay),
+                screensaver_dimmed_brightness_night: normalizeScreensaverDimmedBrightness(state.screensaverDimmedBrightnessNight),
                 screensaver_timeout: state.screensaverTimeout,
                 home_screen_timeout: state.homeScreenTimeout,
                 screen_rotation: state.screenRotation,
@@ -181,7 +175,6 @@ export function installAppBackupModule(): GlobalDescriptors {
         input.type = "file";
         input.accept = ".json";
         input.style.display = "none";
-        var importPostThrottleMs: any = 75;
         function cleanupInput(this: any) {
             if (input.parentNode)
                 input.parentNode.removeChild(input);
@@ -207,25 +200,10 @@ export function installAppBackupModule(): GlobalDescriptors {
                     cleanupInput();
                     return;
                 }
-                var backupPlan: any;
-                var importedSettings: any;
-                var importedGridCols: any;
-                try {
-                    var plannedImport: any = backupImportController.plan(data, { device: DEVICE_ID, slots: NUM_SLOTS });
-                    importedSettings = plannedImport.importedSettings;
-                    importedGridCols = plannedImport.importedGridCols;
-                    backupPlan = plannedImport.backupPlan;
-                }
-                catch (e) {
-                    showBanner((e as any).backupMessage || "Invalid config file \u2014 missing required fields", "error");
-                    cleanupInput();
-                    return;
-                }
-                for (var warningIdx: any = 0; warningIdx < backupPlan.warnings.length; warningIdx++) {
-                    showBanner(backupPlan.warnings[warningIdx], "warning");
-                }
-                setPostThrottle(importPostThrottleMs);
-                resetPostQueueError();
+                function applyBackupRestorePlan(this: any, plannedImport: any) {
+                var importedSettings: any = plannedImport.importedSettings;
+                var importedGridCols: any = plannedImport.importedGridCols;
+                var backupPlan: any = plannedImport.backupPlan;
                 postText(entityName("button_on_color"), backupPlan.config.button_on_color);
                 for (var i: any = 0; i < NUM_SLOTS; i++) {
                     var b: any = backupPlan.buttons[i];
@@ -326,6 +304,8 @@ export function installAppBackupModule(): GlobalDescriptors {
                     }
                     var importedScreensaverAction: any = importedSettings.screensaverAction;
                     var importedScreensaverDimmedBrightness: any = importedSettings.screensaverDimmedBrightness;
+                    var importedScreensaverDimmedBrightnessDay: any = importedSettings.screensaverDimmedBrightnessDay;
+                    var importedScreensaverDimmedBrightnessNight: any = importedSettings.screensaverDimmedBrightnessNight;
                     var importedClockBrightnessDay: any = importedSettings.clockBrightnessDay;
                     var importedClockBrightnessNight: any = importedSettings.clockBrightnessNight;
                     postScreensaverAction(importedScreensaverAction);
@@ -333,6 +313,8 @@ export function installAppBackupModule(): GlobalDescriptors {
                     postClockBrightnessDay(importedClockBrightnessDay);
                     postClockBrightnessNight(importedClockBrightnessNight);
                     postScreensaverDimmedBrightness(importedScreensaverDimmedBrightness);
+                    postScreensaverDimmedBrightnessDay(importedScreensaverDimmedBrightnessDay);
+                    postScreensaverDimmedBrightnessNight(importedScreensaverDimmedBrightnessNight);
                     postScreensaverTimeout(importedSettings.screensaverTimeout);
                     postHomeScreenTimeout(importedSettings.homeScreenTimeout);
                     var importedScreenRotation: any = importedSettings.screenRotation;
@@ -388,6 +370,8 @@ export function installAppBackupModule(): GlobalDescriptors {
                     state.clockBrightnessDay = importedClockBrightnessDay;
                     state.clockBrightnessNight = importedClockBrightnessNight;
                     state.screensaverDimmedBrightness = importedScreensaverDimmedBrightness;
+                    state.screensaverDimmedBrightnessDay = importedScreensaverDimmedBrightnessDay;
+                    state.screensaverDimmedBrightnessNight = importedScreensaverDimmedBrightnessNight;
                     state.screensaverTimeout = importedSettings.screensaverTimeout;
                     state.homeScreenTimeout = importedSettings.homeScreenTimeout;
                     state.screenRotation = importedScreenRotation;
@@ -487,11 +471,8 @@ export function installAppBackupModule(): GlobalDescriptors {
                 renderPreview();
                 renderButtonSettings();
                 switchTab("screen");
-                setPostThrottle(0);
-                postQueueIdle().then(function (this: any) {
-                    if (!postQueueHadError())
-                        showBanner("Configuration imported successfully", "success");
-                });
+                }
+                backupRestoreController.restore(data, { device: DEVICE_ID, slots: NUM_SLOTS }, applyBackupRestorePlan);
                 cleanupInput();
             };
             reader.readAsText(input.files[0]);

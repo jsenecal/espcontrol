@@ -2,8 +2,21 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 export function installEnvironmentStateModule(): GlobalDescriptors {
     // ── Environment State ──────────────────────────────────────────────────
+    var _voiceServicesController: any = createVoiceServicesController();
     function voiceServicesSupported(this: any) {
         return !!(CFG.features && CFG.features.voiceServices);
+    }
+    function voiceServicesState(this: any) {
+        return {
+            supported: voiceServicesSupported(),
+            enabled: !!state.voiceServicesOn,
+        };
+    }
+    function applyVoiceServicesState(this: any, next?: any) {
+        state.voiceServicesOn = next.enabled;
+    }
+    function voiceServicesUiState(this: any) {
+        return _voiceServicesController.uiState(voiceServicesState());
     }
     function isHomeAssistantAutoTimezone(this: any, value?: any) {
         return String(value || "") === AUTO_TIMEZONE_OPTION;
@@ -37,7 +50,11 @@ export function installEnvironmentStateModule(): GlobalDescriptors {
         }
     }
     return {
+        "_voiceServicesController": liveGlobal(() => _voiceServicesController, (value?: any) => { _voiceServicesController = value; }),
         "voiceServicesSupported": staticGlobal(voiceServicesSupported),
+        "voiceServicesState": staticGlobal(voiceServicesState),
+        "applyVoiceServicesState": staticGlobal(applyVoiceServicesState),
+        "voiceServicesUiState": staticGlobal(voiceServicesUiState),
         "isHomeAssistantAutoTimezone": staticGlobal(isHomeAssistantAutoTimezone),
         "effectiveTimezoneOptionForWeb": staticGlobal(effectiveTimezoneOptionForWeb),
         "timezoneOptionsWithFallback": staticGlobal(timezoneOptionsWithFallback),

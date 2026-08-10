@@ -29,9 +29,8 @@ export function installStylesModule(): GlobalDescriptors {
         ".sp-tab-docs::before{content:'';position:absolute;left:0;top:12px;bottom:12px;width:1px;background:var(--border)}" +
         ".sp-tab-docs .mdi{font-size:16px;line-height:1;opacity:.7}" +
         ".sp-page{display:none}.sp-page.active{display:block}" +
-        ".sp-support-btn{position:fixed;right:28px;bottom:28px;z-index:150;display:inline-block;line-height:0}" +
-        ".sp-support-link{display:block}" +
-        ".sp-support-btn img{height:60px;display:block;border-radius:999px}" +
+        ".sp-support-btn{position:fixed;right:28px;bottom:28px;z-index:150;display:inline-block}" +
+        ".sp-support-link{display:block;padding:10px 16px;border-radius:999px;background:#ffdd00;color:#101010;font-size:13px;font-weight:700;line-height:1;text-decoration:none;box-shadow:0 3px 12px rgba(0,0,0,.25)}" +
         ".sp-support-btn.sp-support-hidden{display:none}" +
         ".fade-in{animation:fadeIn .3s ease}" +
         "@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}" +
@@ -292,6 +291,10 @@ export function installStylesModule(): GlobalDescriptors {
         ".sp-field-stack{display:grid;gap:10px}" +
         ".sp-field-stack.sp-hidden{display:none}" +
         ".sp-field-label{display:block;font-size:.8rem;font-weight:500;color:var(--text2);margin-bottom:8px}" +
+        ".sp-field-info-button{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;margin:-4px 0 -4px 2px;padding:0;border:0;background:none;color:inherit;cursor:help;font-size:.9rem;vertical-align:middle}" +
+        ".sp-field-info-button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:2px}" +
+        ".sp-field-info-text{display:none;font-size:.75rem;color:var(--text2);line-height:1.35;margin:-2px 0 8px}" +
+        ".sp-field-info-text.sp-visible{display:block}" +
         ".sp-input,.sp-select{width:100%;padding:10px 12px;background:var(--surface2);" +
         "border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.875rem;" +
         "font-family:inherit;box-sizing:border-box;outline:none;" +

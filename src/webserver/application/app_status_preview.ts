@@ -105,7 +105,7 @@ export function installAppStatusPreviewModule(): GlobalDescriptors {
     }
     function clockBarItems(this: any) {
         var items: any = ["temperature", "time"];
-        if (voiceServicesSupported())
+        if (voiceServicesUiState().clockBarItemVisible)
             items.push("voice");
         items.push("network");
         return items;
@@ -128,7 +128,7 @@ export function installAppStatusPreviewModule(): GlobalDescriptors {
         if (item === "time")
             return !!state.clockBarTimeOn;
         if (item === "voice")
-            return voiceServicesSupported() && !!state.voiceServicesOn;
+            return voiceServicesUiState().iconVisible;
         if (item === "network")
             return !!state.networkStatusOn;
         return false;
@@ -191,7 +191,7 @@ export function installAppStatusPreviewModule(): GlobalDescriptors {
         var layout: any = {
             left: ["temperature"],
             middle: ["time"],
-            right: voiceServicesSupported() ? ["voice", "network"] : ["network"],
+            right: voiceServicesUiState().clockBarItemVisible ? ["voice", "network"] : ["network"],
         };
         els.clockBarItems = {};
         els.temps = {};
@@ -342,7 +342,7 @@ export function installAppStatusPreviewModule(): GlobalDescriptors {
             return;
         var show: any = clockBarVisibleInPreview();
         els.voicePreview.className = "sp-voice-preview mdi mdi-microphone" +
-            (show && voiceServicesSupported() && state.voiceServicesOn ? " sp-visible" : "");
+            (show && voiceServicesUiState().iconVisible ? " sp-visible" : "");
     }
     return {
         "getTzId": staticGlobal(getTzId),

@@ -30,7 +30,9 @@ class EspControlApp : public esphome::Component {
   void loop() override;
   void on_shutdown() override;
   float get_setup_priority() const override {
-    return esphome::setup_priority::AFTER_WIFI;
+    // Cover-art boot automation resets Home Assistant subscriptions at 250.
+    // Start the core just before WiFi (251) so it always owns that state.
+    return esphome::setup_priority::WIFI + 1.0f;
   }
 
   DisplayModeController &display() { return core_.display(); }
@@ -52,6 +54,8 @@ class EspControlApp : public esphome::Component {
   }
 
  private:
+  void register_panel_config_endpoints();
+
   struct LegacyButtonTextSources {
     configuration::EspHomeLegacyTextValue button;
     std::array<configuration::EspHomeLegacyTextValue,
@@ -59,15 +63,13 @@ class EspControlApp : public esphome::Component {
         subpages{};
   };
 
-  EspControlAppCore core_{};
   configuration::PanelConfigLegacyAdapter legacy_config_{};
   configuration::PanelConfigDocumentValidator panel_config_validator_{};
   configuration::EspIdfPanelConfigBlobStorage panel_config_blobs_{};
   configuration::BufferedBlobStorageBackend<PANEL_CONFIG_STORAGE_SLOT_CAPACITY>
       panel_config_backend_{panel_config_blobs_};
   configuration::ConfigurationStore panel_config_store_{panel_config_backend_};
-  configuration::ConfigurationService panel_config_service_{
-      panel_config_store_, legacy_config_, &panel_config_validator_};
+  EspControlAppCore core_{};
   uint8_t *panel_config_memory_{nullptr};
   uint8_t *panel_config_document_buffer_{nullptr};
   std::string web_auth_username_;

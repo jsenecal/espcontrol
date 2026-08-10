@@ -130,9 +130,15 @@ function publicFirmwareVersions(slug) {
 
 async function installRoutes(context, slug) {
   const scriptPath = path.join(WEB_OUTPUT_DIR, "www.js");
+  const webAssetManifestPath = path.join(WEB_OUTPUT_DIR, "web-assets.json");
   assert(
     fs.existsSync(scriptPath),
     `${slug}: generated web UI does not exist at ${scriptPath}`,
+  );
+  const webAssetManifest = JSON.parse(fs.readFileSync(webAssetManifestPath, "utf8"));
+  const immutableBundlePath = path.join(
+    WEB_OUTPUT_DIR,
+    webAssetManifest.bundles[0].path,
   );
 
   await context.route("**/*", async (route) => {
@@ -156,6 +162,28 @@ async function installRoutes(context, slug) {
         status: 200,
         contentType: "application/javascript",
         body: fs.readFileSync(scriptPath, "utf8"),
+      });
+      return;
+    }
+    if (
+      requestUrl.hostname === "espcontrol.test" &&
+      requestUrl.pathname === "/webserver/web-assets.json"
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(webAssetManifest),
+      });
+      return;
+    }
+    if (
+      requestUrl.hostname === "espcontrol.test" &&
+      requestUrl.pathname === `/webserver/${webAssetManifest.bundles[0].path}`
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/javascript",
+        body: fs.readFileSync(immutableBundlePath, "utf8"),
       });
       return;
     }
@@ -1111,6 +1139,51 @@ async function assertSettingsPage(page, label, options = {}, posts = []) {
       has: page.locator(".card-header h3", { hasText: /^Night Schedule$/ }),
     })
     .first();
+  const brightnessCard = page
+    .locator("#sp-settings .card")
+    .filter({
+      has: page.locator(".card-header h3", { hasText: /^Backlight$/ }),
+    })
+    .first();
+  const screensaverCard = page
+    .locator("#sp-settings .card")
+    .filter({
+      has: page.locator(".card-header h3", { hasText: /^Screensaver$/ }),
+    })
+    .first();
+  assert(await brightnessCard.isVisible(), `${label}: backlight settings should render`);
+  assert(await screensaverCard.isVisible(), `${label}: screensaver settings should render`);
+  await brightnessCard.locator(".card-header").click();
+  await screensaverCard.locator(".card-header").click();
+  await screensaverCard.getByRole("button", { name: "Timer", exact: true }).click();
+  const dimmedAction = screensaverCard.locator("#sp-set-clock-mode");
+  await dimmedAction.selectOption("dim");
+  const manualDimmedBrightness = screensaverCard.locator("#sp-set-dimmed-brightness");
+  const daytimeDimmedBrightness = screensaverCard.locator("#sp-set-daytime-dimmed-brightness");
+  const nighttimeDimmedBrightness = screensaverCard.locator("#sp-set-nighttime-dimmed-brightness");
+  await brightnessCard.getByRole("button", { name: "Manual", exact: true }).click();
+  assert(await manualDimmedBrightness.isVisible(), `${label}: Manual mode shows one dimmed-screen brightness`);
+  assert.strictEqual(await daytimeDimmedBrightness.isVisible(), false, `${label}: Manual mode hides daytime dimmed brightness`);
+  assert.strictEqual(await nighttimeDimmedBrightness.isVisible(), false, `${label}: Manual mode hides nighttime dimmed brightness`);
+  await brightnessCard.getByRole("button", { name: "Automatic", exact: true }).click();
+  assert.strictEqual(await manualDimmedBrightness.isVisible(), false, `${label}: Automatic mode hides the manual dimmed brightness`);
+  assert(await daytimeDimmedBrightness.isVisible(), `${label}: Automatic mode shows daytime dimmed brightness`);
+  assert(await nighttimeDimmedBrightness.isVisible(), `${label}: Automatic mode shows nighttime dimmed brightness`);
+  const dimmedBrightnessPostStart = posts.length;
+  await daytimeDimmedBrightness.evaluate((input) => {
+    input.value = "30";
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+  await waitForPost(
+    posts,
+    { domain: "number", name: "screen_saver__daytime_dimmed_brightness", action: "set", value: "30" },
+    `${label}: Automatic mode posts daytime dimmed brightness`,
+    dimmedBrightnessPostStart,
+  );
+  await brightnessCard.getByRole("button", { name: "Timed", exact: true }).click();
+  assert(await daytimeDimmedBrightness.isVisible(), `${label}: Timed mode keeps daytime dimmed brightness visible`);
+  assert(await nighttimeDimmedBrightness.isVisible(), `${label}: Timed mode keeps nighttime dimmed brightness visible`);
   assert(
     await nightScheduleCard.isVisible(),
     `${label}: night schedule settings card should render`,
@@ -2232,6 +2305,14 @@ async function assertAllCardSettingsGrouped(page, posts, label) {
       );
     }
 
+    if (cardOption.value === "weather") {
+      assert.strictEqual(
+        await page.locator(".sp-settings-modal .sp-panel > .sp-disclosure").count(),
+        0,
+        `${label}: Weather current conditions should not show empty Card Settings`,
+      );
+    }
+
     const typeSelect = page.locator(
       '.sp-settings-modal .sp-panel > [data-sp-card-primary="type"] select',
     );
@@ -2251,6 +2332,13 @@ async function assertAllCardSettingsGrouped(page, posts, label) {
       for (const typeValue of typeOptions) {
         await typeSelect.selectOption(typeValue);
         await assertGrouped(`${cardOption.label} / ${typeValue || "default"}`);
+        if (cardOption.value === "weather" && typeValue) {
+          assert.strictEqual(
+            await page.locator(".sp-settings-modal .sp-panel > .sp-disclosure").count(),
+            1,
+            `${label}: Weather forecasts should group their extra settings`,
+          );
+        }
       }
     }
 
@@ -2978,6 +3066,8 @@ function backupFixture(device, slots) {
       clock_brightness_day: 44,
       clock_brightness_night: 22,
       screensaver_dimmed_brightness: 15,
+      screensaver_dimmed_brightness_day: 30,
+      screensaver_dimmed_brightness_night: 5,
       screensaver_timeout: 60,
       home_screen_timeout: 120,
       screen_rotation: "90",
@@ -3277,6 +3367,24 @@ async function assertBackupImportSmoke(page, posts, testCase) {
         value: "15",
       },
       "backup dimmed screensaver brightness import",
+    ],
+    [
+      {
+        domain: "number",
+        name: "screen_saver__daytime_dimmed_brightness",
+        action: "set",
+        value: "30",
+      },
+      "backup daytime dimmed screensaver brightness import",
+    ],
+    [
+      {
+        domain: "number",
+        name: "screen_saver__nighttime_dimmed_brightness",
+        action: "set",
+        value: "5",
+      },
+      "backup nighttime dimmed screensaver brightness import",
     ],
     [
       { domain: "number", name: "screensaver_timeout", action: "set", value: "60" },
@@ -4458,6 +4566,7 @@ async function runCase(browser, testCase) {
   const page = await context.newPage();
   const errors = [];
   const posts = [];
+  const thirdPartyAssetRequests = [];
 
   page.on("pageerror", (error) => errors.push(error.message));
   page.on("console", (message) => {
@@ -4466,6 +4575,13 @@ async function runCase(browser, testCase) {
   });
   page.on("request", (request) => {
     const requestUrl = new URL(request.url());
+    if (
+      ["cdn.jsdelivr.net", "fonts.googleapis.com", "cdn.buymeacoffee.com"].includes(
+        requestUrl.hostname,
+      )
+    ) {
+      thirdPartyAssetRequests.push(requestUrl.href);
+    }
     if (
       request.method() === "POST" &&
       requestUrl.hostname === "espcontrol.test"
@@ -4494,6 +4610,11 @@ async function runCase(browser, testCase) {
       errors,
       [],
       `${testCase.name}: browser errors were reported`,
+    );
+    assert.deepStrictEqual(
+      thirdPartyAssetRequests,
+      [],
+      `${testCase.name}: the editor should not need third-party CDN assets`,
     );
     assertNoLayoutBreaks(
       await measureCoreLayout(page),

@@ -226,7 +226,7 @@ assert.deepStrictEqual(plain(hooks.firmwareFailureStatusFor("Could not download 
 
 const manifest = JSON.parse(fs.readFileSync(DEVICE_MANIFEST, "utf8"));
 const freshOutput = freshWebOutputDir();
-const webOutput = path.join(freshOutput, "www.js");
+const webOutput = path.join(freshOutput, "embedded", "www.js");
 const generated = fs.readFileSync(webOutput, "utf8");
 
 const hostedSandbox = createWebSandbox();
@@ -235,6 +235,7 @@ hostedSandbox.document.currentScript = {
 };
 vm.createContext(hostedSandbox);
 vm.runInContext(generated, hostedSandbox, { filename: webOutput });
+hostedSandbox.__ESPCONTROL_START_EMBEDDED__();
 assert.strictEqual(
   hostedSandbox.__ESPCONTROL_TEST_HOOKS__.config.imageSlotCapacity(),
   1,
@@ -271,6 +272,7 @@ for (const [slug, device] of Object.entries(manifest.devices || {})) {
   sandbox.__ESPCONTROL_DEVICE_PROFILE__ = slug;
   vm.createContext(sandbox);
   vm.runInContext(generated, sandbox, { filename: webOutput });
+  sandbox.__ESPCONTROL_START_EMBEDDED__();
   assert(
     sandbox.__ESPCONTROL_TEST_HOOKS__.config,
     `${slug}: generated web UI must export the same test hooks used by local checks`
@@ -1678,7 +1680,7 @@ assert.strictEqual(
 
 async function verifyLocalFirmwareProfileSelection() {
   const productionOutput = freshWebOutputDir({ testHooks: false });
-  const productionBundle = fs.readFileSync(path.join(productionOutput, "www.js"), "utf8");
+  const productionBundle = fs.readFileSync(path.join(productionOutput, "embedded", "www.js"), "utf8");
   const sandbox = createWebSandbox();
   const requested = [];
   sandbox.document.currentScript = null;
@@ -1692,6 +1694,7 @@ async function verifyLocalFirmwareProfileSelection() {
   };
   vm.createContext(sandbox);
   vm.runInContext(productionBundle, sandbox, { filename: "shared-local-www.js" });
+  sandbox.__ESPCONTROL_START_EMBEDDED__();
   await new Promise((resolve) => setImmediate(resolve));
   assert.deepStrictEqual(requested, ["/espcontrol/version.json", "/api/v1/capabilities"]);
   assert(

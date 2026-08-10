@@ -1209,9 +1209,13 @@ def self_test() -> None:
         raise AssertionError("check:parallel does not use the fast graph with four workers")
 
     public_aliases = {
-        name: command for name, command in package_scripts.items()
-        if name.startswith("check:") and not name.endswith(":legacy")
+        name: command for name, command in package_scripts.items() if name.startswith("check:")
     }
+    legacy_aliases = sorted(name for name in public_aliases if name.endswith(":legacy"))
+    if legacy_aliases:
+        raise AssertionError(
+            "obsolete legacy check aliases remain: " + ", ".join(legacy_aliases)
+        )
     for alias, command in public_aliases.items():
         if alias in profile_aliases or alias == "check:parallel":
             continue
@@ -1221,14 +1225,6 @@ def self_test() -> None:
         expected_command = f"python3 scripts/check_tasks.py run-task {task_id}"
         if command != expected_command:
             raise AssertionError(f"{alias} does not route through run-task {task_id}")
-    missing_legacy = sorted(
-        alias
-        for alias in public_aliases
-        if alias != "check:parallel" and f"{alias}:legacy" not in package_scripts
-    )
-    if missing_legacy:
-        raise AssertionError(f"public check aliases are missing temporary legacy commands: {missing_legacy}")
-
     never_parallel = {
         "local-artifacts",
         "local-esphome",

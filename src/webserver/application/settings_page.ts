@@ -192,7 +192,7 @@ export function installSettingsPageModule(): GlobalDescriptors {
         clockBarBody.appendChild(clockBar.row);
         els.setClockBarToggle = clockBar.input;
         clockBar.input.addEventListener("change", function (this: any) {
-            state.clockBarOn = this.checked;
+            setClockBarEnabled(this.checked);
             state._clockBarStateValues = { local: state.clockBarOn };
             syncClockBarUi();
             postClockBar(state.clockBarOn);
@@ -201,7 +201,7 @@ export function installSettingsPageModule(): GlobalDescriptors {
         clockBarBody.appendChild(clockBarNightMode.row);
         els.setClockBarNightModeToggle = clockBarNightMode.input;
         clockBarNightMode.input.addEventListener("change", function (this: any) {
-            state.clockBarNightModeOn = this.checked;
+            applyClockBarControllerState(_clockBarController.setNightModeEnabled(clockBarControllerState(), this.checked));
             syncClockBarUi();
             postClockBarNightMode(state.clockBarNightModeOn);
         });
@@ -211,13 +211,13 @@ export function installSettingsPageModule(): GlobalDescriptors {
         syncTemperatureUi();
         var clockBarCard: any = makeCollapsibleCard("Clock Bar", clockBarBody, true, clockBarBadge);
         var voiceServicesCard: any = null;
-        if (CFG.features && CFG.features.voiceServices) {
+        if (voiceServicesUiState().settingsVisible) {
             var voiceServicesBody: any = document.createElement("div");
             var voiceServices: any = toggleRow("Voice Services", "sp-set-voice-services", state.voiceServicesOn);
             voiceServicesBody.appendChild(voiceServices.row);
             els.setVoiceServicesToggle = voiceServices.input;
             voiceServices.input.addEventListener("change", function (this: any) {
-                state.voiceServicesOn = this.checked;
+                applyVoiceServicesState(_voiceServicesController.setEnabled(voiceServicesState(), this.checked));
                 syncClockBarUi();
                 postVoiceServices(state.voiceServicesOn);
             });
@@ -327,8 +327,14 @@ export function installSettingsPageModule(): GlobalDescriptors {
         els.setClockSelect = timerClockControls.clockSelect;
         els.setClockField = timerClockControls.clockField;
         els.setDimBrightnessField = timerClockControls.dimBrightnessField;
+        els.setManualDimBrightnessField = timerClockControls.manualDimBrightnessField;
+        els.setAutomaticDimBrightnessField = timerClockControls.automaticDimBrightnessField;
         els.setDimBrightness = timerClockControls.dimBrightness;
         els.setDimBrightnessVal = timerClockControls.dimBrightnessVal;
+        els.setDimBrightnessDay = timerClockControls.dimBrightnessDay;
+        els.setDimBrightnessDayVal = timerClockControls.dimBrightnessDayVal;
+        els.setDimBrightnessNight = timerClockControls.dimBrightnessNight;
+        els.setDimBrightnessNightVal = timerClockControls.dimBrightnessNightVal;
         els.setClockBrightnessDay = timerClockControls.clockBrightnessDay;
         els.setClockBrightnessDayVal = timerClockControls.clockBrightnessDayVal;
         els.setClockBrightnessNight = timerClockControls.clockBrightnessNight;
@@ -357,8 +363,14 @@ export function installSettingsPageModule(): GlobalDescriptors {
         els.setSensorClockSelect = sensorClockControls.clockSelect;
         els.setSensorClockField = sensorClockControls.clockField;
         els.setSensorDimBrightnessField = sensorClockControls.dimBrightnessField;
+        els.setSensorManualDimBrightnessField = sensorClockControls.manualDimBrightnessField;
+        els.setSensorAutomaticDimBrightnessField = sensorClockControls.automaticDimBrightnessField;
         els.setSensorDimBrightness = sensorClockControls.dimBrightness;
         els.setSensorDimBrightnessVal = sensorClockControls.dimBrightnessVal;
+        els.setSensorDimBrightnessDay = sensorClockControls.dimBrightnessDay;
+        els.setSensorDimBrightnessDayVal = sensorClockControls.dimBrightnessDayVal;
+        els.setSensorDimBrightnessNight = sensorClockControls.dimBrightnessNight;
+        els.setSensorDimBrightnessNightVal = sensorClockControls.dimBrightnessNightVal;
         els.setSensorClockBrightnessDay = sensorClockControls.clockBrightnessDay;
         els.setSensorClockBrightnessDayVal = sensorClockControls.clockBrightnessDayVal;
         els.setSensorClockBrightnessNight = sensorClockControls.clockBrightnessNight;

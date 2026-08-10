@@ -11,6 +11,14 @@ namespace espcontrol::configuration {
 constexpr uint16_t CURRENT_CONFIGURATION_DOCUMENT_VERSION = 1;
 constexpr size_t CONFIGURATION_DOCUMENT_HEADER_SIZE = 8;
 
+// Release-controlled compatibility phases. The read/import-only phase is used
+// after the two dual-write releases: older panels can still be upgraded, but
+// native saves no longer overwrite their legacy text entities.
+enum class LegacyConfigurationMode : uint8_t {
+  DUAL_WRITE,
+  READ_IMPORT_ONLY,
+};
+
 enum class LegacyStatus : uint8_t {
   OK,
   EMPTY,
@@ -37,6 +45,17 @@ class LegacyConfigurationAdapter {
                       size_t document_size) = 0;
 };
 
+// Applies a validated native document to the currently running panel. This is
+// deliberately separate from the legacy mirror: a panel can update its live
+// grid without writing the legacy preference-backed entities.
+class ConfigurationRuntimeAdapter {
+ public:
+  virtual ~ConfigurationRuntimeAdapter() = default;
+
+  virtual bool apply(uint16_t document_version, const uint8_t *document,
+                     size_t document_size) = 0;
+};
+
 enum class ServiceStatus : uint8_t {
   OK,
   IMPORTED_LEGACY,
@@ -50,6 +69,7 @@ enum class ServiceStatus : uint8_t {
   STORE_FAILED,
   LEGACY_READ_FAILED,
   LEGACY_MIRROR_FAILED,
+  RUNTIME_APPLY_FAILED,
 };
 
 struct ServiceLoadResult {
@@ -78,7 +98,8 @@ struct ServiceSaveResult {
   bool ok() const { return status == ServiceStatus::OK; }
   bool durable() const {
     return status == ServiceStatus::OK ||
-           status == ServiceStatus::LEGACY_MIRROR_FAILED;
+           status == ServiceStatus::LEGACY_MIRROR_FAILED ||
+           status == ServiceStatus::RUNTIME_APPLY_FAILED;
   }
 };
 
@@ -103,9 +124,11 @@ class ConfigurationService {
   ConfigurationService(ConfigurationStore &store,
                        LegacyConfigurationAdapter &legacy,
       const ConfigurationDocumentValidator *validator = nullptr,
-      uint8_t *scratch_buffer = nullptr, size_t scratch_capacity = 0)
+      uint8_t *scratch_buffer = nullptr, size_t scratch_capacity = 0,
+      LegacyConfigurationMode legacy_mode = LegacyConfigurationMode::DUAL_WRITE)
       : store_(store), legacy_(legacy), validator_(validator),
-        scratch_buffer_(scratch_buffer), scratch_capacity_(scratch_capacity) {}
+        scratch_buffer_(scratch_buffer), scratch_capacity_(scratch_capacity),
+        legacy_mode_(legacy_mode) {}
 
   ServiceLoadResult load(uint8_t *output, size_t output_capacity);
   // During compatibility releases the text entities remain authoritative.
@@ -126,9 +149,15 @@ class ConfigurationService {
   }
 
   size_t maximum_document_size() const;
+  bool legacy_writes_enabled() const {
+    return legacy_mode_ == LegacyConfigurationMode::DUAL_WRITE;
+  }
   void set_scratch_buffer(uint8_t *scratch_buffer, size_t scratch_capacity) {
     scratch_buffer_ = scratch_buffer;
     scratch_capacity_ = scratch_capacity;
+  }
+  void set_runtime_adapter(ConfigurationRuntimeAdapter *runtime) {
+    runtime_ = runtime;
   }
 
  private:
@@ -150,6 +179,8 @@ class ConfigurationService {
   const ConfigurationDocumentValidator *validator_{nullptr};
   uint8_t *scratch_buffer_{nullptr};
   size_t scratch_capacity_{0};
+  ConfigurationRuntimeAdapter *runtime_{nullptr};
+  LegacyConfigurationMode legacy_mode_{LegacyConfigurationMode::DUAL_WRITE};
 };
 
 }  // namespace espcontrol::configuration

@@ -89,7 +89,7 @@ assert.deepStrictEqual(Array.from(hooks.coverArtDelayPostUrls(30)), fixture.post
   "cover-art fallback request ordering changed");
 
 const freshOutput = freshWebOutputDir({ testHooks: false });
-const bytes = fs.readFileSync(path.join(freshOutput, "www.js"));
+const bytes = fs.readFileSync(path.join(freshOutput, "embedded", "www.js"));
 const source = bytes.toString("utf8");
 assert(/^\s*(?:["']use strict["'];)?\(\(\)=>\{/.test(source),
   "shared bundle must remain a normal browser IIFE");
@@ -103,7 +103,9 @@ const bundleSize = {
 };
 assert.strictEqual(bundleSize.minified, fixture.bundleSize.minified,
   "shared minified migration baseline changed");
-assert(Math.abs(bundleSize.gzip - fixture.bundleSize.gzip) <= 1024,
+assert(
+  Math.abs(bundleSize.gzip - fixture.bundleSize.gzip) <=
+    (fixture.bundleSize.gzipTolerance || 1024),
   "shared gzip migration baseline changed beyond the supported compressor variation");
 
 console.log("Web migration characterization baseline checks passed.");

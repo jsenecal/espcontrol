@@ -79,6 +79,7 @@ def firmware_modal_sleep_takeover_errors(root: Path) -> list[str]:
     firmware_dir = root / "components" / "espcontrol"
     backlight_header_path = firmware_dir / "backlight.h"
     modal_path = firmware_dir / "button_grid_modal.h"
+    modal_service_path = firmware_dir / "control_modal_service.h"
     navigation_path = firmware_dir / "button_grid_navigation.h"
     grid_path = firmware_dir / "button_grid_grid.h"
     image_path = firmware_dir / "button_grid_image.h"
@@ -102,17 +103,24 @@ def firmware_modal_sleep_takeover_errors(root: Path) -> list[str]:
         errors.append("components/espcontrol/button_grid_modal.h: provide shared modal lifecycle helpers")
     else:
         text = modal_path.read_text(encoding="utf-8")
+        modal_state_text = (
+            modal_service_path.read_text(encoding="utf-8")
+            if modal_service_path.exists()
+            else text
+        )
         if (
-            "enum class ControlModalDismissPolicy" not in text
+            "enum class ControlModalDismissPolicy" not in modal_state_text
             or "control_modal_force_close_active" not in text
             or "control_modal_close_active_internal(false)" not in text
             or "control_modal_close_for_display_takeover" not in text
-            or "PRESERVE_DURING_DISPLAY_TAKEOVER" not in text
+            or "PRESERVE_DURING_DISPLAY_TAKEOVER" not in modal_state_text
         ):
             errors.append(
                 "components/espcontrol/button_grid_modal.h: centralize modal dismissal policy for display takeover"
             )
-        kind_enum = re.search(r"enum class ControlModalKind\s*\{(?P<body>.*?)\};", text, re.S)
+        kind_enum = re.search(
+            r"enum class ControlModalKind\s*\{(?P<body>.*?)\};", modal_state_text, re.S
+        )
         definition = re.search(
             r"inline\s+ControlModalDefinition\s+control_modal_definition\s*\([^)]*\)\s*\{(?P<body>.*?)\n\}",
             text,

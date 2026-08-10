@@ -1,4 +1,6 @@
 #include "ha_read_coordinator.h"
+#include "espcontrol_app_core.h"
+#include "home_assistant_binding_service.h"
 
 #include <cstdlib>
 #include <functional>
@@ -58,6 +60,7 @@ struct FakeHeapProbe {
 };
 
 using Coordinator = HaReadCoordinator<FakeTransport, FakeHeapProbe>;
+using BindingService = HomeAssistantBindingService<FakeTransport, FakeHeapProbe>;
 
 [[noreturn]] void fail(const char *message) {
   (void) message;
@@ -202,6 +205,51 @@ void released_owner_drops_pending_reads_even_if_its_address_is_reused() {
           "released owner delivered a callback after its address was reused");
 }
 
+void callback_owner_scope_restores_the_previous_owner() {
+  BindingService service;
+  int first = 0;
+  int second = 0;
+  require(service.callback_owner() == nullptr, "new binding service has no callback owner");
+  {
+    auto first_scope = service.callback_owner_scope(&first);
+    require(service.callback_owner() == &first, "first callback scope was not applied");
+    {
+      auto second_scope = service.callback_owner_scope(&second);
+      require(service.callback_owner() == &second, "nested callback scope was not applied");
+    }
+    require(service.callback_owner() == &first, "nested callback scope was not restored");
+  }
+  require(service.callback_owner() == nullptr, "callback scope leaked after destruction");
+}
+
+void app_owned_callback_owner_is_used_when_bound() {
+  BindingService service;
+  HomeAssistantCallbackOwnerService app_owner;
+  int owner = 0;
+  set_home_assistant_callback_owner_service(&app_owner);
+  {
+    auto scope = service.callback_owner_scope(&owner);
+    require(app_owner.callback_owner() == &owner,
+            "binding service did not use app-owned callback state");
+  }
+  set_home_assistant_callback_owner_service(nullptr);
+  require(app_owner.callback_owner() == nullptr,
+          "callback scope did not restore app-owned state");
+}
+
+void core_owns_binding_service_lifetime() {
+  espcontrol::EspControlAppCore app;
+  require(app.start(), "application core did not start");
+  BindingService &service = app.home_assistant_binding_service<BindingService>();
+  int owner = 0;
+  {
+    auto scope = service.callback_owner_scope(&owner);
+    require(app.home_assistant_callback_owner().callback_owner() == &owner,
+            "core-owned binding did not use the app callback state");
+  }
+  require(app.stop(), "application core did not stop");
+}
+
 }  // namespace
 
 int main() {
@@ -213,5 +261,8 @@ int main() {
   stale_generations_do_not_deliver();
   attribute_requests_preserve_attribute();
   released_owner_drops_pending_reads_even_if_its_address_is_reused();
+  callback_owner_scope_restores_the_previous_owner();
+  app_owned_callback_owner_is_used_when_bound();
+  core_owns_binding_service_lifetime();
   return EXIT_SUCCESS;
 }

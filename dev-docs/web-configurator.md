@@ -36,7 +36,14 @@ python3 scripts/build.py www
 ```
 
 That command writes `docs/public/webserver/<slug>/www.js` for each supported
-device. Commit those generated bundles when web behavior changes.
+device. The shared `docs/public/webserver/www.js` is a small hosted bridge: it
+uses `web-assets.json` to select an immutable content-addressed editor for the
+development build and the five supported stable release versions. The matching
+offline editor is written to `docs/public/webserver/embedded/www.js`. Firmware
+loads that local editor first as a fallback, then asks the hosted bridge for its
+declared compatible bundle; if the manifest or bundle cannot be loaded, the
+local editor starts automatically. Commit these generated files when web
+behavior changes.
 
 The configurator page itself is served by the device. New build entry points in
 `builds/*.yaml` bundle the matching JavaScript with `web_server.js_include`, so

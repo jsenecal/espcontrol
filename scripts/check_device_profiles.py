@@ -124,8 +124,12 @@ def test_public_device_capabilities(profile_slugs: list[str]) -> None:
 
 
 def test_generated_web(profiles: dict[str, dict]) -> None:
-    path = WEB_OUTPUT_DIR / "www.js"
-    assert path.is_file(), "shared generated web bundle is missing"
+    bridge_path = WEB_OUTPUT_DIR / "www.js"
+    path = WEB_OUTPUT_DIR / "embedded" / "www.js"
+    assert bridge_path.is_file(), "shared generated web bridge is missing"
+    assert path.is_file(), "embedded generated web bundle is missing"
+    bridge = bridge_path.read_text(encoding="utf-8")
+    assert "web-assets.json" in bridge, "shared hosted web URL does not use the asset manifest"
     text = path.read_text(encoding="utf-8")
 
     for slug, profile in profiles.items():
@@ -143,6 +147,7 @@ def test_generated_web(profiles: dict[str, dict]) -> None:
 
     core = (ROOT / "common" / "device" / "core_infra.yaml").read_text(encoding="utf-8")
     assert "webserver/www.js?device=${device_slug}" in core, "hosted web URL does not select a shared profile"
+    assert "docs/public/webserver/embedded/www.js" in core, "firmware does not embed its offline web editor fallback"
     assert 'ESPCONTROL_DEVICE_SLUG=\\"${device_slug}\\"' in core, "firmware build does not expose its profile slug"
     server = (ROOT / "components" / "web_server_idf" / "web_server_idf.cpp").read_text(encoding="utf-8")
     assert '\\"device_slug\\"' in server and "ESPCONTROL_DEVICE_PROFILE" in server, (
@@ -151,7 +156,11 @@ def test_generated_web(profiles: dict[str, dict]) -> None:
     for slug in profiles:
         for suffix in (".yaml", ".factory.yaml"):
             build = (ROOT / "builds" / f"{slug}{suffix}").read_text(encoding="utf-8")
-            assert 'docs/public/webserver/www.js"' in build, f"{slug}{suffix}: firmware does not embed shared web bundle"
+            assert 'docs/public/webserver/embedded/www.js"' in build, f"{slug}{suffix}: firmware does not embed its offline editor"
+        factory = (ROOT / "builds" / f"{slug}.factory.yaml").read_text(encoding="utf-8")
+        assert "webserver/www.js?device=${device_slug}&v=${firmware_version}" in factory, (
+            f"{slug}.factory.yaml: release firmware does not request its compatible hosted editor"
+        )
 
 
 def test_generated_yaml(profiles: dict[str, dict]) -> None:

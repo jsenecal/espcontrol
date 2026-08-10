@@ -17,6 +17,28 @@ target_include_directories(button_grid_foundations_test PRIVATE
 )
 add_test(NAME button_grid_foundations_test COMMAND button_grid_foundations_test)
 
+add_executable(grid_navigation_service_test
+  grid_navigation_service_test.cpp
+  ../../components/espcontrol/espcontrol_app_core.cpp
+  ../../components/espcontrol/configuration_service.cpp
+  ../../components/espcontrol/configuration_store.cpp
+)
+target_compile_features(grid_navigation_service_test PRIVATE cxx_std_17)
+target_compile_options(grid_navigation_service_test PRIVATE -Wall -Wextra -Werror)
+target_include_directories(grid_navigation_service_test PRIVATE ../../components/espcontrol)
+add_test(NAME grid_navigation_service_test COMMAND grid_navigation_service_test)
+
+add_executable(control_modal_service_test
+  control_modal_service_test.cpp
+  ../../components/espcontrol/espcontrol_app_core.cpp
+  ../../components/espcontrol/configuration_service.cpp
+  ../../components/espcontrol/configuration_store.cpp
+)
+target_compile_features(control_modal_service_test PRIVATE cxx_std_17)
+target_compile_options(control_modal_service_test PRIVATE -Wall -Wextra -Werror)
+target_include_directories(control_modal_service_test PRIVATE ../../components/espcontrol)
+add_test(NAME control_modal_service_test COMMAND control_modal_service_test)
+
 add_executable(alarm_delay_audio_test alarm_delay_audio_test.cpp)
 target_compile_features(alarm_delay_audio_test PRIVATE cxx_std_17)
 target_compile_options(alarm_delay_audio_test PRIVATE -Wall -Wextra -Werror)
@@ -119,13 +141,20 @@ add_test(NAME panel_config_legacy_adapter_test COMMAND panel_config_legacy_adapt
 add_executable(espcontrol_app_core_test
   espcontrol_app_core_test.cpp
   ../../components/espcontrol/espcontrol_app_core.cpp
+  ../../components/espcontrol/configuration_service.cpp
+  ../../components/espcontrol/configuration_store.cpp
 )
 target_compile_features(espcontrol_app_core_test PRIVATE cxx_std_17)
 target_compile_options(espcontrol_app_core_test PRIVATE -Wall -Wextra -Werror)
 target_include_directories(espcontrol_app_core_test PRIVATE ../../components/espcontrol)
 add_test(NAME espcontrol_app_core_test COMMAND espcontrol_app_core_test)
 
-add_executable(ha_read_coordinator_test ha_read_coordinator_test.cpp)
+add_executable(ha_read_coordinator_test
+  ha_read_coordinator_test.cpp
+  ../../components/espcontrol/espcontrol_app_core.cpp
+  ../../components/espcontrol/configuration_service.cpp
+  ../../components/espcontrol/configuration_store.cpp
+)
 target_compile_features(ha_read_coordinator_test PRIVATE cxx_std_17)
 target_compile_options(ha_read_coordinator_test PRIVATE -Wall -Wextra -Werror)
 target_include_directories(ha_read_coordinator_test PRIVATE ../../components/espcontrol)
