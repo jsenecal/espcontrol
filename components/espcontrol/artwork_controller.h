@@ -115,8 +115,7 @@ struct SourceCandidates {
 
     // Local proxy URLs can remain unchanged while Home Assistant publishes a
     // refreshed remote URL for a new track. Prefer that fresh URL immediately.
-    if (refresh_needed && !remote_url.empty() && remote_url != current_url &&
-        selection.primary == current_url) {
+    if (refresh_needed && !remote_url.empty() && remote_url != current_url) {
       selection.fallback = selection.primary;
       selection.primary = remote_url;
       selection.preferred_refreshed_remote = true;

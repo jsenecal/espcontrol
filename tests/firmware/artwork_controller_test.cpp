@@ -87,6 +87,13 @@ int main() {
   assert(artwork_selection_needs_download(true,
                                           selected.primary == "local-stable"));
 
+  // A forced reconnect refresh keeps the current local proxy selected. The
+  // forced flag requests a new download; it must not promote an older remote
+  // fallback simply because both candidates are unchanged.
+  selected = sources.select("local-stable", false);
+  assert(selected.primary == "local-stable");
+  assert(selected.fallback == "remote-stable");
+
   // Empty responses are a real artwork update. Once both sources are empty,
   // the caller must clear/cancel the currently displayed artwork.
   assert(sources.update(false, "", RemoteUpdatePolicy::PRESERVE_LOCAL));
@@ -112,11 +119,18 @@ int main() {
   assert(!artwork_picture_response_clears_retry(true, ARTWORK_SOURCE_LOCAL));
 
   // When a stable local proxy URL still points at the previous track, a fresh
-  // remote URL wins for the refresh and the local URL remains the fallback.
-  sources.update(true, "stable-local");
-  sources.remote_url = "remote-c";
+  // remote URL wins for every changed track and the local URL remains the
+  // fallback—even when the prior refresh had already selected a remote URL.
+  sources.clear();
+  assert(sources.update(true, "stable-local"));
+  assert(sources.update(false, "remote-c", RemoteUpdatePolicy::PRESERVE_LOCAL));
   selected = sources.select("stable-local", true);
   assert(selected.primary == "remote-c");
+  assert(selected.fallback == "stable-local");
+  assert(selected.preferred_refreshed_remote);
+  assert(sources.update(false, "remote-d", RemoteUpdatePolicy::PRESERVE_LOCAL));
+  selected = sources.select("remote-c", true);
+  assert(selected.primary == "remote-d");
   assert(selected.fallback == "stable-local");
   assert(selected.preferred_refreshed_remote);
 

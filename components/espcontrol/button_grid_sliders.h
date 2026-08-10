@@ -8,6 +8,7 @@
 struct ImageCardCtx;
 inline void image_card_set_media_artwork_suppressed(ImageCardCtx *ctx,
                                                      bool suppressed);
+inline void image_card_refresh_media_artwork_on_metadata_change(ImageCardCtx *ctx);
 
 // ── Slider widgets ───────────────────────────────────────────────────
 
@@ -64,6 +65,7 @@ struct MediaNowPlayingCtx {
   std::string primary_entity;
   std::string secondary_entity;
   std::string active_entity;
+  std::string artwork_refresh_signature;
   std::function<void()> refresh_entity_route;
   char artist[HA_STATE_TEXT_MAX_LEN + 1] = {};
   bool source_known = false;

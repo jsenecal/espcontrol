@@ -18,6 +18,7 @@
 constexpr uint32_t IMAGE_CARD_STARTUP_RETRY_MS = 45000;
 constexpr uint32_t IMAGE_CARD_RETRY_INTERVAL_MS = 2000;
 constexpr uint32_t IMAGE_CARD_API_RETRY_INTERVAL_MS = 250;
+constexpr uint32_t IMAGE_CARD_MIN_REPEAT_REFRESH_MS = 30000;
 constexpr uint32_t IMAGE_CARD_MODAL_REFRESH_DELAY_MS = 1000;
 constexpr uint32_t IMAGE_CARD_MODAL_REQUEST_DELAY_MS = 100;
 constexpr uint32_t IMAGE_CARD_MODAL_CLEANUP_DELAY_MS = 100;
@@ -2064,7 +2065,17 @@ inline void image_card_handle_picture(ImageCardCtx *ctx, esphome::StringRef pict
         ctx->media_artwork, ctx->media_artwork_retry_mask)) {
     ctx->next_picture_retry_ms = 0;
   }
+  uint32_t now = esphome::millis();
   bool source_changed = ctx->source_url != url;
+  if (!ctx->media_artwork && ctx->image_ready && !source_changed &&
+      ctx->last_download_completed_ms != 0 &&
+      (uint32_t)(now - ctx->last_download_completed_ms) <
+        IMAGE_CARD_MIN_REPEAT_REFRESH_MS) {
+    ESP_LOGD("image_card", "Skipping recent image refresh for %s",
+             ctx->entity_id.c_str());
+    image_card_log_diagnostics(ctx, "picture-recent-refresh-skipped");
+    return;
+  }
   ctx->source_url = url;
   image_card_log_diagnostics(ctx, "picture-url-ready");
   if (image_card_modal_active_for(ctx)) {
@@ -2079,7 +2090,7 @@ inline void image_card_process_media_artwork(ImageCardCtx *ctx) {
   if (!ctx || !ctx->active || !ctx->media_artwork) return;
   const bool refresh_forced = ctx->media_artwork_refresh_forced;
   const bool prefer_refreshed_remote =
-    refresh_forced || ctx->media_artwork_remote_refresh_pending;
+    ctx->media_artwork_remote_refresh_pending;
   ctx->media_artwork_refresh_forced = false;
   ctx->media_artwork_remote_refresh_pending = false;
   const espcontrol::artwork::SourceSelection selection =
@@ -2194,6 +2205,11 @@ inline void image_card_request_media_artwork(ImageCardCtx *ctx, bool force_refre
       ha_api_connected() ? IMAGE_CARD_API_RETRY_INTERVAL_MS : IMAGE_CARD_RETRY_INTERVAL_MS);
     if (!ctx->image_ready) image_card_set_loading_state(ctx, "Loading", true);
   }
+}
+
+inline void image_card_refresh_media_artwork_on_metadata_change(ImageCardCtx *ctx) {
+  if (!ctx || !ctx->active || !ctx->media_artwork) return;
+  image_card_request_media_artwork(ctx, true);
 }
 
 inline void refresh_image_cards() {
