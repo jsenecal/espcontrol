@@ -107,6 +107,24 @@ export async function runNativePanelConfigTests(migrationFixture?: MigrationFixt
   }));
   equal(await legacyClient.save((current) => current), "unsupported", "legacy firmware stays on the entity path");
 
+  let nativeInitializationComplete = false;
+  const reconnectingClient = createNativePanelConfigClient(async (path, request) => {
+    if (path === "/api/v1/capabilities") {
+      return nativeInitializationComplete
+        ? response(200)
+        : { ...response(404), json: async () => ({}) };
+    }
+    if (request?.method === "PUT") return response(204);
+    return response(200, document, "\"8\"");
+  });
+  equal(await reconnectingClient.discover(), false,
+    "an editor reconnecting during initialization sees native config as temporarily unavailable");
+  equal(reconnectingClient.retryable(), true,
+    "a missing capabilities endpoint is retried after deferred initialization");
+  nativeInitializationComplete = true;
+  equal(await reconnectingClient.save((current) => current), "saved",
+    "a later save rediscovers native configuration after initialization completes");
+
   if (!migrationFixture) return;
   const downgrade = migrationFixture.scenarios.downgrade;
   const downgradedDocument = decodePanelConfig(encodePanelConfig(downgrade.native_document));
