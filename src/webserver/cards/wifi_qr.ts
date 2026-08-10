@@ -66,6 +66,7 @@ export function registerWifiQrCardTypes(): GlobalDescriptors {
         label: function (this: any) { return cardContractCardLabel("wifi_qr"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("wifi_qr"); },
         defaultConfig: function (this: any) { return cardContractDefaultConfig("wifi_qr"); },
+        cardMetadata: WIFI_QR_CARD_METADATA,
         normalizeConfig: normalizeWifiQrConfig,
         onSelect: normalizeWifiQrConfig,
         renderSettings: function (this: any, panel?: any, b?: any, _slot?: any, helpers?: any) {
