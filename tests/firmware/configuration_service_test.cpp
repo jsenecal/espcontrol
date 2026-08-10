@@ -79,6 +79,22 @@ class FakeLegacy final : public LegacyConfigurationAdapter {
   bool mirror_failed{false};
 };
 
+class FakeRuntime final : public ConfigurationRuntimeAdapter {
+ public:
+  bool apply(uint16_t document_version, const uint8_t *document,
+             size_t document_size) override {
+    ++apply_calls;
+    applied_version = document_version;
+    applied.assign(document, document + document_size);
+    return !apply_failed;
+  }
+
+  std::vector<uint8_t> applied;
+  uint16_t applied_version{0};
+  size_t apply_calls{0};
+  bool apply_failed{false};
+};
+
 std::vector<uint8_t> bytes(const char *value) {
   return std::vector<uint8_t>(value, value + std::strlen(value));
 }
@@ -191,6 +207,37 @@ bool successful_save_dual_writes() {
   return saved.ok() && saved.generation == 1 && legacy.mirror_calls == 1 &&
          legacy.mirrored_version == CURRENT_CONFIGURATION_DOCUMENT_VERSION &&
          legacy.mirrored == expected;
+}
+
+bool successful_save_updates_the_native_runtime() {
+  MemoryBackend backend(256);
+  ConfigurationStore store(backend);
+  FakeLegacy legacy;
+  FakeRuntime runtime;
+  ConfigurationService service(store, legacy);
+  service.set_runtime_adapter(&runtime);
+  const std::vector<uint8_t> expected = bytes("live-native-document");
+  const ServiceSaveResult saved =
+      service.save_current(expected.data(), expected.size());
+  return saved.ok() && runtime.apply_calls == 1 &&
+         runtime.applied_version == CURRENT_CONFIGURATION_DOCUMENT_VERSION &&
+         runtime.applied == expected;
+}
+
+bool runtime_is_updated_even_if_the_legacy_mirror_fails() {
+  MemoryBackend backend(256);
+  ConfigurationStore store(backend);
+  FakeLegacy legacy;
+  legacy.mirror_failed = true;
+  FakeRuntime runtime;
+  ConfigurationService service(store, legacy);
+  service.set_runtime_adapter(&runtime);
+  const std::vector<uint8_t> expected = bytes("durable-native-document");
+  const ServiceSaveResult saved =
+      service.save_current(expected.data(), expected.size());
+  return saved.status == ServiceStatus::LEGACY_MIRROR_FAILED &&
+         saved.durable() && runtime.apply_calls == 1 &&
+         runtime.applied == expected;
 }
 
 bool conditional_save_rejects_a_stale_generation() {
@@ -322,6 +369,8 @@ int main() {
       failed_legacy_mirror_keeps_the_native_save_durable() &&
       failed_durable_save_never_updates_legacy() &&
       successful_save_dual_writes() &&
+      successful_save_updates_the_native_runtime() &&
+      runtime_is_updated_even_if_the_legacy_mirror_fails() &&
       conditional_save_rejects_a_stale_generation() &&
       version_and_buffer_failures_are_explicit() &&
       malformed_store_document_is_not_treated_as_legacy() &&
