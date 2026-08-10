@@ -75,6 +75,7 @@ class EspControlApp : public esphome::Component {
   uint8_t *panel_config_memory_{nullptr};
   uint8_t *panel_config_document_buffer_{nullptr};
   uint8_t *boot_configuration_buffer_{nullptr};
+  bool native_configuration_initialized_{false};
   bool boot_configuration_pending_{false};
   std::string web_auth_username_;
   std::string web_auth_password_;

@@ -77,6 +77,10 @@ export class NativePanelConfigClient {
       .catch(() => false)
       .then((supported) => {
         this.supported_ = supported;
+        // A device can be between its ESPHome setup and its deferred native
+        // configuration initialization. Do not cache that temporary negative
+        // result for the lifetime of a reconnecting editor.
+        if (!supported) this.discovery_ = null;
         return supported;
       });
     return this.discovery_;

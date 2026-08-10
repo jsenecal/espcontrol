@@ -57,6 +57,9 @@ void EspControlApp::set_panel_config_button(
 }
 
 void EspControlApp::register_panel_config_endpoints() {
+  // Do not let an early reconnect cache a legacy-only capability response
+  // while the deferred native configuration setup is still in progress.
+  if (!native_configuration_initialized_) return;
   configuration::ConfigurationService *const panel_config_service =
       core_.configuration_service();
   const bool can_register_document_endpoints =
@@ -118,6 +121,7 @@ void EspControlApp::initialize_native_configuration() {
           panel_config_store_, legacy_config_, &panel_config_validator_,
           configuration::PANEL_CONFIG_LEGACY_MODE)) {
     ESP_LOGE(TAG, "Native configuration service is already configured");
+    native_configuration_initialized_ = true;
     register_panel_config_endpoints();
     return;
   }
@@ -125,6 +129,7 @@ void EspControlApp::initialize_native_configuration() {
       core_.configuration_service();
   if (panel_config_service == nullptr) {
     ESP_LOGE(TAG, "Native configuration service is unavailable");
+    native_configuration_initialized_ = true;
     register_panel_config_endpoints();
     return;
   }
@@ -147,6 +152,7 @@ void EspControlApp::initialize_native_configuration() {
         !panel_config_backend_.begin(panel_config_memory_,
                                      PANEL_CONFIG_STORAGE_SLOT_CAPACITY * 2)) {
       ESP_LOGE(TAG, "Native configuration memory is unavailable");
+      native_configuration_initialized_ = true;
       register_panel_config_endpoints();
       return;
     }
@@ -192,6 +198,7 @@ void EspControlApp::initialize_native_configuration() {
       this->set_timeout(1000, [this]() { this->apply_boot_configuration(); });
     }
   }
+  native_configuration_initialized_ = true;
   register_panel_config_endpoints();
 }
 
