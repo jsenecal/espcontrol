@@ -76,6 +76,31 @@ void EspControlApp::register_panel_config_endpoints() {
   configuration::register_panel_config_capabilities_endpoint();
 }
 
+void EspControlApp::apply_boot_configuration() {
+  if (!boot_configuration_pending_ || panel_config_document_buffer_ == nullptr)
+    return;
+
+  boot_configuration_pending_ = false;
+  configuration::ConfigurationService *const panel_config_service =
+      core_.configuration_service();
+  if (panel_config_service == nullptr) return;
+  // Do not retain the document captured during setup: a browser save can
+  // complete before this timeout runs, and the newest durable document must
+  // always win over startup restoration.
+  const configuration::ServiceLoadResult loaded = panel_config_service->load(
+      panel_config_document_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
+  if (!loaded.ok()) {
+    ESP_LOGE(TAG, "Native configuration could not reload for the live grid (%u)",
+             static_cast<unsigned>(loaded.status));
+    return;
+  }
+  if (!legacy_config_.apply(loaded.document_version,
+                            panel_config_document_buffer_,
+                            loaded.document_size)) {
+    ESP_LOGE(TAG, "Native configuration could not update the live grid");
+  }
+}
+
 void EspControlApp::setup() {
   if (core_.start()) {
     cards::set_card_runtime_registry_service(&core_.card_runtime_registry());
@@ -145,11 +170,15 @@ void EspControlApp::setup() {
       }
       if (refreshed.ok()) live_document = refreshed;
     }
-    if (live_document.ok() &&
-        !legacy_config_.apply(live_document.document_version,
-                              panel_config_document_buffer_,
-                              live_document.document_size)) {
-      ESP_LOGE(TAG, "Native configuration could not update the live grid");
+    if (live_document.ok()) {
+      // Publishing the restored values triggers the existing grid-refresh
+      // automations. Run that only after every ESPHome component has completed
+      // setup: on P4 panels the grid and LVGL objects are not safe to refresh
+      // while this component's WiFi-priority setup callback is still running.
+      // Browser PUT requests still apply immediately through the runtime
+      // adapter; this deferral is strictly for startup restoration.
+      boot_configuration_pending_ = true;
+      this->set_timeout(1000, [this]() { this->apply_boot_configuration(); });
     }
   }
   register_panel_config_endpoints();
