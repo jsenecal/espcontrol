@@ -98,11 +98,11 @@ bool CompanionService::ensure_identity_() {
   mbedtls_ctr_drbg_init(&drbg);
   mbedtls_pk_init(&key);
   mbedtls_x509write_crt_init(&certificate);
-  const char personalization[] = "espcontrol-companion";
+  unsigned char personalization[] = "espcontrol-companion";
   bool success = false;
   do {
     if (mbedtls_ctr_drbg_seed(&drbg, mbedtls_entropy_func, &entropy,
-                              reinterpret_cast<const unsigned char *>(personalization), sizeof(personalization)) != 0) break;
+                              personalization, sizeof(personalization)) != 0) break;
     if (mbedtls_pk_setup(&key, mbedtls_pk_info_from_type(MBEDTLS_PK_ECKEY)) != 0) break;
     if (mbedtls_ecp_gen_key(MBEDTLS_ECP_DP_SECP256R1, mbedtls_pk_ec(key), mbedtls_ctr_drbg_random, &drbg) != 0) break;
     mbedtls_x509write_crt_set_version(&certificate, MBEDTLS_X509_CRT_VERSION_3);
@@ -111,8 +111,8 @@ bool CompanionService::ensure_identity_() {
     mbedtls_x509write_crt_set_issuer_key(&certificate, &key);
     if (mbedtls_x509write_crt_set_subject_name(&certificate, "CN=EspControl Companion") != 0) break;
     if (mbedtls_x509write_crt_set_issuer_name(&certificate, "CN=EspControl Companion") != 0) break;
-    const unsigned char serial[] = {static_cast<unsigned char>(esp_random()), static_cast<unsigned char>(esp_random()),
-                                    static_cast<unsigned char>(esp_random()), static_cast<unsigned char>(esp_random())};
+    unsigned char serial[] = {static_cast<unsigned char>(esp_random()), static_cast<unsigned char>(esp_random()),
+                              static_cast<unsigned char>(esp_random()), static_cast<unsigned char>(esp_random())};
     if (mbedtls_x509write_crt_set_serial_raw(&certificate, serial, sizeof(serial)) != 0) break;
     if (mbedtls_x509write_crt_set_validity(&certificate, "20260101000000", "20360101000000") != 0) break;
     if (mbedtls_x509write_crt_set_basic_constraints(&certificate, 0, -1) != 0) break;
@@ -121,7 +121,7 @@ bool CompanionService::ensure_identity_() {
     std::array<uint8_t, 1024> certificate_buffer{};
     const int certificate_length = mbedtls_x509write_crt_der(&certificate, certificate_buffer.data(), certificate_buffer.size(),
                                                                mbedtls_ctr_drbg_random, &drbg);
-    if (certificate_length <= 0 || certificate_length > static_cast<int>(this->identity_.certificate_len + sizeof(this->identity_.certificate))) break;
+    if (certificate_length <= 0 || certificate_length > static_cast<int>(sizeof(this->identity_.certificate))) break;
     std::array<uint8_t, 384> key_buffer{};
     const int key_length = mbedtls_pk_write_key_der(&key, key_buffer.data(), key_buffer.size());
     if (key_length <= 0 || key_length > static_cast<int>(sizeof(this->identity_.private_key))) break;

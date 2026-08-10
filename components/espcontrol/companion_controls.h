@@ -9,6 +9,10 @@
 #include <utility>
 #include <vector>
 
+#ifdef USE_WEBSERVER
+#include "esphome/components/web_server_idf/web_server_idf.h"
+#endif
+
 struct CompanionAction {
   std::string id;
   std::string label;
