@@ -11,7 +11,6 @@
 #include <mbedtls/pk.h>
 #include <mbedtls/sha256.h>
 #include <mbedtls/x509_crt.h>
-#include <mbedtls/x509write_crt.h>
 
 #include <algorithm>
 #include <cstring>
