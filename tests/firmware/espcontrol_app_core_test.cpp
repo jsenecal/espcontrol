@@ -1,4 +1,8 @@
+#include <array>
+#include <cstddef>
 #include <cstdlib>
+#include <cstring>
+#include <vector>
 
 #include "espcontrol_app_core.h"
 
@@ -8,9 +12,64 @@ using espcontrol::DisplayMode;
 using espcontrol::DisplayRequestSource;
 using espcontrol::EspControlAppCore;
 
+namespace {
+
+class MemoryBackend final : public espcontrol::configuration::StorageBackend {
+ public:
+  MemoryBackend() : slots_{std::vector<uint8_t>(128, 0xFF),
+                           std::vector<uint8_t>(128, 0xFF)} {}
+
+  size_t slot_capacity() const override { return slots_[0].size(); }
+  bool read(uint8_t slot, size_t offset, uint8_t *output, size_t size) override {
+    if (slot >= slots_.size() || offset > slots_[slot].size() ||
+        size > slots_[slot].size() - offset) return false;
+    if (size > 0) std::memcpy(output, slots_[slot].data() + offset, size);
+    return true;
+  }
+  bool write(uint8_t slot, size_t offset, const uint8_t *input,
+             size_t size) override {
+    if (slot >= slots_.size() || offset > slots_[slot].size() ||
+        size > slots_[slot].size() - offset) return false;
+    if (size > 0) std::memcpy(slots_[slot].data() + offset, input, size);
+    return true;
+  }
+  bool sync() override { return true; }
+
+ private:
+  std::array<std::vector<uint8_t>, 2> slots_;
+};
+
+class EmptyLegacy final
+    : public espcontrol::configuration::LegacyConfigurationAdapter {
+ public:
+  espcontrol::configuration::LegacyLoadResult load(uint8_t *, size_t) override {
+    return {espcontrol::configuration::LegacyStatus::EMPTY, 1, 0};
+  }
+  bool mirror(uint16_t, const uint8_t *, size_t) override { return true; }
+};
+
+}  // namespace
+
 int main() {
   EspControlAppCore app;
   if (app.lifecycle_state() != AppLifecycleState::CONSTRUCTED) return EXIT_FAILURE;
+  if (app.has_configuration_service() || app.configuration_service() != nullptr) {
+    return EXIT_FAILURE;
+  }
+  MemoryBackend backend;
+  espcontrol::configuration::ConfigurationStore store(backend);
+  EmptyLegacy legacy;
+  if (!app.configure_configuration_service(store, legacy) ||
+      !app.has_configuration_service() ||
+      app.configure_configuration_service(store, legacy)) {
+    return EXIT_FAILURE;
+  }
+  const char configuration[] = "core-owned-config";
+  if (!app.configuration_service()->save_current(
+          reinterpret_cast<const uint8_t *>(configuration),
+          sizeof(configuration) - 1).ok()) {
+    return EXIT_FAILURE;
+  }
   if (app.run_once() || app.stop()) return EXIT_FAILURE;
   if (!app.start() || app.start()) return EXIT_FAILURE;
   if (app.lifecycle_state() != AppLifecycleState::RUNNING) return EXIT_FAILURE;

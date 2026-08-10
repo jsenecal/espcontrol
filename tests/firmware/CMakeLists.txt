@@ -131,6 +131,8 @@ add_test(NAME panel_config_legacy_adapter_test COMMAND panel_config_legacy_adapt
 add_executable(espcontrol_app_core_test
   espcontrol_app_core_test.cpp
   ../../components/espcontrol/espcontrol_app_core.cpp
+  ../../components/espcontrol/configuration_service.cpp
+  ../../components/espcontrol/configuration_store.cpp
 )
 target_compile_features(espcontrol_app_core_test PRIVATE cxx_std_17)
 target_compile_options(espcontrol_app_core_test PRIVATE -Wall -Wextra -Werror)

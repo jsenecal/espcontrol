@@ -61,6 +61,19 @@ void EspControlApp::setup() {
   } else {
     ESP_LOGE(TAG, "Application core failed to start");
   }
+  if (!core_.configure_configuration_service(
+          panel_config_store_, legacy_config_, &panel_config_validator_)) {
+    ESP_LOGE(TAG, "Native configuration service is already configured");
+    configuration::register_panel_config_capabilities_endpoint();
+    return;
+  }
+  configuration::ConfigurationService *const panel_config_service =
+      core_.configuration_service();
+  if (panel_config_service == nullptr) {
+    ESP_LOGE(TAG, "Native configuration service is unavailable");
+    configuration::register_panel_config_capabilities_endpoint();
+    return;
+  }
   if (!legacy_config_.configured()) {
     ESP_LOGW(TAG, "Native configuration sources are not configured");
   } else if (!panel_config_blobs_.begin()) {
@@ -80,12 +93,12 @@ void EspControlApp::setup() {
       configuration::register_panel_config_capabilities_endpoint();
       return;
     }
-    panel_config_service_.set_scratch_buffer(
+    panel_config_service->set_scratch_buffer(
         panel_config_memory_ + PANEL_CONFIG_STORAGE_SLOT_CAPACITY * 2,
         PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
     panel_config_document_buffer_ =
         panel_config_memory_ + PANEL_CONFIG_STORAGE_SLOT_CAPACITY * 3;
-    const configuration::ServiceLoadResult loaded = panel_config_service_.load(
+    const configuration::ServiceLoadResult loaded = panel_config_service->load(
         panel_config_document_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
     if (loaded.status == configuration::ServiceStatus::IMPORTED_LEGACY) {
       ESP_LOGI(TAG, "Imported legacy panel configuration into generation %" PRIu32,
@@ -95,7 +108,7 @@ void EspControlApp::setup() {
                static_cast<unsigned>(loaded.status));
     }
     const configuration::ServiceLoadResult refreshed =
-        panel_config_service_.refresh_legacy_shadow(
+        panel_config_service->refresh_legacy_shadow(
             panel_config_document_buffer_, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
     if (refreshed.status == configuration::ServiceStatus::SYNCED_LEGACY) {
       ESP_LOGI(TAG, "Refreshed native configuration shadow to generation %" PRIu32,
@@ -107,7 +120,7 @@ void EspControlApp::setup() {
     }
     const bool read_endpoint_registered =
         configuration::register_panel_config_read_endpoint(
-            panel_config_service_, panel_config_document_buffer_,
+            *panel_config_service, panel_config_document_buffer_,
             PANEL_CONFIG_STORAGE_SLOT_CAPACITY, web_auth_username_.c_str(),
             web_auth_password_.c_str());
     configuration::set_panel_config_read_supported(read_endpoint_registered);
@@ -116,7 +129,7 @@ void EspControlApp::setup() {
     }
     const bool write_endpoint_registered =
         configuration::register_panel_config_write_endpoint(
-            panel_config_service_, panel_config_document_buffer_,
+            *panel_config_service, panel_config_document_buffer_,
             PANEL_CONFIG_STORAGE_SLOT_CAPACITY, web_auth_username_.c_str(),
             web_auth_password_.c_str());
     configuration::set_panel_config_write_supported(write_endpoint_registered);

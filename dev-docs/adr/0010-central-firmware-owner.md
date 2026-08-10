@@ -24,9 +24,11 @@ and compatibility layer rather than owning service state.
 Existing display behaviour and method names are unchanged; YAML reaches the
 controller through `id(espcontrol_app).display()`. Existing card helpers use a
 compatibility binding to the core-owned registry while they migrate to explicit
-service access. Later service migrations extend this owner one focused pull
-request at a time and must not introduce generated `id(...)` references into
-compiled modules.
+service access. The configuration service is also core-owned; the ESPHome
+component injects its device-specific storage and legacy-text adapters before
+using it to register endpoints. Later service migrations extend this owner one
+focused pull request at a time and must not introduce generated `id(...)`
+references into compiled modules.
 
 The application core remains independent of ESPHome so ownership and lifecycle
 are covered by executable host tests.

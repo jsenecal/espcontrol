@@ -2,6 +2,15 @@
 
 namespace espcontrol {
 
+bool EspControlAppCore::configure_configuration_service(
+    configuration::ConfigurationStore &store,
+    configuration::LegacyConfigurationAdapter &legacy,
+    const configuration::ConfigurationDocumentValidator *validator) {
+  if (configuration_service_) return false;
+  configuration_service_.emplace(store, legacy, validator);
+  return true;
+}
+
 bool EspControlAppCore::start() {
   if (lifecycle_state_ != AppLifecycleState::CONSTRUCTED) return false;
   if (!display_lifecycle_.start()) return false;
