@@ -14,6 +14,7 @@ bool EspControlAppCore::configure_configuration_service(
 bool EspControlAppCore::start() {
   if (lifecycle_state_ != AppLifecycleState::CONSTRUCTED) return false;
   if (!display_lifecycle_.start()) return false;
+  set_home_assistant_callback_owner_service(&home_assistant_callback_owner_);
   lifecycle_state_ = AppLifecycleState::RUNNING;
   return true;
 }
@@ -28,6 +29,7 @@ bool EspControlAppCore::run_once() {
 bool EspControlAppCore::stop() {
   if (lifecycle_state_ != AppLifecycleState::RUNNING) return false;
   if (!display_lifecycle_.stop()) return false;
+  set_home_assistant_callback_owner_service(nullptr);
   lifecycle_state_ = AppLifecycleState::STOPPED;
   return true;
 }

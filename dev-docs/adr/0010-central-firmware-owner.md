@@ -28,7 +28,9 @@ service access. The configuration service is also core-owned; the ESPHome
 component injects its device-specific storage and legacy-text adapters before
 using it to register endpoints. Later service migrations extend this owner one
 focused pull request at a time and must not introduce generated `id(...)`
-references into compiled modules.
+references into compiled modules. Home Assistant callback ownership is likewise
+core-owned, while its transport-specific read coordinator remains an ESPHome
+wiring adapter during the compatibility migration.
 
 The application core remains independent of ESPHome so ownership and lifecycle
 are covered by executable host tests.
