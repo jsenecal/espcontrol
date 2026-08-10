@@ -2655,6 +2655,15 @@ async function assertMediaCoverArtSettingsPanels(page, label) {
     "Cover Art",
     `${label}: Media should offer Cover Art in its Type selector`,
   );
+  assert.deepStrictEqual(
+    await page
+      .locator("#sp-inp-media-mode option")
+      .evaluateAll((options) => options
+        .filter((option) => ["play_pause", "previous", "next", "volume"].includes(option.value))
+        .map((option) => option.textContent)),
+    ["Play/Pause", "Previous", "Next", "Volume"],
+    `${label}: Media action types should not include the word Button`,
+  );
 
   const cardSettings = page.locator(".sp-settings-modal .sp-disclosure").filter({
     has: page.locator("#sp-inp-media-cover-art-card-settings"),
