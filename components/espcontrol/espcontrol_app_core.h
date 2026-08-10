@@ -120,6 +120,13 @@ class EspControlAppCore {
     return grid_navigation_service_.get_or_create<NavigationService>();
   }
 
+  // Modal widgets stay in the LVGL-facing UI layer, while their lifecycle
+  // state receives the same application-owned lifetime as navigation.
+  template<typename ModalService>
+  ModalService &modal_state_service() {
+    return modal_state_service_.get_or_create<ModalService>();
+  }
+
   // Compatibility facade for ESPHome YAML while display ownership migrates to
   // the explicit lifecycle service.
   DisplayModeController &display() { return display_lifecycle_.controller(); }
@@ -135,6 +142,7 @@ class EspControlAppCore {
   std::optional<configuration::ConfigurationService> configuration_service_;
   HomeAssistantCallbackOwnerService home_assistant_callback_owner_{};
   FixedRuntimeServiceSlot grid_navigation_service_{};
+  FixedRuntimeServiceSlot modal_state_service_{};
 };
 
 inline EspControlAppCore *&active_espcontrol_app_core() {
