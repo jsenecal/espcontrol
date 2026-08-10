@@ -59,6 +59,8 @@ function verifyManifest(webRoot) {
     "embedded editor must expose its offline fallback entry point");
   assert(embedded.includes("__ESPCONTROL_RELOAD_EMBEDDED__"),
     "embedded editor must expose a clean fallback reload entry point");
+  assert(embedded.includes("__ESPCONTROL_UI_STARTING__"),
+    "embedded editor must wait for deferred startup before using its fallback");
   assert(embedded.includes(contents.toString("utf8")),
     "embedded fallback must contain the immutable editor bundle");
   const bridge = fs.readFileSync(path.join(webRoot, "www.js"), "utf8");

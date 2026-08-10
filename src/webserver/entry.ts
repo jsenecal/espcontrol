@@ -132,6 +132,7 @@ const startupState = globalThis as typeof globalThis & {
   __ESPCONTROL_START_EMBEDDED__?: () => void;
   __ESPCONTROL_RELOAD_EMBEDDED__?: () => void;
   __ESPCONTROL_UI_STARTED__?: boolean;
+  __ESPCONTROL_UI_STARTING__?: boolean;
 };
 
 const applicationBootstrapModules: readonly EditorBootstrapModule[] = [
@@ -284,12 +285,12 @@ function startEspControl(): void {
     installEditorBootstrap(testHookBootstrapModules, undefined, installedModules);
   }
   installEditorBootstrap([{ name: "app-start", install: installAppStartModule }], undefined, installedModules);
-  startupState.__ESPCONTROL_UI_STARTED__ = true;
 }
 
 function startEmbeddedFallback(error: unknown): void {
   console.error("Unable to start EspControl", error);
   startupState.__ESPCONTROL_UI_STARTED__ = false;
+  startupState.__ESPCONTROL_UI_STARTING__ = false;
   const reload = startupState.__ESPCONTROL_RELOAD_EMBEDDED__;
   if (typeof reload === "function") {
     reload();

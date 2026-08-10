@@ -83,7 +83,7 @@ function protectedApp(bundle) {
 }
 
 function embeddedFallback(bundle) {
-  return `(()=>{let e=!1;const t=()=>{if(e)return;e=!0;globalThis.__ESPCONTROL_USING_EMBEDDED__=!0;${bundle}},r=()=>{if(globalThis.__ESPCONTROL_USING_EMBEDDED__){t();return}try{const u=new URL(window.location.href);u.searchParams.set("espcontrol_fallback","1");window.location.replace(u.href)}catch(_){t()}};globalThis.__ESPCONTROL_START_EMBEDDED__=t;globalThis.__ESPCONTROL_RELOAD_EMBEDDED__=r;setTimeout(()=>{globalThis.__ESPCONTROL_UI_STARTED__||t()},1500)})();\n`;
+  return `(()=>{let e=!1;const t=()=>{if(e)return;e=!0;globalThis.__ESPCONTROL_USING_EMBEDDED__=!0;${bundle}},r=()=>{if(globalThis.__ESPCONTROL_USING_EMBEDDED__){t();return}try{const u=new URL(window.location.href);u.searchParams.set("espcontrol_fallback","1");window.location.replace(u.href)}catch(_){t()}};globalThis.__ESPCONTROL_START_EMBEDDED__=t;globalThis.__ESPCONTROL_RELOAD_EMBEDDED__=r;setTimeout(()=>{globalThis.__ESPCONTROL_UI_STARTED__||globalThis.__ESPCONTROL_UI_STARTING__||t()},1500)})();\n`;
 }
 
 async function main() {
