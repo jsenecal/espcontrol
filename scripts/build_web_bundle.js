@@ -79,7 +79,7 @@ function webAssetBridge() {
 }
 
 function protectedApp(bundle) {
-  return `(()=>{if(globalThis.__ESPCONTROL_UI_STARTED__)return;globalThis.__ESPCONTROL_UI_STARTED__=true;${bundle}})();\n`;
+  return `(()=>{if(globalThis.__ESPCONTROL_UI_STARTED__)return;try{${bundle}}catch(e){const t=globalThis.__ESPCONTROL_START_EMBEDDED__;typeof t==="function"&&t();throw e}})();\n`;
 }
 
 function embeddedFallback(bundle) {

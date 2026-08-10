@@ -128,6 +128,11 @@ import { installAppTestHooksSettings } from "./testing/app_test_hooks_settings";
 
 declare const __ESPCONTROL_TEST_HOOKS_ENABLED__: boolean;
 
+const startupState = globalThis as typeof globalThis & {
+  __ESPCONTROL_START_EMBEDDED__?: () => void;
+  __ESPCONTROL_UI_STARTED__?: boolean;
+};
+
 const applicationBootstrapModules: readonly EditorBootstrapModule[] = [
   { name: "core", install: installCore },
   { name: "firmware-metadata", install: installFirmwareMetadataModule },
@@ -235,6 +240,7 @@ const testHookBootstrapModules: readonly EditorBootstrapModule[] = [
 ];
 
 function startEspControl(): void {
+  if (startupState.__ESPCONTROL_UI_STARTED__) return;
   AppInstance.initializeAppState();
   installStaticGlobals({
     ...DeviceConfig,
@@ -277,13 +283,23 @@ function startEspControl(): void {
     installEditorBootstrap(testHookBootstrapModules, undefined, installedModules);
   }
   installEditorBootstrap([{ name: "app-start", install: installAppStartModule }], undefined, installedModules);
+  startupState.__ESPCONTROL_UI_STARTED__ = true;
+}
+
+function startEmbeddedFallback(error: unknown): void {
+  console.error("Unable to start EspControl", error);
+  startupState.__ESPCONTROL_UI_STARTED__ = false;
+  const start = startupState.__ESPCONTROL_START_EMBEDDED__;
+  if (typeof start === "function") start();
 }
 
 const deviceConfigReady = DeviceConfig.initializeDeviceConfig();
 if (deviceConfigReady) {
-  void deviceConfigReady.then(startEspControl).catch((error) => {
-    console.error("Unable to start EspControl", error);
-  });
+  void deviceConfigReady.then(startEspControl).catch(startEmbeddedFallback);
 } else {
-  startEspControl();
+  try {
+    startEspControl();
+  } catch (error) {
+    startEmbeddedFallback(error);
+  }
 }
