@@ -221,6 +221,21 @@ void callback_owner_scope_restores_the_previous_owner() {
   require(service.callback_owner() == nullptr, "callback scope leaked after destruction");
 }
 
+void app_owned_callback_owner_is_used_when_bound() {
+  BindingService service;
+  HomeAssistantCallbackOwnerService app_owner;
+  int owner = 0;
+  set_home_assistant_callback_owner_service(&app_owner);
+  {
+    auto scope = service.callback_owner_scope(&owner);
+    require(app_owner.callback_owner() == &owner,
+            "binding service did not use app-owned callback state");
+  }
+  set_home_assistant_callback_owner_service(nullptr);
+  require(app_owner.callback_owner() == nullptr,
+          "callback scope did not restore app-owned state");
+}
+
 }  // namespace
 
 int main() {
@@ -233,5 +248,6 @@ int main() {
   attribute_requests_preserve_attribute();
   released_owner_drops_pending_reads_even_if_its_address_is_reused();
   callback_owner_scope_restores_the_previous_owner();
+  app_owned_callback_owner_is_used_when_bound();
   return EXIT_SUCCESS;
 }

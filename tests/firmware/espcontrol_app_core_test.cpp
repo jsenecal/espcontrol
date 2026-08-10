@@ -91,12 +91,27 @@ int main() {
     return EXIT_FAILURE;
   }
 
+  int callback_owner = 0;
+  {
+    auto scope = app.home_assistant_callback_owner().scope(&callback_owner);
+    if (app.home_assistant_callback_owner().callback_owner() !=
+        &callback_owner) {
+      return EXIT_FAILURE;
+    }
+  }
+  if (app.home_assistant_callback_owner().callback_owner() != nullptr) {
+    return EXIT_FAILURE;
+  }
+
   if (!app.run_once() || !app.run_once() || app.loop_count() != 2 ||
       app.display_lifecycle().loop_count() != 2) {
     return EXIT_FAILURE;
   }
   if (!app.stop() || app.stop() || app.run_once() ||
       app.display_lifecycle().state() != DisplayLifecycleState::STOPPED) {
+    return EXIT_FAILURE;
+  }
+  if (home_assistant_callback_owner_service_binding() != nullptr) {
     return EXIT_FAILURE;
   }
   if (app.lifecycle_state() != AppLifecycleState::STOPPED) return EXIT_FAILURE;

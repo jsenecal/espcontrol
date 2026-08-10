@@ -6,6 +6,7 @@
 #include "button_grid_card_runtime.h"
 #include "configuration_service.h"
 #include "display_lifecycle_service.h"
+#include "home_assistant_binding_service.h"
 
 namespace espcontrol {
 
@@ -53,6 +54,13 @@ class EspControlAppCore {
     return configuration_service_ ? &*configuration_service_ : nullptr;
   }
 
+  HomeAssistantCallbackOwnerService &home_assistant_callback_owner() {
+    return home_assistant_callback_owner_;
+  }
+  const HomeAssistantCallbackOwnerService &home_assistant_callback_owner() const {
+    return home_assistant_callback_owner_;
+  }
+
   // Compatibility facade for ESPHome YAML while display ownership migrates to
   // the explicit lifecycle service.
   DisplayModeController &display() { return display_lifecycle_.controller(); }
@@ -66,6 +74,7 @@ class EspControlAppCore {
   DisplayLifecycleService display_lifecycle_{};
   cards::CardRuntimeRegistryService card_runtime_registry_{};
   std::optional<configuration::ConfigurationService> configuration_service_;
+  HomeAssistantCallbackOwnerService home_assistant_callback_owner_{};
 };
 
 }  // namespace espcontrol
