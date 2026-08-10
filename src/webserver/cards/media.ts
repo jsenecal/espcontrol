@@ -467,6 +467,75 @@ export function registerMediaCardTypes(): GlobalDescriptors {
                     }),
                 }
                 : MEDIA_CARD_METADATA);
+            function renderSpeakerDiscoveryEntityField(this: any) {
+            if (b.sensor === "control_modal" || b.sensor === "speaker_group") {
+                var groupEntityField: any = helpers.textField(
+                    "Speaker Discovery Entity (optional)",
+                    helpers.idPrefix + "speaker-group-entity",
+                    mediaSpeakerGroupEntity(b),
+                    "Default: sensor.speaker_group", "", false);
+                var groupEntityHintText: any = "Leave this blank to use sensor.speaker_group. Only enter another helper if you have more than one speaker helper or have changed the default entity name.";
+                var groupEntityHint: any = document.createElement("button");
+                groupEntityHint.type = "button";
+                groupEntityHint.className = "mdi mdi-information-outline sp-field-info-button";
+                groupEntityHint.setAttribute("aria-label", "About the speaker discovery entity");
+                groupEntityHint.setAttribute("aria-expanded", "false");
+                var groupEntityTooltip: any = document.createElement("div");
+                groupEntityTooltip.className = "sp-field-info-text";
+                groupEntityTooltip.id = helpers.idPrefix + "speaker-group-entity-tooltip";
+                groupEntityTooltip.setAttribute("aria-live", "polite");
+                groupEntityTooltip.textContent = groupEntityHintText;
+                groupEntityHint.setAttribute("aria-describedby", groupEntityTooltip.id);
+                var groupEntityHintHovered: any = false;
+                var groupEntityHintFocused: any = false;
+                var groupEntityHintTapped: any = false;
+                function setGroupEntityTooltipVisible(this: any, visible?: any) {
+                    groupEntityTooltip.classList.toggle("sp-visible", !!visible);
+                    groupEntityHint.setAttribute("aria-expanded", visible ? "true" : "false");
+                }
+                function syncGroupEntityTooltipVisibility(this: any) {
+                    setGroupEntityTooltipVisible(groupEntityHintHovered || groupEntityHintFocused || groupEntityHintTapped);
+                }
+                groupEntityHint.addEventListener("mouseenter", function (this: any) {
+                    groupEntityHintHovered = true;
+                    syncGroupEntityTooltipVisibility();
+                });
+                groupEntityHint.addEventListener("mouseleave", function (this: any) {
+                    groupEntityHintHovered = false;
+                    syncGroupEntityTooltipVisibility();
+                });
+                groupEntityHint.addEventListener("focus", function (this: any) {
+                    groupEntityHintFocused = true;
+                    syncGroupEntityTooltipVisibility();
+                });
+                groupEntityHint.addEventListener("click", function (this: any) {
+                    if (document.activeElement !== groupEntityHint)
+                        groupEntityHintTapped = !groupEntityHintTapped;
+                    syncGroupEntityTooltipVisibility();
+                });
+                groupEntityHint.addEventListener("blur", function (this: any) {
+                    groupEntityHintFocused = false;
+                    groupEntityHintTapped = false;
+                    syncGroupEntityTooltipVisibility();
+                });
+                groupEntityHint.addEventListener("keydown", function (this: any, event?: any) {
+                    if (event.key === "Escape") {
+                        groupEntityHintFocused = false;
+                        groupEntityHintTapped = false;
+                        setGroupEntityTooltipVisible(false);
+                    }
+                });
+                groupEntityField.field.querySelector("label").appendChild(groupEntityHint);
+                groupEntityField.field.insertBefore(groupEntityTooltip, groupEntityField.input);
+                panel.appendChild(groupEntityField.field);
+                groupEntityField.input.pattern = "(?:media_player|sensor)\\.[A-Za-z0-9_]+";
+                groupEntityField.input.addEventListener("change", function (this: any) {
+                    setMediaSpeakerGroupEntity(b, groupEntityField.input.value);
+                    groupEntityField.input.value = mediaSpeakerGroupEntity(b);
+                    helpers.saveField("options", b.options);
+                });
+            }
+            }
             var displayMode: any = helpers.renderCardSegmentControl(panel, b, helpers, {
                 segment: Object.assign({}, MEDIA_CARD_METADATA.displayMode, {
                     inputId: helpers.idPrefix + "media-display",
@@ -774,20 +843,7 @@ export function registerMediaCardTypes(): GlobalDescriptors {
                     fallback: "Speaker",
                 });
             }
-            if (b.sensor === "control_modal" || b.sensor === "speaker_group") {
-                var groupEntityField: any = helpers.textField(
-                    "Speaker Discovery Entity (optional)",
-                    helpers.idPrefix + "speaker-group-entity",
-                    mediaSpeakerGroupEntity(b),
-                    "Default: sensor.speaker_group", "", false);
-                panel.appendChild(groupEntityField.field);
-                groupEntityField.input.pattern = "(?:media_player|sensor)\\.[A-Za-z0-9_]+";
-                groupEntityField.input.addEventListener("change", function (this: any) {
-                    setMediaSpeakerGroupEntity(b, groupEntityField.input.value);
-                    groupEntityField.input.value = mediaSpeakerGroupEntity(b);
-                    helpers.saveField("options", b.options);
-                });
-            }
+            renderSpeakerDiscoveryEntityField();
         },
         renderPreview: function (this: any, b?: any, helpers?: any) {
             function modeInfo(this: any, value?: any) {
