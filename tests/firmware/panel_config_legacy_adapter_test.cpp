@@ -24,8 +24,18 @@ class FakeText final : public LegacyTextValue {
   bool set_value(const char *value, size_t value_size) override {
     if (value == nullptr && value_size > 0) return false;
     state_.assign(value, value_size);
+    ++persistent_writes;
     return true;
   }
+  bool publish_value(const char *value, size_t value_size) override {
+    if (value == nullptr && value_size > 0) return false;
+    state_.assign(value, value_size);
+    ++runtime_publishes;
+    return true;
+  }
+
+  size_t persistent_writes{0};
+  size_t runtime_publishes{0};
 
  private:
   std::string state_;
@@ -125,11 +135,42 @@ bool native_document_mirrors_back_to_legacy_entities_for_downgrade() {
          on_color.value() == "0088FF";
 }
 
+bool native_document_updates_live_grid_without_writing_legacy_preferences() {
+  FakeText order("old-order");
+  FakeText button("old-button");
+  std::array<LegacyTextValue *, PanelConfigLegacyAdapter::MAX_SUBPAGE_CHUNKS>
+      chunks{};
+  PanelConfigLegacyAdapter adapter;
+  adapter.set_device_profile("profile");
+  adapter.set_button_order(&order);
+  adapter.set_button(1, &button, chunks);
+
+  std::array<uint8_t, 256> document{};
+  PanelConfigWriter writer(document.data(), document.size());
+  size_t document_size = 0;
+  if (writer.begin() != PanelConfigStatus::OK ||
+      writer.append_device_profile(reinterpret_cast<const uint8_t *>("profile"),
+                                   7) != PanelConfigStatus::OK ||
+      writer.append_button(1, reinterpret_cast<const uint8_t *>("new-button"),
+                           10) != PanelConfigStatus::OK ||
+      writer.append_setting(reinterpret_cast<const uint8_t *>("button_order"),
+                            12, reinterpret_cast<const uint8_t *>("1"), 1) !=
+          PanelConfigStatus::OK ||
+      writer.finish(&document_size) != PanelConfigStatus::OK) {
+    return false;
+  }
+  return adapter.apply(1, document.data(), document_size) &&
+         button.value() == "new-button" && order.value() == "1" &&
+         button.persistent_writes == 0 && order.persistent_writes == 0 &&
+         button.runtime_publishes == 2 && order.runtime_publishes == 2;
+}
+
 }  // namespace
 
 int main() {
   return imports_legacy_button_subpage_and_order() &&
-                 native_document_mirrors_back_to_legacy_entities_for_downgrade()
+                 native_document_mirrors_back_to_legacy_entities_for_downgrade() &&
+                 native_document_updates_live_grid_without_writing_legacy_preferences()
              ? 0
              : 1;
 }

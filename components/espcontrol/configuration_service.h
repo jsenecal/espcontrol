@@ -37,6 +37,17 @@ class LegacyConfigurationAdapter {
                       size_t document_size) = 0;
 };
 
+// Applies a validated native document to the currently running panel. This is
+// deliberately separate from the legacy mirror: a panel can update its live
+// grid without writing the legacy preference-backed entities.
+class ConfigurationRuntimeAdapter {
+ public:
+  virtual ~ConfigurationRuntimeAdapter() = default;
+
+  virtual bool apply(uint16_t document_version, const uint8_t *document,
+                     size_t document_size) = 0;
+};
+
 enum class ServiceStatus : uint8_t {
   OK,
   IMPORTED_LEGACY,
@@ -50,6 +61,7 @@ enum class ServiceStatus : uint8_t {
   STORE_FAILED,
   LEGACY_READ_FAILED,
   LEGACY_MIRROR_FAILED,
+  RUNTIME_APPLY_FAILED,
 };
 
 struct ServiceLoadResult {
@@ -78,7 +90,8 @@ struct ServiceSaveResult {
   bool ok() const { return status == ServiceStatus::OK; }
   bool durable() const {
     return status == ServiceStatus::OK ||
-           status == ServiceStatus::LEGACY_MIRROR_FAILED;
+           status == ServiceStatus::LEGACY_MIRROR_FAILED ||
+           status == ServiceStatus::RUNTIME_APPLY_FAILED;
   }
 };
 
@@ -130,6 +143,9 @@ class ConfigurationService {
     scratch_buffer_ = scratch_buffer;
     scratch_capacity_ = scratch_capacity;
   }
+  void set_runtime_adapter(ConfigurationRuntimeAdapter *runtime) {
+    runtime_ = runtime;
+  }
 
  private:
   CommitResult commit_document(uint16_t document_version,
@@ -150,6 +166,7 @@ class ConfigurationService {
   const ConfigurationDocumentValidator *validator_{nullptr};
   uint8_t *scratch_buffer_{nullptr};
   size_t scratch_capacity_{0};
+  ConfigurationRuntimeAdapter *runtime_{nullptr};
 };
 
 }  // namespace espcontrol::configuration

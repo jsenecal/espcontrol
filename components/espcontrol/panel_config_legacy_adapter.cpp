@@ -112,24 +112,44 @@ bool PanelConfigLegacyAdapter::mirror(uint16_t document_version,
                                       const uint8_t *document,
                                       size_t document_size) {
   return document_version == PANEL_CONFIG_DOCUMENT_VERSION && configured() &&
-         mirror_document(document, document_size);
+         apply_document(document, document_size, true);
 }
 
-bool PanelConfigLegacyAdapter::mirror_document(const uint8_t *document,
-                                               size_t document_size) {
+bool PanelConfigLegacyAdapter::apply(uint16_t document_version,
+                                     const uint8_t *document,
+                                     size_t document_size) {
+  return document_version == PANEL_CONFIG_DOCUMENT_VERSION && configured() &&
+         apply_document(document, document_size, false);
+}
+
+bool PanelConfigLegacyAdapter::write_value(LegacyTextValue *target,
+                                           const char *value,
+                                           size_t value_size,
+                                           bool persist_legacy) {
+  if (target == nullptr) return false;
+  return persist_legacy ? target->set_value(value, value_size)
+                        : target->publish_value(value, value_size);
+}
+
+bool PanelConfigLegacyAdapter::apply_document(const uint8_t *document,
+                                              size_t document_size,
+                                              bool persist_legacy) {
   PanelConfigReader reader(document, document_size);
   if (reader.begin() != PanelConfigStatus::OK) return false;
 
   // Clear known values first. Missing records intentionally mean that the
-  // corresponding old entity is empty in the native document.
-  if (!button_order_->set_value("", 0)) return false;
-  if (button_on_color_ != nullptr && !button_on_color_->set_value("", 0))
+  // corresponding compatibility entity is empty in the native document.
+  if (!write_value(button_order_, "", 0, persist_legacy)) return false;
+  if (button_on_color_ != nullptr &&
+      !write_value(button_on_color_, "", 0, persist_legacy))
     return false;
   for (ButtonSources &sources : buttons_) {
-    if (sources.button != nullptr && !sources.button->set_value("", 0))
+    if (sources.button != nullptr &&
+        !write_value(sources.button, "", 0, persist_legacy))
       return false;
     for (LegacyTextValue *chunk : sources.subpage_chunks) {
-      if (chunk != nullptr && !chunk->set_value("", 0)) return false;
+      if (chunk != nullptr && !write_value(chunk, "", 0, persist_legacy))
+        return false;
     }
   }
 
@@ -145,8 +165,9 @@ bool PanelConfigLegacyAdapter::mirror_document(const uint8_t *document,
     } else if (record.type == PanelConfigRecordType::BUTTON) {
       ButtonSources &sources = buttons_[record.slot - 1];
       if (sources.button == nullptr ||
-          !sources.button->set_value(reinterpret_cast<const char *>(record.value),
-                                     record.value_size)) {
+          !write_value(sources.button,
+                       reinterpret_cast<const char *>(record.value),
+                       record.value_size, persist_legacy)) {
         return false;
       }
     } else if (record.type == PanelConfigRecordType::SUBPAGE) {
@@ -155,8 +176,9 @@ bool PanelConfigLegacyAdapter::mirror_document(const uint8_t *document,
       for (LegacyTextValue *chunk : sources.subpage_chunks) {
         if (chunk == nullptr) continue;
         const size_t chunk_size = std::min<size_t>(255, record.value_size - offset);
-        if (!chunk->set_value(reinterpret_cast<const char *>(record.value + offset),
-                              chunk_size)) {
+        if (!write_value(chunk,
+                         reinterpret_cast<const char *>(record.value + offset),
+                         chunk_size, persist_legacy)) {
           return false;
         }
         offset += chunk_size;
@@ -165,16 +187,18 @@ bool PanelConfigLegacyAdapter::mirror_document(const uint8_t *document,
     } else if (record.type == PanelConfigRecordType::SETTING &&
                record.key_size == sizeof(BUTTON_ORDER_KEY) - 1 &&
                std::memcmp(record.key, BUTTON_ORDER_KEY, record.key_size) == 0) {
-      if (!button_order_->set_value(reinterpret_cast<const char *>(record.value),
-                                    record.value_size)) {
+      if (!write_value(button_order_,
+                       reinterpret_cast<const char *>(record.value),
+                       record.value_size, persist_legacy)) {
         return false;
       }
     } else if (record.type == PanelConfigRecordType::SETTING &&
                record.key_size == sizeof(BUTTON_ON_COLOR_KEY) - 1 &&
                std::memcmp(record.key, BUTTON_ON_COLOR_KEY, record.key_size) == 0) {
       if (button_on_color_ != nullptr &&
-          !button_on_color_->set_value(
-              reinterpret_cast<const char *>(record.value), record.value_size)) {
+          !write_value(button_on_color_,
+                       reinterpret_cast<const char *>(record.value),
+                       record.value_size, persist_legacy)) {
         return false;
       }
     }

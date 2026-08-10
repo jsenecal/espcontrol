@@ -17,10 +17,16 @@ class LegacyTextValue {
   virtual ~LegacyTextValue() = default;
 
   virtual const std::string &value() const = 0;
+  // Changes the preference-backed compatibility entity for firmware that is
+  // later downgraded to a legacy release.
   virtual bool set_value(const char *value, size_t value_size) = 0;
+  // Updates only the live ESPHome state. This triggers the existing grid
+  // refresh wiring without overwriting the compatibility preference store.
+  virtual bool publish_value(const char *value, size_t value_size) = 0;
 };
 
-class PanelConfigLegacyAdapter final : public LegacyConfigurationAdapter {
+class PanelConfigLegacyAdapter final : public LegacyConfigurationAdapter,
+                                       public ConfigurationRuntimeAdapter {
  public:
   static constexpr size_t MAX_SUBPAGE_CHUNKS = 8;
 
@@ -39,6 +45,8 @@ class PanelConfigLegacyAdapter final : public LegacyConfigurationAdapter {
   LegacyLoadResult load(uint8_t *output, size_t output_capacity) override;
   bool mirror(uint16_t document_version, const uint8_t *document,
               size_t document_size) override;
+  bool apply(uint16_t document_version, const uint8_t *document,
+             size_t document_size) override;
 
  private:
   struct ButtonSources {
@@ -48,7 +56,10 @@ class PanelConfigLegacyAdapter final : public LegacyConfigurationAdapter {
 
   bool write_document(uint8_t *output, size_t output_capacity,
                       size_t *document_size) const;
-  bool mirror_document(const uint8_t *document, size_t document_size);
+  bool apply_document(const uint8_t *document, size_t document_size,
+                      bool persist_legacy);
+  static bool write_value(LegacyTextValue *target, const char *value,
+                          size_t value_size, bool persist_legacy);
 
   std::string device_profile_;
   LegacyTextValue *button_order_{nullptr};

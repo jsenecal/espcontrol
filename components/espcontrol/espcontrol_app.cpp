@@ -94,6 +94,7 @@ void EspControlApp::setup() {
     register_panel_config_endpoints();
     return;
   }
+  panel_config_service->set_runtime_adapter(&legacy_config_);
   if (!legacy_config_.configured()) {
     ESP_LOGW(TAG, "Native configuration sources are not configured");
   } else if (!panel_config_blobs_.begin()) {
@@ -137,6 +138,12 @@ void EspControlApp::setup() {
                refreshed.status != configuration::ServiceStatus::EMPTY) {
       ESP_LOGE(TAG, "Native configuration refresh failed (%u)",
                static_cast<unsigned>(refreshed.status));
+    }
+    if (refreshed.ok() &&
+        !legacy_config_.apply(refreshed.document_version,
+                              panel_config_document_buffer_,
+                              refreshed.document_size)) {
+      ESP_LOGE(TAG, "Native configuration could not update the live grid");
     }
   }
   register_panel_config_endpoints();
