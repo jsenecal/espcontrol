@@ -2226,54 +2226,11 @@ inline void delete_climate_control_context(ClimateControlCtx *ctx) {
   delete ctx;
 }
 
-// The climate panel is one of the largest transient LVGL views.  ESPHome's
-// LVGL allocator uses PSRAM first, so creating it while an artwork refresh has
-// consumed or fragmented that heap can make a later widget allocation return
-// null and abort the entire firmware.  Leave enough room for the panel and
-// keep the device online; the user can open the card once memory is available.
-constexpr size_t CLIMATE_MODAL_LVGL_MIN_FREE_BYTES = 256 * 1024;
-constexpr size_t CLIMATE_MODAL_LVGL_MIN_LARGEST_BLOCK_BYTES = 96 * 1024;
-constexpr uint32_t CLIMATE_MODAL_STARTUP_GUARD_MS = 15000;
-
-inline bool climate_control_modal_memory_available() {
-#ifdef ESP_PLATFORM
-  static uint32_t first_climate_modal_attempt_ms = 0;
-  const uint32_t now = esphome::millis();
-  if (first_climate_modal_attempt_ms == 0) first_climate_modal_attempt_ms = now;
-  if (now - first_climate_modal_attempt_ms < CLIMATE_MODAL_STARTUP_GUARD_MS) {
-    ESP_LOGW("climate_control", "Deferring climate panel until startup is complete");
-    return false;
-  }
-  lv_mem_monitor_t memory{};
-  lv_mem_monitor(&memory);
-  if (memory.free_size < CLIMATE_MODAL_LVGL_MIN_FREE_BYTES ||
-      memory.free_biggest_size < CLIMATE_MODAL_LVGL_MIN_LARGEST_BLOCK_BYTES) {
-    ESP_LOGW("climate_control",
-             "Deferring climate panel: LVGL heap free=%u largest=%u",
-             static_cast<unsigned>(memory.free_size),
-             static_cast<unsigned>(memory.free_biggest_size));
-    return false;
-  }
-#endif
-  return true;
-}
-
 inline void climate_control_open_modal(ClimateControlCtx *ctx) {
-  (void) ctx;
-  // The P4 firmware can start with its LVGL allocator exhausted after artwork
-  // initialisation.  Opening this large modal then aborts the whole firmware,
-  // taking down Home Assistant and the web server with it.  Keep the main
-  // controls available while the compact P4 climate view is rebuilt.
-  ESP_LOGW("climate_control", "Climate details are temporarily unavailable on this display");
-  return;
-  if (!ctx || !ctx->available || !climate_control_modal_memory_available()) return;
+  if (!ctx || !ctx->available) return;
   ControlModalShell shell = control_modal_open_shell(
     ControlModalKind::CLIMATE, ctx->btn, ctx->width_compensation_percent,
     ctx->icon_font, climate_control_hide_modal);
-  if (!shell.overlay || !shell.panel || !shell.close_btn) {
-    ESP_LOGW("climate_control", "Unable to create climate panel shell");
-    return;
-  }
   ClimateControlModalUi &ui = climate_control_modal_ui();
   ui.active = ctx;
   ui.overlay = shell.overlay;
@@ -2397,10 +2354,8 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   lv_obj_set_style_pad_all(ui.target_row, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_column(ui.target_row, 4, LV_PART_MAIN);
   lv_obj_set_layout(ui.target_row, LV_LAYOUT_FLEX);
-  // The default flex flow is a horizontal row.  Explicitly writing these
-  // local styles can allocate from LVGL's constrained internal heap and has
-  // caused an unrecoverable allocation abort on the ESP32-P4 during startup.
-  // Keep the defaults here so the climate modal remains usable under pressure.
+  lv_obj_set_style_flex_flow(ui.target_row, LV_FLEX_FLOW_ROW, LV_PART_MAIN);
+  lv_obj_set_style_flex_cross_place(ui.target_row, LV_FLEX_ALIGN_END, LV_PART_MAIN);
   lv_obj_clear_flag(ui.target_row, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_clear_flag(ui.target_row, LV_OBJ_FLAG_SCROLLABLE);
 

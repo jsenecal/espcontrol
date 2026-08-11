@@ -3,6 +3,7 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <cstdlib>
 #include <new>
 #include <optional>
@@ -34,12 +35,12 @@ class FixedRuntimeServiceSlot {
                   "runtime service exceeds the fixed core slot capacity");
     static_assert(alignof(Service) <= alignof(std::max_align_t),
                   "runtime service alignment exceeds the fixed core slot");
-    const void *type = service_type<Service>();
-    if (type_ == nullptr) {
+    const char *type_name = service_type<Service>();
+    if (type_name_ == nullptr) {
       new (storage_.data()) Service();
-      type_ = type;
+      type_name_ = type_name;
       destroy_ = [](void *storage) { static_cast<Service *>(storage)->~Service(); };
-    } else if (type_ != type) {
+    } else if (std::strcmp(type_name_, type_name) != 0) {
       std::abort();
     }
     return *static_cast<Service *>(static_cast<void *>(storage_.data()));
@@ -47,19 +48,21 @@ class FixedRuntimeServiceSlot {
 
   void reset() {
     if (destroy_ != nullptr) destroy_(storage_.data());
-    type_ = nullptr;
+    type_name_ = nullptr;
     destroy_ = nullptr;
   }
 
  private:
   template<typename Service>
-  static const void *service_type() {
-    static const int marker = 0;
-    return &marker;
+  static const char *service_type() {
+    // Function-local marker addresses can differ between ESP-IDF translation
+    // units even for the same template specialisation.  The signature text is
+    // stable for the concrete service and preserves the fixed-slot invariant.
+    return __PRETTY_FUNCTION__;
   }
 
   alignas(std::max_align_t) std::array<uint8_t, CAPACITY> storage_{};
-  const void *type_{nullptr};
+  const char *type_name_{nullptr};
   void (*destroy_)(void *){nullptr};
 };
 
