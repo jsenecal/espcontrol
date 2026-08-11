@@ -23,6 +23,12 @@ class EspHomeLegacyTextValue final : public LegacyTextValue {
     return true;
   }
 
+  bool publish_value(const char *value, size_t value_size) override {
+    if (text_ == nullptr || (value == nullptr && value_size > 0)) return false;
+    text_->publish_state(std::string(value == nullptr ? "" : value, value_size));
+    return true;
+  }
+
  private:
   esphome::text::Text *text_{nullptr};
   std::string empty_;

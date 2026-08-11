@@ -64,19 +64,40 @@ function supportedCapabilities(value: unknown): boolean {
 
 export class NativePanelConfigClient {
   private supported_ = false;
+  private retryable_ = false;
   private discovery_: Promise<boolean> | null = null;
 
   constructor(private readonly fetch_: NativePanelConfigFetch) {}
 
   supported(): boolean { return this.supported_; }
+  retryable(): boolean { return this.retryable_; }
+
+  private retryDiscovery(): void {
+    this.supported_ = false;
+    this.retryable_ = true;
+    this.discovery_ = null;
+  }
 
   async discover(): Promise<boolean> {
     if (this.discovery_) return this.discovery_;
     this.discovery_ = this.fetch_("/api/v1/capabilities", { cache: "no-store" })
-      .then(async (response) => response.ok && supportedCapabilities(await response.json()))
-      .catch(() => false)
+      .then(async (response) => {
+        // A 404 or 503 can occur during the short deferred firmware setup.
+        // A valid legacy capabilities response, however, must remain on the
+        // entity fallback path without waiting for another native request.
+        this.retryable_ = response.status === 404 || response.status === 503;
+        return response.ok && supportedCapabilities(await response.json());
+      })
+      .catch(() => {
+        this.retryable_ = false;
+        return false;
+      })
       .then((supported) => {
         this.supported_ = supported;
+        // A device can be between its ESPHome setup and its deferred native
+        // configuration initialization. Do not cache that temporary negative
+        // result for the lifetime of a reconnecting editor.
+        if (!supported) this.discovery_ = null;
         return supported;
       });
     return this.discovery_;
@@ -87,7 +108,13 @@ export class NativePanelConfigClient {
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
         const current = await this.fetch_("/api/v1/config", { cache: "no-store" });
-        if (!current.ok) return "failed";
+        if (!current.ok) {
+          if (current.status === 404 || current.status === 503) {
+            this.retryDiscovery();
+            return "unsupported";
+          }
+          return "failed";
+        }
         const generation = current.headers.get("ETag");
         if (!generation) return "failed";
         const currentDocument = decodePanelConfig(new Uint8Array(await current.arrayBuffer()));
@@ -105,6 +132,10 @@ export class NativePanelConfigClient {
         // save so callers do not claim that an older firmware can restore it.
         if (next.status === 202) return "mirror-failed";
         if (next.ok) return "saved";
+        if (next.status === 404 || next.status === 503) {
+          this.retryDiscovery();
+          return "unsupported";
+        }
         if (next.status !== 409) return "failed";
       } catch {
         return "failed";

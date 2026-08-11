@@ -13,6 +13,7 @@ using espcontrol::artwork::artwork_source_mark_received;
 using espcontrol::artwork::artwork_source_request_mask;
 using espcontrol::artwork::artwork_picture_response_clears_retry;
 using espcontrol::artwork::artwork_response_needs_processing;
+using espcontrol::artwork::artwork_selection_needs_download;
 using espcontrol::artwork::source_response_can_apply_immediately;
 using espcontrol::cover_art::RuntimeState;
 using espcontrol::cover_art::media_card_artwork_suppressed;
@@ -64,13 +65,41 @@ int main() {
   assert(!source_response_can_apply_immediately(false, true));
   assert(!source_response_can_apply_immediately(true, false));
 
-  // Repeated callbacks must not restart artwork work that is already pending,
-  // while changed sources and idle recovery attempts must still be processed.
-  assert(!artwork_response_needs_processing(false, true, false));
-  assert(!artwork_response_needs_processing(false, false, true));
-  assert(artwork_response_needs_processing(false, false, false));
-  assert(artwork_response_needs_processing(true, true, false));
-  assert(artwork_response_needs_processing(true, false, true));
+  // Ordinary player-state updates with the same artwork remain no-ops. Only a
+  // changed source or an explicit reconnect/recovery refresh is processed.
+  assert(!artwork_response_needs_processing(false, false));
+  assert(artwork_response_needs_processing(false, true));
+  assert(artwork_response_needs_processing(true, false));
+  assert(artwork_response_needs_processing(true, true));
+  assert(!artwork_selection_needs_download(false, true));
+  assert(artwork_selection_needs_download(false, false));
+  assert(artwork_selection_needs_download(true, true));
+
+  // A state update with the same selected local artwork does not download it
+  // again. Reconnect and attribute-read retry use the forced path instead.
+  sources.clear();
+  assert(sources.update(false, "remote-stable"));
+  assert(sources.update(true, "local-stable"));
+  selected = sources.select("local-stable", false);
+  assert(selected.primary == "local-stable");
+  assert(!artwork_selection_needs_download(false,
+                                            selected.primary == "local-stable"));
+  assert(artwork_selection_needs_download(true,
+                                          selected.primary == "local-stable"));
+
+  // A forced reconnect refresh keeps the current local proxy selected. The
+  // forced flag requests a new download; it must not promote an older remote
+  // fallback simply because both candidates are unchanged.
+  selected = sources.select("local-stable", false);
+  assert(selected.primary == "local-stable");
+  assert(selected.fallback == "remote-stable");
+
+  // Empty responses are a real artwork update. Once both sources are empty,
+  // the caller must clear/cancel the currently displayed artwork.
+  assert(sources.update(false, "", RemoteUpdatePolicy::PRESERVE_LOCAL));
+  assert(sources.update(true, ""));
+  selected = sources.select("local-stable", false);
+  assert(selected.primary.empty());
 
   // A partial queue failure retries only the source that failed. Reads that
   // were already accepted must not accumulate duplicate deferred callbacks.
@@ -90,11 +119,18 @@ int main() {
   assert(!artwork_picture_response_clears_retry(true, ARTWORK_SOURCE_LOCAL));
 
   // When a stable local proxy URL still points at the previous track, a fresh
-  // remote URL wins for the refresh and the local URL remains the fallback.
-  sources.update(true, "stable-local");
-  sources.remote_url = "remote-c";
+  // remote URL wins for every changed track and the local URL remains the
+  // fallback—even when the prior refresh had already selected a remote URL.
+  sources.clear();
+  assert(sources.update(true, "stable-local"));
+  assert(sources.update(false, "remote-c", RemoteUpdatePolicy::PRESERVE_LOCAL));
   selected = sources.select("stable-local", true);
   assert(selected.primary == "remote-c");
+  assert(selected.fallback == "stable-local");
+  assert(selected.preferred_refreshed_remote);
+  assert(sources.update(false, "remote-d", RemoteUpdatePolicy::PRESERVE_LOCAL));
+  selected = sources.select("remote-c", true);
+  assert(selected.primary == "remote-d");
   assert(selected.fallback == "stable-local");
   assert(selected.preferred_refreshed_remote);
 

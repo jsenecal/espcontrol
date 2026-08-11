@@ -2246,6 +2246,29 @@ async function assertNewMediaCardDefaults(page, posts, label) {
     const overlay = document.querySelector(".sp-settings-overlay");
     return overlay && !overlay.classList.contains("sp-visible");
   });
+
+  await page.locator(`.sp-main [data-pos="${pos}"].sp-empty-cell`).click();
+  await page.waitForSelector(".sp-settings-overlay.sp-visible");
+  await page.getByRole("button", { name: "Action card type" }).click();
+  await page
+    .locator(".sp-settings-modal .sp-disclosure")
+    .filter({ hasText: "Card Settings" })
+    .first()
+    .locator(".sp-disclosure-button")
+    .click();
+  await page.locator("#sp-inp-label").fill("Custom media label");
+  await page.locator("#sp-inp-type").selectOption("media");
+  await page.locator("#sp-inp-media-mode").selectOption("play_pause");
+  assert.strictEqual(
+    await page.locator("#sp-inp-label").inputValue(),
+    "Custom media label",
+    `${label}: changing a labelled card to Media preserves its custom label`,
+  );
+  await page.locator(".sp-settings-close").click();
+  await page.waitForFunction(() => {
+    const overlay = document.querySelector(".sp-settings-overlay");
+    return overlay && !overlay.classList.contains("sp-visible");
+  });
   assert.strictEqual(
     posts.length,
     before,
@@ -4669,6 +4692,23 @@ async function runCase(browser, testCase) {
       thirdPartyAssetRequests,
       [],
       `${testCase.name}: the editor should not need third-party CDN assets`,
+    );
+    const iconStyle = await page.evaluate(() => {
+      const style = document.getElementById("espcontrol-local-web-assets");
+      return style ? style.textContent || "" : "";
+    });
+    assert(
+      iconStyle.includes(".mdi-cog::before{content:'\\F0493'}"),
+      `${testCase.name}: the local icon stylesheet should use a CSS codepoint escape`,
+    );
+    assert(
+      iconStyle.includes("@font-face{font-family:'Inter'"),
+      `${testCase.name}: the local stylesheet should embed the interface font`,
+    );
+    assert.strictEqual(
+      await page.locator(".sp-support-link").textContent(),
+      "Buy me a coffee",
+      `${testCase.name}: the support button should retain its recognised label`,
     );
     assertNoLayoutBreaks(
       await measureCoreLayout(page),

@@ -255,7 +255,6 @@ export function registerMediaCardTypes(): GlobalDescriptors {
         onSelect: function (this: any, b?: any) {
             b.entity = "";
             b.sensor = "cover_art";
-            b.label = "Cover Art";
             b.unit = "";
             b.precision = (b.sensor === "play_pause" || b.sensor === "position") && b.precision === "state" ? "state" : "";
             b.icon = "Auto";

@@ -789,11 +789,31 @@ inline bool media_fast_press_consume(int slot_num) {
   return sent;
 }
 
+inline bool button_press_opens_modal(const ParsedCfg &config, lv_obj_t *button) {
+  const auto context = card_runtime_context(config);
+  if (card_runtime_main_click_opens_modal(context)) return true;
+
+  using Driver = espcontrol::card_runtime::CardDriverId;
+  if (context.runtime.driver == Driver::ACTION) {
+    return action_script_confirmation_enabled(config);
+  }
+  if (context.runtime.driver == Driver::TOGGLE && button &&
+      !is_button_entity(config.entity)) {
+    return switch_confirmation_required(
+      config, lv_obj_has_state(button, LV_STATE_CHECKED));
+  }
+  return false;
+}
+
 inline void handle_button_press(const std::string &cfg, int slot_num,
                                 lv_obj_t *btn_obj) {
-  (void) btn_obj;
   if (slot_num <= 0 || slot_num > MAX_GRID_SLOTS) return;
   ParsedCfg p = parse_cfg(cfg);
+  if (btn_obj && button_press_opens_modal(p, btn_obj)) {
+    // The modal replaces this card on release. Clearing the state inside the
+    // press event avoids scheduling a pointless pressed-card repaint first.
+    lv_obj_clear_state(btn_obj, LV_STATE_PRESSED);
+  }
   if (p.type != "media") return;
   std::string mode = media_card_mode(p.sensor);
   if (!media_fast_press_mode(mode) || p.entity.empty()) return;

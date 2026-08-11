@@ -2155,10 +2155,10 @@ def firmware_image_card_startup_errors(
     if (
         "image_card_request_current_picture" not in text
         or "if (ctx->media_artwork)" not in text
-        or "image_card_request_media_artwork(ctx);" not in text
+        or "image_card_request_media_artwork(ctx, true);" not in text
         or "image_card_refresh_current_picture(ctx);" not in text
         or "ctx->media_artwork_retry_mask = 0;" not in text
-        or "ctx->media_artwork_sources.clear();" not in text
+        or "ctx->pending_fallback_picture.clear();" not in text
         or "artwork_picture_response_clears_retry" not in text
         or "inline void image_card_refresh_due()" not in text
         or text.count("image_card_request_current_picture(ctx);") < 2
@@ -6464,7 +6464,7 @@ def run_self_test() -> int:
         "}\n"
         "inline void image_card_request_current_picture(ImageCardCtx *ctx) {\n"
         "  if (ctx->media_artwork) {\n"
-        "    image_card_request_media_artwork(ctx);\n"
+        "    image_card_request_media_artwork(ctx, ctx->media_artwork_retry_mask != 0);\n"
         "  } else {\n"
         "    image_card_request_picture(ctx);\n"
         "  }\n"
@@ -6472,9 +6472,13 @@ def run_self_test() -> int:
         "inline void image_card_refresh_current_picture(ImageCardCtx *ctx) {\n"
         "  if (ctx->media_artwork) {\n"
         "    ctx->media_artwork_retry_mask = 0;\n"
-        "    ctx->media_artwork_sources.clear();\n"
+        "    ctx->pending_fallback_picture.clear();\n"
         "  }\n"
-        "  image_card_request_current_picture(ctx);\n"
+        "  if (ctx->media_artwork) {\n"
+        "    image_card_request_media_artwork(ctx, true);\n"
+        "  } else {\n"
+        "    image_card_request_current_picture(ctx);\n"
+        "  }\n"
         "}\n"
         "inline void image_card_handle_picture(ImageCardCtx *ctx) {\n"
         "  if (artwork_picture_response_clears_retry(ctx->media_artwork, ctx->media_artwork_retry_mask)) {\n"
