@@ -180,7 +180,7 @@ export function installApiModule(
     }
     function getJsonFirst(this: any, paths?: any, callback?: any) {
         var index: any = 0;
-        function tryNext(this: any) {
+        function tryNext(this: any): Promise<any> {
             if (index >= paths.length)
                 return Promise.resolve(null);
             return getJsonQuietly(paths[index++]).then(function (this: any, data?: any) {

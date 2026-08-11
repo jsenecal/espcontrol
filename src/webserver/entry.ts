@@ -143,7 +143,8 @@ function installApplicationCompatibility(): void {
   installGlobals(installScreensaverTimeoutModule());
   installGlobals(installC6FirmwareUiModule());
   installGlobals(installGridModule());
-  const deviceApi = createDeviceApi((url, init) => fetch(url, init));
+  const deviceApi = createDeviceApi((url, init) =>
+    fetch(url, init as RequestInit));
   const nativePanelConfig = createNativePanelConfigMigrationController();
   const cardEditorDraft = createCardEditorDraftController({
     cloneCard: (button) => Model.cloneCardConfig(button),
