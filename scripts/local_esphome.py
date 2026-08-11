@@ -7,6 +7,7 @@ import os
 import shlex
 import subprocess
 import sys
+import tempfile
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
@@ -151,7 +152,14 @@ def run(argv: list[str]) -> int:
 
 class LocalEsphomeTests(unittest.TestCase):
     def test_reads_the_repository_pinned_esphome_version(self) -> None:
-        self.assertEqual(pinned_esphome_version(), "2026.7.4")
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            env_path = root / ".github" / "esphome.env"
+            env_path.parent.mkdir()
+            env_path.write_text("ESPHOME_VERSION=test-version\n", encoding="utf-8")
+
+            with mock.patch(__name__ + ".ROOT", root):
+                self.assertEqual(pinned_esphome_version(), "test-version")
 
     def test_reads_installed_esphome_version(self) -> None:
         with mock.patch(__name__ + ".subprocess.run") as run_mock:
