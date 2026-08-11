@@ -101,14 +101,10 @@ inline EspHomeHaBindingService &ha_binding_service() {
   if (auto *core = espcontrol::active_espcontrol_app_core()) {
     return core->home_assistant_binding_service<EspHomeHaBindingService>();
   }
-#ifdef ESP_PLATFORM
-  // Firmware UI work begins only after EspControlAppCore starts. Keeping the
-  // contract strict avoids a second permanent binding-service allocation.
-  std::abort();
-#else
+  // ESPHome can reset subscriptions while the application core is starting.
+  // Keep that transition harmless rather than aborting the entire firmware.
   static EspHomeHaBindingService service;
   return service;
-#endif
 }
 
 inline EspHomeHaReadCoordinator &ha_read_coordinator() {
