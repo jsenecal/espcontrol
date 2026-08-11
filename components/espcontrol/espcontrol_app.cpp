@@ -105,6 +105,11 @@ bool EspControlApp::create_native_configuration_runtime() {
   runtime->legacy_config.set_button_on_color(&runtime->button_on_color);
   for (size_t index = 0; index < panel_config_button_texts_.size(); ++index) {
     const PanelConfigTextSources &sources = panel_config_button_texts_[index];
+    // Device profiles only provide text entities for their real panel slots.
+    // Do not register placeholder wrappers for the remaining fixed-capacity
+    // entries: a restored document would correctly try to clear them, but the
+    // wrappers have no ESPHome text object to update.
+    if (sources.button == nullptr) continue;
     NativeConfigurationRuntime::LegacyButtonTextSources &legacy_sources =
         runtime->buttons[index];
     legacy_sources.button.bind(sources.button);
