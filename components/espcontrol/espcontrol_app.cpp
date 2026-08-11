@@ -159,6 +159,7 @@ void EspControlApp::register_panel_config_endpoints() {
   if (!can_bind_document_endpoints) {
     configuration::set_panel_config_read_supported(false);
     configuration::set_panel_config_write_supported(false);
+    configuration::set_panel_config_http_context_initialization_complete(true);
     return;
   }
   configuration::bind_panel_config_http_context(
@@ -172,6 +173,7 @@ void EspControlApp::register_panel_config_endpoints() {
   // loop() would briefly make concurrent requests observe a false readiness
   // flag and rewrite the shared pointers while the web task is using them.
   panel_config_http_context_bound_ = true;
+  configuration::set_panel_config_http_context_initialization_complete(true);
 }
 
 void EspControlApp::apply_boot_configuration() {

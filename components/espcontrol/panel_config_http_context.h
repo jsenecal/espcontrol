@@ -15,6 +15,7 @@ struct PanelConfigHttpContext {
   const char *username{nullptr};
   const char *password{nullptr};
   std::atomic<bool> ready{false};
+  std::atomic<bool> initialization_complete{false};
 };
 
 inline PanelConfigHttpContext &panel_config_http_context() {
@@ -40,6 +41,19 @@ inline void bind_panel_config_http_context(ConfigurationService &service,
 
 inline bool panel_config_http_context_ready() {
   return panel_config_http_context().ready.load(std::memory_order_acquire);
+}
+
+// Capabilities must not report a permanent legacy fallback while the deferred
+// native setup is still running. Once setup completes, an unavailable context
+// intentionally advertises the normal legacy-only capability response.
+inline void set_panel_config_http_context_initialization_complete(bool complete) {
+  panel_config_http_context().initialization_complete.store(
+      complete, std::memory_order_release);
+}
+
+inline bool panel_config_http_context_initialization_complete() {
+  return panel_config_http_context().initialization_complete.load(
+      std::memory_order_acquire);
 }
 
 }  // namespace espcontrol::configuration
