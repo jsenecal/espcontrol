@@ -30,11 +30,7 @@ export function installAppModule(): GlobalDescriptors {
         link.href = "https://www.buymeacoffee.com/jtenniswood";
         link.target = "_blank";
         link.rel = "noopener";
-        var icon: any = document.createElement("span");
-        icon.className = "mdi mdi-coffee-maker";
-        icon.setAttribute("aria-hidden", "true");
-        link.appendChild(icon);
-        link.append("Buy me a coffee");
+        link.innerHTML = '<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60" style="border-radius:999px;">';
         panel.appendChild(link);
         document.body.appendChild(panel);
         syncTabChrome();
