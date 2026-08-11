@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 from typing import Any
 
-from product_model_v2 import source_path
+from product_model_v2 import load_product_model_v2, source_path
 
 ROOT = Path(__file__).resolve().parent.parent
 DEVICE_MANIFEST = source_path("deviceProfiles")
@@ -316,6 +316,8 @@ def compose_catalog_data(data: Any) -> dict[str, Any]:
 
 
 def load_catalog_data(path: Path = DEVICE_CATALOG) -> dict[str, Any]:
+    if path.resolve() == DEVICE_CATALOG.resolve():
+        return compose_catalog_data(load_product_model_v2().device_catalog_data())
     return compose_catalog_data(load_json(path))
 
 
