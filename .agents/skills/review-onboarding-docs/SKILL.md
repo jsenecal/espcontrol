@@ -1,6 +1,6 @@
 ---
 name: review-onboarding-docs
-description: Research-only audit of product and device documentation for first-time users. Use when asked to critique, assess, simplify, reorganize, or improve getting-started, installation, setup, configuration, or support docs; when documentation feels bloated, dense, technical, or hard to navigate; or when a bold, high-level documentation strategy with five recommendations is needed. Do not use to edit documentation.
+description: Research-only audit of product and device documentation for first-time users. Use when explicitly asked to review, critique, assess, or audit getting-started, installation, setup, configuration, or support docs; or when a bold, high-level documentation strategy with five recommendations is needed. Do not use to edit documentation.
 ---
 
 # Review Onboarding Docs
