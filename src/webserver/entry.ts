@@ -6,14 +6,6 @@ import * as PreviewGridFeature from "./features/preview_grid";
 import * as PreviewFeature from "./features/preview";
 import * as BackupFeature from "./features/backup";
 import * as BackupExportController from "./features/backup_export_controller";
-import * as SettingsFeature from "./features/settings";
-import * as AlarmDelayAudioController from "./features/alarm_delay_audio_controller";
-import * as ScreensaverController from "./features/screensaver_controller";
-import * as CoverArtScreensaverController from "./features/cover_art_screensaver_controller";
-import * as MediaPlaybackController from "./features/media_playback_controller";
-import * as VoiceServicesController from "./features/voice_services_controller";
-import * as ClockBarController from "./features/clock_bar_controller";
-import * as ScreenScheduleController from "./features/screen_schedule_controller";
 import * as ClipboardFeature from "./features/clipboard";
 import * as UiTokens from "./state/ui_tokens";
 import * as AppState from "./state/app_state";
@@ -254,16 +246,6 @@ function startEspControl(): void {
     ClipboardFeature,
     createBackupFeature: BackupFeature.createBackupFeature,
     createBackupExportController: BackupExportController.createBackupExportController,
-    createSettingsUiFeature: SettingsFeature.createSettingsUiFeature,
-    createAlarmDelayAudioController: AlarmDelayAudioController.createAlarmDelayAudioController,
-    createScreensaverController: ScreensaverController.createScreensaverController,
-    createCoverArtScreensaverController: CoverArtScreensaverController.createCoverArtScreensaverController,
-    createMediaPlaybackController: MediaPlaybackController.createMediaPlaybackController,
-    createVoiceServicesController: VoiceServicesController.createVoiceServicesController,
-    createClockBarController: ClockBarController.createClockBarController,
-    createScreenScheduleController: ScreenScheduleController.createScreenScheduleController,
-    screensaverControlState: SettingsFeature.screensaverControlState,
-    timedSettingLabel: SettingsFeature.timedSettingLabel,
     ...UiTokens,
     ...AppState,
     ...EventAliases,

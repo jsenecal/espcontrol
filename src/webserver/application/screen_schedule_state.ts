@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { createScreenScheduleController } from "../features/screen_schedule_controller";
 export function installScreenScheduleStateModule(): GlobalDescriptors {
     // ── Screen Schedule State ──────────────────────────────────────────────
     var _screenScheduleController: any = createScreenScheduleController({

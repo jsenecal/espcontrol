@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { createClockBarController } from "../features/clock_bar_controller";
 export function installClockBarStateModule(): GlobalDescriptors {
     // ── Clock Bar State ───────────────────────────────────────────────────
     var _clockBarController: any = createClockBarController();
