@@ -1980,11 +1980,21 @@ script:
           }
           #endif
           const int subscription_generation = id(cover_art_subscription_generation);
+          if (!already_subscribed) {
+            // The first remote/local subscription callbacks are one paired
+            // artwork update, even when a previous image remains on screen.
+            id(cover_art_runtime).artwork_refresh.begin(
+              espcontrol::artwork::ARTWORK_SOURCE_BOTH, false);
+          }
 
           std::function<void()> mark_artwork_refresh_needed = []() {
             id(cover_art_runtime).refresh_needed = true;
             id(cover_art_runtime).retry_url.clear();
             id(cover_art_runtime).retry_count = 0;
+            // Metadata identifies a new artwork generation. Open the paired
+            // response window before its independent attributes arrive.
+            id(cover_art_runtime).artwork_refresh.begin(
+              espcontrol::artwork::ARTWORK_SOURCE_BOTH, true);
           };
           std::function<void()> invalidate_stale_media_duration = [cover_entity]() {
             const uint32_t last_duration_ms = id(cover_art_last_duration_callback_ms);
@@ -2481,6 +2491,12 @@ script:
               }
 
               const bool source_changed = id(cover_art_runtime).sources.get(local) != url;
+              if (source_changed && !id(cover_art_runtime).artwork_refresh.active() &&
+                  !id(cover_art_runtime).source_url.empty()) {
+                ESP_LOGD("cover_art", "Ignoring delayed %s artwork callback after batch settled",
+                         local ? "entity_picture_local" : "entity_picture");
+                return;
+              }
               if (source_changed && !id(cover_art_runtime).artwork_refresh.active()) {
                 id(cover_art_runtime).artwork_refresh.begin(
                   espcontrol::artwork::ARTWORK_SOURCE_BOTH, false);

@@ -13,6 +13,8 @@ using espcontrol::artwork::artwork_source_failed_mask;
 using espcontrol::artwork::artwork_source_mark_received;
 using espcontrol::artwork::artwork_source_request_mask;
 using espcontrol::artwork::artwork_picture_response_clears_retry;
+using espcontrol::artwork::artwork_batch_waits_for_companion;
+using espcontrol::artwork::artwork_refresh_forced;
 using espcontrol::artwork::artwork_response_needs_processing;
 using espcontrol::artwork::artwork_selection_needs_download;
 using espcontrol::artwork::source_response_can_apply_immediately;
@@ -75,6 +77,13 @@ int main() {
   assert(!artwork_selection_needs_download(false, true));
   assert(artwork_selection_needs_download(false, false));
   assert(artwork_selection_needs_download(true, true));
+  assert(artwork_batch_waits_for_companion(false, true));
+  assert(!artwork_batch_waits_for_companion(false, false));
+  assert(!artwork_batch_waits_for_companion(true, true));
+  assert(artwork_refresh_forced(true, false, false));
+  assert(artwork_refresh_forced(false, true, false));
+  assert(artwork_refresh_forced(false, false, true));
+  assert(!artwork_refresh_forced(false, false, false));
 
   // A state update with the same selected local artwork does not download it
   // again. Reconnect and attribute-read retry use the forced path instead.
@@ -154,6 +163,14 @@ int main() {
   assert(batch.receive(local_retry, true));
   assert(batch.complete());
   assert(batch.finish());
+
+  // A retry of a failed local read leaves the earlier remote result available
+  // when the retry returns empty.
+  sources.clear();
+  assert(sources.update(false, "remote-retry", RemoteUpdatePolicy::PRESERVE_LOCAL));
+  assert(!sources.update(true, ""));
+  selected = sources.select("", false);
+  assert(selected.primary == "remote-retry");
 
   // When a stable local proxy URL still points at the previous track, a fresh
   // remote URL wins for every changed track and the local URL remains the

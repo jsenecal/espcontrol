@@ -2092,14 +2092,20 @@ inline void image_card_handle_picture(ImageCardCtx *ctx, esphome::StringRef pict
 
 inline void image_card_process_media_artwork(ImageCardCtx *ctx) {
   if (!ctx || !ctx->active || !ctx->media_artwork) return;
+  const bool batch_complete = ctx->media_artwork_refresh.complete();
   const bool refresh_forced = ctx->media_artwork_refresh.forced;
   const bool prefer_refreshed_remote =
     ctx->media_artwork_remote_refresh_pending;
-  ctx->media_artwork_refresh.finish();
-  ctx->media_artwork_remote_refresh_pending = false;
   const espcontrol::artwork::SourceSelection selection =
       ctx->media_artwork_sources.select(ctx->source_url, prefer_refreshed_remote);
   const std::string &chosen = selection.primary;
+  if (espcontrol::artwork::artwork_batch_waits_for_companion(
+          batch_complete, chosen.empty())) {
+    image_card_log_diagnostics(ctx, "media-artwork-waiting-for-companion");
+    return;
+  }
+  ctx->media_artwork_refresh.finish();
+  ctx->media_artwork_remote_refresh_pending = false;
   if (chosen.empty()) {
     image_card_clear_media_artwork(ctx);
     return;
@@ -2181,10 +2187,17 @@ inline void image_card_request_media_artwork(ImageCardCtx *ctx, bool force_refre
   const uint32_t generation = ha_subscription_generation();
   uint8_t request_mask = espcontrol::artwork::artwork_source_request_mask(
     ctx->media_artwork_retry_mask);
-  const bool refresh_forced = ctx->media_artwork_refresh_forced || force_refresh;
+  const bool refresh_forced = espcontrol::artwork::artwork_refresh_forced(
+    ctx->media_artwork_refresh.forced,
+    ctx->media_artwork_refresh_forced,
+    force_refresh);
   ctx->media_artwork_refresh_forced = false;
   ctx->media_artwork_remote_refresh_pending = false;
-  ctx->media_artwork_sources.clear();
+  // A retry requests only the source that failed to queue. Keep the successful
+  // companion as a fallback so an empty retry result cannot clear valid art.
+  if (request_mask == espcontrol::artwork::ARTWORK_SOURCE_BOTH) {
+    ctx->media_artwork_sources.clear();
+  }
   const uint32_t request_generation = ctx->media_artwork_refresh.begin(
     request_mask, refresh_forced);
   bool remote_queued = true;
