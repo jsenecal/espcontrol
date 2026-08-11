@@ -15,9 +15,9 @@ when deciding what to edit and what must be regenerated.
 
 Edit these files when changing product behavior or supported hardware:
 
-- `devices/catalog.json` - supported panels, layout facts, web preview sizing,
+- `product/v2/device_catalog.json` - supported panels, layout facts, web preview sizing,
   firmware fonts, firmware package substitutions, and public screen metadata.
-- `common/config/card_contract.json` - card types, saved config fields, defaults,
+- `product/v2/card_contract.json` - card types, saved config fields, defaults,
   picker metadata, card options, migration aliases, and compact subpage codes.
 - `product/v2/entity_names.json` - Home Assistant entity names shared by
   firmware YAML and the web setup page.
@@ -26,20 +26,20 @@ Edit these files when changing product behavior or supported hardware:
 - `product/v2/product_compatibility.json` - saved config, backup,
   layout, and migration fixtures that protect upgrades.
 
-`model_v2.json` records the device catalogue and translation sources. Sources
-that have not yet migrated deliberately continue through the established files;
-only the selected pilot is authored in `product/v2/`.
+`model_v2.json` records the complete card-contract and device-catalogue sources
+in `product/v2/`. The selected pilot overlays below prove the per-card and
+per-device composition path without changing the generated output.
 
 ## Product Model v2 Pilot
 
 - `v2/cards/sensor.json` is the authoritative Sensor card definition.
 - `v2/devices/guition-esp32-p4-jc8012p4a1.json` is the authoritative 10-inch
-  V1 device entry; shared hardware profiles remain in `devices/catalog.json`.
+  V1 device entry; shared hardware profiles remain in `product/v2/device_catalog.json`.
 
 `python3 scripts/check_product_model_v2.py` proves that the composed model is
 byte-for-byte equivalent to the legacy card contract and device catalogue.
-Until another family is migrated, edit all other cards and devices in their
-established source files.
+Until another family receives a per-item overlay, edit its shared definition in
+`product/v2/card_contract.json` or `product/v2/device_catalog.json`.
 
 ## Generated Outputs
 
