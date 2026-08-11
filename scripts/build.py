@@ -39,6 +39,7 @@ MDI_VERSION = "7.4.47"
 MDI_CSS_URL = f"https://cdn.jsdelivr.net/npm/@mdi/font@{MDI_VERSION}/css/materialdesignicons.css"
 MDI_WEB_FONT = ROOT / "common" / "assets" / "fonts" / f"materialdesignicons-webfont-{MDI_VERSION}.ttf"
 INTER_WEB_FONT = ROOT / "node_modules" / "vitepress" / "dist" / "client" / "theme-default" / "fonts" / "inter-roman-latin.woff2"
+ROBOTO_WEB_FONT = ROOT / "common" / "assets" / "fonts" / "roboto-latin.woff2"
 WEB_SOURCE_DIR = ROOT / "src" / "webserver"
 
 # The hosted editor remains available to the development firmware plus the
@@ -3653,6 +3654,8 @@ def embedded_web_mdi_styles():
         raise BuildError(f"Missing bundled web icon font: {MDI_WEB_FONT.relative_to(ROOT)}")
     if not INTER_WEB_FONT.exists():
         raise BuildError(f"Missing bundled web interface font: {INTER_WEB_FONT.relative_to(ROOT)}")
+    if not ROBOTO_WEB_FONT.exists():
+        raise BuildError(f"Missing bundled web preview font: {ROBOTO_WEB_FONT.relative_to(ROOT)}")
 
     data = load_json(ICONS_JSON)
     codepoints = web_mdi_icon_codepoints(data)
@@ -3662,8 +3665,12 @@ def embedded_web_mdi_styles():
         raise BuildError("Missing MDI codepoints for browser icons: " + ", ".join(missing))
 
     interface_font_data = base64.b64encode(INTER_WEB_FONT.read_bytes()).decode("ascii")
+    preview_font_data = base64.b64encode(ROBOTO_WEB_FONT.read_bytes()).decode("ascii")
     icon_font_data = base64.b64encode(MDI_WEB_FONT.read_bytes()).decode("ascii")
     css = [
+        "@font-face{font-family:'Roboto';src:url(data:font/woff2;base64,",
+        preview_font_data,
+        ") format('woff2');font-weight:100 900;font-style:normal;font-display:swap}",
         "@font-face{font-family:'Inter';src:url(data:font/woff2;base64,",
         interface_font_data,
         ") format('woff2');font-weight:100 900;font-style:normal;font-display:swap}",
