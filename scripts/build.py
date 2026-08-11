@@ -32,7 +32,7 @@ from product_schema import (
     assert_card_contract_valid,
     assert_entity_names_valid as assert_product_entity_names_valid,
 )
-from product_model_v2 import source_directory, source_path
+from product_model_v2 import load_product_model_v2, source_directory, source_path
 
 ROOT = Path(__file__).resolve().parent.parent
 MDI_VERSION = "7.4.47"
@@ -308,7 +308,7 @@ def load_entity_names_data():
 
 
 def load_card_contract_data():
-    return load_json(CARD_CONTRACT_JSON)
+    return load_product_model_v2().card_contract_data()
 
 
 def replace_between_markers(text, start_tag, end_tag, new_content):
