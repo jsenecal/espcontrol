@@ -47,6 +47,8 @@ per-device composition path without changing the generated output.
   `lock.json` are the access-card family.
 - `v2/cards/action.json`, `option_select.json`, `push.json`, `slider.json`,
   and `subpage.json` are the interaction-card family.
+- `v2/cards/climate.json` and `climate_control.json` are the climate-card
+  family.
 - `v2/devices/guition-esp32-p4-jc8012p4a1.json` and
   `guition-esp32-p4-jc8012p4a1-v2.json` are the 10-inch V1 and V2 device
   entries; shared hardware profiles remain in `product/v2/device_catalog.json`.
