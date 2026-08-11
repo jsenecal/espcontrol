@@ -60,6 +60,12 @@ per-device composition path without changing the generated output.
   entries; shared hardware profiles remain in `product/v2/device_catalog.json`.
 - `v2/devices/guition-esp32-p4-jc1060p470.json` is the authoritative 7-inch
   device entry, including its display and cover-art layout.
+- `v2/devices/guition-esp32-p4-jc4880p443.json` is the authoritative 4.3-inch
+  P4 device entry.
+- `v2/devices/esp32-p4-86.json` is the authoritative square P4-86 device
+  entry, including its local-voice and relay capabilities.
+- `v2/devices/guition-esp32-s3-4848s040.json` is the authoritative compact
+  S3 device entry.
 
 `python3 scripts/check_product_model_v2.py` proves that the composed model is
 byte-for-byte equivalent to the legacy card contract and device catalogue.
