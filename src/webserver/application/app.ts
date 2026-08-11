@@ -30,7 +30,7 @@ export function installAppModule(): GlobalDescriptors {
         link.href = "https://www.buymeacoffee.com/jtenniswood";
         link.target = "_blank";
         link.rel = "noopener";
-        link.innerHTML = '<img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="60" style="border-radius:999px;">';
+        link.setAttribute("aria-label", "Buy Me A Coffee");
         panel.appendChild(link);
         document.body.appendChild(panel);
         syncTabChrome();
