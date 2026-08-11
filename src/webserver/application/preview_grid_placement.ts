@@ -1,6 +1,6 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { createPreviewPlacementController } from "../features/preview_placement_controller";
+import type { PreviewPlacementController } from "../features/preview_placement_controller";
 import { closestGridCell, swapGridCell } from "../features/preview";
 import {
     canPlaceSlotAt as canPlaceSlotAtInGrid,
@@ -10,8 +10,9 @@ import {
     placeSlotAt as placeSlotAtInGrid,
     resolveSpanPosition,
 } from "../features/preview_grid";
-export function installPreviewGridPlacementModule(): GlobalDescriptors {
-    var previewPlacementController: any = createPreviewPlacementController();
+export function installPreviewGridPlacementModule(
+    previewPlacementController: PreviewPlacementController,
+): GlobalDescriptors {
     // ── Preview Grid Placement ────────────────────────────────────────
     function resolveSpanPos(this: any, pos?: any) {
         var c: any = ctx();

@@ -71,6 +71,7 @@ import { installPreviewInteractionsModule } from "./application/preview_interact
 import { createCardEditorDraftController } from "./features/card_editor_draft_controller";
 import { createCardEditorValidationController } from "./features/card_editor_validation_controller";
 import { createCardEditorSaveController } from "./features/card_editor_save_controller";
+import { createPreviewPlacementController } from "./features/preview_placement_controller";
 import { installBackupContractModule } from "./application/backup_contract";
 import { installAppBackupModule } from "./application/app_backup";
 import { installAppStatusPreviewModule } from "./application/app_status_preview";
@@ -154,6 +155,7 @@ function installApplicationCompatibility(): void {
     emptyCard: () => Model.emptyCardConfig(),
   });
   const cardEditorValidation = createCardEditorValidationController();
+  const previewPlacementController = createPreviewPlacementController();
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
@@ -193,7 +195,7 @@ function installApplicationCompatibility(): void {
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave,
   ));
-  installGlobals(installPreviewGridPlacementModule());
+  installGlobals(installPreviewGridPlacementModule(previewPlacementController));
   installGlobals(installPreviewContextMenuModule());
   installGlobals(installPreviewClipboardModule());
   installGlobals(installPreviewInteractionsModule(cardEditorDraft));
