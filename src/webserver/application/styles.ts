@@ -30,7 +30,7 @@ export function installStylesModule(): GlobalDescriptors {
         ".sp-tab-docs .mdi{font-size:16px;line-height:1;opacity:.7}" +
         ".sp-page{display:none}.sp-page.active{display:block}" +
         ".sp-support-btn{position:fixed;right:28px;bottom:28px;z-index:150;display:inline-block;line-height:0}" +
-        ".sp-support-link{display:block;width:214px;height:60px;border-radius:999px}" +
+        ".sp-support-link{display:block;width:214px;height:60px;border-radius:999px;overflow:hidden;text-indent:-9999px;white-space:nowrap}" +
         ".sp-support-btn.sp-support-hidden{display:none}" +
         ".fade-in{animation:fadeIn .3s ease}" +
         "@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}" +
