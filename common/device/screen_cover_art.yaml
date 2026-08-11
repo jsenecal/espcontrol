@@ -2465,10 +2465,17 @@ script:
           }
 
           auto handle_picture_change =
-            [cover_entity, subscription_generation](esphome::StringRef picture, bool local) {
+            [cover_entity, subscription_generation](esphome::StringRef picture, bool local,
+                                                    uint32_t request_generation) {
               if (!id(cover_art_screensaver_enabled).state ||
                   subscription_generation != id(cover_art_subscription_generation) ||
                   cover_entity != id(cover_art_active_media_player_entity)) return;
+
+              if (!id(cover_art_runtime).artwork_refresh.receive(request_generation, local)) {
+                ESP_LOGD("cover_art", "Ignoring stale %s artwork response",
+                         local ? "entity_picture_local" : "entity_picture");
+                return;
+              }
 
               constexpr size_t COVER_ART_URL_MAX_LEN = espcontrol::cover_art::MAX_ARTWORK_URL_LENGTH;
               std::string path = string_ref_limited(picture, COVER_ART_URL_MAX_LEN);
@@ -2491,21 +2498,6 @@ script:
               }
 
               const bool source_changed = id(cover_art_runtime).sources.get(local) != url;
-              if (source_changed && !id(cover_art_runtime).artwork_refresh.active() &&
-                  !id(cover_art_runtime).source_url.empty()) {
-                ESP_LOGD("cover_art", "Ignoring delayed %s artwork callback after batch settled",
-                         local ? "entity_picture_local" : "entity_picture");
-                return;
-              }
-              if (source_changed && !id(cover_art_runtime).artwork_refresh.active()) {
-                id(cover_art_runtime).artwork_refresh.begin(
-                  espcontrol::artwork::ARTWORK_SOURCE_BOTH, false);
-              }
-              if (id(cover_art_runtime).artwork_refresh.active()) {
-                id(cover_art_runtime).artwork_refresh.receive(
-                  id(cover_art_runtime).artwork_refresh.generation, local);
-              }
-
               if (!source_changed) {
                 const bool process_cached =
                     !url.empty() &&
@@ -2538,13 +2530,41 @@ script:
                 id(cover_art_process_cached_artwork).execute();
               }
             };
+          std::function<void()> request_paired_picture =
+            [cover_entity, subscription_generation, handle_picture_change]() {
+              if (!id(cover_art_screensaver_enabled).state ||
+                  subscription_generation != id(cover_art_subscription_generation) ||
+                  cover_entity != id(cover_art_active_media_player_entity)) return;
+              const uint32_t request_generation = id(cover_art_runtime).artwork_refresh.begin(
+                espcontrol::artwork::ARTWORK_SOURCE_BOTH,
+                id(cover_art_runtime).artwork_refresh.forced);
+              const bool remote_queued = ha_get_attribute(
+                cover_entity,
+                std::string("entity_picture"),
+                std::function<void(esphome::StringRef)>(
+                  [handle_picture_change, request_generation](esphome::StringRef picture) {
+                    handle_picture_change(picture, false, request_generation);
+                  })
+              );
+              const bool local_queued = ha_get_attribute(
+                cover_entity,
+                std::string("entity_picture_local"),
+                std::function<void(esphome::StringRef)>(
+                  [handle_picture_change, request_generation](esphome::StringRef picture) {
+                    handle_picture_change(picture, true, request_generation);
+                  })
+              );
+              ESP_LOGD("cover_art", "Paired artwork request remote=%s local=%s",
+                       remote_queued ? "queued" : "failed",
+                       local_queued ? "queued" : "failed");
+            };
           if (!already_subscribed) {
             bool picture_subscribed = ha_subscribe_attribute(
               cover_entity,
               std::string("entity_picture"),
               std::function<void(esphome::StringRef)>(
-                [handle_picture_change](esphome::StringRef picture) {
-                  handle_picture_change(picture, false);
+                [request_paired_picture](esphome::StringRef) {
+                  request_paired_picture();
                 }),
               HA_SUBSCRIPTION_SCOPE_COVER_ART
             );
@@ -2552,14 +2572,15 @@ script:
               cover_entity,
               std::string("entity_picture_local"),
               std::function<void(esphome::StringRef)>(
-                [handle_picture_change](esphome::StringRef picture) {
-                  handle_picture_change(picture, true);
+                [request_paired_picture](esphome::StringRef) {
+                  request_paired_picture();
                 }),
               HA_SUBSCRIPTION_SCOPE_COVER_ART
             );
             ESP_LOGI("cover_art", "Artwork subscriptions entity_picture=%s entity_picture_local=%s",
                      picture_subscribed ? "ready" : "failed",
                      local_picture_subscribed ? "ready" : "failed");
+            request_paired_picture();
           }
           #ifndef ESPCONTROL_LOW_HEAP_COVER_ART
           std::function<void(esphome::StringRef)> handle_media_duration =

@@ -150,6 +150,17 @@ int main() {
   assert(batch.complete());
   assert(batch.finish());
 
+  // Each paired read captures its own generation. A delayed response from the
+  // previous track cannot be accepted into the newer track's batch.
+  const uint32_t track_a_read = batch.begin(ARTWORK_SOURCE_BOTH, false);
+  const uint32_t track_b_read = batch.begin(ARTWORK_SOURCE_BOTH, false);
+  assert(track_b_read != track_a_read);
+  assert(!batch.receive(track_a_read, true));
+  assert(batch.receive(track_b_read, false));
+  assert(batch.receive(track_b_read, true));
+  assert(batch.complete());
+  assert(batch.finish());
+
   // A timeout may settle a one-sided response, after which its delayed
   // companion must not replace the selected artwork mid-download.
   const uint32_t timed_out_read = batch.begin(ARTWORK_SOURCE_BOTH, false);

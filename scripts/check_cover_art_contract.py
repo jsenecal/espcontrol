@@ -172,6 +172,8 @@ for required in (
     "artwork_refresh.begin(",
     "artwork_refresh.receive(",
     "artwork_refresh.finish();",
+    "request_paired_picture",
+    "Ignoring stale %s artwork response",
 ):
     if required not in screen_cover_art:
         raise SystemExit(f"Cover-art screensaver refresh-batch contract missing: {required}")
@@ -261,8 +263,8 @@ resubscribe_end = cover_art.find("\n  - id:", resubscribe_start + 1)
 if resubscribe_start < 0 or resubscribe_end < 0:
     raise SystemExit("Cover art subscription lifecycle contract missing")
 resubscribe = cover_art[resubscribe_start:resubscribe_end]
-if "ha_get_" in resubscribe:
-    raise SystemExit("Cover art must use live subscriptions instead of retained one-shot reads")
+if "request_paired_picture" not in resubscribe:
+    raise SystemExit("Cover art must retain paired artwork refresh requests")
 cover_art_subscription_order = []
 for handler, attribute in (
     ("handle_media_content_type", "media_content_type"),
