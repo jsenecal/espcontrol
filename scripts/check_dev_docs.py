@@ -61,7 +61,7 @@ SOURCE_TRUTH_ROWS: tuple[SourceTruthRow, ...] = (
         "`npm run check:card-runtime-coverage` and `npm run check:saved-config-parity`",
     ),
     SourceTruthRow(
-        "common/config/entity_names.json",
+        "product/v2/entity_names.json",
         ("common/config/entity_names.yaml", "src/webserver/generated/entity_catalog.ts"),
         "python3 scripts/build.py entities",
         "`python3 scripts/build.py entities --check` and `npm run check:product`",
@@ -85,7 +85,7 @@ SOURCE_TRUTH_ROWS: tuple[SourceTruthRow, ...] = (
         "`python3 scripts/generate_device_slots.py --check` and `npm run check:product`",
     ),
     SourceTruthRow(
-        "common/assets/icons.json",
+        "product/v2/icons.json",
         (
             "generated sections inside `common/assets/icon_glyphs.yaml`",
             "generated sections inside `components/espcontrol/icons.h`",
@@ -101,7 +101,7 @@ SOURCE_TRUTH_ROWS: tuple[SourceTruthRow, ...] = (
         "compile the affected firmware before publishing",
     ),
     SourceTruthRow(
-        "common/config/strings.*.txt",
+        "product/v2/translations/strings.*.txt",
         ("components/espcontrol/i18n_generated.h",),
         "python3 scripts/build.py i18n",
         "`python3 scripts/build.py i18n --check` and `npm run check:product`",
@@ -119,13 +119,13 @@ SOURCE_TRUTH_ROWS: tuple[SourceTruthRow, ...] = (
         "`npm run check:web-smoke` and `npm run check:product`",
     ),
     SourceTruthRow(
-        "compatibility/fixtures/product_compatibility.json",
+        "product/v2/product_compatibility.json",
         ("no generated output; protects saved config, backup, layout, and migration behavior",),
         "none",
         "`npm run check:backup-contract` and `npm run check:product`",
     ),
     SourceTruthRow(
-        "`devices/catalog.json`, `common/config/card_contract.json`, `common/config/entity_names.json`, `common/assets/icons.json`, `compatibility/fixtures/product_compatibility.json`",
+        "`devices/catalog.json`, `common/config/card_contract.json`, `product/v2/entity_names.json`, `product/v2/icons.json`, `product/v2/product_compatibility.json`",
         ("product/product_snapshot.json",),
         "python3 scripts/check_product_snapshot.py --update",
         "`npm run check:product-snapshot` and `npm run check:product`",
@@ -203,7 +203,7 @@ CHECK_MATRIX_ROWS: tuple[CheckMatrixRow, ...] = (
         "`npm run check:fast` or compile affected firmware when display layout or device behavior changes",
     ),
     CheckMatrixRow(
-        "`src/webserver/application/config_codec.ts`, `components/espcontrol/button_grid_config.h`, `compatibility/fixtures/product_compatibility.json`",
+        "`src/webserver/application/config_codec.ts`, `components/espcontrol/button_grid_config.h`, `product/v2/product_compatibility.json`",
         "Saved card strings, backup/import/export shape, migration compatibility",
         "`npm run check:backup-contract` and `npm run check:firmware-parser`",
         "`npm run check:product` when compact config, backup, or migration behavior changes",
@@ -215,13 +215,13 @@ CHECK_MATRIX_ROWS: tuple[CheckMatrixRow, ...] = (
         "`npm run check:product`; compile affected firmware before publishing new or changed device support",
     ),
     CheckMatrixRow(
-        "`common/assets/icons.json`, `common/assets/*glyphs.yaml`, `devices/<slug>/device/fonts.yaml`",
+        "`product/v2/icons.json`, `common/assets/*glyphs.yaml`, `devices/<slug>/device/fonts.yaml`",
         "Icon names, glyph coverage, firmware font roles, device font mappings",
         "`python3 scripts/check_icon_groups.py`",
         "`npm run check:product`; compile affected firmware when a visible font role or small-screen layout changes",
     ),
     CheckMatrixRow(
-        "`common/config/entity_names.json`, entity name consumers",
+        "`product/v2/entity_names.json`, entity name consumers",
         "Shared Home Assistant entity names consumed by firmware YAML and the web setup page",
         "`python3 scripts/build.py entities --check`",
         "`npm run check:product` when generated entity files or web behavior changes",
@@ -233,7 +233,7 @@ CHECK_MATRIX_ROWS: tuple[CheckMatrixRow, ...] = (
         "`npm run check:product` when authored product sources also changed",
     ),
     CheckMatrixRow(
-        "`common/config/strings.*.txt`",
+        "`product/v2/translations/strings.*.txt`",
         "Firmware translations and generated i18n header",
         "`python3 scripts/build.py i18n --check`",
         "`npm run check:product` when translated UI strings affect release output",

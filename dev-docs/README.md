@@ -67,7 +67,7 @@ or upstream project instead.
   edit authored sources, never generated outputs.
 - Product metadata starts in `devices/catalog.json`; `devices/manifest.json` is generated for compatibility.
 - Card behavior starts in `common/config/card_contract.json`.
-- Shared Home Assistant entity names start in `common/config/entity_names.json`.
+- Shared Home Assistant entity names start in `product/v2/entity_names.json`.
 - Web setup code lives under `src/webserver/`.
 - Firmware UI code lives in `components/espcontrol/`, with `button_grid.h` as
   the compatibility entry point and focused headers/compiled modules behind it.

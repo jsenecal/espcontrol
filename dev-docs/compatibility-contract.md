@@ -8,7 +8,7 @@ explicit migration path, compatibility fixture, release note, and rollback plan.
 | Surface | Promise | Protected by |
 |---|---|---|
 | Saved card strings | Existing `Button N Config` and subpage config strings keep parsing after firmware or web updates. | `npm run check:firmware-parser`, `npm run check:web-smoke`, `npm run check:backup-contract` |
-| Backup import/export | Backups created by older supported releases import without users recreating layouts by hand. | `compatibility/fixtures/product_compatibility.json`, `npm run check:backup-contract` |
+| Backup import/export | Backups created by older supported releases import without users recreating layouts by hand. | `product/v2/product_compatibility.json`, `npm run check:backup-contract` |
 | Card type names and aliases | Saved card `type` values keep their meaning, including hidden and legacy types. | `common/config/card_contract.json`, `npm run check:card-contract-outputs` |
 | Option values | Existing option keys and values either keep working or have a fallback parser. | `src/webserver/application/config_codec.ts`, `components/espcontrol/button_grid_config.h` |
 | Device slugs | Published device slugs remain valid for firmware bundles, web bundles, docs, manifests, and release assets. | `devices/manifest.json`, `npm run check:device-profiles`, `npm run check:firmware-release` |

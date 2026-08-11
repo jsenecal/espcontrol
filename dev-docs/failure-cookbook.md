@@ -69,7 +69,7 @@ Stop if there is no authored source change that explains the generated diff.
 
 First files:
 
-- `compatibility/fixtures/product_compatibility.json`
+- `product/v2/product_compatibility.json`
 - `src/webserver/application/backup_contract.ts`
 - `src/webserver/application/config_codec.ts`
 
