@@ -31,16 +31,19 @@ export function installConfigPostApiModule(): GlobalDescriptors {
             return;
         var previousPendingChunks: any = EspControlModel.splitSubpageConfigChunks(state.subpageSavePending[slot] || "", keys.length, 255) || [];
         state.subpageSavePending[slot] = full;
+        var directPosts: any = [];
         for (var ki: any = 0; ki < keys.length; ki++) {
             var chunkName: any = entityNameForSlot(keys[ki], slot);
             var chunk: any = chunks[ki] || "";
             if (!subpageChunkShouldPost(slot, keys, chunks, ki, previousPendingChunks))
                 continue;
             if (direct)
-                postTextLegacy(chunkName, chunk);
+                directPosts.push(postTextLegacy(chunkName, chunk));
             else
                 postText(chunkName, chunk);
         }
+        if (direct)
+            return Promise.all(directPosts);
     }
     function saveSubpageEntity(this: any, slot?: any) {
         var sp: any = state.subpages[slot];
@@ -54,11 +57,14 @@ export function installConfigPostApiModule(): GlobalDescriptors {
         var nativeSave: any = nativePanelConfigSubpageWrite(slot, full);
         if (nativeSave) {
             state.subpageSavePending[slot] = full;
-            nativeSave.then(function (result: any) {
+            _postQueue = _postQueue.then(function () { return nativeSave; }).then(function (result: any) {
                 if (result === "legacy-fallback")
-                    saveSubpageEntityLegacy(slot, full, true);
+                    return saveSubpageEntityLegacy(slot, full, true);
+                if (result !== "saved")
+                    _postQueueHadError = true;
+                return result;
             });
-            return;
+            return _postQueue;
         }
         saveSubpageEntityLegacy(slot, full);
     }

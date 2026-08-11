@@ -9,6 +9,7 @@ export function installNativePanelConfigMigrationModule(): GlobalDescriptors {
         return fetch(path, request);
     });
     var _nativePanelConfigSaveQueue: any = Promise.resolve("saved");
+    var _nativePanelConfigLegacyFallback: any = false;
     var NATIVE_PANEL_CONFIG_RETRY_DELAY_MS: any = 250;
     var NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES: any = 20;
 
@@ -30,11 +31,22 @@ export function installNativePanelConfigMigrationModule(): GlobalDescriptors {
         return result;
     }
     function waitForNativePanelConfigDiscovery(this: any, attempts?: any) {
+        if (_nativePanelConfigLegacyFallback)
+            return Promise.resolve("legacy-fallback");
         return beginNativePanelConfigMigration().then(function (supported: any) {
-            if (supported || !_nativePanelConfigClient.retryable())
+            if (supported) {
+                _nativePanelConfigLegacyFallback = false;
                 return supported;
-            if ((attempts || 0) >= NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES)
+            }
+            if (!_nativePanelConfigClient.retryable())
+                return supported;
+            if ((attempts || 0) >= NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES) {
+                // Older firmware never exposes the native endpoints. Keep the
+                // capped decision for later queued writes so each one does not
+                // repeat the full discovery delay before using its legacy path.
+                _nativePanelConfigLegacyFallback = true;
                 return "legacy-fallback";
+            }
             return new Promise(function (resolve: any) {
                 setTimeout(resolve, NATIVE_PANEL_CONFIG_RETRY_DELAY_MS);
             }).then(function () { return waitForNativePanelConfigDiscovery((attempts || 0) + 1); });
@@ -119,6 +131,7 @@ export function installNativePanelConfigMigrationModule(): GlobalDescriptors {
     return {
         "_nativePanelConfigClient": liveGlobal(() => _nativePanelConfigClient, (value?: any) => { _nativePanelConfigClient = value; }),
         "_nativePanelConfigSaveQueue": liveGlobal(() => _nativePanelConfigSaveQueue, (value?: any) => { _nativePanelConfigSaveQueue = value; }),
+        "_nativePanelConfigLegacyFallback": liveGlobal(() => _nativePanelConfigLegacyFallback, (value?: any) => { _nativePanelConfigLegacyFallback = value; }),
         "NATIVE_PANEL_CONFIG_RETRY_DELAY_MS": liveGlobal(() => NATIVE_PANEL_CONFIG_RETRY_DELAY_MS, (value?: any) => { NATIVE_PANEL_CONFIG_RETRY_DELAY_MS = value; }),
         "NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES": liveGlobal(() => NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES, (value?: any) => { NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES = value; }),
         "beginNativePanelConfigMigration": staticGlobal(beginNativePanelConfigMigration),
