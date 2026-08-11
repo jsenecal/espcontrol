@@ -144,12 +144,12 @@ class EspControlAppCore {
   // and callback state receive one core-owned lifetime.
   template<typename BindingService>
   BindingService &home_assistant_binding_service() {
-    return home_assistant_binding_service_.get_or_create<BindingService>();
+    return home_assistant_binding_service_.get_or_create_ui_service<BindingService>();
   }
 
   template<typename NavigationService>
   NavigationService &grid_navigation_service() {
-    return grid_navigation_service_.get_or_create<NavigationService>();
+    return grid_navigation_service_.get_or_create_ui_service<NavigationService>();
   }
 
   // Modal widgets stay in the LVGL-facing UI layer, while their lifecycle
