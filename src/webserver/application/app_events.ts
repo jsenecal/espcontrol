@@ -1,9 +1,11 @@
 import { state } from "../state/app_instance";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ReconnectController } from "../features/reconnect";
+import type { SseHandlerFactory } from "./app_state_event_handlers";
 
 export function installAppEventsModule(
     reconnectController: ReconnectController<unknown>,
+    createSseHandlers: SseHandlerFactory,
 ): GlobalDescriptors {
     // ── SSE ────────────────────────────────────────────────────────────────
     function connectEvents(this: any) {

@@ -96,6 +96,7 @@ import { installAppEventsModule } from "./application/app_events";
 import { installAppModule } from "./application/app";
 import { installAppStartModule } from "./application/app_start";
 import { createReconnectController } from "./features/reconnect";
+import type { SseHandlerFactory } from "./application/app_state_event_handlers";
 import { registerActionCardTypes } from "./cards/action";
 import { registerAlarmCardTypes } from "./cards/alarm";
 import { registerCalendarCardTypes } from "./cards/calendar";
@@ -365,7 +366,10 @@ function installApplicationCompatibility(): void {
   installGlobals(installAppStatusPreviewModule());
   installGlobals(installAppTitleModule());
   installGlobals(installAppConfigEventsModule());
-  installGlobals(installAppStateEventHandlersModule());
+  let sseHandlerFactory: SseHandlerFactory | undefined;
+  installGlobals(installAppStateEventHandlersModule((factory) => {
+    sseHandlerFactory = factory;
+  }));
   const reconnectController = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),
     loadInitialState: (handleState, markConnected) =>
@@ -375,7 +379,8 @@ function installApplicationCompatibility(): void {
     setActiveSource: (source) => { _eventSource = source; },
     schedule: (callback, delayMs) => setTimeout(callback, delayMs),
   });
-  installGlobals(installAppEventsModule(reconnectController));
+  if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
+  installGlobals(installAppEventsModule(reconnectController, sseHandlerFactory));
   installGlobals(installAppModule());
 }
 
