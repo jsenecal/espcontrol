@@ -46,6 +46,25 @@ class FixedRuntimeServiceSlot {
     return *static_cast<Service *>(static_cast<void *>(storage_.data()));
   }
 
+  // Some ESP-IDF builds emit separate type-name constants for a UI type that
+  // crosses the ESPHome component boundary.  Modal state has one concrete
+  // production type, so reuse that fixed storage without a cross-unit token
+  // comparison rather than turning an implementation-detail mismatch into a
+  // firmware-wide abort.
+  template<typename Service>
+  Service &get_or_create_ui_service() {
+    static_assert(sizeof(Service) <= CAPACITY,
+                  "runtime service exceeds the fixed core slot capacity");
+    static_assert(alignof(Service) <= alignof(std::max_align_t),
+                  "runtime service alignment exceeds the fixed core slot");
+    if (destroy_ == nullptr) {
+      new (storage_.data()) Service();
+      type_name_ = service_type<Service>();
+      destroy_ = [](void *storage) { static_cast<Service *>(storage)->~Service(); };
+    }
+    return *static_cast<Service *>(static_cast<void *>(storage_.data()));
+  }
+
   void reset() {
     if (destroy_ != nullptr) destroy_(storage_.data());
     type_name_ = nullptr;
@@ -137,7 +156,7 @@ class EspControlAppCore {
   // state receives the same application-owned lifetime as navigation.
   template<typename ModalService>
   ModalService &modal_state_service() {
-    return modal_state_service_.get_or_create<ModalService>();
+    return modal_state_service_.get_or_create_ui_service<ModalService>();
   }
 
   // Compatibility facade for ESPHome YAML while display ownership migrates to
