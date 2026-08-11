@@ -80,6 +80,7 @@ import { installAppStateEventHandlersModule } from "./application/app_state_even
 import { installAppEventsModule } from "./application/app_events";
 import { installAppModule } from "./application/app";
 import { installAppStartModule } from "./application/app_start";
+import { createReconnectController } from "./features/reconnect";
 import { registerActionCardTypes } from "./cards/action";
 import { registerAlarmCardTypes } from "./cards/alarm";
 import { registerCalendarCardTypes } from "./cards/calendar";
@@ -202,7 +203,16 @@ function installApplicationCompatibility(): void {
   installGlobals(installAppTitleModule());
   installGlobals(installAppConfigEventsModule());
   installGlobals(installAppStateEventHandlersModule());
-  installGlobals(installAppEventsModule());
+  const reconnectController = createReconnectController<unknown>({
+    eventStreamEnabled: () => eventStreamEnabled(),
+    loadInitialState: (handleState, markConnected) =>
+      loadInitialState(handleState, markConnected),
+    createEventSource: () => new EventSource("/events"),
+    getActiveSource: () => _eventSource,
+    setActiveSource: (source) => { _eventSource = source; },
+    schedule: (callback, delayMs) => setTimeout(callback, delayMs),
+  });
+  installGlobals(installAppEventsModule(reconnectController));
   installGlobals(installAppModule());
 }
 
