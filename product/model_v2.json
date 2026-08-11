@@ -1,7 +1,7 @@
 {
   "modelVersion": 2,
   "stage": "generated-pilot",
-  "description": "The Product Model v2 ownership boundary, with the sensor, media, image, and complete light-card family plus the 10-inch V1 device pilot authored under product/.",
+  "description": "The Product Model v2 ownership boundary, with the sensor, media, image, complete light-card family, and 10-inch device profiles authored under product/.",
   "sources": {
     "cardContract": {
       "path": "product/v2/card_contract.json",
@@ -54,7 +54,8 @@
       "light_temperature": "product/v2/cards/light_temperature.json"
     },
     "devices": {
-      "guition-esp32-p4-jc8012p4a1": "product/v2/devices/guition-esp32-p4-jc8012p4a1.json"
+      "guition-esp32-p4-jc8012p4a1": "product/v2/devices/guition-esp32-p4-jc8012p4a1.json",
+      "guition-esp32-p4-jc8012p4a1-v2": "product/v2/devices/guition-esp32-p4-jc8012p4a1-v2.json"
     }
   }
 }
