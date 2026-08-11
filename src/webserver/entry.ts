@@ -2,8 +2,6 @@ import * as DeviceConfig from "./device_config";
 import * as Model from "./model";
 import * as DeviceApi from "./api/device_api";
 import * as RequestFailure from "./api/request_failure";
-import * as PreviewGridFeature from "./features/preview_grid";
-import * as PreviewFeature from "./features/preview";
 import * as SettingsFeature from "./features/settings";
 import * as AlarmDelayAudioController from "./features/alarm_delay_audio_controller";
 import * as ScreensaverController from "./features/screensaver_controller";
@@ -12,7 +10,6 @@ import * as MediaPlaybackController from "./features/media_playback_controller";
 import * as VoiceServicesController from "./features/voice_services_controller";
 import * as ClockBarController from "./features/clock_bar_controller";
 import * as ScreenScheduleController from "./features/screen_schedule_controller";
-import * as ClipboardFeature from "./features/clipboard";
 import * as UiTokens from "./state/ui_tokens";
 import * as AppState from "./state/app_state";
 import * as AppInstance from "./state/app_instance";
@@ -247,9 +244,6 @@ function startEspControl(): void {
     ...Model,
     ...DeviceApi,
     ...RequestFailure,
-    PreviewGridFeature,
-    PreviewFeature,
-    ClipboardFeature,
     createSettingsUiFeature: SettingsFeature.createSettingsUiFeature,
     createAlarmDelayAudioController: AlarmDelayAudioController.createAlarmDelayAudioController,
     createScreensaverController: ScreensaverController.createScreensaverController,

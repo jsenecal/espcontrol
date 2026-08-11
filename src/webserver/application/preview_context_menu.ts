@@ -1,11 +1,13 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { clampMenuPosition } from "../features/preview";
+import { resizeGridSlot } from "../features/preview_grid";
 export function installPreviewContextMenuModule(): GlobalDescriptors {
     // ── Preview Context Menu ──────────────────────────────────────────
     // ── Context menu (unified) ─────────────────────────────────────────────
     var ctxMenu: any = null;
     function positionMenu(this: any, menu?: any, e?: any) {
-        var position: any = PreviewFeature.clampMenuPosition({ x: e.clientX, y: e.clientY }, menu.offsetWidth, menu.offsetHeight, window.innerWidth, window.innerHeight);
+        var position: any = clampMenuPosition({ x: e.clientX, y: e.clientY }, menu.offsetWidth, menu.offsetHeight, window.innerWidth, window.innerHeight);
         menu.style.left = position.x + "px";
         menu.style.top = position.y + "px";
     }
@@ -80,7 +82,7 @@ export function installPreviewContextMenuModule(): GlobalDescriptors {
         var curSz: any = c.sizes[slot] || 1;
         if (curSz === targetSz)
             return;
-        var resized: any = PreviewGridFeature.resizeGridSlot(c.grid, c.sizes, slot, slotPos, targetSz, c.maxSlots, GRID_COLS, !c.isSub);
+        var resized: any = resizeGridSlot(c.grid, c.sizes, slot, slotPos, targetSz, c.maxSlots, GRID_COLS, !c.isSub);
         if (!resized.accepted)
             return;
         c.grid.splice(0, c.grid.length);

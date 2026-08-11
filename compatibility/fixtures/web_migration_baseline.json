@@ -109,8 +109,12 @@
     ]
   },
 <<<<<<< HEAD
+<<<<<<< HEAD
   "bundleSize": { "minified": 2601311, "gzip": 1083879, "gzipTolerance": 8192 }
 =======
   "bundleSize": { "minified": 2546694, "gzip": 1040872, "gzipTolerance": 8192 }
 >>>>>>> c2cf04dc (Import backup features directly)
+=======
+  "bundleSize": { "minified": 2545139, "gzip": 1040465, "gzipTolerance": 8192 }
+>>>>>>> e92d0f73 (Import preview features directly)
 }
