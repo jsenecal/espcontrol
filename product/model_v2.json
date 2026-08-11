@@ -1,7 +1,7 @@
 {
   "modelVersion": 2,
-  "stage": "legacy-adapter",
-  "description": "The Product Model v2 ownership boundary while existing authored files remain in place.",
+  "stage": "generated-pilot",
+  "description": "The Product Model v2 ownership boundary, with the sensor card and 10-inch V1 device pilot authored under product/.",
   "sources": {
     "cardContract": {
       "path": "common/config/card_contract.json",
@@ -40,7 +40,15 @@
     }
   },
   "equivalenceSamples": {
-    "cardType": "",
-    "deviceSlug": "esp32-p4-86"
+    "cardType": "sensor",
+    "deviceSlug": "guition-esp32-p4-jc8012p4a1"
+  },
+  "pilots": {
+    "cards": {
+      "sensor": "product/v2/cards/sensor.json"
+    },
+    "devices": {
+      "guition-esp32-p4-jc8012p4a1": "product/v2/devices/guition-esp32-p4-jc8012p4a1.json"
+    }
   }
 }

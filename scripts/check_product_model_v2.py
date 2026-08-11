@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify that Product Model v2 mirrors the current legacy product sources."""
+"""Verify that Product Model v2 pilot sources preserve legacy output exactly."""
 
 from __future__ import annotations
 
@@ -21,18 +21,25 @@ def load_json(path: Path) -> dict:
 def assert_equivalence() -> None:
     model = load_product_model_v2()
     cards = load_json(model.source_path("cardContract"))["cards"]
-    profiles = load_json(model.source_path("deviceProfiles"))["devices"]
+    devices = load_json(model.source_path("deviceCatalog"))["devices"]
     assert model.card_type in cards, "Product Model v2 sample card must exist in the legacy card contract"
-    assert model.device_slug in profiles, "Product Model v2 sample device must exist in the legacy manifest"
+    assert model.device_slug in devices, "Product Model v2 sample device must exist in the legacy device catalog"
 
     # Canonical JSON makes this a byte-for-byte comparison of the selected
     # legacy payload and the Product Model adapter view used by later generators.
     legacy_card = json.dumps(cards[model.card_type], sort_keys=True, separators=(",", ":"))
     adapter_card = json.dumps(model.sample_card(), sort_keys=True, separators=(",", ":"))
-    legacy_device = json.dumps(profiles[model.device_slug], sort_keys=True, separators=(",", ":"))
+    legacy_device = json.dumps(devices[model.device_slug], sort_keys=True, separators=(",", ":"))
     adapter_device = json.dumps(model.sample_device(), sort_keys=True, separators=(",", ":"))
-    assert legacy_card == adapter_card, "selected card differs from its Product Model adapter view"
-    assert legacy_device == adapter_device, "selected device differs from its Product Model adapter view"
+    assert legacy_card == adapter_card, "selected card differs from its Product Model source"
+    assert legacy_device == adapter_device, "selected device differs from its Product Model source"
+
+    legacy_contract = json.dumps(load_json(model.source_path("cardContract")), sort_keys=True, separators=(",", ":"))
+    generated_contract = json.dumps(model.card_contract_data(), sort_keys=True, separators=(",", ":"))
+    legacy_catalog = json.dumps(load_json(model.source_path("deviceCatalog")), sort_keys=True, separators=(",", ":"))
+    generated_catalog = json.dumps(model.device_catalog_data(), sort_keys=True, separators=(",", ":"))
+    assert legacy_contract == generated_contract, "Product Model card contract output differs from legacy output"
+    assert legacy_catalog == generated_catalog, "Product Model device catalog output differs from legacy output"
 
 
 def run_self_test() -> None:
@@ -50,6 +57,17 @@ def run_self_test() -> None:
             assert "sources must define every Product Model v2 source exactly once" in str(exc)
         else:
             raise AssertionError("missing product source must fail validation")
+    invalid = copy.deepcopy(data)
+    invalid["pilots"]["cards"].pop("sensor")
+    with TemporaryDirectory() as directory:
+        path = Path(directory) / "model.json"
+        path.write_text(json.dumps(invalid), encoding="utf-8")
+        try:
+            load_product_model_v2(path)
+        except ProductModelV2Error as exc:
+            assert "pilots.cards must be a non-empty object" in str(exc)
+        else:
+            raise AssertionError("a generated pilot must define its sample card")
     print("Product Model v2 self-test passed.")
 
 
@@ -62,7 +80,7 @@ def main() -> int:
             run_self_test()
         else:
             assert_equivalence()
-            print("Product Model v2 legacy adapter matches its selected legacy card and device.")
+            print("Product Model v2 generated pilot matches its selected legacy card and device.")
     except (AssertionError, ProductModelV2Error, KeyError) as exc:
         print(f"ERROR: {exc}")
         return 1
