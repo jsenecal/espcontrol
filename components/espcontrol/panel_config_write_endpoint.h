@@ -34,7 +34,15 @@ class PanelConfigWriteHandler final
                : 0;
   }
   bool canReceiveBody(esphome::web_server_idf::AsyncWebServerRequest *request) override {
-    if (!panel_config_http_context_ready()) return false;
+    if (!panel_config_http_context_ready()) {
+      // AsyncWebServer stops processing when this returns false, so reply here
+      // rather than relying on handleRequest() to report the startup state.
+      httpd_req_t *raw_request = *request;
+      send_status(raw_request, "503 Service Unavailable",
+                  "Native configuration is starting");
+      reset_upload();
+      return false;
+    }
     PanelConfigHttpContext &context = panel_config_http_context();
 #ifdef USE_WEBSERVER_AUTH
     if (!request->authenticate(context.username, context.password)) {

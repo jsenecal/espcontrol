@@ -149,7 +149,8 @@ bool EspControlApp::create_native_configuration_runtime() {
 void EspControlApp::register_panel_config_endpoints() {
   // Do not let an early reconnect cache a legacy-only capability response
   // while the deferred native configuration setup is still in progress.
-  if (!native_configuration_initialized_) return;
+  if (!native_configuration_initialized_ || panel_config_http_context_bound_)
+    return;
   configuration::ConfigurationService *const panel_config_service =
       core_.configuration_service();
   NativeConfigurationRuntime *const runtime = native_configuration_runtime_.get();
@@ -167,6 +168,10 @@ void EspControlApp::register_panel_config_endpoints() {
       web_auth_password_ == nullptr ? "" : web_auth_password_);
   configuration::set_panel_config_read_supported(true);
   configuration::set_panel_config_write_supported(true);
+  // The context transitions from not-ready to ready once. Rebinding it from
+  // loop() would briefly make concurrent requests observe a false readiness
+  // flag and rewrite the shared pointers while the web task is using them.
+  panel_config_http_context_bound_ = true;
 }
 
 void EspControlApp::apply_boot_configuration() {
