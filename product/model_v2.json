@@ -1,7 +1,7 @@
 {
   "modelVersion": 2,
   "stage": "generated-pilot",
-  "description": "The Product Model v2 ownership boundary, with the sensor, media, image, light-card family, base fan card, and 10-inch device profiles authored under product/.",
+  "description": "The Product Model v2 ownership boundary, with the sensor, media, image, light-card family, base and speed fan cards, and 10-inch device profiles authored under product/.",
   "sources": {
     "cardContract": {
       "path": "product/v2/card_contract.json",
@@ -52,7 +52,8 @@
       "light_brightness": "product/v2/cards/light_brightness.json",
       "light_control": "product/v2/cards/light_control.json",
       "light_temperature": "product/v2/cards/light_temperature.json",
-      "fan_switch": "product/v2/cards/fan_switch.json"
+      "fan_switch": "product/v2/cards/fan_switch.json",
+      "fan_speed": "product/v2/cards/fan_speed.json"
     },
     "devices": {
       "guition-esp32-p4-jc8012p4a1": "product/v2/devices/guition-esp32-p4-jc8012p4a1.json",
