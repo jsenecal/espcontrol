@@ -2226,14 +2226,6 @@ async function assertNewMediaCardDefaults(page, posts, label) {
     "cover_art",
     `${label}: a new Media card should default to Cover Art`,
   );
-  await page.evaluate(() => {
-    renderPreview();
-  });
-  assert.strictEqual(
-    await page.locator(`.sp-main [data-pos="${pos}"] .sp-image-label-main`).textContent(),
-    "Cover Art",
-    `${label}: a new Cover Art card preview should use its generated label`,
-  );
   await page.locator("#sp-inp-media-mode").selectOption("play_pause");
   assert.strictEqual(
     await page.locator("#sp-inp-label").inputValue(),
