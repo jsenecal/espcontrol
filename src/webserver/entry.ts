@@ -45,7 +45,7 @@ import { installConfigSensorOptionsModule } from "./application/config_sensor_op
 import { installConfigConfirmationOptionsModule } from "./application/config_confirmation_options";
 import { installConfigAccessClimateAlarmOptionsModule } from "./application/config_access_climate_alarm_options";
 import { installConfigCodecModule } from "./application/config_codec";
-import { installNativePanelConfigMigrationModule } from "./application/native_panel_config_migration";
+import { createNativePanelConfigMigrationController } from "./application/native_panel_config_migration";
 import { installConfigPostApiModule } from "./application/config_post_api";
 import { installStateLoaderApiModule } from "./application/state_loader_api";
 import { installArtworkPostApiModule } from "./application/artwork_post_api";
@@ -142,8 +142,8 @@ function installApplicationCompatibility(): void {
   installGlobals(installScreensaverTimeoutModule());
   installGlobals(installC6FirmwareUiModule());
   installGlobals(installGridModule());
-  installGlobals(installNativePanelConfigMigrationModule());
-  installGlobals(installApiModule());
+  const nativePanelConfig = createNativePanelConfigMigrationController();
+  installGlobals(installApiModule(nativePanelConfig));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule());
   installGlobals(installConfigOptionCoreModule());
@@ -155,7 +155,7 @@ function installApplicationCompatibility(): void {
   installGlobals(installConfigConfirmationOptionsModule());
   installGlobals(installConfigAccessClimateAlarmOptionsModule());
   installGlobals(installConfigCodecModule());
-  installGlobals(installConfigPostApiModule());
+  installGlobals(installConfigPostApiModule(nativePanelConfig));
   installGlobals(installStateLoaderApiModule());
   installGlobals(installArtworkPostApiModule());
   installGlobals(installScreenSchedulePostApiModule());

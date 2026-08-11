@@ -1,6 +1,10 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installApiModule(): GlobalDescriptors {
+import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
+
+export function installApiModule(
+    nativePanelConfig: NativePanelConfigController | null = null,
+): GlobalDescriptors {
     // ── POST queue ─────────────────────────────────────────────────────────
     var _deviceApi: any = createDeviceApi(function (this: any, url?: any, init?: any) { return fetch(url, init); });
     var _postQueue: any = Promise.resolve(null);
@@ -73,7 +77,9 @@ export function installApiModule(): GlobalDescriptors {
         });
     }
     function postText(this: any, name?: any, value?: any) {
-        var nativeSave: any = nativePanelConfigTextWrite(name, value);
+        var nativeSave: any = nativePanelConfig
+            ? nativePanelConfig.writeText(String(name || ""), String(value || ""))
+            : null;
         if (nativeSave) {
             _postQueue = _postQueue.then(function () { return nativeSave; }).then(function (result: any) {
                 if (result === "legacy-fallback")
