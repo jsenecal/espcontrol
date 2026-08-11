@@ -2259,14 +2259,13 @@ inline bool climate_control_modal_memory_available() {
 }
 
 inline void climate_control_open_modal(ClimateControlCtx *ctx) {
-#if defined(CONFIG_IDF_TARGET_ESP32P4)
+  (void) ctx;
   // The P4 firmware can start with its LVGL allocator exhausted after artwork
   // initialisation.  Opening this large modal then aborts the whole firmware,
   // taking down Home Assistant and the web server with it.  Keep the main
   // controls available while the compact P4 climate view is rebuilt.
   ESP_LOGW("climate_control", "Climate details are temporarily unavailable on this display");
   return;
-#endif
   if (!ctx || !ctx->available || !climate_control_modal_memory_available()) return;
   ControlModalShell shell = control_modal_open_shell(
     ControlModalKind::CLIMATE, ctx->btn, ctx->width_compensation_percent,
