@@ -186,7 +186,6 @@ declare global {
   var WEB_UI_COLORS: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
   var _backupFeature: any;
-  var _deviceApi: any;
   var _eventSource: any;
   var _postQueue: any;
   var _postQueueHadError: any;
@@ -423,7 +422,6 @@ declare global {
   var createBackupEnvelope: any;
   var createClipboardEntry: any;
   var createClockBarItemElement: any;
-  var createDeviceApi: any;
   var createDisclosureChevron: any;
   var createEntityToggleSection: any;
   var createHourSelect: any;

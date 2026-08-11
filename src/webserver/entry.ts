@@ -1,6 +1,6 @@
 import * as DeviceConfig from "./device_config";
 import * as Model from "./model";
-import * as DeviceApi from "./api/device_api";
+import { createDeviceApi } from "./api/device_api";
 import * as RequestFailure from "./api/request_failure";
 import * as UiTokens from "./state/ui_tokens";
 import * as AppState from "./state/app_state";
@@ -143,14 +143,15 @@ function installApplicationCompatibility(): void {
   installGlobals(installScreensaverTimeoutModule());
   installGlobals(installC6FirmwareUiModule());
   installGlobals(installGridModule());
+  const deviceApi = createDeviceApi((url, init) => fetch(url, init));
   const nativePanelConfig = createNativePanelConfigMigrationController();
   const cardEditorDraft = createCardEditorDraftController({
     cloneCard: (button) => Model.cloneCardConfig(button),
     emptyCard: () => Model.emptyCardConfig(),
   });
-  installGlobals(installApiModule(nativePanelConfig));
+  installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
-  installGlobals(installPublicFirmwareInstallModule());
+  installGlobals(installPublicFirmwareInstallModule(deviceApi));
   installGlobals(installConfigOptionCoreModule());
   installGlobals(installConfigMediaOptionsModule());
   installGlobals(installConfigImageOptionsModule());
@@ -239,7 +240,6 @@ function startEspControl(): void {
     ...DeviceConfig,
     EspControlModel: Model,
     ...Model,
-    ...DeviceApi,
     ...RequestFailure,
     ...UiTokens,
     ...AppState,

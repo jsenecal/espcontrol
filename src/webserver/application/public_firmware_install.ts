@@ -1,6 +1,10 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installPublicFirmwareInstallModule(): GlobalDescriptors {
+import type { DeviceApi } from "../api/device_api";
+
+export function installPublicFirmwareInstallModule(
+    deviceApi: DeviceApi,
+): GlobalDescriptors {
     // ── Public Firmware Web OTA ────────────────────────────────────────────
     function ensurePublicFirmwareOtaUrl(this: any, info?: any) {
         info = info || selectedFirmwareInfo();
@@ -56,7 +60,7 @@ export function installPublicFirmwareInstallModule(): GlobalDescriptors {
             return ensurePublicFirmwareOtaUrl(info).then(function (this: any, otaUrl?: any) {
                 if (!otaUrl)
                     throw new Error("Firmware file is not available yet.");
-                return _deviceApi.request(otaUrl, { cache: "no-store" });
+                return deviceApi.request(otaUrl, { cache: "no-store" });
             }).then(function (this: any, result?: any) {
                 if (result.kind === "network-error")
                     throw result.error;
@@ -69,7 +73,7 @@ export function installPublicFirmwareInstallModule(): GlobalDescriptors {
                 var form: any = new FormData();
                 form.append("file", blob, filename);
                 uploadStarted = true;
-                return _deviceApi.request("/update", { method: "POST", body: form });
+                return deviceApi.request("/update", { method: "POST", body: form });
             }).then(function (this: any, result?: any) {
                 if (result.kind === "network-error")
                     throw result.error;
