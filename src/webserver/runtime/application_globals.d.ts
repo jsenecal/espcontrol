@@ -59,7 +59,6 @@ declare global {
   var CLOCK_BAR_NIGHT_MODE_UNAVAILABLE: any;
   var CLOCK_BAR_TIME_UNAVAILABLE: any;
   var CLOCK_BAR_UNAVAILABLE: any;
-  var createScreenScheduleController: any;
   var _screenScheduleController: any;
   var screenScheduleControllerState: any;
   var applyScreenScheduleControllerState: any;
@@ -436,10 +435,6 @@ declare global {
   var createMdiIcon: any;
   var createPanelConfigBackupPayload: any;
   var createRangeSlider: any;
-  var createCoverArtScreensaverController: any;
-  var createMediaPlaybackController: any;
-  var createVoiceServicesController: any;
-  var createClockBarController: any;
   var _coverArtScreensaverController: any;
   var _mediaPlaybackController: any;
   var _voiceServicesController: any;
@@ -456,9 +451,6 @@ declare global {
   var coverArtScreensaverState: any;
   var applyCoverArtScreensaverState: any;
   var createScreensaverThenControls: any;
-  var createScreensaverController: any;
-  var createSettingsUiFeature: any;
-  var createAlarmDelayAudioController: any;
   var createSseHandlers: any;
   var createTimeInput: any;
   var ctx: any;
@@ -1039,7 +1031,6 @@ declare global {
   var screenRotationStartupRequired: any;
   var screenWidthPercent: any;
   var screensaverActionOption: any;
-  var screensaverControlState: any;
   var screensaverTimeoutSupported: any;
   var segmentControl: any;
   var selectButton: any;
@@ -1213,7 +1204,6 @@ declare global {
   var temperatureUnitSymbol: any;
   var textInput: any;
   var textSpan: any;
-  var timedSettingLabel: any;
   var timezoneCardCityLabel: any;
   var timezoneCardTimeParts: any;
   var timezoneOffsetMinutes: any;
