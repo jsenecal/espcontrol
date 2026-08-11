@@ -232,7 +232,10 @@ void EspControlApp::initialize_native_configuration() {
   panel_config_service->set_runtime_adapter(&runtime.legacy_config);
   if (!runtime.legacy_config.configured()) {
     ESP_LOGW(TAG, "Native configuration sources are not configured");
-  } else if (!runtime.blobs.begin()) {
+  } else if (panel_config_card_images_storage_
+                 ? !runtime.blobs.begin_card_images_partition(
+                       PANEL_CONFIG_STORAGE_SLOT_CAPACITY)
+                 : !runtime.blobs.begin()) {
     ESP_LOGE(TAG, "Native configuration storage is unavailable");
   } else {
     ESP_LOGI(TAG, "Allocating native configuration buffers");

@@ -45,6 +45,9 @@ class EspControlApp : public esphome::Component {
       esphome::text::Text *subpage_2, esphome::text::Text *subpage_3,
       esphome::text::Text *subpage_4, esphome::text::Text *subpage_5,
       esphome::text::Text *subpage_6, esphome::text::Text *subpage_7);
+  void set_panel_config_card_images_storage(bool enabled) {
+    panel_config_card_images_storage_ = enabled;
+  }
   void set_web_auth_credentials(const char *username, const char *password) {
     web_auth_username_ = username;
     web_auth_password_ = password;
@@ -68,6 +71,7 @@ class EspControlApp : public esphome::Component {
   esphome::text::Text *panel_config_button_order_{nullptr};
   esphome::text::Text *panel_config_button_on_color_{nullptr};
   std::array<PanelConfigTextSources, 32> panel_config_button_texts_{};
+  bool panel_config_card_images_storage_{false};
   // This owns every non-trivial configuration object. Keeping it separate
   // leaves the ESPHome-created application object safe to construct before
   // the framework's allocators and component setup are ready.
