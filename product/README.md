@@ -43,6 +43,8 @@ per-device composition path without changing the generated output.
 - `v2/cards/weather.json` and `weather_forecast.json` are the weather family.
 - `v2/cards/internal.json`, `local_sensor.json`, and `screen_lock.json` are
   the system-card family.
+- `v2/cards/cover.json`, `door_window.json`, `garage.json`, `gate.json`, and
+  `lock.json` are the access-card family.
 - `v2/devices/guition-esp32-p4-jc8012p4a1.json` and
   `guition-esp32-p4-jc8012p4a1-v2.json` are the 10-inch V1 and V2 device
   entries; shared hardware profiles remain in `product/v2/device_catalog.json`.
