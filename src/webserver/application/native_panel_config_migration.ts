@@ -10,6 +10,7 @@ export function installNativePanelConfigMigrationModule(): GlobalDescriptors {
     });
     var _nativePanelConfigSaveQueue: any = Promise.resolve("saved");
     var NATIVE_PANEL_CONFIG_RETRY_DELAY_MS: any = 250;
+    var NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES: any = 20;
 
     function beginNativePanelConfigMigration(this: any) {
         if (typeof fetch !== "function")
@@ -28,13 +29,15 @@ export function installNativePanelConfigMigrationModule(): GlobalDescriptors {
             showBanner("Could not save the configuration. Check the connection and try again.", "error");
         return result;
     }
-    function waitForNativePanelConfigDiscovery(this: any) {
+    function waitForNativePanelConfigDiscovery(this: any, attempts?: any) {
         return beginNativePanelConfigMigration().then(function (supported: any) {
             if (supported || !_nativePanelConfigClient.retryable())
                 return supported;
+            if ((attempts || 0) >= NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES)
+                return "legacy-fallback";
             return new Promise(function (resolve: any) {
                 setTimeout(resolve, NATIVE_PANEL_CONFIG_RETRY_DELAY_MS);
-            }).then(waitForNativePanelConfigDiscovery);
+            }).then(function () { return waitForNativePanelConfigDiscovery((attempts || 0) + 1); });
         });
     }
     function scheduleNativePanelConfigSave(this: any, update?: any) {
@@ -56,12 +59,16 @@ export function installNativePanelConfigMigrationModule(): GlobalDescriptors {
                 return waitForNativePanelConfigDiscovery();
             })
             .then(function (supported: any) {
+                if (supported === "legacy-fallback")
+                    return supported;
                 return supported ? _nativePanelConfigClient.save(update) : "unsupported";
             })
             .then(function (result: any) {
                 if (result !== "unsupported" || !_nativePanelConfigClient.retryable())
                     return result;
                 return waitForNativePanelConfigDiscovery().then(function (supported: any) {
+                    if (supported === "legacy-fallback")
+                        return supported;
                     return supported ? _nativePanelConfigClient.save(update) : result;
                 });
             })
@@ -113,6 +120,7 @@ export function installNativePanelConfigMigrationModule(): GlobalDescriptors {
         "_nativePanelConfigClient": liveGlobal(() => _nativePanelConfigClient, (value?: any) => { _nativePanelConfigClient = value; }),
         "_nativePanelConfigSaveQueue": liveGlobal(() => _nativePanelConfigSaveQueue, (value?: any) => { _nativePanelConfigSaveQueue = value; }),
         "NATIVE_PANEL_CONFIG_RETRY_DELAY_MS": liveGlobal(() => NATIVE_PANEL_CONFIG_RETRY_DELAY_MS, (value?: any) => { NATIVE_PANEL_CONFIG_RETRY_DELAY_MS = value; }),
+        "NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES": liveGlobal(() => NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES, (value?: any) => { NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES = value; }),
         "beginNativePanelConfigMigration": staticGlobal(beginNativePanelConfigMigration),
         "nativePanelConfigMigrationSupported": staticGlobal(nativePanelConfigMigrationSupported),
         "nativePanelConfigSubpageWrite": staticGlobal(nativePanelConfigSubpageWrite),
