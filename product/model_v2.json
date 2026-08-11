@@ -1,7 +1,7 @@
 {
   "modelVersion": 2,
   "stage": "generated-pilot",
-  "description": "The Product Model v2 ownership boundary, with the sensor card and 10-inch V1 device pilot authored under product/.",
+  "description": "The Product Model v2 ownership boundary, with the sensor and media card pilots plus the 10-inch V1 device pilot authored under product/.",
   "sources": {
     "cardContract": {
       "path": "product/v2/card_contract.json",
@@ -45,7 +45,8 @@
   },
   "pilots": {
     "cards": {
-      "sensor": "product/v2/cards/sensor.json"
+      "sensor": "product/v2/cards/sensor.json",
+      "media": "product/v2/cards/media.json"
     },
     "devices": {
       "guition-esp32-p4-jc8012p4a1": "product/v2/devices/guition-esp32-p4-jc8012p4a1.json"
