@@ -113,13 +113,13 @@ export async function runNativePanelConfigTests(migrationFixture?: MigrationFixt
     if (path === "/api/v1/capabilities") {
       return nativeInitializationComplete
         ? response(200)
-        : { ...response(404), json: async () => ({}) };
+        : { ...response(503), json: async () => ({}) };
     }
     if (request?.method === "PUT") return response(204);
     return response(200, document, "\"8\"");
   });
   equal(await reconnectingClient.discover(), false,
-    "an editor reconnecting during initialization sees native config as temporarily unavailable");
+    "an editor reconnecting during initialization treats the retryable 503 as temporary");
   equal(reconnectingClient.retryable(), true,
     "a missing capabilities endpoint is retried after deferred initialization");
   nativeInitializationComplete = true;
