@@ -457,7 +457,6 @@ declare global {
   var applyCoverArtScreensaverState: any;
   var createScreensaverThenControls: any;
   var createScreensaverController: any;
-  var createSettingsUiFeature: any;
   var createAlarmDelayAudioController: any;
   var createSseHandlers: any;
   var createTimeInput: any;
@@ -1039,7 +1038,6 @@ declare global {
   var screenRotationStartupRequired: any;
   var screenWidthPercent: any;
   var screensaverActionOption: any;
-  var screensaverControlState: any;
   var screensaverTimeoutSupported: any;
   var segmentControl: any;
   var selectButton: any;
@@ -1213,7 +1211,6 @@ declare global {
   var temperatureUnitSymbol: any;
   var textInput: any;
   var textSpan: any;
-  var timedSettingLabel: any;
   var timezoneCardCityLabel: any;
   var timezoneCardTimeParts: any;
   var timezoneOffsetMinutes: any;

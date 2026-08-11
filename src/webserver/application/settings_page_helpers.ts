@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { createSettingsUiFeature, timedSettingLabel } from "../features/settings";
 export function installSettingsPageHelpersModule(): GlobalDescriptors {
     // ── Settings Page Helpers ──────────────────────────────────────────
     // ── Settings UI helpers ─────────────────────────────────────────────
