@@ -10,12 +10,19 @@ export interface BackupFileControllerOptions {
   readonly showBanner: (message: string, kind: BackupFileBannerKind) => void;
 }
 
+export interface BackupFileController {
+  download(data: unknown, filename: string): void;
+  import(onBackup: (data: unknown) => void): void;
+}
+
 /**
  * Owns the browser-independent part of backup file transfer. The application
  * adapter supplies the DOM picker and download implementation while this
  * controller keeps validation and user-facing errors consistent.
  */
-export function createBackupFileController(options: BackupFileControllerOptions) {
+export function createBackupFileController(
+  options: BackupFileControllerOptions,
+): BackupFileController {
   return {
     download(data: unknown, filename: string): void {
       options.transport.download(JSON.stringify(data, null, 2), filename);

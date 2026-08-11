@@ -5,6 +5,7 @@ import * as RequestFailure from "./api/request_failure";
 import * as UiTokens from "./state/ui_tokens";
 import * as AppState from "./state/app_state";
 import * as AppInstance from "./state/app_instance";
+import { state } from "./state/app_instance";
 import * as EventAliases from "./state/event_aliases";
 import * as EventState from "./state/event_state";
 import * as FirmwareEvents from "./state/firmware_events";
@@ -80,6 +81,10 @@ import { createAlarmDelayAudioController } from "./features/alarm_delay_audio_co
 import { createScreensaverController } from "./features/screensaver_controller";
 import { createCoverArtScreensaverController } from "./features/cover_art_screensaver_controller";
 import { createMediaPlaybackController } from "./features/media_playback_controller";
+import { createBackupImportController } from "./features/backup_import_controller";
+import { createBackupExportController } from "./features/backup_export_controller";
+import { createBackupFileController } from "./features/backup_file_controller";
+import { createBackupRestoreController } from "./features/backup_restore_controller";
 import { installBackupContractModule } from "./application/backup_contract";
 import { installAppBackupModule } from "./application/app_backup";
 import { installAppStatusPreviewModule } from "./application/app_status_preview";
@@ -246,7 +251,104 @@ function installApplicationCompatibility(): void {
   installGlobals(installPreviewClipboardModule());
   installGlobals(installPreviewInteractionsModule(cardEditorDraft));
   installGlobals(installBackupContractModule());
-  installGlobals(installAppBackupModule());
+  const normalizeImportedPanelSettings = (settings: any) => {
+    if (!settings) return null;
+    return EspControlModel.normalizeBackupPanelSettings(settings, {
+      timezone: state.timezone,
+      language: state.language,
+      clockFormat: state.clockFormat,
+      clockFormatOptions: state.clockFormatOptions,
+      ntpDefaults: NTP_SERVER_DEFAULTS,
+      ntpServer1: state.ntpServer1,
+      ntpServer2: state.ntpServer2,
+      ntpServer3: state.ntpServer3,
+      coverArtHomeAssistantProtocol: state.homeAssistantArtworkProtocol,
+      coverArtHomeAssistantPort: state.coverArtHomeAssistantPort,
+      coverArtHomeAssistantBaseUrl: state.coverArtHomeAssistantBaseUrl,
+      autoUpdate: state.autoUpdate,
+      updateFrequency: state.updateFrequency,
+      updateFrequencyOptions: state.updateFreqOptions,
+      screenRotationOptions: allScreenRotationOptions(),
+    });
+  };
+  const gridColsForImportedSettings = (importedSettings: any): number => {
+    const rotation = importedSettings ? importedSettings.screenRotation : state.screenRotation;
+    const layout = isPortraitRotation(rotation) && CFG.portrait ? CFG.portrait : CFG;
+    return layout.cols || CFG.cols;
+  };
+  const backupExportController = createBackupExportController({
+    serializeButtonConfig,
+    serializeSubpageConfig,
+  });
+  const backupImportController = createBackupImportController<any, any, any, any>({
+    normalizeBackup: normalizeBackupConfig,
+    normalizeSettings: normalizeImportedPanelSettings,
+    gridColsForSettings: gridColsForImportedSettings,
+    getGridCols: () => GRID_COLS,
+    setGridCols: (gridCols) => { GRID_COLS = gridCols; },
+    planBackupImport,
+  });
+  const backupRestoreController = createBackupRestoreController<any, any>({
+    plan: backupImportController.plan,
+    warnings: (plannedImport) => plannedImport.backupPlan.warnings,
+    showBanner,
+    setPostThrottle,
+    resetPostQueueError,
+    postQueueIdle,
+    postQueueHadError,
+  });
+  const backupFileController = createBackupFileController({
+    transport: {
+      download(content, filename) {
+        const blob = new Blob([content], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      },
+      chooseJsonFile(onText, onError) {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.accept = ".json";
+        input.style.display = "none";
+        const cleanupInput = () => {
+          if (input.parentNode) input.parentNode.removeChild(input);
+        };
+        input.addEventListener("cancel", cleanupInput);
+        input.addEventListener("change", () => {
+          if (!input.files || !input.files[0]) {
+            cleanupInput();
+            return;
+          }
+          const reader = new FileReader();
+          reader.onerror = () => {
+            cleanupInput();
+            onError();
+          };
+          reader.onload = () => {
+            cleanupInput();
+            onText(String(reader.result || ""));
+          };
+          reader.readAsText(input.files[0]);
+        });
+        document.body.appendChild(input);
+        input.click();
+      },
+    },
+    showBanner,
+  });
+  installGlobals(installAppBackupModule({
+    backupExport: backupExportController,
+    backupImport: backupImportController,
+    backupRestore: backupRestoreController,
+    backupFile: backupFileController,
+    normalizeImportedPanelSettings,
+    gridColsForImportedSettings,
+  }));
   installGlobals(installAppStatusPreviewModule());
   installGlobals(installAppTitleModule());
   installGlobals(installAppConfigEventsModule());
