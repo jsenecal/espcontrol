@@ -108,9 +108,5 @@
       "/number/Screen%20Saver%3A%20Cover%20Art%20Delay/set?value=30"
     ]
   },
-<<<<<<< HEAD
-  "bundleSize": { "minified": 2600987, "gzip": 1083769, "gzipTolerance": 8192 }
-=======
-  "bundleSize": { "minified": 2546018, "gzip": 1040580, "gzipTolerance": 8192 }
->>>>>>> 87599d3b (Import feature controllers directly)
+  "bundleSize": { "minified": 2600563, "gzip": 1083660, "gzipTolerance": 8192 }
 }
