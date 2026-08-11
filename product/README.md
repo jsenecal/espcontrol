@@ -35,6 +35,7 @@ per-device composition path without changing the generated output.
 - `v2/cards/sensor.json` is the authoritative Sensor card definition.
 - `v2/cards/media.json` is the authoritative Media card definition, including
   the cover-art configuration used by media-player cards.
+- `v2/cards/image.json` is the authoritative Camera/Image card definition.
 - `v2/devices/guition-esp32-p4-jc8012p4a1.json` is the authoritative 10-inch
   V1 device entry; shared hardware profiles remain in `product/v2/device_catalog.json`.
 
