@@ -183,7 +183,11 @@ def _pilot_sources(kind: str, data: Any) -> dict[str, Path]:
         raise ProductModelV2Error(f"pilots.{kind} must be a non-empty object")
     sources: dict[str, Path] = {}
     for identifier, path_value in data.items():
-        if not isinstance(identifier, str) or not identifier:
+        # The card contract's default switch is intentionally keyed by an
+        # empty string. It is a fallback entry, not a user-selectable card
+        # type, so allow it only for card pilots. Device identifiers must
+        # remain explicit non-empty slugs.
+        if not isinstance(identifier, str) or (not identifier and kind != "cards"):
             raise ProductModelV2Error(f"pilots.{kind} identifiers must be non-empty strings")
         if not isinstance(path_value, str) or not path_value:
             raise ProductModelV2Error(f"pilots.{kind}.{identifier} must be a non-empty path")

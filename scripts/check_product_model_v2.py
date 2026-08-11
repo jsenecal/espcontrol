@@ -70,6 +70,24 @@ def run_self_test() -> None:
             assert "pilots.cards must be a non-empty object" in str(exc)
         else:
             raise AssertionError("a generated pilot must define its sample card")
+    default_card = copy.deepcopy(data)
+    default_card["pilots"]["cards"][""] = default_card["pilots"]["cards"]["sensor"]
+    with TemporaryDirectory() as directory:
+        path = Path(directory) / "model.json"
+        path.write_text(json.dumps(default_card), encoding="utf-8")
+        model = load_product_model_v2(path)
+        assert "" in model.pilot_cards, "the default switch fallback must be a valid card pilot"
+    invalid = copy.deepcopy(data)
+    invalid["pilots"]["devices"][""] = invalid["pilots"]["devices"][next(iter(invalid["pilots"]["devices"]))]
+    with TemporaryDirectory() as directory:
+        path = Path(directory) / "model.json"
+        path.write_text(json.dumps(invalid), encoding="utf-8")
+        try:
+            load_product_model_v2(path)
+        except ProductModelV2Error as exc:
+            assert "pilots.devices identifiers must be non-empty strings" in str(exc)
+        else:
+            raise AssertionError("an unnamed device pilot must fail validation")
     print("Product Model v2 self-test passed.")
 
 
