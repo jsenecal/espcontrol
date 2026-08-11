@@ -2233,9 +2233,14 @@ inline void delete_climate_control_context(ClimateControlCtx *ctx) {
 // keep the device online; the user can open the card once memory is available.
 constexpr size_t CLIMATE_MODAL_LVGL_MIN_FREE_BYTES = 256 * 1024;
 constexpr size_t CLIMATE_MODAL_LVGL_MIN_LARGEST_BLOCK_BYTES = 96 * 1024;
+constexpr uint32_t CLIMATE_MODAL_STARTUP_GUARD_MS = 15000;
 
 inline bool climate_control_modal_memory_available() {
 #ifdef ESP_PLATFORM
+  if (esphome::millis() < CLIMATE_MODAL_STARTUP_GUARD_MS) {
+    ESP_LOGW("climate_control", "Deferring climate panel until startup is complete");
+    return false;
+  }
   lv_mem_monitor_t memory{};
   lv_mem_monitor(&memory);
   if (memory.free_size < CLIMATE_MODAL_LVGL_MIN_FREE_BYTES ||
