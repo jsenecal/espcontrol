@@ -2237,7 +2237,10 @@ constexpr uint32_t CLIMATE_MODAL_STARTUP_GUARD_MS = 15000;
 
 inline bool climate_control_modal_memory_available() {
 #ifdef ESP_PLATFORM
-  if (esphome::millis() < CLIMATE_MODAL_STARTUP_GUARD_MS) {
+  static uint32_t first_climate_modal_attempt_ms = 0;
+  const uint32_t now = esphome::millis();
+  if (first_climate_modal_attempt_ms == 0) first_climate_modal_attempt_ms = now;
+  if (now - first_climate_modal_attempt_ms < CLIMATE_MODAL_STARTUP_GUARD_MS) {
     ESP_LOGW("climate_control", "Deferring climate panel until startup is complete");
     return false;
   }
