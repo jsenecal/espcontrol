@@ -1,10 +1,11 @@
 # Product Source Map
 
-This directory is the Product Model ownership boundary. During the first reset
-stage, [`model_v2.json`](model_v2.json) maps the established source locations
-into one validated model without moving them or changing runtime behaviour.
-Generators and validators resolve their current product inputs through this
-adapter, so a later source migration has one controlled entry point.
+This directory is the Product Model ownership boundary. The initial reset stage
+mapped established source locations into one validated model. The current
+generated-pilot stage moves the Sensor card and Guition JC8012P4A1 (10-inch V1)
+device entry into [`v2/`](v2/) while preserving the existing generated output.
+Generators and validators resolve their card and device inputs through this
+model, so later migrations change one controlled entry point.
 
 The hard internal edit/rebuild/check contract lives in
 [`dev-docs/source-of-truth.md`](../dev-docs/source-of-truth.md). Use that page
@@ -25,10 +26,20 @@ Edit these files when changing product behavior or supported hardware:
 - `compatibility/fixtures/product_compatibility.json` - saved config, backup,
   layout, and migration fixtures that protect upgrades.
 
-`model_v2.json` also records the device catalogue and translation sources. Do
-not duplicate their data into the model: it deliberately delegates to the
-established files until Product Model v2 replaces each source in a focused
-migration.
+`model_v2.json` records the device catalogue and translation sources. Sources
+that have not yet migrated deliberately continue through the established files;
+only the selected pilot is authored in `product/v2/`.
+
+## Product Model v2 Pilot
+
+- `v2/cards/sensor.json` is the authoritative Sensor card definition.
+- `v2/devices/guition-esp32-p4-jc8012p4a1.json` is the authoritative 10-inch
+  V1 device entry; shared hardware profiles remain in `devices/catalog.json`.
+
+`python3 scripts/check_product_model_v2.py` proves that the composed model is
+byte-for-byte equivalent to the legacy card contract and device catalogue.
+Until another family is migrated, edit all other cards and devices in their
+established source files.
 
 ## Generated Outputs
 
