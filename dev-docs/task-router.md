@@ -35,7 +35,7 @@ or export behavior, model fields, aliases, or compatibility fixtures.
 2. Edit first:
    - `src/webserver/application/config_codec.ts`
    - `components/espcontrol/button_grid_config.h`
-   - `compatibility/fixtures/product_compatibility.json`
+   - `product/v2/product_compatibility.json`
 3. Regenerate only if contract, model, or web generated inputs also changed.
 4. Verify first with `npm run check:backup-contract`,
    `npm run check:model-contract`, and `npm run check:firmware-parser`.

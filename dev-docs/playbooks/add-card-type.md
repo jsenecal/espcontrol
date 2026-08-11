@@ -37,7 +37,7 @@ and firmware behavior show the real shape of the change.
 - [ ] If firmware parsing needs new fields or options, update
       `components/espcontrol/button_grid_config.h`.
 - [ ] Add or update compatibility fixtures when the saved shape changes:
-      `compatibility/fixtures/product_compatibility.json`.
+      `product/v2/product_compatibility.json`.
 - [ ] Add every meaningful mode to `common/config/card_runtime_inventory.json`,
       including expected subscriptions, actions, and modal ownership.
 - [ ] Cover normalisation, picker visibility, preview, reload persistence,

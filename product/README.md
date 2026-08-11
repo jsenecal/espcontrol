@@ -19,11 +19,11 @@ Edit these files when changing product behavior or supported hardware:
   firmware fonts, firmware package substitutions, and public screen metadata.
 - `common/config/card_contract.json` - card types, saved config fields, defaults,
   picker metadata, card options, migration aliases, and compact subpage codes.
-- `common/config/entity_names.json` - Home Assistant entity names shared by
+- `product/v2/entity_names.json` - Home Assistant entity names shared by
   firmware YAML and the web setup page.
-- `common/assets/icons.json` - icon names, Material Design Icon codepoints, and
+- `product/v2/icons.json` - icon names, Material Design Icon codepoints, and
   domain defaults.
-- `compatibility/fixtures/product_compatibility.json` - saved config, backup,
+- `product/v2/product_compatibility.json` - saved config, backup,
   layout, and migration fixtures that protect upgrades.
 
 `model_v2.json` records the device catalogue and translation sources. Sources

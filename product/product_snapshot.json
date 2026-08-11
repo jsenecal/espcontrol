@@ -4,9 +4,9 @@
   "sources": {
     "deviceProfiles": "devices/manifest.json",
     "cardContract": "common/config/card_contract.json",
-    "entityNames": "common/config/entity_names.json",
-    "icons": "common/assets/icons.json",
-    "compatibilityFixtures": "compatibility/fixtures/product_compatibility.json"
+    "entityNames": "product/v2/entity_names.json",
+    "icons": "product/v2/icons.json",
+    "compatibilityFixtures": "product/v2/product_compatibility.json"
   },
   "summary": {
     "deviceProfiles": 6,

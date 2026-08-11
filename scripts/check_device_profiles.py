@@ -16,7 +16,7 @@ import check_public_firmware
 WEB_OUTPUT_DIR = ROOT / "docs" / "public" / "webserver"
 DEVICE_CAPABILITIES_JSON = ROOT / "docs" / "public" / "device-profiles.json"
 DEVICE_DOCS_DIR = ROOT / "docs" / "generated" / "screens"
-COMPAT_FIXTURES = ROOT / "compatibility" / "fixtures" / "product_compatibility.json"
+COMPAT_FIXTURES = ROOT / "product" / "v2" / "product_compatibility.json"
 BUTTON_GRID_CARDS = ROOT / "components" / "espcontrol" / "button_grid_cards.h"
 BUTTON_GRID_WEATHER_DRIVER = ROOT / "components" / "espcontrol" / "button_grid_weather_driver.h"
 BUTTON_GRID_WEATHER_FORECAST = ROOT / "components" / "espcontrol" / "button_grid_weather_forecast.h"

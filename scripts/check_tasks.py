@@ -1267,7 +1267,7 @@ def self_test() -> None:
         if not {"scripts/web_source.js", "scripts/build_web_bundle.js"} <= set(registry[task_id].inputs):
             raise AssertionError(f"{task_id} cache keys omit shared web-source helpers")
     for task_id in ("config", "model-contract"):
-        if "compatibility/fixtures/product_compatibility.json" not in registry[task_id].inputs:
+        if "product/v2/product_compatibility.json" not in registry[task_id].inputs:
             raise AssertionError(f"{task_id} cache keys omit compatibility fixtures")
     if not {
         "common/**",

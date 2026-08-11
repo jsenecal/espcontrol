@@ -36,7 +36,7 @@ already contain older strings.
 1. Update parsing and serialization together.
 2. Keep older values readable unless there is an intentional migration.
 3. Add or update compatibility fixtures in
-   `compatibility/fixtures/product_compatibility.json`.
+   `product/v2/product_compatibility.json`.
 4. Run:
 
 ```bash
@@ -48,7 +48,7 @@ npm run check:product
 
 ## Add a Home Assistant Entity Name
 
-1. Edit `common/config/entity_names.json`.
+1. Edit `product/v2/entity_names.json`.
 2. Run `python3 scripts/build.py`.
 3. Confirm these generated files changed as expected:
    - `common/config/entity_names.yaml`
@@ -88,7 +88,7 @@ Playbook: [Change fonts or icons](playbooks/change-fonts-or-icons.md).
 
 Fonts and icons are memory-sensitive on embedded displays.
 
-1. Add icons to `common/assets/icons.json` when the name should be available in
+1. Add icons to `product/v2/icons.json` when the name should be available in
    the setup page.
 2. Add needed glyphs to the relevant `common/assets/*glyphs.yaml` file.
 3. Add or adjust per-device font definitions in

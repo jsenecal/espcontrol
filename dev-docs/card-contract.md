@@ -271,7 +271,7 @@ Treat saved card config as durable user data.
 - Do not rename card types without an alias or migration path.
 - Do not remove an option parser before existing values have a fallback.
 - Keep backup import/export working for older backups.
-- Add fixtures in `compatibility/fixtures/product_compatibility.json` when the
+- Add fixtures in `product/v2/product_compatibility.json` when the
   saved shape changes.
 
 Baseline migration decision: leading and trailing whitespace in saved Media playlist text values is not meaningful. Browser and firmware normalization trim it, and a padded `playlist` content type is treated as the default and omitted. Existing stored strings are still read without a new format and are not rewritten until an existing save or backup-import action persists the normalized value.

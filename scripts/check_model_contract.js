@@ -10,7 +10,7 @@ const ROOT = path.resolve(__dirname, "..");
 const MODEL_ENTRY = path.join(ROOT, "src", "webserver", "model", "index.ts");
 const PRIMITIVES_ENTRY = path.join(ROOT, "src", "webserver", "model", "config_primitives.ts");
 const CARD_CONTRACT_ENTRY = path.join(ROOT, "src", "webserver", "generated", "card_contract.ts");
-const COMPAT_FIXTURES = path.join(ROOT, "compatibility", "fixtures", "product_compatibility.json");
+const COMPAT_FIXTURES = path.join(ROOT, "product", "v2", "product_compatibility.json");
 
 const model = loadTypeScriptModule(MODEL_ENTRY);
 const primitives = loadTypeScriptModule(PRIMITIVES_ENTRY);
