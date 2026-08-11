@@ -1,7 +1,7 @@
 {
   "modelVersion": 2,
   "stage": "generated-pilot",
-  "description": "The Product Model v2 ownership boundary, with the sensor, media, image, light-switch, and light-brightness card pilots plus the 10-inch V1 device pilot authored under product/.",
+  "description": "The Product Model v2 ownership boundary, with the sensor, media, image, light-switch, light-brightness, and light-control card pilots plus the 10-inch V1 device pilot authored under product/.",
   "sources": {
     "cardContract": {
       "path": "product/v2/card_contract.json",
@@ -49,7 +49,8 @@
       "media": "product/v2/cards/media.json",
       "image": "product/v2/cards/image.json",
       "light_switch": "product/v2/cards/light_switch.json",
-      "light_brightness": "product/v2/cards/light_brightness.json"
+      "light_brightness": "product/v2/cards/light_brightness.json",
+      "light_control": "product/v2/cards/light_control.json"
     },
     "devices": {
       "guition-esp32-p4-jc8012p4a1": "product/v2/devices/guition-esp32-p4-jc8012p4a1.json"
