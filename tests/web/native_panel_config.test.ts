@@ -4,6 +4,7 @@ import {
   type NativePanelConfigRequest,
   type NativePanelConfigResponse,
 } from "../../src/webserver/features/native_panel_config";
+import { installNativePanelConfigMigrationModule } from "../../src/webserver/application/native_panel_config_migration";
 import { decodePanelConfig, encodePanelConfig, type PanelConfigDocument } from "../../src/webserver/model";
 
 interface MigrationFixture {
@@ -124,6 +125,43 @@ export async function runNativePanelConfigTests(migrationFixture?: MigrationFixt
   nativeInitializationComplete = true;
   equal(await reconnectingClient.save((current) => current), "saved",
     "a later save rediscovers native configuration after initialization completes");
+
+  const savedDescriptors = new Map<string, PropertyDescriptor | undefined>();
+  const saveDescriptor = (name: string): void => {
+    if (!savedDescriptors.has(name))
+      savedDescriptors.set(name, Object.getOwnPropertyDescriptor(globalThis, name));
+  };
+  const setGlobal = (name: string, value: unknown): void => {
+    saveDescriptor(name);
+    Object.defineProperty(globalThis, name, {
+      configurable: true,
+      writable: true,
+      value,
+    });
+  };
+  try {
+    let capabilityRequests = 0;
+    setGlobal("fetch", async () => {
+      capabilityRequests += 1;
+      return { ...response(404), json: async () => ({}) };
+    });
+    setGlobal("DEVICE_ID", "panel-a");
+    setGlobal("entityName", (name: string) => name);
+    setGlobal("showBanner", () => undefined);
+    const descriptors = installNativePanelConfigMigrationModule();
+    for (const name of Object.keys(descriptors)) saveDescriptor(name);
+    Object.defineProperties(globalThis, descriptors);
+    equal((globalThis as Record<string, (name: string, value: string) => unknown>)
+      .nativePanelConfigTextWrite("button_order", "1,2"), null,
+    "an edit during deferred native setup falls back to the legacy entity route");
+    equal(capabilityRequests, 1,
+      "the edit reuses the in-flight capability probe instead of attempting a native save");
+  } finally {
+    for (const [name, descriptor] of savedDescriptors) {
+      if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+      else delete (globalThis as Record<string, unknown>)[name];
+    }
+  }
 
   if (!migrationFixture) return;
   const downgrade = migrationFixture.scenarios.downgrade;

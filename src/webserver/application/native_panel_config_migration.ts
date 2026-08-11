@@ -28,7 +28,11 @@ export function installNativePanelConfigMigrationModule(): GlobalDescriptors {
         return result;
     }
     function scheduleNativePanelConfigSave(this: any, update?: any) {
-        if (!nativePanelConfigMigrationSupported() && !_nativePanelConfigClient.retryable()) {
+        if (!nativePanelConfigMigrationSupported()) {
+            // A restarting panel can serve the editor before its deferred
+            // native endpoints exist. Keep this edit on the established
+            // entity route until discovery has positively confirmed native
+            // support, rather than consuming it with a temporary 404.
             beginNativePanelConfigMigration();
             return null;
         }
