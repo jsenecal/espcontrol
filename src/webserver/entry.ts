@@ -85,6 +85,7 @@ import { createBackupImportController } from "./features/backup_import_controlle
 import { createBackupExportController } from "./features/backup_export_controller";
 import { createBackupFileController } from "./features/backup_file_controller";
 import { createBackupRestoreController } from "./features/backup_restore_controller";
+import { createBackupFeature } from "./features/backup";
 import { installBackupContractModule } from "./application/backup_contract";
 import { installAppBackupModule } from "./application/app_backup";
 import { installAppStatusPreviewModule } from "./application/app_status_preview";
@@ -250,7 +251,19 @@ function installApplicationCompatibility(): void {
   installGlobals(installPreviewContextMenuModule());
   installGlobals(installPreviewClipboardModule());
   installGlobals(installPreviewInteractionsModule(cardEditorDraft));
-  installGlobals(installBackupContractModule());
+  const backupFeature = createBackupFeature({
+    deviceId: DEVICE_ID,
+    gridCols: GRID_COLS,
+    numSlots: NUM_SLOTS,
+    normalizeButtonConfig,
+    parseSubpageConfig,
+    serializeSubpageConfig,
+    buildSubpageGrid: (subpage) => {
+      buildSubpageGridAndNormalizeOrder(subpage);
+      return subpage.grid || [];
+    },
+  });
+  installGlobals(installBackupContractModule(backupFeature));
   const normalizeImportedPanelSettings = (settings: any) => {
     if (!settings) return null;
     return EspControlModel.normalizeBackupPanelSettings(settings, {
