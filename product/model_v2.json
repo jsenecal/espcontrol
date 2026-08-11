@@ -1,7 +1,7 @@
 {
   "modelVersion": 2,
   "stage": "generated-pilot",
-  "description": "The Product Model v2 ownership boundary, with the sensor, media, image, light-card, fan-card, date/time, and weather card families plus 10-inch device profiles authored under product/.",
+  "description": "The Product Model v2 ownership boundary, with the sensor, media, image, light-card, fan-card, date/time, weather, and system card families plus 10-inch device profiles authored under product/.",
   "sources": {
     "cardContract": {
       "path": "product/v2/card_contract.json",
@@ -62,7 +62,10 @@
       "calendar": "product/v2/cards/calendar.json",
       "timezone": "product/v2/cards/timezone.json",
       "weather": "product/v2/cards/weather.json",
-      "weather_forecast": "product/v2/cards/weather_forecast.json"
+      "weather_forecast": "product/v2/cards/weather_forecast.json",
+      "internal": "product/v2/cards/internal.json",
+      "local_sensor": "product/v2/cards/local_sensor.json",
+      "screen_lock": "product/v2/cards/screen_lock.json"
     },
     "devices": {
       "guition-esp32-p4-jc8012p4a1": "product/v2/devices/guition-esp32-p4-jc8012p4a1.json",
