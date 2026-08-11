@@ -2390,8 +2390,10 @@ inline void climate_control_open_modal(ClimateControlCtx *ctx) {
   lv_obj_set_style_pad_all(ui.target_row, 0, LV_PART_MAIN);
   lv_obj_set_style_pad_column(ui.target_row, 4, LV_PART_MAIN);
   lv_obj_set_layout(ui.target_row, LV_LAYOUT_FLEX);
-  lv_obj_set_style_flex_flow(ui.target_row, LV_FLEX_FLOW_ROW, LV_PART_MAIN);
-  lv_obj_set_style_flex_cross_place(ui.target_row, LV_FLEX_ALIGN_END, LV_PART_MAIN);
+  // The default flex flow is a horizontal row.  Explicitly writing these
+  // local styles can allocate from LVGL's constrained internal heap and has
+  // caused an unrecoverable allocation abort on the ESP32-P4 during startup.
+  // Keep the defaults here so the climate modal remains usable under pressure.
   lv_obj_clear_flag(ui.target_row, LV_OBJ_FLAG_CLICKABLE);
   lv_obj_clear_flag(ui.target_row, LV_OBJ_FLAG_SCROLLABLE);
 
