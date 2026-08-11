@@ -30,9 +30,11 @@ Edit these files when changing product behavior or supported hardware:
 in `product/v2/`. The selected pilot overlays below prove the per-card and
 per-device composition path without changing the generated output.
 
-## Product Model v2 Pilot
+## Product Model v2 Pilots
 
 - `v2/cards/sensor.json` is the authoritative Sensor card definition.
+- `v2/cards/media.json` is the authoritative Media card definition, including
+  the cover-art configuration used by media-player cards.
 - `v2/devices/guition-esp32-p4-jc8012p4a1.json` is the authoritative 10-inch
   V1 device entry; shared hardware profiles remain in `product/v2/device_catalog.json`.
 

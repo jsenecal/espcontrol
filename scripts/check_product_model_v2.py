@@ -25,14 +25,16 @@ def assert_equivalence() -> None:
     assert model.card_type in cards, "Product Model v2 sample card must exist in the legacy card contract"
     assert model.device_slug in devices, "Product Model v2 sample device must exist in the legacy device catalog"
 
-    # Canonical JSON makes this a byte-for-byte comparison of the selected
-    # legacy payload and the Product Model adapter view used by later generators.
-    legacy_card = json.dumps(cards[model.card_type], sort_keys=True, separators=(",", ":"))
-    adapter_card = json.dumps(model.sample_card(), sort_keys=True, separators=(",", ":"))
-    legacy_device = json.dumps(devices[model.device_slug], sort_keys=True, separators=(",", ":"))
-    adapter_device = json.dumps(model.sample_device(), sort_keys=True, separators=(",", ":"))
-    assert legacy_card == adapter_card, "selected card differs from its Product Model source"
-    assert legacy_device == adapter_device, "selected device differs from its Product Model source"
+    # Canonical JSON makes these byte-for-byte comparisons of each selected
+    # legacy payload and the Product Model adapter view used by generators.
+    for card_type in model.pilot_cards:
+        legacy_card = json.dumps(cards[card_type], sort_keys=True, separators=(",", ":"))
+        adapter_card = json.dumps(model.pilot_json("cards", card_type), sort_keys=True, separators=(",", ":"))
+        assert legacy_card == adapter_card, f"{card_type} card differs from its Product Model source"
+    for device_slug in model.pilot_devices:
+        legacy_device = json.dumps(devices[device_slug], sort_keys=True, separators=(",", ":"))
+        adapter_device = json.dumps(model.pilot_json("devices", device_slug), sort_keys=True, separators=(",", ":"))
+        assert legacy_device == adapter_device, f"{device_slug} device differs from its Product Model source"
 
     legacy_contract = json.dumps(load_json(model.source_path("cardContract")), sort_keys=True, separators=(",", ":"))
     generated_contract = json.dumps(model.card_contract_data(), sort_keys=True, separators=(",", ":"))
@@ -58,7 +60,7 @@ def run_self_test() -> None:
         else:
             raise AssertionError("missing product source must fail validation")
     invalid = copy.deepcopy(data)
-    invalid["pilots"]["cards"].pop("sensor")
+    invalid["pilots"]["cards"] = {}
     with TemporaryDirectory() as directory:
         path = Path(directory) / "model.json"
         path.write_text(json.dumps(invalid), encoding="utf-8")
@@ -80,7 +82,7 @@ def main() -> int:
             run_self_test()
         else:
             assert_equivalence()
-            print("Product Model v2 generated pilot matches its selected legacy card and device.")
+            print("Product Model v2 generated pilots match their legacy card and device outputs.")
     except (AssertionError, ProductModelV2Error, KeyError) as exc:
         print(f"ERROR: {exc}")
         return 1
