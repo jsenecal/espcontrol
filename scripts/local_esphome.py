@@ -7,6 +7,7 @@ import os
 import shlex
 import subprocess
 import sys
+import tempfile
 import unittest
 from contextlib import redirect_stdout
 from io import StringIO
@@ -19,6 +20,51 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class LocalEsphomeError(RuntimeError):
     pass
+
+
+def pinned_esphome_version() -> str:
+    env_path = ROOT / ".github" / "esphome.env"
+    try:
+        lines = env_path.read_text(encoding="utf-8").splitlines()
+    except OSError as exc:
+        raise LocalEsphomeError(f"Could not read {env_path}: {exc}") from exc
+
+    versions = [
+        line.removeprefix("ESPHOME_VERSION=")
+        for line in lines
+        if line.startswith("ESPHOME_VERSION=")
+    ]
+    if len(versions) != 1 or not versions[0]:
+        raise LocalEsphomeError(f"{env_path} must declare exactly one ESPHOME_VERSION")
+    return versions[0]
+
+
+def installed_esphome_version(esphome_bin: str) -> str:
+    try:
+        result = subprocess.run(
+            [esphome_bin, "version"],
+            capture_output=True,
+            check=False,
+            text=True,
+        )
+    except OSError as exc:
+        raise LocalEsphomeError(f"Could not run ESPHome at {esphome_bin}: {exc}") from exc
+
+    output = f"{result.stdout}\n{result.stderr}"
+    for line in output.splitlines():
+        if line.startswith("Version:"):
+            return line.removeprefix("Version:").strip()
+    raise LocalEsphomeError(f"Could not determine the ESPHome version from {esphome_bin}")
+
+
+def ensure_pinned_esphome(esphome_bin: str) -> None:
+    expected = pinned_esphome_version()
+    installed = installed_esphome_version(esphome_bin)
+    if installed != expected:
+        raise LocalEsphomeError(
+            f"ESPHome {expected} is required by .github/esphome.env, but {esphome_bin} is {installed}. "
+            "Install or select the pinned version before compiling or flashing."
+        )
 
 
 def resolve_yaml_path(yaml_arg: str, cwd: Path | None = None) -> Path:
@@ -93,16 +139,44 @@ def run(argv: list[str]) -> int:
     dry_run, yaml_path, command, command_args = parse_args(argv)
     version = local_version_for(yaml_path)
     esphome_bin = resolve_esphome_bin(os.environ.get("ESPHOME_BIN", "esphome"))
-    esphome_command = build_esphome_command(yaml_path, command, command_args, version, esphome_bin)
 
     if dry_run:
+        esphome_command = build_esphome_command(yaml_path, command, command_args, version, esphome_bin)
         print(shlex.join(esphome_command))
         return 0
 
+    ensure_pinned_esphome(esphome_bin)
+    esphome_command = build_esphome_command(yaml_path, command, command_args, version, esphome_bin)
     return subprocess.run(esphome_command, cwd=esphome_working_dir(yaml_path)).returncode
 
 
 class LocalEsphomeTests(unittest.TestCase):
+    def test_reads_the_repository_pinned_esphome_version(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            env_path = root / ".github" / "esphome.env"
+            env_path.parent.mkdir()
+            env_path.write_text("ESPHOME_VERSION=test-version\n", encoding="utf-8")
+
+            with mock.patch(__name__ + ".ROOT", root):
+                self.assertEqual(pinned_esphome_version(), "test-version")
+
+    def test_reads_installed_esphome_version(self) -> None:
+        with mock.patch(__name__ + ".subprocess.run") as run_mock:
+            run_mock.return_value = subprocess.CompletedProcess(
+                args=["esphome", "version"],
+                returncode=0,
+                stdout="Version: 2026.7.4\n",
+                stderr="",
+            )
+            self.assertEqual(installed_esphome_version("esphome"), "2026.7.4")
+
+    def test_rejects_an_unpinned_esphome_version(self) -> None:
+        with mock.patch(__name__ + ".pinned_esphome_version", return_value="2026.7.4"), \
+            mock.patch(__name__ + ".installed_esphome_version", return_value="2026.7.0"):
+            with self.assertRaisesRegex(LocalEsphomeError, "2026.7.4.*2026.7.0"):
+                ensure_pinned_esphome("esphome")
+
     def test_uses_dev_firmware_version(self) -> None:
         path = ROOT / "devices" / "esp32-p4-86" / "dev.yaml"
         self.assertEqual(local_version_for(path), "dev")
@@ -146,6 +220,7 @@ class LocalEsphomeTests(unittest.TestCase):
         path = ROOT / "devices" / "esp32-p4-86" / "dev.yaml"
         with mock.patch(__name__ + ".parse_args", return_value=(False, path, "run", [])), \
             mock.patch(__name__ + ".local_version_for", return_value="local-version"), \
+            mock.patch(__name__ + ".ensure_pinned_esphome"), \
             mock.patch(__name__ + ".subprocess.run") as run_mock:
             run_mock.return_value.returncode = 0
             self.assertEqual(run(["devices/esp32-p4-86/dev.yaml", "run"]), 0)
