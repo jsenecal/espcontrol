@@ -2,8 +2,8 @@
 
 This directory is the Product Model ownership boundary. The initial reset stage
 mapped established source locations into one validated model. The current
-generated-pilot stage moves the Sensor card and Guition JC8012P4A1 (10-inch V1)
-device entry into [`v2/`](v2/) while preserving the existing generated output.
+generated-pilot stage moves selected card families and device entries into
+[`v2/`](v2/) while preserving the existing generated output.
 Generators and validators resolve their card and device inputs through this
 model, so later migrations change one controlled entry point.
 
@@ -32,12 +32,18 @@ per-device composition path without changing the generated output.
 
 ## Product Model v2 Pilots
 
-- `v2/cards/sensor.json` is the authoritative Sensor card definition.
-- `v2/cards/media.json` is the authoritative Media card definition, including
-  the cover-art configuration used by media-player cards.
-- `v2/cards/image.json` is the authoritative Camera/Image card definition.
-- `v2/devices/guition-esp32-p4-jc8012p4a1.json` is the authoritative 10-inch
-  V1 device entry; shared hardware profiles remain in `product/v2/device_catalog.json`.
+- `v2/cards/sensor.json`, `media.json`, and `image.json` are the original
+  sensor, media, and image pilots.
+- `v2/cards/light_*.json` is the complete light-card family: switch,
+  brightness, full control, and temperature.
+- `v2/cards/fan_*.json` is the complete fan-card family: switch, speed,
+  direction, oscillation, preset, and full control.
+- `v2/cards/clock.json`, `calendar.json`, and `timezone.json` are the
+  date-and-time family.
+- `v2/cards/weather.json` and `weather_forecast.json` are the weather family.
+- `v2/devices/guition-esp32-p4-jc8012p4a1.json` and
+  `guition-esp32-p4-jc8012p4a1-v2.json` are the 10-inch V1 and V2 device
+  entries; shared hardware profiles remain in `product/v2/device_catalog.json`.
 
 `python3 scripts/check_product_model_v2.py` proves that the composed model is
 byte-for-byte equivalent to the legacy card contract and device catalogue.
