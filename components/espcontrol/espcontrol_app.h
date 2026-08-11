@@ -25,9 +25,11 @@ class EspControlApp : public esphome::Component {
   void loop() override;
   void on_shutdown() override;
   float get_setup_priority() const override {
-    // Cover-art boot automation resets Home Assistant subscriptions at 250.
-    // Start the core just before WiFi (251) so it always owns that state.
-    return esphome::setup_priority::WIFI + 1.0f;
+    // The native configuration wiring binds restored ESPHome text entities.
+    // Those entities, and the P4 display services they can refresh, are only
+    // ready once Wi-Fi setup has completed. Starting the owner earlier makes
+    // P4 firmware reset before ESPHome can confirm a new OTA boot.
+    return esphome::setup_priority::AFTER_WIFI;
   }
 
   DisplayModeController &display() { return core_.display(); }
