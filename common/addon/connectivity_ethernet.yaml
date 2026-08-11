@@ -46,10 +46,6 @@ ethernet:
           - lvgl.page.show: ethernet_setup_page
           - script.execute: setup_screen_dim
 
-api:
-  on_client_connected:
-    - script.execute: ha_restore_after_api
-
 script:
   - id: ha_restore_after_api
     mode: restart

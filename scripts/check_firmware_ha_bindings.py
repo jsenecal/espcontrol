@@ -3154,18 +3154,8 @@ def firmware_connectivity_api_errors(paths: tuple[Path, ...], root: Path) -> lis
             errors.append(f"{rel}: wait for Home Assistant state subscription, not any API client")
         if "on_client_connected:" in text and "ha_api_state_connected()" not in text:
             errors.append(f"{rel}: only navigate after a Home Assistant state connection is ready")
-        api_connected_match = re.search(
-            r"(?ms)^api:\n(?P<body>.*?)(?:^\S|\Z)",
-            text,
-        )
-        if api_connected_match and "on_client_connected:" in api_connected_match.group("body"):
-            api_connected_body = api_connected_match.group("body")
-            if "ha_reconnect_flow" in api_connected_body:
-                errors.append(f"{rel}: do not manage a Home Assistant waiting screen on reconnect")
-            if "script.execute: ha_restore_after_api" not in api_connected_body:
-                errors.append(f"{rel}: continue initial setup when Home Assistant connects")
-            if "wait_until:" in api_connected_body or "timeout: 2s" in api_connected_body:
-                errors.append(f"{rel}: do not delay initial setup when Home Assistant connects")
+        if "on_client_connected:" in text:
+            errors.append(f"{rel}: keep API connection recovery centralised in core_infra.yaml")
         restore_body = yaml_script_body(text, "ha_restore_after_api")
         if restore_body is None:
             errors.append(f"{rel}: define the Home Assistant initial-setup continuation script")
@@ -3191,6 +3181,8 @@ def firmware_ha_connection_screen_errors(core_infra_path: Path, root: Path) -> l
         errors.append(f"{rel}: do not start a display flow when Home Assistant disconnects")
     if "on_client_connected:" not in text or "id(ha_restore_after_api).execute();" not in text:
         errors.append(f"{rel}: continue initial setup when Home Assistant connects")
+    if "- delay: 1s" not in text:
+        errors.append(f"{rel}: yield before API connection recovery work")
     if "apply_registered_ha_control_availability" in text:
         errors.append(f"{rel}: do not dim registered cards when HA disconnects")
     return errors
@@ -7174,9 +7166,6 @@ def run_self_test() -> int:
         "    - if:\n"
         "        condition:\n"
         "          lambda: 'return ha_api_state_connected();'\n"
-        "api:\n"
-        "  on_client_connected:\n"
-        "    - script.execute: ha_restore_after_api\n"
         "script:\n"
         "  - id: ha_restore_after_api\n"
         "    mode: restart\n"

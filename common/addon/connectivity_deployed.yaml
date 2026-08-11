@@ -40,13 +40,6 @@ wifi:
         then:
           - script.execute: wifi_reconnect_flow
 
-api:
-  on_client_connected:
-    - lambda: |-
-        if (client_info.find("Home Assistant") != std::string::npos) {
-          id(ha_restore_after_api).execute();
-        }
-
 script:
   - id: ha_restore_after_api
     mode: restart
