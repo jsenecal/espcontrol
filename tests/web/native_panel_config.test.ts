@@ -151,8 +151,10 @@ export async function runNativePanelConfigTests(migrationFixture?: MigrationFixt
     const descriptors = installNativePanelConfigMigrationModule();
     for (const name of Object.keys(descriptors)) saveDescriptor(name);
     Object.defineProperties(globalThis, descriptors);
-    equal((globalThis as Record<string, (name: string, value: string) => unknown>)
-      .nativePanelConfigTextWrite("button_order", "1,2"), null,
+    const migrationGlobals = globalThis as unknown as {
+      nativePanelConfigTextWrite: (name: string, value: string) => unknown;
+    };
+    equal(migrationGlobals.nativePanelConfigTextWrite("button_order", "1,2"), null,
     "an edit during deferred native setup falls back to the legacy entity route");
     equal(capabilityRequests, 1,
       "the edit reuses the in-flight capability probe instead of attempting a native save");
