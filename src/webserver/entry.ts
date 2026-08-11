@@ -68,6 +68,7 @@ import { installPreviewGridPlacementModule } from "./application/preview_grid_pl
 import { installPreviewContextMenuModule } from "./application/preview_context_menu";
 import { installPreviewClipboardModule } from "./application/preview_clipboard";
 import { installPreviewInteractionsModule } from "./application/preview_interactions";
+import { createCardEditorDraftController } from "./features/card_editor_draft_controller";
 import { installBackupContractModule } from "./application/backup_contract";
 import { installAppBackupModule } from "./application/app_backup";
 import { installAppStatusPreviewModule } from "./application/app_status_preview";
@@ -143,6 +144,10 @@ function installApplicationCompatibility(): void {
   installGlobals(installC6FirmwareUiModule());
   installGlobals(installGridModule());
   const nativePanelConfig = createNativePanelConfigMigrationController();
+  const cardEditorDraft = createCardEditorDraftController({
+    cloneCard: (button) => Model.cloneCardConfig(button),
+    emptyCard: () => Model.emptyCardConfig(),
+  });
   installGlobals(installApiModule(nativePanelConfig));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule());
@@ -172,11 +177,11 @@ function installApplicationCompatibility(): void {
   installGlobals(installButtonSettingsSelectionModule());
   installGlobals(installButtonSettingsRenderQueueModule());
   installGlobals(installButtonSettingsIconPickerModule());
-  installGlobals(installButtonSettingsModule());
+  installGlobals(installButtonSettingsModule(cardEditorDraft));
   installGlobals(installPreviewGridPlacementModule());
   installGlobals(installPreviewContextMenuModule());
   installGlobals(installPreviewClipboardModule());
-  installGlobals(installPreviewInteractionsModule());
+  installGlobals(installPreviewInteractionsModule(cardEditorDraft));
   installGlobals(installBackupContractModule());
   installGlobals(installAppBackupModule());
   installGlobals(installAppStatusPreviewModule());

@@ -1,13 +1,11 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { createCardEditorDraftController } from "../features/card_editor_draft_controller";
+import type { CardEditorDraftController } from "../features/card_editor_draft_controller";
 import { createCardEditorValidationController } from "../features/card_editor_validation_controller";
 import { createCardEditorSaveController } from "../features/card_editor_save_controller";
-export function installButtonSettingsModule(): GlobalDescriptors {
-    var cardEditorDraftController: any = createCardEditorDraftController({
-        "cloneCard": function (button: any) { return EspControlModel.cloneCardConfig(button); },
-        "emptyCard": function () { return EspControlModel.emptyCardConfig(); },
-    });
+export function installButtonSettingsModule(
+    cardEditorDraftController: CardEditorDraftController,
+): GlobalDescriptors {
     var cardEditorValidationController: any = createCardEditorValidationController();
     var cardEditorSaveController: any = createCardEditorSaveController({
         "emptyCard": function () { return EspControlModel.emptyCardConfig(); },
