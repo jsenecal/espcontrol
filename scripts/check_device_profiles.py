@@ -151,13 +151,16 @@ def test_generated_web(profiles: dict[str, dict]) -> None:
 
     core = (ROOT / "common" / "device" / "core_infra.yaml").read_text(encoding="utf-8")
     assert "webserver/www.js?device=${device_slug}" in core, "hosted web URL does not select a shared profile"
-    assert "docs/public/webserver/embedded/www.js" in core, "firmware does not embed its offline web editor fallback"
     assert 'ESPCONTROL_DEVICE_SLUG=\\"${device_slug}\\"' in core, "firmware build does not expose its profile slug"
     server = (ROOT / "components" / "web_server_idf" / "web_server_idf.cpp").read_text(encoding="utf-8")
     assert '\\"device_slug\\"' in server and "ESPCONTROL_DEVICE_PROFILE" in server, (
         "firmware metadata endpoint does not expose the shared web profile"
     )
     for slug in profiles:
+        dev = (ROOT / "devices" / slug / "dev.yaml").read_text(encoding="utf-8")
+        assert 'js_include: "../../docs/public/webserver/embedded/www.js"' in dev, (
+            f"{slug}: local development firmware does not embed its offline editor"
+        )
         for suffix in (".yaml", ".factory.yaml"):
             build = (ROOT / "builds" / f"{slug}{suffix}").read_text(encoding="utf-8")
             assert 'docs/public/webserver/embedded/www.js"' in build, f"{slug}{suffix}: firmware does not embed its offline editor"
