@@ -1,4 +1,5 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { createBackupFeature } from "../features/backup";
 export function installBackupContractModule(): GlobalDescriptors {
     // ── Backup contract compatibility bridge ──────────────────────────────
     var _backupFeature: any = createBackupFeature({

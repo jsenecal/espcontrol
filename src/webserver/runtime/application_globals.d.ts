@@ -425,7 +425,6 @@ declare global {
   var createActionButton: any;
   var createBackupConfig: any;
   var createBackupEnvelope: any;
-  var createBackupFeature: any;
   var createClipboardEntry: any;
   var createClockBarItemElement: any;
   var createDeviceApi: any;
