@@ -1,7 +1,7 @@
 {
   "modelVersion": 2,
   "stage": "generated-pilot",
-  "description": "The Product Model v2 ownership boundary, with the sensor, media, image, light-card and fan-card families, and 10-inch device profiles authored under product/.",
+  "description": "The Product Model v2 ownership boundary, with the sensor, media, image, light-card and fan-card families, clock card, and 10-inch device profiles authored under product/.",
   "sources": {
     "cardContract": {
       "path": "product/v2/card_contract.json",
@@ -57,7 +57,8 @@
       "fan_direction": "product/v2/cards/fan_direction.json",
       "fan_oscillate": "product/v2/cards/fan_oscillate.json",
       "fan_preset": "product/v2/cards/fan_preset.json",
-      "fan_control": "product/v2/cards/fan_control.json"
+      "fan_control": "product/v2/cards/fan_control.json",
+      "clock": "product/v2/cards/clock.json"
     },
     "devices": {
       "guition-esp32-p4-jc8012p4a1": "product/v2/devices/guition-esp32-p4-jc8012p4a1.json",
