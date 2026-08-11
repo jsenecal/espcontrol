@@ -75,6 +75,11 @@ import { createPreviewPlacementController } from "./features/preview_placement_c
 import { createClockBarController } from "./features/clock_bar_controller";
 import { createVoiceServicesController } from "./features/voice_services_controller";
 import { createScreenScheduleController } from "./features/screen_schedule_controller";
+import { createSettingsUiFeature } from "./features/settings";
+import { createAlarmDelayAudioController } from "./features/alarm_delay_audio_controller";
+import { createScreensaverController } from "./features/screensaver_controller";
+import { createCoverArtScreensaverController } from "./features/cover_art_screensaver_controller";
+import { createMediaPlaybackController } from "./features/media_playback_controller";
 import { installBackupContractModule } from "./application/backup_contract";
 import { installAppBackupModule } from "./application/app_backup";
 import { installAppStatusPreviewModule } from "./application/app_status_preview";
@@ -197,7 +202,33 @@ function installApplicationCompatibility(): void {
   installGlobals(installClockBarPostApiModule());
   installGlobals(installControlsModule());
   installGlobals(installControlsShellModule());
-  installGlobals(installSettingsPageHelpersModule());
+  const settingsUiFeature = createSettingsUiFeature({
+    document,
+    textSpan,
+    createDisclosureChevron,
+  });
+  const alarmDelayAudioController = createAlarmDelayAudioController({
+    announcement: normalizeAlarmDelayAnnouncement,
+    beepVolume: normalizeAlarmDelayBeepVolume,
+    finalCountdown: normalizeAlarmDelayFinalCountdown,
+  });
+  const screensaverController = createScreensaverController({
+    action: normalizeScreensaverAction,
+    dimBrightness: normalizeScreensaverDimmedBrightness,
+    clockBrightness: normalizeClockBrightness,
+  });
+  const coverArtScreensaverController = createCoverArtScreensaverController({
+    delay: normalizeCoverArtDelay,
+    trackOverlayDuration: (value) => parseFloat(String(value)) || 0,
+  });
+  const mediaPlaybackController = createMediaPlaybackController();
+  installGlobals(installSettingsPageHelpersModule({
+    settingsUiFeature,
+    alarmDelayAudio: alarmDelayAudioController,
+    screensaver: screensaverController,
+    coverArtScreensaver: coverArtScreensaverController,
+    mediaPlayback: mediaPlaybackController,
+  }));
   installGlobals(installSettingsScheduleSectionModule());
   installGlobals(installSettingsCoverArtSectionModule());
   installGlobals(installSettingsSystemSectionModule());
