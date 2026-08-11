@@ -16,6 +16,12 @@ api:
   reboot_timeout: 0s
   homeassistant_states: true
   homeassistant_services: true
+  # ESPHome reserves three TCP client sockets for its API on these panels.
+  # Keep the runtime client pool within that budget: the ESP32-P4 hosted Wi-Fi
+  # stack otherwise accepts more half-open API clients than it can service,
+  # starving Home Assistant and the web configurator of a usable connection.
+  max_connections: 3
+  max_send_queue: 12
   on_client_connected:
     - lambda: |-
         ESP_LOGI("api", "API client connected: %s", client_info.c_str());
