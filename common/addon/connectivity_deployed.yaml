@@ -42,7 +42,10 @@ wifi:
 
 api:
   on_client_connected:
-    - script.execute: ha_restore_after_api
+    - lambda: |-
+        if (client_info.find("Home Assistant") != std::string::npos) {
+          id(ha_restore_after_api).execute();
+        }
 
 script:
   - id: ha_restore_after_api

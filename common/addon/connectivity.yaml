@@ -70,7 +70,16 @@ wifi:
 
 api:
   on_client_connected:
-    - script.execute: ha_restore_after_api
+    # The API server authenticates before replying to the client's Hello
+    # request. Running the full LVGL recovery sequence for a logger, browser,
+    # or other non-Home-Assistant client at that point can starve the initial
+    # response and drop the connection. core_infra already restores Home
+    # Assistant explicitly; keep this compatibility trigger scoped the same
+    # way.
+    - lambda: |-
+        if (client_info.find("Home Assistant") != std::string::npos) {
+          id(ha_restore_after_api).execute();
+        }
 
 script:
   - id: ha_restore_after_api
