@@ -25,7 +25,10 @@
 namespace espcontrol {
 
 static const char *const TAG = "espcontrol.config";
-constexpr uint32_t NATIVE_CONFIGURATION_INITIALIZATION_DELAY_MS = 15000;
+// This component is shared by devices whose OTA rollback window can be as
+// short as 10 seconds. Leave enough of that window for initialization itself
+// to fail safely after the display and restored text entities have settled.
+constexpr uint32_t NATIVE_CONFIGURATION_INITIALIZATION_DELAY_MS = 5000;
 
 class EspControlApp::NativeConfigurationRuntime {
  public:
@@ -187,9 +190,9 @@ void EspControlApp::setup() {
   }
 
   // NVS work and the legacy snapshot can be expensive on a populated panel.
-  // Give the display, restored text entities, and OTA boot validation time to
-  // come up before collecting the first legacy snapshot. This also keeps an
-  // unsuccessful snapshot inside the OTA rollback window on P4 panels.
+  // Give the display and restored text entities time to come up before
+  // collecting the first legacy snapshot, while preserving the OTA rollback
+  // window for every supported device.
   ESP_LOGI(TAG, "Deferring native configuration initialization for %" PRIu32 " ms",
            NATIVE_CONFIGURATION_INITIALIZATION_DELAY_MS);
   this->set_timeout(NATIVE_CONFIGURATION_INITIALIZATION_DELAY_MS,
