@@ -1,9 +1,12 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { createClockBarController } from "../features/clock_bar_controller";
-export function installClockBarStateModule(): GlobalDescriptors {
+import type { ClockBarController } from "../features/clock_bar_controller";
+
+export function installClockBarStateModule(
+    clockBarController: ClockBarController,
+): GlobalDescriptors {
     // ── Clock Bar State ───────────────────────────────────────────────────
-    var _clockBarController: any = createClockBarController();
+    var clockBarControllerInstance: ClockBarController = clockBarController;
     function clockBarControllerState(this: any) {
         return {
             enabled: !!state.clockBarOn,
@@ -19,11 +22,11 @@ export function installClockBarStateModule(): GlobalDescriptors {
         state.clockBarSelectedItem = next.selectedItem;
     }
     function clockBarUiState(this: any) {
-        return _clockBarController.uiState(clockBarControllerState());
+        return clockBarControllerInstance.uiState(clockBarControllerState());
     }
     function setClockBarEnabled(this: any, enabled?: any) {
         var current: any = clockBarControllerState();
-        var next: any = _clockBarController.setEnabled(current, enabled);
+        var next: any = clockBarControllerInstance.setEnabled(current, enabled);
         // The editor belongs to the selected preview item. Close it before the
         // controller removes that selection, otherwise its modal can outlive
         // the Clock Bar that contained the item.
@@ -200,7 +203,7 @@ export function installClockBarStateModule(): GlobalDescriptors {
     }
     function syncClockBarUi(this: any) {
         var before: any = clockBarControllerState();
-        applyClockBarControllerState(_clockBarController.reconcile(before));
+        applyClockBarControllerState(clockBarControllerInstance.reconcile(before));
         var uiState: any = clockBarUiState();
         var visible: any = uiState.previewVisible;
         if (!visible && before.selectedItem) {
@@ -243,7 +246,10 @@ export function installClockBarStateModule(): GlobalDescriptors {
         updateTempPreview();
     }
     return {
-        "_clockBarController": liveGlobal(() => _clockBarController, (value?: any) => { _clockBarController = value; }),
+        "_clockBarController": liveGlobal(
+            () => clockBarControllerInstance,
+            (value?: any) => { clockBarControllerInstance = value as ClockBarController; },
+        ),
         "clockBarControllerState": staticGlobal(clockBarControllerState),
         "applyClockBarControllerState": staticGlobal(applyClockBarControllerState),
         "clockBarUiState": staticGlobal(clockBarUiState),

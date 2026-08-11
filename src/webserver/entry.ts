@@ -72,6 +72,9 @@ import { createCardEditorDraftController } from "./features/card_editor_draft_co
 import { createCardEditorValidationController } from "./features/card_editor_validation_controller";
 import { createCardEditorSaveController } from "./features/card_editor_save_controller";
 import { createPreviewPlacementController } from "./features/preview_placement_controller";
+import { createClockBarController } from "./features/clock_bar_controller";
+import { createVoiceServicesController } from "./features/voice_services_controller";
+import { createScreenScheduleController } from "./features/screen_schedule_controller";
 import { installBackupContractModule } from "./application/backup_contract";
 import { installAppBackupModule } from "./application/app_backup";
 import { installAppStatusPreviewModule } from "./application/app_status_preview";
@@ -132,9 +135,20 @@ function installApplicationCompatibility(): void {
   installGlobals(installStylesModule());
   installGlobals(installStateModule());
   installGlobals(installLanguageStateModule());
-  installGlobals(installEnvironmentStateModule());
+  const voiceServicesController = createVoiceServicesController();
+  installGlobals(installEnvironmentStateModule(voiceServicesController));
   installGlobals(installScreenRotationStateModule());
-  installGlobals(installScreenScheduleStateModule());
+  const screenScheduleController = createScreenScheduleController({
+    trigger: normalizeScheduleTrigger,
+    sensorActivation: normalizeScheduleSensorActivation,
+    hour: normalizeHour,
+    mode: normalizeScheduleMode,
+    wakeTimeout: normalizeScheduleWakeTimeout,
+    wakeBrightness: normalizeScheduleWakeBrightness,
+    dimmedBrightness: normalizeScheduleDimmedBrightness,
+    clockBrightness: normalizeScheduleClockBrightness,
+  });
+  installGlobals(installScreenScheduleStateModule(screenScheduleController));
   installGlobals(installNtpStateModule());
   installGlobals(installAppearanceStateModule());
   installGlobals(installIdleStateModule());
@@ -142,7 +156,8 @@ function installApplicationCompatibility(): void {
   installGlobals(installScreensaverStateModule());
   installGlobals(installFirmwareVersionStateModule());
   installGlobals(installEntityStateModule());
-  installGlobals(installClockBarStateModule());
+  const clockBarController = createClockBarController();
+  installGlobals(installClockBarStateModule(clockBarController));
   installGlobals(installFirmwareUpdateStateModule());
   installGlobals(installScreensaverTimeoutModule());
   installGlobals(installC6FirmwareUiModule());
