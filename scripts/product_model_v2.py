@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Load and validate Product Model v2, including its generated-source pilots.
+"""Load and validate Product Model v2, including its generated-source entries.
 
 The model makes current product ownership explicit without moving stable source
 files yet. Generators and validators can resolve their inputs through this
@@ -28,7 +28,7 @@ REQUIRED_SOURCES = {
     "translations": ("glob", "authored"),
     "compatibilityFixtures": ("file", "authored"),
 }
-PRODUCT_MODEL_STAGES = {"legacy-adapter", "generated-pilot"}
+PRODUCT_MODEL_STAGES = {"legacy-adapter", "generated-pilot", "generated-source"}
 
 
 class ProductModelV2Error(RuntimeError):
@@ -204,7 +204,9 @@ def load_product_model_v2(path: Path = PRODUCT_MODEL_V2_JSON) -> ProductModelV2:
         raise ProductModelV2Error(f"modelVersion must be {PRODUCT_MODEL_V2_VERSION}")
     stage = data.get("stage")
     if stage not in PRODUCT_MODEL_STAGES:
-        raise ProductModelV2Error("stage must be 'legacy-adapter' or 'generated-pilot'")
+        raise ProductModelV2Error(
+            "stage must be 'legacy-adapter', 'generated-pilot', or 'generated-source'"
+        )
     if not isinstance(data.get("description"), str) or not data["description"].strip():
         raise ProductModelV2Error("description must be a non-empty string")
     sources_data = data.get("sources")
@@ -231,11 +233,22 @@ def load_product_model_v2(path: Path = PRODUCT_MODEL_V2_JSON) -> ProductModelV2:
         pilot_devices: dict[str, Path] = {}
     else:
         if not isinstance(pilots, dict) or set(pilots) != {"cards", "devices"}:
-            raise ProductModelV2Error("generated-pilot models must declare cards and devices pilots")
+            raise ProductModelV2Error("generated Product Model sources must declare cards and devices pilots")
         pilot_cards = _pilot_sources("cards", pilots["cards"])
         pilot_devices = _pilot_sources("devices", pilots["devices"])
         if card_type not in pilot_cards or device_slug not in pilot_devices:
             raise ProductModelV2Error("equivalence samples must be Product Model pilot sources")
+        if stage == "generated-source":
+            contract_cards = _load_json(sources["cardContract"].path).get("cards")
+            catalog_devices = _load_json(sources["deviceCatalog"].path).get("devices")
+            if not isinstance(contract_cards, dict) or set(pilot_cards) != set(contract_cards):
+                raise ProductModelV2Error(
+                    "generated-source cards must define every card-contract entry exactly once"
+                )
+            if not isinstance(catalog_devices, dict) or set(pilot_devices) != set(catalog_devices):
+                raise ProductModelV2Error(
+                    "generated-source devices must define every device-catalog entry exactly once"
+                )
     return ProductModelV2(sources, card_type, device_slug, pilot_cards, pilot_devices)
 
 

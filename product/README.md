@@ -2,8 +2,8 @@
 
 This directory is the Product Model ownership boundary. The initial reset stage
 mapped established source locations into one validated model. The current
-generated-pilot stage moves selected card families and device entries into
-[`v2/`](v2/) while preserving the existing generated output.
+generated-source stage owns every supported card-contract entry and device
+profile in [`v2/`](v2/) while preserving the existing generated output.
 Generators and validators resolve their card and device inputs through this
 model, so later migrations change one controlled entry point.
 
@@ -27,10 +27,11 @@ Edit these files when changing product behavior or supported hardware:
   layout, and migration fixtures that protect upgrades.
 
 `model_v2.json` records the complete card-contract and device-catalogue sources
-in `product/v2/`. The selected pilot overlays below prove the per-card and
-per-device composition path without changing the generated output.
+in `product/v2/`. The per-card and per-device sources below are required to
+cover every supported entry and prove the composed model has not changed the
+generated output.
 
-## Product Model v2 Pilots
+## Product Model v2 Sources
 
 - `v2/cards/sensor.json`, `media.json`, and `image.json` are the original
   sensor, media, and image pilots.
@@ -68,9 +69,8 @@ per-device composition path without changing the generated output.
   S3 device entry.
 
 `python3 scripts/check_product_model_v2.py` proves that the composed model is
-byte-for-byte equivalent to the legacy card contract and device catalogue.
-Until another family receives a per-item overlay, edit its shared definition in
-`product/v2/card_contract.json` or `product/v2/device_catalog.json`.
+byte-for-byte equivalent to the generated card contract and device catalogue,
+and rejects an incomplete card or device source set.
 
 ## Generated Outputs
 
