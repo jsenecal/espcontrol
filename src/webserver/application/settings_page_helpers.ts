@@ -1,6 +1,10 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createSettingsUiFeature, timedSettingLabel } from "../features/settings";
+import { createAlarmDelayAudioController } from "../features/alarm_delay_audio_controller";
+import { createScreensaverController } from "../features/screensaver_controller";
+import { createCoverArtScreensaverController } from "../features/cover_art_screensaver_controller";
+import { createMediaPlaybackController } from "../features/media_playback_controller";
 export function installSettingsPageHelpersModule(): GlobalDescriptors {
     // ── Settings Page Helpers ──────────────────────────────────────────
     // ── Settings UI helpers ─────────────────────────────────────────────
