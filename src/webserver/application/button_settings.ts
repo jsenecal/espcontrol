@@ -1,19 +1,13 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardEditorDraftController } from "../features/card_editor_draft_controller";
-import { createCardEditorValidationController } from "../features/card_editor_validation_controller";
-import { createCardEditorSaveController } from "../features/card_editor_save_controller";
+import type { CardEditorValidationController } from "../features/card_editor_validation_controller";
+import type { CardEditorSaveController } from "../features/card_editor_save_controller";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
+    cardEditorValidationController: CardEditorValidationController,
+    cardEditorSaveController: CardEditorSaveController,
 ): GlobalDescriptors {
-    var cardEditorValidationController: any = createCardEditorValidationController();
-    var cardEditorSaveController: any = createCardEditorSaveController({
-        "emptyCard": function () { return EspControlModel.emptyCardConfig(); },
-        "copyCard": function (target: any, source: any) {
-            EspControlModel.copyCardConfig(target, source);
-            normalizeButtonConfig(target);
-        },
-    });
     // ── Button settings panel (unified) ────────────────────────────────────
     function openCardSettings(this: any, slot?: any) {
         if (isConfigLocked())

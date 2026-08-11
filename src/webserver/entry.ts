@@ -69,6 +69,8 @@ import { installPreviewContextMenuModule } from "./application/preview_context_m
 import { installPreviewClipboardModule } from "./application/preview_clipboard";
 import { installPreviewInteractionsModule } from "./application/preview_interactions";
 import { createCardEditorDraftController } from "./features/card_editor_draft_controller";
+import { createCardEditorValidationController } from "./features/card_editor_validation_controller";
+import { createCardEditorSaveController } from "./features/card_editor_save_controller";
 import { installBackupContractModule } from "./application/backup_contract";
 import { installAppBackupModule } from "./application/app_backup";
 import { installAppStatusPreviewModule } from "./application/app_status_preview";
@@ -150,6 +152,7 @@ function installApplicationCompatibility(): void {
     cloneCard: (button) => Model.cloneCardConfig(button),
     emptyCard: () => Model.emptyCardConfig(),
   });
+  const cardEditorValidation = createCardEditorValidationController();
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
@@ -162,6 +165,13 @@ function installApplicationCompatibility(): void {
   installGlobals(installConfigConfirmationOptionsModule());
   installGlobals(installConfigAccessClimateAlarmOptionsModule());
   installGlobals(installConfigCodecModule());
+  const cardEditorSave = createCardEditorSaveController({
+    emptyCard: () => Model.emptyCardConfig(),
+    copyCard: (target, source) => {
+      Model.copyCardConfig(target, source);
+      normalizeButtonConfig(target);
+    },
+  });
   installGlobals(installConfigPostApiModule(nativePanelConfig));
   installGlobals(installStateLoaderApiModule());
   installGlobals(installArtworkPostApiModule());
@@ -179,7 +189,9 @@ function installApplicationCompatibility(): void {
   installGlobals(installButtonSettingsSelectionModule());
   installGlobals(installButtonSettingsRenderQueueModule());
   installGlobals(installButtonSettingsIconPickerModule());
-  installGlobals(installButtonSettingsModule(cardEditorDraft));
+  installGlobals(installButtonSettingsModule(
+    cardEditorDraft, cardEditorValidation, cardEditorSave,
+  ));
   installGlobals(installPreviewGridPlacementModule());
   installGlobals(installPreviewContextMenuModule());
   installGlobals(installPreviewClipboardModule());
