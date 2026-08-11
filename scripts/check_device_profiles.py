@@ -204,6 +204,28 @@ def test_upgrades_do_not_reset_saved_panel_config() -> None:
         )
 
 
+def test_native_panel_config_pilot_wiring() -> None:
+    slug = "guition-esp32-p4-jc8012p4a1"
+    profile = load_device_profiles()[slug]
+    device = (ROOT / "devices" / slug / "device" / "device.yaml").read_text(encoding="utf-8")
+    assert "  panel_config:\n" in device, (
+        f"{slug}: the native configuration pilot must wire PanelConfig to its restored entities"
+    )
+    assert "    device_profile: ${device_slug}\n" in device, (
+        f"{slug}: native PanelConfig must retain the selected device profile"
+    )
+    assert device.count("      - config: button_") == profile["slots"], (
+        f"{slug}: native PanelConfig must wire every card slot"
+    )
+    for slot in range(1, profile["slots"] + 1):
+        assert f"      - config: button_{slot}_config\n" in device, (
+            f"{slug}: native PanelConfig is missing slot {slot}"
+        )
+        assert f"subpage_{slot}_config_ext_7" in device, (
+            f"{slug}: native PanelConfig must retain every subpage chunk for slot {slot}"
+        )
+
+
 def test_local_voice_generation_uses_capability() -> None:
     voice_device = {
         "slug": "semantic-voice-test",
@@ -677,6 +699,7 @@ def main() -> int:
     test_constrained_s3_supports_one_cover_art_card(profiles)
     test_generated_yaml(profiles)
     test_upgrades_do_not_reset_saved_panel_config()
+    test_native_panel_config_pilot_wiring()
     test_local_voice_generation_uses_capability()
     test_square_s3_reapplies_clock_bar_after_screen_changes()
     test_rotation_refresh_rebuilds_subpages()

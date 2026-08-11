@@ -38,6 +38,8 @@ class PanelConfigCapabilitiesHandler final
     httpd_resp_set_status(raw_request, "200 OK");
     httpd_resp_set_type(raw_request, "application/json");
     httpd_resp_set_hdr(raw_request, "Cache-Control", "no-store");
+    httpd_resp_set_hdr(raw_request, "X-Panel-Config-Initialization",
+                       panel_config_initialization_status());
     httpd_resp_send(raw_request, response.data(), response_size);
   }
 };
