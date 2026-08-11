@@ -2,11 +2,6 @@ import * as DeviceConfig from "./device_config";
 import * as Model from "./model";
 import * as DeviceApi from "./api/device_api";
 import * as RequestFailure from "./api/request_failure";
-import * as PreviewGridFeature from "./features/preview_grid";
-import * as PreviewFeature from "./features/preview";
-import * as BackupFeature from "./features/backup";
-import * as BackupExportController from "./features/backup_export_controller";
-import * as ClipboardFeature from "./features/clipboard";
 import * as UiTokens from "./state/ui_tokens";
 import * as AppState from "./state/app_state";
 import * as AppInstance from "./state/app_instance";
@@ -241,11 +236,6 @@ function startEspControl(): void {
     ...Model,
     ...DeviceApi,
     ...RequestFailure,
-    PreviewGridFeature,
-    PreviewFeature,
-    ClipboardFeature,
-    createBackupFeature: BackupFeature.createBackupFeature,
-    createBackupExportController: BackupExportController.createBackupExportController,
     ...UiTokens,
     ...AppState,
     ...EventAliases,

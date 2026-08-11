@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { createClipboardEntry } from "../features/clipboard";
 export function installPreviewClipboardModule(): GlobalDescriptors {
     // ── Preview Clipboard ─────────────────────────────────────────────
     // ── Cut / Paste ────────────────────────────────────────────────────────
@@ -12,7 +13,7 @@ export function installPreviewClipboardModule(): GlobalDescriptors {
         if (!c.isSub && src.type === "subpage" && state.subpages[slot]) {
             subpageConfig = serializeSubpageConfig(state.subpages[slot]);
         }
-        return ClipboardFeature.createClipboardEntry(src, c.sizes[slot] || 1, subpageConfig);
+        return createClipboardEntry(src, c.sizes[slot] || 1, subpageConfig);
     }
     function copySlot(this: any, slot?: any) {
         var entry: any = buildClipboardEntry(slot);

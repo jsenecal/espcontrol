@@ -63,7 +63,6 @@ declare global {
   var screenScheduleControllerState: any;
   var applyScreenScheduleControllerState: any;
   var COVER_CONTROL_TABS_OPTION: any;
-  var ClipboardFeature: any;
   var DATE_TIME_CARD_METADATA: any;
   var DEVICE_ID: any;
   var DOMAIN_ICONS: any;
@@ -130,8 +129,6 @@ declare global {
   var NUM_SLOTS: any;
   var PRESENCE_CARD_METADATA: any;
   var PUSH_CARD_METADATA: any;
-  var PreviewFeature: any;
-  var PreviewGridFeature: any;
   var SCREENSAVER_ACTION_UNAVAILABLE: any;
   var SCREENSAVER_TIMEOUT_OPTIONS: any;
   var SCREEN_LOCK_CARD_METADATA: any;
@@ -424,7 +421,6 @@ declare global {
   var createActionButton: any;
   var createBackupConfig: any;
   var createBackupEnvelope: any;
-  var createBackupFeature: any;
   var createClipboardEntry: any;
   var createClockBarItemElement: any;
   var createDeviceApi: any;
