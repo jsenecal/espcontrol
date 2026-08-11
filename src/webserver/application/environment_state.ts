@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { createVoiceServicesController } from "../features/voice_services_controller";
 export function installEnvironmentStateModule(): GlobalDescriptors {
     // ── Environment State ──────────────────────────────────────────────────
     var _voiceServicesController: any = createVoiceServicesController();
