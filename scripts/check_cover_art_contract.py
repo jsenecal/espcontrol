@@ -172,7 +172,7 @@ for required in (
     "artwork_refresh.begin(",
     "artwork_refresh.receive(",
     "artwork_refresh.finish();",
-    "request_paired_picture",
+    "cover_art_request_paired_artwork",
     "Ignoring stale %s artwork response",
 ):
     if required not in screen_cover_art:
@@ -263,7 +263,7 @@ resubscribe_end = cover_art.find("\n  - id:", resubscribe_start + 1)
 if resubscribe_start < 0 or resubscribe_end < 0:
     raise SystemExit("Cover art subscription lifecycle contract missing")
 resubscribe = cover_art[resubscribe_start:resubscribe_end]
-if "request_paired_picture" not in resubscribe:
+if "cover_art_request_paired_artwork" not in cover_art:
     raise SystemExit("Cover art must retain paired artwork refresh requests")
 cover_art_subscription_order = []
 for handler, attribute in (
