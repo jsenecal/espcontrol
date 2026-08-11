@@ -2226,11 +2226,39 @@ inline void delete_climate_control_context(ClimateControlCtx *ctx) {
   delete ctx;
 }
 
+// The climate panel is one of the largest transient LVGL views.  ESPHome's
+// LVGL allocator uses PSRAM first, so creating it while an artwork refresh has
+// consumed or fragmented that heap can make a later widget allocation return
+// null and abort the entire firmware.  Leave enough room for the panel and
+// keep the device online; the user can open the card once memory is available.
+constexpr size_t CLIMATE_MODAL_LVGL_MIN_FREE_BYTES = 256 * 1024;
+constexpr size_t CLIMATE_MODAL_LVGL_MIN_LARGEST_BLOCK_BYTES = 96 * 1024;
+
+inline bool climate_control_modal_memory_available() {
+#ifdef ESP_PLATFORM
+  lv_mem_monitor_t memory{};
+  lv_mem_monitor(&memory);
+  if (memory.free_size < CLIMATE_MODAL_LVGL_MIN_FREE_BYTES ||
+      memory.free_biggest_size < CLIMATE_MODAL_LVGL_MIN_LARGEST_BLOCK_BYTES) {
+    ESP_LOGW("climate_control",
+             "Deferring climate panel: LVGL heap free=%u largest=%u",
+             static_cast<unsigned>(memory.free_size),
+             static_cast<unsigned>(memory.free_biggest_size));
+    return false;
+  }
+#endif
+  return true;
+}
+
 inline void climate_control_open_modal(ClimateControlCtx *ctx) {
-  if (!ctx || !ctx->available) return;
+  if (!ctx || !ctx->available || !climate_control_modal_memory_available()) return;
   ControlModalShell shell = control_modal_open_shell(
     ControlModalKind::CLIMATE, ctx->btn, ctx->width_compensation_percent,
     ctx->icon_font, climate_control_hide_modal);
+  if (!shell.overlay || !shell.panel || !shell.close_btn) {
+    ESP_LOGW("climate_control", "Unable to create climate panel shell");
+    return;
+  }
   ClimateControlModalUi &ui = climate_control_modal_ui();
   ui.active = ctx;
   ui.overlay = shell.overlay;
