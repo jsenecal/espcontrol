@@ -63,8 +63,6 @@ declare global {
   var VACUUM_CARD_METADATA: any;
   var VACUUM_CARD_MODES: any;
   var VOICE_SERVICES_UNAVAILABLE: any;
-  var WEATHER_CARD_METADATA: any;
-  var WEATHER_FORECAST_CARD_METADATA: any;
   var WEBHOOK_CARD_METADATA: any;
   var WEBHOOK_HEADERS_OPTION: any;
   var WEBHOOK_METHODS: any;
@@ -420,7 +418,6 @@ declare global {
   var normalizeScreenRotation: any;
   var normalizeVacuumConfig: any;
   var normalizeVacuumMode: any;
-  var normalizeWeatherCardMode: any;
   var normalizeWebhookConfig: any;
   var normalizeWifiStrengthPercent: any;
   var openCardSettings: any;
@@ -705,11 +702,6 @@ declare global {
   var voiceServicesSupported: any;
   var waitForFirmwareRestart: any;
   var waitForReboot: any;
-  var weatherCardDefaultForecastLabel: any;
-  var weatherCardIsForecastMode: any;
-  var weatherForecastCardsSupported: any;
-  var weatherModeOptionValues: any;
-  var weatherModeOptions: any;
   var webhookHeaders: any;
   var webhookMethod: any;
   var webserverMockNow: any;

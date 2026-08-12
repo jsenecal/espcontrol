@@ -25,6 +25,7 @@ import type { CardRegistry } from "./card_registry";
 import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
 import type { ConfigMediaOptionsFeature } from "./config_media_options";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
+import type { ConfigWeatherOptionsFeature } from "./config_weather_options";
 import type { ConfigModalTabOptionsFeature } from "./config_modal_tab_options";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "./config_access_climate_alarm_options";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
@@ -67,6 +68,7 @@ export interface ApplicationContext {
     readonly options: ConfigSensorOptionsFeature;
     readonly mediaOptions: ConfigMediaOptionsFeature;
     readonly imageOptions: ConfigImageOptionsFeature;
+    readonly weatherOptions: ConfigWeatherOptionsFeature;
     readonly modalTabs: ConfigModalTabOptionsFeature;
     readonly accessClimateAlarm: ConfigAccessClimateAlarmOptionsFeature;
     readonly confirmationOptions: ConfigConfirmationOptionsFeature;
@@ -111,6 +113,7 @@ export interface ApplicationContextOptions {
   readonly configurationOptions: ConfigSensorOptionsFeature;
   readonly mediaConfigurationOptions: ConfigMediaOptionsFeature;
   readonly imageConfigurationOptions: ConfigImageOptionsFeature;
+  readonly weatherConfigurationOptions: ConfigWeatherOptionsFeature;
   readonly modalTabOptions: ConfigModalTabOptionsFeature;
   readonly accessClimateAlarmOptions: ConfigAccessClimateAlarmOptionsFeature;
   readonly confirmationOptions: ConfigConfirmationOptionsFeature;
@@ -167,6 +170,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       options: options.configurationOptions,
       mediaOptions: options.mediaConfigurationOptions,
       imageOptions: options.imageConfigurationOptions,
+      weatherOptions: options.weatherConfigurationOptions,
       modalTabs: options.modalTabOptions,
       accessClimateAlarm: options.accessClimateAlarmOptions,
       confirmationOptions: options.confirmationOptions,

@@ -1,10 +1,14 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
-export function registerWeatherForecastCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { WeatherCardRegistration } from "./weather";
+
+export function registerWeatherForecastCardTypes(
+    registry: CardRegistry,
+    weather: WeatherCardRegistration,
+): void {
     // Legacy read-only forecast card: displays tomorrow's high / low temperature.
-    var WEATHER_FORECAST_CARD_METADATA: any = {
-        entity: WEATHER_CARD_METADATA.entity,
-        preview: WEATHER_CARD_METADATA.preview,
+    const WEATHER_FORECAST_CARD_METADATA: any = {
+        entity: weather.entityMetadata,
+        preview: weather.previewMetadata,
     };
     registry.register("weather_forecast", {
         label: "Weather Forecast",
@@ -32,7 +36,4 @@ export function registerWeatherForecastCardTypes(registry: CardRegistry): Global
             };
         },
     });
-    return {
-        "WEATHER_FORECAST_CARD_METADATA": liveGlobal(() => WEATHER_FORECAST_CARD_METADATA, (value?: any) => { WEATHER_FORECAST_CARD_METADATA = value; }),
-    };
 }

@@ -65,11 +65,13 @@ import {
     ACTION_CARD_OPTION_SELECT_ACTION,
 } from "./config_action_contract";
 import { normalizeCoverMode } from "./config_cover_contract";
+import type { ConfigWeatherOptionsFeature } from "./config_weather_options";
 export function createConfigCodecFeature(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
     mediaOptions: ConfigMediaOptionsFeature,
     imageOptions: ConfigImageOptionsFeature,
+    weatherOptions: ConfigWeatherOptionsFeature,
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
@@ -94,6 +96,7 @@ export function createConfigCodecFeature(
         imageIconEnabled,
         normalizeImageOptions,
     } = imageOptions;
+    const { normalizeWeatherCardMode } = weatherOptions;
     imageOptions.connectSubpageParser((value) => parseSubpageConfig(value));
     const {
         normalizeLightControlOptions,

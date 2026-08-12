@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -9,13 +8,25 @@ import {
     cardContractPickerKey,
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
-import {
-    cardContractOptionSpec,
-    cardContractOptionSupportedFor,
-} from "../application/config_option_core";
-export function registerWeatherCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { ConfigWeatherOptionsFeature } from "../application/config_weather_options";
+
+export interface WeatherCardRegistration {
+    readonly entityMetadata: any;
+    readonly previewMetadata: any;
+}
+
+export function registerWeatherCardTypes(
+    registry: CardRegistry,
+    weatherOptions: ConfigWeatherOptionsFeature,
+): WeatherCardRegistration {
+    const {
+        weatherCardDefaultForecastLabel,
+        weatherCardIsForecastMode,
+        weatherModeOptions,
+        normalizeWeatherCardMode,
+    } = weatherOptions;
     // Read-only weather card: displays either current conditions or high / low temperatures.
-    var WEATHER_CARD_METADATA: any = {
+    const WEATHER_CARD_METADATA: any = {
         mode: {
             label: "Type",
             idSuffix: "weather-display",
@@ -55,37 +66,6 @@ export function registerWeatherCardTypes(registry: CardRegistry): GlobalDescript
             currentBadge: "weather-cloudy",
         },
     };
-    function weatherCardDefaultForecastLabel(this: any, b?: any) {
-        return b.precision === "today" ? "Today" : "Tomorrow";
-    }
-    function weatherForecastCardsSupported(this: any) {
-        var disabled: any = CFG.disabledCardTypes || [];
-        return disabled.indexOf("weather_forecast") === -1;
-    }
-    function weatherModeOptions(this: any) {
-        var options: any = [
-            ["", "Current Conditions"],
-            ["today", "Temperatures Today"],
-            ["tomorrow", "Temperatures Tomorrow"],
-        ];
-        return weatherForecastCardsSupported() ? options : [options[0]];
-    }
-    function weatherModeOptionValues(this: any) {
-        var spec: any = cardContractOptionSpec("weather", "weather_mode");
-        var values: any = spec && spec.values ? spec.values.slice() : ["", "today", "tomorrow"];
-        return weatherForecastCardsSupported() ? values : values.filter(function (this: any, value?: any) {
-            return value === "";
-        });
-    }
-    function normalizeWeatherCardMode(this: any, mode?: any) {
-        mode = String(mode || "");
-        return weatherModeOptionValues().indexOf(mode) >= 0 ? mode : "";
-    }
-    function weatherCardIsForecastMode(this: any, b?: any) {
-        return weatherForecastCardsSupported() &&
-            !!b &&
-            cardContractOptionSupportedFor("weather", "large_numbers", { precision: b.precision });
-    }
     registry.register("weather", {
         label: function (this: any) { return cardContractCardLabel("weather"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("weather"); },
@@ -129,12 +109,7 @@ export function registerWeatherCardTypes(registry: CardRegistry): GlobalDescript
         },
     });
     return {
-        "WEATHER_CARD_METADATA": liveGlobal(() => WEATHER_CARD_METADATA, (value?: any) => { WEATHER_CARD_METADATA = value; }),
-        "weatherCardDefaultForecastLabel": staticGlobal(weatherCardDefaultForecastLabel),
-        "weatherForecastCardsSupported": staticGlobal(weatherForecastCardsSupported),
-        "weatherModeOptions": staticGlobal(weatherModeOptions),
-        "weatherModeOptionValues": staticGlobal(weatherModeOptionValues),
-        "normalizeWeatherCardMode": staticGlobal(normalizeWeatherCardMode),
-        "weatherCardIsForecastMode": staticGlobal(weatherCardIsForecastMode),
+        entityMetadata: WEATHER_CARD_METADATA.entity,
+        previewMetadata: WEATHER_CARD_METADATA.preview,
     };
 }

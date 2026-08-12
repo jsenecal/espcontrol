@@ -20,6 +20,7 @@ import type { CardRegistry } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
 import type { ConfigMediaOptionsFeature } from "../application/config_media_options";
 import type { ConfigImageOptionsFeature } from "../application/config_image_options";
+import type { ConfigWeatherOptionsFeature } from "../application/config_weather_options";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
@@ -38,6 +39,7 @@ export function installAppTestHooksConfig(
     sensorOptions: ConfigSensorOptionsFeature,
     mediaOptions: ConfigMediaOptionsFeature,
     imageOptions: ConfigImageOptionsFeature,
+    weatherOptions: ConfigWeatherOptionsFeature,
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
@@ -88,6 +90,11 @@ export function installAppTestHooksConfig(
         imageIconEnabled,
         normalizeImageOptions,
     } = imageOptions;
+    const {
+        weatherCardIsForecastMode,
+        weatherModeOptionValues,
+        normalizeWeatherCardMode,
+    } = weatherOptions;
     const {
         coverControlTabDefinitions,
         coverControlTabs,

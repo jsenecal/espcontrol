@@ -37,6 +37,7 @@ import { installFirmwareUpdatePostApiModule } from "./application/firmware_updat
 import { installPublicFirmwareInstallModule } from "./application/public_firmware_install";
 import { createConfigMediaOptionsFeature } from "./application/config_media_options";
 import { createConfigImageOptionsFeature } from "./application/config_image_options";
+import { createConfigWeatherOptionsFeature } from "./application/config_weather_options";
 import { createConfigModalTabOptionsFeature } from "./application/config_modal_tab_options";
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
 import { createConfigConfirmationOptionsFeature } from "./application/config_confirmation_options";
@@ -314,8 +315,8 @@ function installCardCompatibility(context: ApplicationContext): void {
   registerSwitchCardTypes(registry, context.configuration.confirmationOptions);
   registerTimezoneCardTypes(registry);
   registry.registerCompatibility(registerVacuumCardTypes(registry));
-  registry.registerCompatibility(registerWeatherCardTypes(registry));
-  registry.registerCompatibility(registerWeatherForecastCardTypes(registry));
+  const weatherCards = registerWeatherCardTypes(registry, context.configuration.weatherOptions);
+  registerWeatherForecastCardTypes(registry, weatherCards);
   registry.registerCompatibility(registerWebhookCardTypes(registry));
 }
 
@@ -326,6 +327,7 @@ function installTestCompatibility(context: ApplicationContext): void {
     context.configuration.options,
     context.configuration.mediaOptions,
     context.configuration.imageOptions,
+    context.configuration.weatherOptions,
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
     context.configuration.confirmationOptions,
@@ -383,6 +385,7 @@ function composeApplicationContext(): ApplicationContext {
     mediaOptions: mediaConfigurationOptions,
     showBanner: (message, kind) => showBanner(message, kind),
   });
+  const weatherConfigurationOptions = createConfigWeatherOptionsFeature(layout.config);
   const modalTabOptions = createConfigModalTabOptionsFeature({
     document: dom.document,
     renderButtonSettings: () => renderButtonSettings(),
@@ -394,6 +397,7 @@ function composeApplicationContext(): ApplicationContext {
     configurationOptions,
     mediaConfigurationOptions,
     imageConfigurationOptions,
+    weatherConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
@@ -579,6 +583,7 @@ function composeApplicationContext(): ApplicationContext {
     configurationOptions,
     mediaConfigurationOptions,
     imageConfigurationOptions,
+    weatherConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,

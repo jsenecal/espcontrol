@@ -4,6 +4,7 @@ import {
 } from "../../src/webserver/application/application_context";
 import { createCardRegistry } from "../../src/webserver/application/card_registry";
 import { installCore } from "../../src/webserver/application/core";
+import { createConfigWeatherOptionsFeature } from "../../src/webserver/application/config_weather_options";
 import type { DeviceConfig } from "../../src/webserver/state/types";
 import type { GlobalDescriptors } from "../../src/webserver/runtime/globals";
 
@@ -34,6 +35,7 @@ export function runApplicationContextTests(): void {
   const configurationOptions = {} as any;
   const mediaConfigurationOptions = {} as any;
   const imageConfigurationOptions = {} as any;
+  const weatherConfigurationOptions = {} as any;
   const modalTabOptions = {} as any;
   const accessClimateAlarmOptions = {} as any;
   const confirmationOptions = {} as any;
@@ -73,6 +75,7 @@ export function runApplicationContextTests(): void {
     configurationOptions,
     mediaConfigurationOptions,
     imageConfigurationOptions,
+    weatherConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
@@ -113,6 +116,7 @@ export function runApplicationContextTests(): void {
   equal(context.configuration.options, configurationOptions, "context retains typed configuration options");
   equal(context.configuration.mediaOptions, mediaConfigurationOptions, "context retains typed media options");
   equal(context.configuration.imageOptions, imageConfigurationOptions, "context retains typed image options");
+  equal(context.configuration.weatherOptions, weatherConfigurationOptions, "context retains typed weather options");
   equal(context.configuration.modalTabs, modalTabOptions, "context retains typed modal-tab options");
   equal(context.configuration.accessClimateAlarm, accessClimateAlarmOptions, "context retains typed access/climate/alarm options");
   equal(context.configuration.confirmationOptions, confirmationOptions, "context retains typed confirmation options");
@@ -137,6 +141,15 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.settingsUi, settingsUi, "context retains settings DOM ownership");
   equal(context.controllers.voiceServices, voiceServices, "context retains voice settings ownership");
   equal(context.controllers.reconnect, reconnect, "context retains reconnect ownership");
+
+  const weatherOptions = createConfigWeatherOptionsFeature(profile);
+  equal(weatherOptions.normalizeWeatherCardMode("today"), "today", "weather options preserve supported forecast modes");
+  equal(weatherOptions.normalizeWeatherCardMode("invalid"), "", "weather options reject unknown modes");
+  equal(weatherOptions.weatherCardDefaultForecastLabel({ precision: "today" }), "Today", "weather options label today's forecast");
+  equal(weatherOptions.weatherCardDefaultForecastLabel({ precision: "tomorrow" }), "Tomorrow", "weather options label tomorrow's forecast");
+  const currentOnlyWeather = createConfigWeatherOptionsFeature({ ...profile, disabledCardTypes: ["weather_forecast"] });
+  equal(currentOnlyWeather.normalizeWeatherCardMode("tomorrow"), "", "disabled forecast support normalizes to current conditions");
+  equal(currentOnlyWeather.weatherCardIsForecastMode({ precision: "tomorrow" }), false, "disabled forecast support hides forecast controls");
 
   cards.registerCompatibility({ example: { configurable: true, value: true } });
   equal(cards.compatibilityDefinitionCount, 1, "registry counts compatibility definitions");

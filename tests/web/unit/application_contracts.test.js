@@ -36,7 +36,6 @@ describe("browserless application contracts", () => {
       ["push", "registerPushCardTypes"],
       ["screen_lock", "registerScreenLockCardTypes"],
       ["timezone", "registerTimezoneCardTypes"],
-      ["weather_forecast", "registerWeatherForecastCardTypes"],
       ["webhook", "registerWebhookCardTypes"],
       ["action", "registerActionCardTypes"],
       ["alarm", "registerAlarmCardTypes"],
@@ -49,7 +48,6 @@ describe("browserless application contracts", () => {
       ["slider", "registerSliderCardTypes"],
       ["subpage", "registerSubpageCardTypes"],
       ["vacuum", "registerVacuumCardTypes"],
-      ["weather", "registerWeatherCardTypes"],
     ];
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     for (const [fileName, registrationFunction] of migratedCards) {
@@ -118,6 +116,19 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(source, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerImageCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:IMAGE_CARD_METADATA|imageModalModeOptions|renderImageLabelSettings|renderImageModalSettings):/);
+  });
+
+  test("registers weather cards through explicit shared options", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const weather = fs.readFileSync(path.join(ROOT, "src/webserver/cards/weather.ts"), "utf8");
+    const forecast = fs.readFileSync(path.join(ROOT, "src/webserver/cards/weather_forecast.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(weather, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|CFG)\b/);
+    assert.doesNotMatch(forecast, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|WEATHER_CARD_METADATA)\b/);
+    assert.match(entry, /const weatherCards = registerWeatherCardTypes\(registry, context\.configuration\.weatherOptions\);/);
+    assert.match(entry, /registerWeatherForecastCardTypes\(registry, weatherCards\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerWeather/);
+    assert.doesNotMatch(globals, /\bvar (?:WEATHER_CARD_METADATA|WEATHER_FORECAST_CARD_METADATA|normalizeWeatherCardMode|weatherCardDefaultForecastLabel|weatherCardIsForecastMode|weatherForecastCardsSupported|weatherModeOptionValues|weatherModeOptions):/);
   });
 
   test("injects the card registry into editor and preview consumers", () => {
