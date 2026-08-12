@@ -135,18 +135,6 @@ esphome:
     then:
       - script.execute: cover_art_resubscribe
 
-api:
-  on_client_connected:
-    - lambda: |-
-        if (client_info.find("Home Assistant") == std::string::npos) return;
-        if (!client_address.empty()) {
-          id(cover_art_home_assistant_client_address) = client_address;
-        }
-        id(cover_art_api_wait_logged) = false;
-        id(cover_art_resolve_home_assistant_base_url).execute();
-    - delay: 2s
-    - script.execute: cover_art_resubscribe
-
 image:
   - platform: file
     file: "${cover_art_placeholder_file}"
