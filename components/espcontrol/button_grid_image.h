@@ -1492,6 +1492,11 @@ inline void image_card_refresh_current_picture(ImageCardCtx *ctx) {
   if (ctx->media_artwork) {
     ctx->media_artwork_retry_mask = 0;
     ctx->pending_fallback_picture.clear();
+    // Explicit recovery refreshes (notably after reconnect) supersede an
+    // incomplete batch whose callbacks may have been lost with the old API
+    // connection. The next begin() advances the generation, so any late
+    // callback from that connection remains stale.
+    ctx->media_artwork_refresh.reset();
     if (ctx->media_artwork_timer) {
       lv_timer_del(ctx->media_artwork_timer);
       ctx->media_artwork_timer = nullptr;

@@ -189,23 +189,30 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                     if (nativeSubpageValue)
                         nativeDocument.subpages[Number(nativeSubpageKey)] = nativeSubpageValue;
                 }
-                var nativeRestore: any = controllers.nativePanelConfig
-                    ? controllers.nativePanelConfig.writeDocument(nativeDocument)
-                    : null;
-                if (nativeRestore) {
-                    _postQueue = _postQueue.then(function () { return nativeRestore; }).then(function (result: any) {
-                        if (result !== "saved")
-                            _postQueueHadError = true;
-                        return result;
-                    });
-                }
-                else {
+                function queueLegacyLayoutRestore() {
                     postText(entityName("button_on_color"), backupPlan.config.button_on_color);
                     for (var legacyButtonIndex: any = 0; legacyButtonIndex < controllers.layout.numSlots; legacyButtonIndex++)
                         saveButtonConfig(legacyButtonIndex + 1);
                     for (var legacySubpageKey in state.subpages)
                         saveSubpageEntity(legacySubpageKey);
                     postText(entityName("button_order"), normalizedButtonOrder);
+                }
+                var nativeRestore: any = controllers.nativePanelConfig
+                    ? controllers.nativePanelConfig.writeDocument(nativeDocument)
+                    : null;
+                if (nativeRestore) {
+                    _postQueue = _postQueue.then(function () { return nativeRestore; }).then(function (result: any) {
+                        if (result === "legacy-fallback") {
+                            queueLegacyLayoutRestore();
+                        }
+                        else if (result !== "saved") {
+                            _postQueueHadError = true;
+                        }
+                        return result;
+                    });
+                }
+                else {
+                    queueLegacyLayoutRestore();
                 }
                 state.onColor = backupPlan.config.button_on_color;
                 if (els.setOnColor && els.setOnColor._syncColor)
