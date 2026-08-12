@@ -1,4 +1,3 @@
-import { state } from "../state/app_instance";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -9,46 +8,22 @@ import {
     cardContractPickerKey,
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
-export function registerTimezoneCardTypes(registry: CardRegistry): void {
+import type { ConfigDateTimeOptionsFeature } from "../application/config_date_time_options";
+
+export function registerTimezoneCardTypes(
+    registry: CardRegistry,
+    dateTimeOptions: ConfigDateTimeOptionsFeature,
+    documentService: Document,
+): void {
+    const {
+        appendTimezoneOption,
+        defaultTimezoneCardEntity,
+        metadata,
+        timezoneCardCityLabel,
+        timezoneCardTimeParts,
+        timezoneOptionsFor,
+    } = dateTimeOptions;
     // Read-only world clock card: displays local time for a selected city.
-    function timezoneCardCityLabel(this: any, tzOption?: any) {
-        var tzId: any = getTzId(effectiveTimezoneOptionForWeb(tzOption || ""));
-        if (!tzId)
-            return "World Clock";
-        if (tzId === "UTC")
-            return "UTC";
-        var city: any = tzId.substring(tzId.lastIndexOf("/") + 1);
-        return city.replace(/_/g, " ");
-    }
-    function timezoneCardTimeParts(this: any, tzOption?: any) {
-        var use12h: any = typeof state !== "undefined" && state.clockFormat === "12h";
-        var tzId: any = getTzId(effectiveTimezoneOptionForWeb(tzOption || "UTC"));
-        try {
-            var opts: any = { timeZone: tzId, hour: "numeric", minute: "2-digit" };
-            if (use12h)
-                opts.hour12 = true;
-            else
-                opts.hourCycle = "h23";
-            var parts: any = new Intl.DateTimeFormat("en-US", opts).formatToParts(webserverNow());
-            var hour: any = "";
-            var minute: any = "";
-            for (var i: any = 0; i < parts.length; i++) {
-                if (parts[i].type === "hour")
-                    hour = parts[i].value;
-                else if (parts[i].type === "minute")
-                    minute = parts[i].value;
-            }
-            if (!hour || !minute)
-                return { value: "--:--", unit: "" };
-            return {
-                value: (use12h ? hour : hour.padStart(2, "0")) + ":" + minute,
-                unit: "",
-            };
-        }
-        catch (e) {
-            return { value: "--:--", unit: "" };
-        }
-    }
     registry.register("timezone", {
         label: function (this: any) { return cardContractCardLabel("timezone"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("timezone"); },
@@ -59,7 +34,7 @@ export function registerTimezoneCardTypes(registry: CardRegistry): void {
         isAvailable: function (this: any) {
             return false;
         },
-        cardMetadata: DATE_TIME_CARD_METADATA,
+        cardMetadata: metadata,
         onSelect: function (this: any, b?: any) {
             var defaults: any = cardContractDefaultConfig("timezone");
             Object.keys(defaults).forEach(function (this: any, key?: any) { b[key] = defaults[key]; });
@@ -72,14 +47,12 @@ export function registerTimezoneCardTypes(registry: CardRegistry): void {
                 b.label = "";
                 helpers.saveField("label", "");
             }
-            helpers.renderCardModeSelector(panel, b, helpers, DATE_TIME_CARD_METADATA);
-            helpers.renderCardLargeNumbersToggle(panel, b, helpers, DATE_TIME_CARD_METADATA);
-            var tzSelect: any = document.createElement("select");
+            helpers.renderCardModeSelector(panel, b, helpers, metadata);
+            helpers.renderCardLargeNumbersToggle(panel, b, helpers, metadata);
+            var tzSelect: any = documentService.createElement("select");
             tzSelect.className = "sp-select";
             tzSelect.id = helpers.idPrefix + "timezone";
-            var options: any = typeof state !== "undefined"
-                ? timezoneOptionsWithFallback(state.timezoneOptions, b.entity)
-                : [b.entity];
+            var options: any = timezoneOptionsFor(b.entity);
             options.forEach(function (this: any, opt?: any) {
                 appendTimezoneOption(tzSelect, opt);
             });
@@ -95,13 +68,13 @@ export function registerTimezoneCardTypes(registry: CardRegistry): void {
             helpers.markCardPrimaryField(timezoneField, "entity");
         },
         renderPreview: function (this: any, b?: any, helpers?: any) {
-            var tz: any = b.entity || (typeof state !== "undefined" && state.timezone) || "UTC (GMT+0)";
+            var tz: any = b.entity || defaultTimezoneCardEntity();
             var time: any = timezoneCardTimeParts(tz);
-            var hideLabel: any = cardLargeNumbersHidePreviewLabel(b, helpers, DATE_TIME_CARD_METADATA);
+            var hideLabel: any = cardLargeNumbersHidePreviewLabel(b, helpers, metadata);
             return {
                 buttonClass: hideLabel ? "sp-date-time-wide-large" : undefined,
                 iconHtml: cardSensorPreviewHtml(b, helpers, time.value, time.unit),
-                labelHtml: hideLabel ? "" : cardBadgeLabelHtml(helpers, timezoneCardCityLabel(tz), DATE_TIME_CARD_METADATA.preview.timezoneBadge),
+                labelHtml: hideLabel ? "" : cardBadgeLabelHtml(helpers, timezoneCardCityLabel(tz), metadata.preview.timezoneBadge),
             };
         },
     });

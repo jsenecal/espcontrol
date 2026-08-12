@@ -14,7 +14,6 @@ declare global {
   var _screenScheduleController: any;
   var screenScheduleControllerState: any;
   var applyScreenScheduleControllerState: any;
-  var DATE_TIME_CARD_METADATA: any;
   var DEVICE_ID: any;
   var FAN_CARD_METADATA: any;
   var FAN_CONTROL_TYPE_OPTIONS: any;
@@ -218,14 +217,9 @@ declare global {
   var ctxMenu: any;
   var cutButtons: any;
   var cutSlot: any;
-  var dateTimeCardMode: any;
-  var dateTimeCardTimeParts: any;
-  var dateTimeLargeNumbersLabel: any;
-  var dateTimeModeOptionValues: any;
   var defaultButtonTypeForPicker: any;
   var defaultCardTypeForPicker: any;
   var defaultClockBarTemperatureEntity: any;
-  var defaultTimezoneCardEntity: any;
   var downloadBackupConfig: any;
   var deleteButtons: any;
   var deleteSlot: any;
@@ -371,7 +365,6 @@ declare global {
   var normalizeClockBarTemperatureEntities: any;
   var normalizeClockBarTemperatureEntries: any;
   var normalizeCoverLikeMode: any;
-  var normalizeDateTimeCardMode: any;
   var normalizeFanControlType: any;
   var normalizeGarageMode: any;
   var normalizeGateMode: any;
@@ -565,7 +558,6 @@ declare global {
   var setC6FirmwareUpdateAvailable: any;
   var setClockBarItemVisible: any;
   var setConfigLocked: any;
-  var setDateTimeCardMode: any;
   var setFanControlType: any;
   var setFavicon: any;
   var setFirmwareUpdateInfo: any;

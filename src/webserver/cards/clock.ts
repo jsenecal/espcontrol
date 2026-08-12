@@ -8,7 +8,13 @@ import {
     cardContractPickerKey,
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
-export function registerClockCardTypes(registry: CardRegistry): void {
+import type { ConfigDateTimeOptionsFeature } from "../application/config_date_time_options";
+
+export function registerClockCardTypes(
+    registry: CardRegistry,
+    dateTimeOptions: ConfigDateTimeOptionsFeature,
+): void {
+    const { dateTimeCardTimeParts, metadata } = dateTimeOptions;
     // Read-only local clock card: displays the panel's local time only.
     registry.register("clock", {
         label: function (this: any) { return cardContractCardLabel("clock"); },
@@ -20,7 +26,7 @@ export function registerClockCardTypes(registry: CardRegistry): void {
         isAvailable: function (this: any) {
             return false;
         },
-        cardMetadata: DATE_TIME_CARD_METADATA,
+        cardMetadata: metadata,
         onSelect: function (this: any, b?: any) {
             var defaults: any = cardContractDefaultConfig("clock");
             Object.keys(defaults).forEach(function (this: any, key?: any) { b[key] = defaults[key]; });
@@ -33,13 +39,13 @@ export function registerClockCardTypes(registry: CardRegistry): void {
             b.sensor = "";
             b.unit = "";
             b.precision = "";
-            helpers.renderCardModeSelector(panel, b, helpers, DATE_TIME_CARD_METADATA);
-            helpers.renderCardLargeNumbersToggle(panel, b, helpers, DATE_TIME_CARD_METADATA);
+            helpers.renderCardModeSelector(panel, b, helpers, metadata);
+            helpers.renderCardLargeNumbersToggle(panel, b, helpers, metadata);
         },
         renderPreview: function (this: any, b?: any, helpers?: any) {
             var time: any = dateTimeCardTimeParts();
             return {
-                buttonClass: cardLargeNumbersHidePreviewLabel(b, helpers, DATE_TIME_CARD_METADATA)
+                buttonClass: cardLargeNumbersHidePreviewLabel(b, helpers, metadata)
                     ? "sp-clock-wide-large"
                     : undefined,
                 iconHtml: cardSensorPreviewHtml(b, helpers, time.value, time.unit),

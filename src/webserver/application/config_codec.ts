@@ -69,6 +69,7 @@ import type { ConfigWeatherOptionsFeature } from "./config_weather_options";
 import type { ConfigWebhookOptionsFeature } from "./config_webhook_options";
 import type { ConfigRobotCardOptionsFeature } from "./config_robot_card_options";
 import type { ConfigLockOptionsFeature } from "./config_lock_options";
+import type { ConfigDateTimeOptionsFeature } from "./config_date_time_options";
 export function createConfigCodecFeature(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
@@ -78,6 +79,7 @@ export function createConfigCodecFeature(
     webhookOptions: ConfigWebhookOptionsFeature,
     robotOptions: ConfigRobotCardOptionsFeature,
     lockOptions: ConfigLockOptionsFeature,
+    dateTimeOptions: ConfigDateTimeOptionsFeature,
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
@@ -111,6 +113,7 @@ export function createConfigCodecFeature(
         vacuumModeNeedsArea,
     } = robotOptions;
     const { normalizeLockMode } = lockOptions;
+    const { normalizeDateTimeCardMode } = dateTimeOptions;
     imageOptions.connectSubpageParser((value) => parseSubpageConfig(value));
     const {
         normalizeLightControlOptions,

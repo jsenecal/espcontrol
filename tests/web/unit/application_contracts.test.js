@@ -27,17 +27,14 @@ describe("browserless application contracts", () => {
     const migratedCards = [
       ["sensor", "registerSensorCardTypes"],
       ["switch", "registerSwitchCardTypes"],
-      ["clock", "registerClockCardTypes"],
       ["door_window", "registerDoorWindowCardTypes"],
       ["image", "registerImageCardTypes"],
       ["lawn_mower", "registerLawnMowerCardTypes"],
       ["presence", "registerPresenceCardTypes"],
       ["push", "registerPushCardTypes"],
       ["screen_lock", "registerScreenLockCardTypes"],
-      ["timezone", "registerTimezoneCardTypes"],
       ["action", "registerActionCardTypes"],
       ["alarm", "registerAlarmCardTypes"],
-      ["calendar", "registerCalendarCardTypes"],
       ["climate", "registerClimateCardTypes"],
       ["fan", "registerFanCardTypes"],
       ["light_temperature", "registerLightTemperatureCardTypes"],
@@ -71,16 +68,16 @@ describe("browserless application contracts", () => {
   test("registers static card families without compatibility descriptors", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
-    const cards = ["clock", "push", "screen_lock", "timezone"];
+    const cards = ["push", "screen_lock"];
     for (const card of cards) {
       const source = fs.readFileSync(path.join(ROOT, `src/webserver/cards/${card}.ts`), "utf8");
       assert.doesNotMatch(source, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     }
-    for (const registration of ["registerClockCardTypes", "registerPushCardTypes", "registerScreenLockCardTypes", "registerTimezoneCardTypes"]) {
+    for (const registration of ["registerPushCardTypes", "registerScreenLockCardTypes"]) {
       assert.match(entry, new RegExp(`^  ${registration}\\(registry\\);`, "m"));
       assert.doesNotMatch(entry, new RegExp(`registerCompatibility\\(${registration}`));
     }
-    assert.doesNotMatch(globals, /\bvar (?:PUSH_CARD_METADATA|SCREEN_LOCK_CARD_METADATA|pushActionSpec|pushDefaultIcon|pushDefaultIconOn|timezoneCardCityLabel|timezoneCardTimeParts):/);
+    assert.doesNotMatch(globals, /\bvar (?:PUSH_CARD_METADATA|SCREEN_LOCK_CARD_METADATA|pushActionSpec|pushDefaultIcon|pushDefaultIconOn):/);
   });
 
   test("keeps card metadata private to registry definitions", () => {
@@ -182,6 +179,20 @@ describe("browserless application contracts", () => {
     assert.match(entry, /registerLockCardTypes\(registry, context\.configuration\.lockOptions\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerLockCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:LOCK_CARD_METADATA|lockCommandMode|lockModeDefaultIcon|lockModeDefaultLabel|lockModeOptionValues|lockUsesDefaultIcon|normalizeLockMode):/);
+  });
+
+  test("registers date/time cards through one explicit service", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    for (const card of ["calendar", "clock", "timezone"]) {
+      const source = fs.readFileSync(path.join(ROOT, `src/webserver/cards/${card}.ts`), "utf8");
+      assert.doesNotMatch(source, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|DATE_TIME_CARD_METADATA)\b/);
+    }
+    assert.match(entry, /registerCalendarCardTypes\(registry, context\.configuration\.dateTimeOptions\);/);
+    assert.match(entry, /registerClockCardTypes\(registry, context\.configuration\.dateTimeOptions\);/);
+    assert.match(entry, /registerTimezoneCardTypes\(registry, context\.configuration\.dateTimeOptions, context\.dom\.document\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerCalendarCardTypes/);
+    assert.doesNotMatch(globals, /\bvar (?:DATE_TIME_CARD_METADATA|dateTimeCardMode|dateTimeCardTimeParts|dateTimeLargeNumbersLabel|dateTimeModeOptionValues|defaultTimezoneCardEntity|normalizeDateTimeCardMode|setDateTimeCardMode):/);
   });
 
   test("injects the card registry into editor and preview consumers", () => {

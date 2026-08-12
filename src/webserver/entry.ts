@@ -42,6 +42,7 @@ import { createConfigWebhookOptionsFeature } from "./application/config_webhook_
 import { createConfigInternalRelayOptionsFeature } from "./application/config_internal_relay_options";
 import { createConfigRobotCardOptionsFeature } from "./application/config_robot_card_options";
 import { createConfigLockOptionsFeature } from "./application/config_lock_options";
+import { createConfigDateTimeOptionsFeature } from "./application/config_date_time_options";
 import { createConfigModalTabOptionsFeature } from "./application/config_modal_tab_options";
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
 import { createConfigConfirmationOptionsFeature } from "./application/config_confirmation_options";
@@ -277,13 +278,13 @@ function installCardCompatibility(context: ApplicationContext): void {
   const coverLikeCards = createCoverLikeCardRegistration(registry);
   registry.registerCompatibility(registerActionCardTypes(registry, context.configuration.confirmationOptions));
   registry.registerCompatibility(registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm));
-  registry.registerCompatibility(registerCalendarCardTypes(registry));
+  registerCalendarCardTypes(registry, context.configuration.dateTimeOptions);
   registerClimateCardTypes(
     registry,
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
   );
-  registerClockCardTypes(registry);
+  registerClockCardTypes(registry, context.configuration.dateTimeOptions);
   registry.registerCompatibility(coverLikeCards.descriptors);
   registerDoorWindowCardTypes(registry, context.configuration.options);
   registry.registerCompatibility(registerFanCardTypes(registry, context.configuration.modalTabs));
@@ -319,7 +320,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerSliderCardTypes(registry, context.configuration.modalTabs));
   registry.registerCompatibility(registerSubpageCardTypes(registry, context.configuration.codec));
   registerSwitchCardTypes(registry, context.configuration.confirmationOptions);
-  registerTimezoneCardTypes(registry);
+  registerTimezoneCardTypes(registry, context.configuration.dateTimeOptions, context.dom.document);
   registerVacuumCardTypes(registry, context.configuration.robotOptions);
   const weatherCards = registerWeatherCardTypes(registry, context.configuration.weatherOptions);
   registerWeatherForecastCardTypes(registry, weatherCards);
@@ -337,6 +338,7 @@ function installTestCompatibility(context: ApplicationContext): void {
     context.configuration.webhookOptions,
     context.configuration.internalRelayOptions,
     context.configuration.lockOptions,
+    context.configuration.dateTimeOptions,
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
     context.configuration.confirmationOptions,
@@ -399,6 +401,16 @@ function composeApplicationContext(): ApplicationContext {
   const internalRelayConfigurationOptions = createConfigInternalRelayOptionsFeature(layout.config);
   const robotConfigurationOptions = createConfigRobotCardOptionsFeature();
   const lockConfigurationOptions = createConfigLockOptionsFeature();
+  const dateTimeConfigurationOptions = createConfigDateTimeOptionsFeature({
+    state: AppInstance.state,
+    now: () => webserverNow(),
+    renderButtonSettings: () => renderButtonSettings(),
+    effectiveTimezoneOption: (value) => effectiveTimezoneOptionForWeb(value),
+    timezoneId: (value) => getTzId(value),
+    timezoneOptionsWithFallback: (options, selected) => timezoneOptionsWithFallback(options, selected),
+    appendTimezoneOption: (select, option) => appendTimezoneOption(select, option),
+    monthNameForIndex: (index) => monthNameForIndex(index),
+  });
   const modalTabOptions = createConfigModalTabOptionsFeature({
     document: dom.document,
     renderButtonSettings: () => renderButtonSettings(),
@@ -414,6 +426,7 @@ function composeApplicationContext(): ApplicationContext {
     webhookConfigurationOptions,
     robotConfigurationOptions,
     lockConfigurationOptions,
+    dateTimeConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
@@ -604,6 +617,7 @@ function composeApplicationContext(): ApplicationContext {
     internalRelayConfigurationOptions,
     robotConfigurationOptions,
     lockConfigurationOptions,
+    dateTimeConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
