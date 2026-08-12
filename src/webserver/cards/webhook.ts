@@ -1,5 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { configOptionValue, setConfigOptionValue } from "../model/config_primitives";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -10,47 +8,21 @@ import {
     cardContractPickerKey,
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
-export function registerWebhookCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { ConfigWebhookOptionsFeature } from "../application/config_webhook_options";
+
+export function registerWebhookCardTypes(
+    registry: CardRegistry,
+    webhookOptions: ConfigWebhookOptionsFeature,
+): void {
+    const {
+        methods,
+        normalizeWebhookConfig,
+        setWebhookHeaders,
+        webhookHeaders,
+        webhookMethod,
+    } = webhookOptions;
     // Webhook card: sends a direct HTTP request from the panel.
-    var WEBHOOK_HEADERS_OPTION: any = "webhook_headers";
-    var WEBHOOK_METHODS: any = [
-        ["GET", "GET"],
-        ["POST", "POST"],
-        ["PUT", "PUT"],
-        ["PATCH", "PATCH"],
-        ["DELETE", "DELETE"],
-    ];
-    function webhookMethod(this: any, value?: any) {
-        value = String(value || "").trim().toUpperCase();
-        for (var i: any = 0; i < WEBHOOK_METHODS.length; i++) {
-            if (WEBHOOK_METHODS[i][0] === value)
-                return value;
-        }
-        return "GET";
-    }
-    function webhookHeaders(this: any, b?: any) {
-        return configOptionValue(b && b.options, WEBHOOK_HEADERS_OPTION);
-    }
-    function setWebhookHeaders(this: any, b?: any, value?: any) {
-        if (!b)
-            return "";
-        b.options = setConfigOptionValue(b.options, WEBHOOK_HEADERS_OPTION, value || "");
-        return b.options;
-    }
-    function normalizeWebhookConfig(this: any, b?: any) {
-        if (!b)
-            return;
-        b.sensor = webhookMethod(b.sensor);
-        b.icon_on = "Auto";
-        b.precision = "";
-        if (b.sensor === "GET" || b.sensor === "DELETE")
-            b.unit = "";
-        if (!b.icon)
-            b.icon = "Auto";
-        var headers: any = webhookHeaders(b);
-        b.options = headers ? setConfigOptionValue("", WEBHOOK_HEADERS_OPTION, headers) : "";
-    }
-    var WEBHOOK_CARD_METADATA: any = {
+    const WEBHOOK_CARD_METADATA: any = {
         url: {
             label: "URL",
             idSuffix: "webhook-url",
@@ -59,7 +31,7 @@ export function registerWebhookCardTypes(registry: CardRegistry): GlobalDescript
         method: {
             label: "Type",
             idSuffix: "webhook-method",
-            options: WEBHOOK_METHODS,
+            options: methods,
         },
         icon: {
             pickerIdSuffix: "webhook-icon-picker",
@@ -143,13 +115,4 @@ export function registerWebhookCardTypes(registry: CardRegistry): GlobalDescript
             });
         },
     });
-    return {
-        "WEBHOOK_HEADERS_OPTION": liveGlobal(() => WEBHOOK_HEADERS_OPTION, (value?: any) => { WEBHOOK_HEADERS_OPTION = value; }),
-        "WEBHOOK_METHODS": liveGlobal(() => WEBHOOK_METHODS, (value?: any) => { WEBHOOK_METHODS = value; }),
-        "webhookMethod": staticGlobal(webhookMethod),
-        "webhookHeaders": staticGlobal(webhookHeaders),
-        "setWebhookHeaders": staticGlobal(setWebhookHeaders),
-        "normalizeWebhookConfig": staticGlobal(normalizeWebhookConfig),
-        "WEBHOOK_CARD_METADATA": liveGlobal(() => WEBHOOK_CARD_METADATA, (value?: any) => { WEBHOOK_CARD_METADATA = value; }),
-    };
 }

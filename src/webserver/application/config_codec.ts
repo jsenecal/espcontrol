@@ -66,12 +66,14 @@ import {
 } from "./config_action_contract";
 import { normalizeCoverMode } from "./config_cover_contract";
 import type { ConfigWeatherOptionsFeature } from "./config_weather_options";
+import type { ConfigWebhookOptionsFeature } from "./config_webhook_options";
 export function createConfigCodecFeature(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
     mediaOptions: ConfigMediaOptionsFeature,
     imageOptions: ConfigImageOptionsFeature,
     weatherOptions: ConfigWeatherOptionsFeature,
+    webhookOptions: ConfigWebhookOptionsFeature,
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
@@ -97,6 +99,7 @@ export function createConfigCodecFeature(
         normalizeImageOptions,
     } = imageOptions;
     const { normalizeWeatherCardMode } = weatherOptions;
+    const { normalizeWebhookConfig, webhookMethod } = webhookOptions;
     imageOptions.connectSubpageParser((value) => parseSubpageConfig(value));
     const {
         normalizeLightControlOptions,
@@ -587,7 +590,7 @@ export function createConfigCodecFeature(
         else if (type === "subpage") {
             options = normalizeSubpageOptions(options, sensor, precision);
         }
-        else if (type === "webhook" && typeof normalizeWebhookConfig === "function") {
+        else if (type === "webhook") {
             var webhookButton: any = EspControlModel.cloneCardConfig(b || {});
             normalizeWebhookConfig(webhookButton);
             sensor = webhookButton.sensor;

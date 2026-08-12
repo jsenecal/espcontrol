@@ -63,9 +63,6 @@ declare global {
   var VACUUM_CARD_METADATA: any;
   var VACUUM_CARD_MODES: any;
   var VOICE_SERVICES_UNAVAILABLE: any;
-  var WEBHOOK_CARD_METADATA: any;
-  var WEBHOOK_HEADERS_OPTION: any;
-  var WEBHOOK_METHODS: any;
   var WEBSERVER_MOCK_NOW_ISO: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
   var _backupFeature: any;
@@ -418,7 +415,6 @@ declare global {
   var normalizeScreenRotation: any;
   var normalizeVacuumConfig: any;
   var normalizeVacuumMode: any;
-  var normalizeWebhookConfig: any;
   var normalizeWifiStrengthPercent: any;
   var openCardSettings: any;
   var openClockBarTemperatureSettings: any;
@@ -615,7 +611,6 @@ declare global {
   var setPublicFirmwareInfo: any;
   var setPublicFirmwareVersions: any;
   var setViewportMeta: any;
-  var setWebhookHeaders: any;
   var settingsStateEntities: any;
   var settingsStatusHeader: any;
   var setupPreviewEvents: any;
@@ -702,8 +697,6 @@ declare global {
   var voiceServicesSupported: any;
   var waitForFirmwareRestart: any;
   var waitForReboot: any;
-  var webhookHeaders: any;
-  var webhookMethod: any;
   var webserverMockNow: any;
   var webserverNow: any;
   var webserverUseMockNowForTest: any;

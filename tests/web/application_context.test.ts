@@ -5,6 +5,7 @@ import {
 import { createCardRegistry } from "../../src/webserver/application/card_registry";
 import { installCore } from "../../src/webserver/application/core";
 import { createConfigWeatherOptionsFeature } from "../../src/webserver/application/config_weather_options";
+import { createConfigWebhookOptionsFeature } from "../../src/webserver/application/config_webhook_options";
 import type { DeviceConfig } from "../../src/webserver/state/types";
 import type { GlobalDescriptors } from "../../src/webserver/runtime/globals";
 
@@ -36,6 +37,7 @@ export function runApplicationContextTests(): void {
   const mediaConfigurationOptions = {} as any;
   const imageConfigurationOptions = {} as any;
   const weatherConfigurationOptions = {} as any;
+  const webhookConfigurationOptions = {} as any;
   const modalTabOptions = {} as any;
   const accessClimateAlarmOptions = {} as any;
   const confirmationOptions = {} as any;
@@ -76,6 +78,7 @@ export function runApplicationContextTests(): void {
     mediaConfigurationOptions,
     imageConfigurationOptions,
     weatherConfigurationOptions,
+    webhookConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
@@ -117,6 +120,7 @@ export function runApplicationContextTests(): void {
   equal(context.configuration.mediaOptions, mediaConfigurationOptions, "context retains typed media options");
   equal(context.configuration.imageOptions, imageConfigurationOptions, "context retains typed image options");
   equal(context.configuration.weatherOptions, weatherConfigurationOptions, "context retains typed weather options");
+  equal(context.configuration.webhookOptions, webhookConfigurationOptions, "context retains typed webhook options");
   equal(context.configuration.modalTabs, modalTabOptions, "context retains typed modal-tab options");
   equal(context.configuration.accessClimateAlarm, accessClimateAlarmOptions, "context retains typed access/climate/alarm options");
   equal(context.configuration.confirmationOptions, confirmationOptions, "context retains typed confirmation options");
@@ -150,6 +154,16 @@ export function runApplicationContextTests(): void {
   const currentOnlyWeather = createConfigWeatherOptionsFeature({ ...profile, disabledCardTypes: ["weather_forecast"] });
   equal(currentOnlyWeather.normalizeWeatherCardMode("tomorrow"), "", "disabled forecast support normalizes to current conditions");
   equal(currentOnlyWeather.weatherCardIsForecastMode({ precision: "tomorrow" }), false, "disabled forecast support hides forecast controls");
+
+  const webhookOptions = createConfigWebhookOptionsFeature();
+  equal(webhookOptions.webhookMethod("post"), "POST", "webhook options normalize supported methods");
+  equal(webhookOptions.webhookMethod("unknown"), "GET", "webhook options fall back to GET");
+  const webhook = { sensor: "POST", unit: "{}", icon: "", icon_on: "Flash", precision: "1", options: "webhook_headers=Content-Type%3A%20application/json,unused=value" } as any;
+  webhookOptions.normalizeWebhookConfig(webhook);
+  equal(webhook.icon, "Auto", "webhook normalization restores the default icon");
+  equal(webhook.icon_on, "Auto", "webhook normalization removes the active icon");
+  equal(webhook.precision, "", "webhook normalization clears precision");
+  equal(webhookOptions.webhookHeaders(webhook), "Content-Type: application/json", "webhook normalization preserves encoded headers");
 
   cards.registerCompatibility({ example: { configurable: true, value: true } });
   equal(cards.compatibilityDefinitionCount, 1, "registry counts compatibility definitions");
