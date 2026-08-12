@@ -50,7 +50,7 @@ import { createConfigModalTabOptionsFeature } from "./application/config_modal_t
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
 import { createConfigConfirmationOptionsFeature } from "./application/config_confirmation_options";
 import { createConfigAccessClimateAlarmOptionsFeature } from "./application/config_access_climate_alarm_options";
-import { installConfigCodecModule } from "./application/config_codec";
+import { createConfigCodecFeature } from "./application/config_codec";
 import { createNativePanelConfigMigrationController } from "./application/native_panel_config_migration";
 import { createConfigPersistenceFeature } from "./application/config_post_api";
 import { installStateLoaderApiModule } from "./application/state_loader_api";
@@ -179,15 +179,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
-  installGlobals(installConfigCodecModule(
-    context.cards,
-    context.configuration.options,
-    context.configuration.mediaOptions,
-    context.configuration.imageOptions,
-    context.configuration.modalTabs,
-    context.configuration.accessClimateAlarm,
-    context.configuration.confirmationOptions,
-  ));
+  installGlobals(context.configuration.codec.globals);
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
   installGlobals(installStateLoaderApiModule());
@@ -378,6 +370,15 @@ function composeApplicationContext(): ApplicationContext {
   });
   const accessClimateAlarmOptions = createConfigAccessClimateAlarmOptionsFeature(modalTabOptions);
   const confirmationOptions = createConfigConfirmationOptionsFeature(accessClimateAlarmOptions);
+  const configurationCodec = createConfigCodecFeature(
+    cards,
+    configurationOptions,
+    mediaConfigurationOptions,
+    imageConfigurationOptions,
+    modalTabOptions,
+    accessClimateAlarmOptions,
+    confirmationOptions,
+  );
   const cardEditorDraft = createCardEditorDraftController({
     cloneCard: (button) => Model.cloneCardConfig(button),
     emptyCard: () => Model.emptyCardConfig(),
@@ -386,7 +387,7 @@ function composeApplicationContext(): ApplicationContext {
     emptyCard: () => Model.emptyCardConfig(),
     copyCard: (target, source) => {
       Model.copyCardConfig(target, source);
-      normalizeButtonConfig(target);
+      configurationCodec.normalizeButtonConfig(target);
     },
   });
   const cardEditorValidation = createCardEditorValidationController();
@@ -427,11 +428,11 @@ function composeApplicationContext(): ApplicationContext {
     deviceId: layout.deviceId,
     gridCols: layout.gridCols,
     numSlots: layout.numSlots,
-    normalizeButtonConfig: (button) => normalizeButtonConfig(button),
-    parseSubpageConfig: (value) => parseSubpageConfig(value),
-    serializeSubpageConfig: (subpage) => serializeSubpageConfig(subpage),
+    normalizeButtonConfig: (button) => configurationCodec.normalizeButtonConfig(button),
+    parseSubpageConfig: (value) => configurationCodec.parseSubpageConfig(value),
+    serializeSubpageConfig: (subpage) => configurationCodec.serializeSubpageConfig(subpage),
     buildSubpageGrid: (subpage) => {
-      buildSubpageGridAndNormalizeOrder(subpage);
+      configurationCodec.buildSubpageGridAndNormalizeOrder(subpage);
       return subpage.grid || [];
     },
   });
@@ -462,8 +463,8 @@ function composeApplicationContext(): ApplicationContext {
     return profile.cols || layout.config.cols;
   };
   const backupExport = createBackupExportController({
-    serializeButtonConfig: (button) => serializeButtonConfig(button),
-    serializeSubpageConfig: (subpage) => serializeSubpageConfig(subpage),
+    serializeButtonConfig: (button) => configurationCodec.serializeButtonConfig(button),
+    serializeSubpageConfig: (subpage) => configurationCodec.serializeSubpageConfig(subpage),
   });
   const backupImport = createBackupImportController<any, any, any, any>({
     normalizeBackup: (data) => backupContract.normalizeBackupConfig(data),
@@ -558,6 +559,7 @@ function composeApplicationContext(): ApplicationContext {
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
+    configurationCodec,
     backupContract,
     backupExport,
     backupFile,

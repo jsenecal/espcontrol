@@ -37,6 +37,7 @@ export function runApplicationContextTests(): void {
   const modalTabOptions = {} as any;
   const accessClimateAlarmOptions = {} as any;
   const confirmationOptions = {} as any;
+  const configurationCodec = {} as any;
   const backupContract = {} as any;
   const backupExport = {} as any;
   const backupFile = {} as any;
@@ -72,6 +73,7 @@ export function runApplicationContextTests(): void {
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
+    configurationCodec,
     backupContract,
     backupExport,
     backupFile,
@@ -109,6 +111,7 @@ export function runApplicationContextTests(): void {
   equal(context.configuration.modalTabs, modalTabOptions, "context retains typed modal-tab options");
   equal(context.configuration.accessClimateAlarm, accessClimateAlarmOptions, "context retains typed access/climate/alarm options");
   equal(context.configuration.confirmationOptions, confirmationOptions, "context retains typed confirmation options");
+  equal(context.configuration.codec, configurationCodec, "context retains the typed configuration codec");
   equal(context.backup.contract, backupContract, "context retains the backup contract");
   equal(context.backup.export, backupExport, "context retains backup export ownership");
   equal(context.backup.file, backupFile, "context retains backup file ownership");

@@ -189,6 +189,17 @@ describe("browserless application contracts", () => {
     assert.match(options, /from "\.\.\/model\/config_primitives"/);
   });
 
+  test("owns one configuration codec instance in the application context", () => {
+    const codec = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_codec.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.match(codec, /createConfigCodecFeature/);
+    assert.doesNotMatch(entry, /installConfigCodecModule/);
+    assert.match(entry, /configurationCodec = createConfigCodecFeature/);
+    assert.match(entry, /installGlobals\(context\.configuration\.codec\.globals\)/);
+    assert.match(entry, /configurationCodec\.normalizeButtonConfig/);
+    assert.match(entry, /configurationCodec\.serializeSubpageConfig/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

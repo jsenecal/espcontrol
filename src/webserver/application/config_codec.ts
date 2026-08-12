@@ -1,5 +1,5 @@
 import { state } from "../state/app_instance";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     migrateSavedConfigVacuumLegacy,
     normalizeSavedConfigVacuumIconOn,
@@ -46,7 +46,7 @@ import {
     ACTION_CARD_OPTION_SELECT_ACTION,
 } from "./config_action_contract";
 import { normalizeCoverMode } from "./config_cover_contract";
-export function installConfigCodecModule(
+export function createConfigCodecFeature(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
     mediaOptions: ConfigMediaOptionsFeature,
@@ -54,7 +54,7 @@ export function installConfigCodecModule(
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
-): GlobalDescriptors {
+) {
     const {
         cardLargeNumbersSupported,
         normalizeDateTimeOptions,
@@ -941,60 +941,67 @@ export function installConfigCodecModule(
                 this.blur();
         });
     }
-    return {
-        "normalizeWithRegisteredCardType": staticGlobal(normalizeWithRegisteredCardType),
-        "normalizeButtonConfig": staticGlobal(normalizeButtonConfig),
-        "cardRequiresSquareSize": staticGlobal(cardRequiresSquareSize),
-        "cardSupportsMaxSize": staticGlobal(cardSupportsMaxSize),
-        "cardSupportsPortraitLargeSize": staticGlobal(cardSupportsPortraitLargeSize),
-        "cardSupportsLandscapeLargeSize": staticGlobal(cardSupportsLandscapeLargeSize),
-        "normalizeCardSizeForConfig": staticGlobal(normalizeCardSizeForConfig),
-        "isBrightnessSliderType": staticGlobal(isBrightnessSliderType),
-        "isFanCardType": staticGlobal(isFanCardType),
-        "isClimateCardType": staticGlobal(isClimateCardType),
-        "isOptionSelectType": staticGlobal(isOptionSelectType),
-        "fanCardDefaultIcon": staticGlobal(fanCardDefaultIcon),
-        "buttonConfigChangedByNormalize": staticGlobal(buttonConfigChangedByNormalize),
-        "trimConfigFields": staticGlobal(trimConfigFields),
-        "buttonConfigFields": staticGlobal(buttonConfigFields),
-        "encodeConfigField": staticGlobal(encodeConfigField),
-        "decodeConfigField": staticGlobal(decodeConfigField),
-        "legacyButtonConfigSafe": staticGlobal(legacyButtonConfigSafe),
-        "serializeButtonConfig": staticGlobal(serializeButtonConfig),
-        "parseRawButtonConfig": staticGlobal(parseRawButtonConfig),
-        "parseButtonConfig": staticGlobal(parseButtonConfig),
-        "hasLegacySliderDirection": staticGlobal(hasLegacySliderDirection),
-        "buttonConfigHasLegacySliderDirection": staticGlobal(buttonConfigHasLegacySliderDirection),
-        "buttonConfigNeedsMigration": staticGlobal(buttonConfigNeedsMigration),
-        "parseBackOrderToken": staticGlobal(parseBackOrderToken),
-        "backOrderToken": staticGlobal(backOrderToken),
-        "backLabelFromOrder": staticGlobal(backLabelFromOrder),
-        "parseSubpageOrder": staticGlobal(parseSubpageOrder),
-        "subpageOrderForSerialize": staticGlobal(subpageOrderForSerialize),
-        "subpageSerializedOrder": staticGlobal(subpageSerializedOrder),
-        "parseSubpageConfig": staticGlobal(parseSubpageConfig),
-        "subpageTypeCode": staticGlobal(subpageTypeCode),
-        "subpageTypeFromCode": staticGlobal(subpageTypeFromCode),
-        "encodeSubpageField": staticGlobal(encodeSubpageField),
-        "decodeSubpageField": staticGlobal(decodeSubpageField),
-        "parseCompactSubpageConfig": staticGlobal(parseCompactSubpageConfig),
-        "subpageConfigHasLegacySliderDirection": staticGlobal(subpageConfigHasLegacySliderDirection),
-        "subpageConfigNeedsMigration": staticGlobal(subpageConfigNeedsMigration),
-        "serializeSubpageConfig": staticGlobal(serializeSubpageConfig),
-        "subpageLegacyButtonFields": staticGlobal(subpageLegacyButtonFields),
-        "subpageCompactButtonFields": staticGlobal(subpageCompactButtonFields),
-        "legacySubpageConfigSafe": staticGlobal(legacySubpageConfigSafe),
-        "serializeLegacySubpageConfig": staticGlobal(serializeLegacySubpageConfig),
-        "serializeCompactSubpageConfig": staticGlobal(serializeCompactSubpageConfig),
-        "applySubpageRaw": staticGlobal(applySubpageRaw),
-        "getSubpage": staticGlobal(getSubpage),
-        "buildSubpageGrid": staticGlobal(buildSubpageGrid),
-        "buildSubpageGridAndNormalizeOrder": staticGlobal(buildSubpageGridAndNormalizeOrder),
-        "serializeSubpageGrid": staticGlobal(serializeSubpageGrid),
-        "enterSubpage": staticGlobal(enterSubpage),
-        "exitSubpage": staticGlobal(exitSubpage),
-        "saveSubpageConfig": staticGlobal(saveSubpageConfig),
-        "subpageFirstFreeSlot": staticGlobal(subpageFirstFreeSlot),
-        "bindTextPost": staticGlobal(bindTextPost),
+    const feature = {
+        normalizeWithRegisteredCardType,
+        normalizeButtonConfig,
+        cardRequiresSquareSize,
+        cardSupportsMaxSize,
+        cardSupportsPortraitLargeSize,
+        cardSupportsLandscapeLargeSize,
+        normalizeCardSizeForConfig,
+        isBrightnessSliderType,
+        isFanCardType,
+        isClimateCardType,
+        isOptionSelectType,
+        fanCardDefaultIcon,
+        buttonConfigChangedByNormalize,
+        trimConfigFields,
+        buttonConfigFields,
+        encodeConfigField,
+        decodeConfigField,
+        legacyButtonConfigSafe,
+        serializeButtonConfig,
+        parseRawButtonConfig,
+        parseButtonConfig,
+        hasLegacySliderDirection,
+        buttonConfigHasLegacySliderDirection,
+        buttonConfigNeedsMigration,
+        parseBackOrderToken,
+        backOrderToken,
+        backLabelFromOrder,
+        parseSubpageOrder,
+        subpageOrderForSerialize,
+        subpageSerializedOrder,
+        parseSubpageConfig,
+        subpageTypeCode,
+        subpageTypeFromCode,
+        encodeSubpageField,
+        decodeSubpageField,
+        parseCompactSubpageConfig,
+        subpageConfigHasLegacySliderDirection,
+        subpageConfigNeedsMigration,
+        serializeSubpageConfig,
+        subpageLegacyButtonFields,
+        subpageCompactButtonFields,
+        legacySubpageConfigSafe,
+        serializeLegacySubpageConfig,
+        serializeCompactSubpageConfig,
+        applySubpageRaw,
+        getSubpage,
+        buildSubpageGrid,
+        buildSubpageGridAndNormalizeOrder,
+        serializeSubpageGrid,
+        enterSubpage,
+        exitSubpage,
+        saveSubpageConfig,
+        subpageFirstFreeSlot,
+        bindTextPost,
     };
+    const globals: GlobalDescriptors = {};
+    for (const name of Object.keys(feature) as Array<keyof typeof feature>) {
+        globals[name] = staticGlobal(feature[name]);
+    }
+    return { ...feature, globals };
 }
+
+export type ConfigCodecFeature = ReturnType<typeof createConfigCodecFeature>;
