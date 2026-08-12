@@ -164,7 +164,6 @@ declare global {
   var applyClockBarTemperatureEntities: any;
   var applyEntityModeCardModeChange: any;
   var applyImportedButtonOrder: any;
-  var applyPageTitle: any;
   var applyScreensaverTimeoutState: any;
   var applySpans: any;
   var addNativeConfigToBackup: any;
@@ -415,7 +414,6 @@ declare global {
   var groupCardSettingsFields: any;
   var handleBtnClick: any;
   var handleDocumentSelectionMouseDown: any;
-  var handleWebServerPingEvent: any;
   var hasCustomNtpServers: any;
   var hasRememberedPostPath: any;
   var hideContextMenu: any;
@@ -483,7 +481,6 @@ declare global {
   var lightTempSpec: any;
   var lightTempStep: any;
   var loadInitialState: any;
-  var loadPageTitleFromEventStream: any;
   var loadStateItems: any;
   var lockCommandMode: any;
   var lockModeDefaultIcon: any;

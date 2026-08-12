@@ -3,11 +3,13 @@ import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ReconnectController } from "../features/reconnect";
 import type { SseHandlerFactory } from "./app_state_event_handlers";
 import type { UiRuntimeState } from "./state";
+import type { AppTitleFeature } from "./app_title";
 
 export function installAppEventsModule(
     reconnectController: ReconnectController<unknown>,
     createSseHandlers: SseHandlerFactory,
     runtime: UiRuntimeState,
+    pageTitle: AppTitleFeature,
 ): GlobalDescriptors {
     const els = runtime.els;
     // ── SSE ────────────────────────────────────────────────────────────────
@@ -112,7 +114,7 @@ export function installAppEventsModule(
         reconnectController.connect({
             "onConnected": markConnected,
             "onDisconnected": handleDisconnected,
-            "onPing": handleWebServerPingEvent,
+            "onPing": pageTitle.handleWebServerPingEvent,
             "parseState": function (e: any) { return parseEntityEventData(e.data); },
             "onState": handleState,
         });

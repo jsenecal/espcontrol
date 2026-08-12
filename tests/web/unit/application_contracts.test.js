@@ -291,7 +291,7 @@ describe("browserless application contracts", () => {
     const persistence = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_post_api.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime\)/);
-    assert.match(entry, /installAppEventsModule\(reconnectController, sseHandlerFactory, context\.runtime\)/);
+    assert.match(entry, /installAppEventsModule\([\s\S]*reconnectController, sseHandlerFactory, context\.runtime, context\.controllers\.pageTitle/);
     assert.match(persistence, /runtime\.pendingSliderSubpageMigrations/);
     assert.doesNotMatch(runtime, /"(?:orderReceived|migrationTimer|sliderMigrationTimer|pendingSliderSubpageMigrations)"/);
     assert.doesNotMatch(globals, /\bvar (?:orderReceived|migrationTimer|sliderMigrationTimer|pendingSliderSubpageMigrations):/);
@@ -359,6 +359,19 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(runtime, /globals: GlobalDescriptors/);
     assert.doesNotMatch(entry, /context\.runtime\.globals/);
     assert.doesNotMatch(globals, /\bvar els:/);
+  });
+
+  test("owns page-title behavior without compatibility globals", () => {
+    const title = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_title.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const events = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_events.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(title, /createAppTitleFeature/);
+    assert.doesNotMatch(title, /GlobalDescriptors|staticGlobal/);
+    assert.match(entry, /pageTitle = createAppTitleFeature/);
+    assert.match(events, /pageTitle\.handleWebServerPingEvent/);
+    assert.doesNotMatch(entry, /installAppTitleModule/);
+    assert.doesNotMatch(globals, /\bvar (?:applyPageTitle|handleWebServerPingEvent|loadPageTitleFromEventStream):/);
   });
 
   test("preserves settings normalization", () => {

@@ -53,6 +53,7 @@ export function runApplicationContextTests(): void {
   const clockBar = {} as any;
   const coverArtScreensaver = {} as any;
   const mediaPlayback = {} as any;
+  const pageTitle = {} as any;
   const screenSchedule = {} as any;
   const screensaver = {} as any;
   const settingsUi = {} as any;
@@ -90,6 +91,7 @@ export function runApplicationContextTests(): void {
     clockBar,
     coverArtScreensaver,
     mediaPlayback,
+    pageTitle,
     reconnect,
     screenSchedule,
     screensaver,
@@ -129,6 +131,7 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.clockBar, clockBar, "context retains clock bar ownership");
   equal(context.controllers.coverArtScreensaver, coverArtScreensaver, "context retains cover art settings ownership");
   equal(context.controllers.mediaPlayback, mediaPlayback, "context retains media settings ownership");
+  equal(context.controllers.pageTitle, pageTitle, "context retains page title ownership");
   equal(context.controllers.screenSchedule, screenSchedule, "context retains schedule settings ownership");
   equal(context.controllers.screensaver, screensaver, "context retains screensaver settings ownership");
   equal(context.controllers.settingsUi, settingsUi, "context retains settings DOM ownership");

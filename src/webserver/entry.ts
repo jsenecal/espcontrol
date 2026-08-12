@@ -94,7 +94,7 @@ import { createBackupFeature } from "./features/backup";
 import { installBackupContractModule } from "./application/backup_contract";
 import { createAppBackupFeature } from "./application/app_backup";
 import { installAppStatusPreviewModule } from "./application/app_status_preview";
-import { installAppTitleModule } from "./application/app_title";
+import { createAppTitleFeature } from "./application/app_title";
 import { installAppConfigEventsModule } from "./application/app_config_events";
 import { installAppStateEventHandlersModule } from "./application/app_state_event_handlers";
 import { installAppEventsModule } from "./application/app_events";
@@ -259,7 +259,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   }, context.runtime));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule(context.runtime));
-  installGlobals(installAppTitleModule());
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec));
   let sseHandlerFactory: SseHandlerFactory | undefined;
   installGlobals(installAppStateEventHandlersModule(context.runtime, (factory) => {
@@ -267,8 +266,10 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   }));
   const reconnectController = context.controllers.reconnect;
   if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
-  installGlobals(installAppEventsModule(reconnectController, sseHandlerFactory, context.runtime));
-  installGlobals(installAppModule());
+  installGlobals(installAppEventsModule(
+    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle,
+  ));
+  installGlobals(installAppModule(context.controllers.pageTitle));
 }
 
 function installCardCompatibility(context: ApplicationContext): void {
@@ -352,6 +353,15 @@ function composeApplicationContext(): ApplicationContext {
   };
   const deviceApi = createDeviceApi((url, init) =>
     dom.fetch(url, init as RequestInit));
+  const pageTitle = createAppTitleFeature({
+    document: dom.document,
+    eventStreamEnabled: () => {
+      try { return new URLSearchParams(dom.window.location.search).get("events") === "1"; }
+      catch (_) { return false; }
+    },
+    eventSourceAvailable: () => typeof EventSource === "function",
+    createEventSource: dom.createEventSource,
+  });
   const layout = createApplicationLayoutState(
     DeviceConfig.deviceId,
     DeviceConfig.deviceConfig,
@@ -588,6 +598,7 @@ function composeApplicationContext(): ApplicationContext {
     clockBar,
     coverArtScreensaver,
     mediaPlayback,
+    pageTitle,
     previewPlacement,
     reconnect,
     screenSchedule,

@@ -30,6 +30,7 @@ import type { ConfigAccessClimateAlarmOptionsFeature } from "./config_access_cli
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
+import type { AppTitleFeature } from "./app_title";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -87,6 +88,7 @@ export interface ApplicationContext {
     readonly clockBar: ClockBarController;
     readonly coverArtScreensaver: CoverArtScreensaverController;
     readonly mediaPlayback: MediaPlaybackController;
+    readonly pageTitle: AppTitleFeature;
     readonly previewPlacement: PreviewPlacementController;
     readonly reconnect: ReconnectController<unknown>;
     readonly screenSchedule: ScreenScheduleController;
@@ -126,6 +128,7 @@ export interface ApplicationContextOptions {
   readonly clockBar: ClockBarController;
   readonly coverArtScreensaver: CoverArtScreensaverController;
   readonly mediaPlayback: MediaPlaybackController;
+  readonly pageTitle: AppTitleFeature;
   readonly previewPlacement: PreviewPlacementController;
   readonly reconnect: ReconnectController<unknown>;
   readonly screenSchedule: ScreenScheduleController;
@@ -185,6 +188,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       clockBar: options.clockBar,
       coverArtScreensaver: options.coverArtScreensaver,
       mediaPlayback: options.mediaPlayback,
+      pageTitle: options.pageTitle,
       previewPlacement: options.previewPlacement,
       reconnect: options.reconnect,
       screenSchedule: options.screenSchedule,
