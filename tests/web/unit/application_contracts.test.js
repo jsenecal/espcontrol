@@ -204,6 +204,16 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:renderCoverControlTabSettings|sliderCardMetadata|sliderTypeFactory):/);
   });
 
+  test("registers fan card families without compatibility descriptors", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/fan.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.match(entry, /registerFanCardTypes\(registry, context\.configuration\.modalTabs\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerFanCardTypes/);
+    assert.doesNotMatch(globals, /\bvar (?:FAN_CARD_METADATA|FAN_CONTROL_TYPE_OPTIONS|fanControlBadgeIcon|fanControlDefaultIcon|fanTypeFactory|normalizeFanControlType|renderFanControlTabSettings|renderFanControlTypeField|setFanControlType):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",

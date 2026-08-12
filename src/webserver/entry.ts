@@ -287,7 +287,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registerClockCardTypes(registry, context.configuration.dateTimeOptions);
   registry.registerCompatibility(coverLikeCards.descriptors);
   registerDoorWindowCardTypes(registry, context.configuration.options);
-  registry.registerCompatibility(registerFanCardTypes(registry, context.configuration.modalTabs));
+  registerFanCardTypes(registry, context.configuration.modalTabs);
   registry.registerCompatibility(registerGarageCardTypes(
     coverLikeCards.register,
     context.configuration.accessClimateAlarm,

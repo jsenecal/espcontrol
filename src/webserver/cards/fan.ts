@@ -1,11 +1,10 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 export function registerFanCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
         fanControlTabDefinitions,
         fanControlTabs,
@@ -249,15 +248,4 @@ export function registerFanCardTypes(
     registry.register("fan_oscillate", fanTypeFactory({ type: "fan_oscillate", pickerKey: "fan_speed", hidden: true }));
     registry.register("fan_direction", fanTypeFactory({ type: "fan_direction", pickerKey: "fan_speed", hidden: true }));
     registry.register("fan_preset", fanTypeFactory({ type: "fan_preset", pickerKey: "fan_speed", hidden: true }));
-    return {
-        "FAN_CONTROL_TYPE_OPTIONS": liveGlobal(() => FAN_CONTROL_TYPE_OPTIONS, (value?: any) => { FAN_CONTROL_TYPE_OPTIONS = value; }),
-        "normalizeFanControlType": staticGlobal(normalizeFanControlType),
-        "fanControlDefaultIcon": staticGlobal(fanControlDefaultIcon),
-        "fanControlBadgeIcon": staticGlobal(fanControlBadgeIcon),
-        "FAN_CARD_METADATA": liveGlobal(() => FAN_CARD_METADATA, (value?: any) => { FAN_CARD_METADATA = value; }),
-        "setFanControlType": staticGlobal(setFanControlType),
-        "renderFanControlTypeField": staticGlobal(renderFanControlTypeField),
-        "renderFanControlTabSettings": staticGlobal(renderFanControlTabSettings),
-        "fanTypeFactory": staticGlobal(fanTypeFactory),
-    };
 }

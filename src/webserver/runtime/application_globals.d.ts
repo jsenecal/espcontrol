@@ -15,8 +15,6 @@ declare global {
   var screenScheduleControllerState: any;
   var applyScreenScheduleControllerState: any;
   var DEVICE_ID: any;
-  var FAN_CARD_METADATA: any;
-  var FAN_CONTROL_TYPE_OPTIONS: any;
   var FAVICON_SVG: any;
   var FIRMWARE_CHECKING_VERSION_LABEL: any;
   var FIRMWARE_DEV_VERSION_LABEL: any;
@@ -252,9 +250,6 @@ declare global {
   var eventStreamEnabled: any;
   var exportConfig: any;
   var failPublicFirmwareUpload: any;
-  var fanControlBadgeIcon: any;
-  var fanControlDefaultIcon: any;
-  var fanTypeFactory: any;
   var fieldLabel: any;
   var fieldWithControl: any;
   var findDuplicatePlacement: any;
@@ -365,7 +360,6 @@ declare global {
   var normalizeClockBarTemperatureEntities: any;
   var normalizeClockBarTemperatureEntries: any;
   var normalizeCoverLikeMode: any;
-  var normalizeFanControlType: any;
   var normalizeGarageMode: any;
   var normalizeGateMode: any;
   var normalizeGridSpansForLayout: any;
@@ -504,8 +498,6 @@ declare global {
   var renderClockBarLayout: any;
   var renderClockBarSelectionBar: any;
   var renderCoverLikeConfirmationSettings: any;
-  var renderFanControlTabSettings: any;
-  var renderFanControlTypeField: any;
   var renderFirmwareUpdateStatus: any;
   var renderFirmwareVersion: any;
   var renderLightControlTabSettings: any;
@@ -557,7 +549,6 @@ declare global {
   var setC6FirmwareUpdateAvailable: any;
   var setClockBarItemVisible: any;
   var setConfigLocked: any;
-  var setFanControlType: any;
   var setFavicon: any;
   var setFirmwareUpdateInfo: any;
   var setFirmwareVersion: any;
