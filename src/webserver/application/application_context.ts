@@ -5,6 +5,14 @@ import type { CardEditorDraftController } from "../features/card_editor_draft_co
 import type { CardEditorSaveController } from "../features/card_editor_save_controller";
 import type { CardEditorValidationController } from "../features/card_editor_validation_controller";
 import type { PreviewPlacementController } from "../features/preview_placement_controller";
+import type { AlarmDelayAudioController } from "../features/alarm_delay_audio_controller";
+import type { ClockBarController } from "../features/clock_bar_controller";
+import type { CoverArtScreensaverController } from "../features/cover_art_screensaver_controller";
+import type { MediaPlaybackController } from "../features/media_playback_controller";
+import type { ScreenScheduleController } from "../features/screen_schedule_controller";
+import type { ScreensaverController } from "../features/screensaver_controller";
+import type { SettingsUiFeature } from "../features/settings";
+import type { VoiceServicesController } from "../features/voice_services_controller";
 import type { DeviceConfig, AppState } from "../state/types";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { GlobalDescriptors } from "../runtime/globals";
@@ -64,11 +72,19 @@ export interface ApplicationContext {
     readonly persistence: ConfigPersistenceFeature;
   };
   readonly controllers: {
+    readonly alarmDelayAudio: AlarmDelayAudioController;
     readonly cardEditorDraft: CardEditorDraftController;
     readonly cardEditorSave: CardEditorSaveController;
     readonly cardEditorValidation: CardEditorValidationController;
+    readonly clockBar: ClockBarController;
+    readonly coverArtScreensaver: CoverArtScreensaverController;
+    readonly mediaPlayback: MediaPlaybackController;
     readonly previewPlacement: PreviewPlacementController;
     readonly reconnect: ReconnectController<unknown>;
+    readonly screenSchedule: ScreenScheduleController;
+    readonly screensaver: ScreensaverController;
+    readonly settingsUi: SettingsUiFeature;
+    readonly voiceServices: VoiceServicesController;
   };
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
@@ -81,11 +97,19 @@ export interface ApplicationContextOptions {
   readonly api: DeviceApi;
   readonly nativeConfiguration: NativePanelConfigController;
   readonly configurationPersistence: ConfigPersistenceFeature;
+  readonly alarmDelayAudio: AlarmDelayAudioController;
   readonly cardEditorDraft: CardEditorDraftController;
   readonly cardEditorSave: CardEditorSaveController;
   readonly cardEditorValidation: CardEditorValidationController;
+  readonly clockBar: ClockBarController;
+  readonly coverArtScreensaver: CoverArtScreensaverController;
+  readonly mediaPlayback: MediaPlaybackController;
   readonly previewPlacement: PreviewPlacementController;
   readonly reconnect: ReconnectController<unknown>;
+  readonly screenSchedule: ScreenScheduleController;
+  readonly screensaver: ScreensaverController;
+  readonly settingsUi: SettingsUiFeature;
+  readonly voiceServices: VoiceServicesController;
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
 }
@@ -116,11 +140,19 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       persistence: options.configurationPersistence,
     },
     controllers: {
+      alarmDelayAudio: options.alarmDelayAudio,
       cardEditorDraft: options.cardEditorDraft,
       cardEditorSave: options.cardEditorSave,
       cardEditorValidation: options.cardEditorValidation,
+      clockBar: options.clockBar,
+      coverArtScreensaver: options.coverArtScreensaver,
+      mediaPlayback: options.mediaPlayback,
       previewPlacement: options.previewPlacement,
       reconnect: options.reconnect,
+      screenSchedule: options.screenSchedule,
+      screensaver: options.screensaver,
+      settingsUi: options.settingsUi,
+      voiceServices: options.voiceServices,
     },
     dom: options.dom,
     cards: options.cards,

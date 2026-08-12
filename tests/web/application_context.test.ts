@@ -32,10 +32,18 @@ export function runApplicationContextTests(): void {
   const nativeConfiguration = { begin() {} } as any;
   const configurationPersistence = { globals: {}, saveButtonConfig() {}, saveSubpageEntity() {} } as any;
   const reconnect = { connect() {} } as any;
+  const alarmDelayAudio = {} as any;
   const cardEditorDraft = {} as any;
   const cardEditorSave = {} as any;
   const cardEditorValidation = {} as any;
   const previewPlacement = {} as any;
+  const clockBar = {} as any;
+  const coverArtScreensaver = {} as any;
+  const mediaPlayback = {} as any;
+  const screenSchedule = {} as any;
+  const screensaver = {} as any;
+  const settingsUi = {} as any;
+  const voiceServices = {} as any;
   const state = { grid: [] } as any;
   const model = {} as any;
   const dom = {} as any;
@@ -46,11 +54,19 @@ export function runApplicationContextTests(): void {
     api,
     nativeConfiguration,
     configurationPersistence,
+    alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,
     cardEditorValidation,
     previewPlacement,
+    clockBar,
+    coverArtScreensaver,
+    mediaPlayback,
     reconnect,
+    screenSchedule,
+    screensaver,
+    settingsUi,
+    voiceServices,
     dom,
     cards,
   });
@@ -64,9 +80,17 @@ export function runApplicationContextTests(): void {
   equal(context.configuration.native, nativeConfiguration, "context retains native persistence");
   equal(context.configuration.persistence, configurationPersistence, "context retains save persistence");
   equal(context.controllers.cardEditorDraft, cardEditorDraft, "context retains editor draft ownership");
+  equal(context.controllers.alarmDelayAudio, alarmDelayAudio, "context retains alarm settings ownership");
   equal(context.controllers.cardEditorSave, cardEditorSave, "context retains editor save ownership");
   equal(context.controllers.cardEditorValidation, cardEditorValidation, "context retains editor validation ownership");
   equal(context.controllers.previewPlacement, previewPlacement, "context retains preview placement ownership");
+  equal(context.controllers.clockBar, clockBar, "context retains clock bar ownership");
+  equal(context.controllers.coverArtScreensaver, coverArtScreensaver, "context retains cover art settings ownership");
+  equal(context.controllers.mediaPlayback, mediaPlayback, "context retains media settings ownership");
+  equal(context.controllers.screenSchedule, screenSchedule, "context retains schedule settings ownership");
+  equal(context.controllers.screensaver, screensaver, "context retains screensaver settings ownership");
+  equal(context.controllers.settingsUi, settingsUi, "context retains settings DOM ownership");
+  equal(context.controllers.voiceServices, voiceServices, "context retains voice settings ownership");
   equal(context.controllers.reconnect, reconnect, "context retains reconnect ownership");
 
   cards.registerCompatibility({ example: { configurable: true, value: true } });
