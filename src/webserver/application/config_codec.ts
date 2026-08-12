@@ -99,6 +99,8 @@ export function createConfigCodecFeature(
     } = sensorOptions;
     const {
         mediaEditorMode,
+        mediaNowPlayingControls,
+        mediaStateDisplayModeSupported,
         normalizeMediaOptions,
     } = mediaOptions;
     const {

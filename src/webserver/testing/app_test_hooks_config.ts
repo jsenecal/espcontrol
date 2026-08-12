@@ -71,6 +71,16 @@ export function installAppTestHooksConfig(
         presenceActiveColorEnabled,
     } = sensorOptions;
     const {
+        mediaModeOptionValues,
+        mediaEditorMode,
+        mediaNowPlayingControls,
+        mediaNowPlayingControlValues,
+        mediaStateDisplayModeSupported,
+        mediaPlaylistSourceOptions,
+        parseMediaPlaylistContentId,
+        buildMediaPlaylistContentId,
+        mediaPlaylistContentTypeKnown,
+        mediaPlaylistContentTypeOptions,
         normalizeMediaOptions,
         mediaCoverArtDetailsEnabled,
         setMediaCoverArtDetailsEnabled,

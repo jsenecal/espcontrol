@@ -29,8 +29,6 @@ declare global {
   var LIGHT_FULL_CONTROL_CARD_METADATA: any;
   var LIGHT_TEMPERATURE_CARD_METADATA: any;
   var MAX_CLOCK_BAR_TEMPERATURES: any;
-  var MEDIA_CARD_METADATA: any;
-  var MEDIA_PLAYLIST_SOURCE_DEFINITIONS: any;
   var NETWORK_STATUS_ICON_UNAVAILABLE: any;
   var NUM_SLOTS: any;
   var SCREENSAVER_ACTION_UNAVAILABLE: any;
@@ -108,7 +106,6 @@ declare global {
   var buildClipboardEntry: any;
   var buildCoverArtSettingsCard: any;
   var buildHeader: any;
-  var buildMediaPlaylistContentId: any;
   var buildScreenPage: any;
   var buildScreenScheduleSettingsCard: any;
   var buildSettingsPage: any;
@@ -322,22 +319,6 @@ declare global {
   var loadStateItems: any;
   var makeCollapsibleCard: any;
   var markCardPrimaryField: any;
-  var mediaBehaviorSpec: any;
-  var mediaDefaultMode: any;
-  var mediaEditorMode: any;
-  var mediaEditorValidMode: any;
-  var mediaLabelIsGenerated: any;
-  var mediaModeOptionValues: any;
-  var mediaNowPlayingControlValues: any;
-  var mediaNowPlayingControls: any;
-  var mediaNowPlayingPlayPauseEnabled: any;
-  var mediaNowPlayingProgressEnabled: any;
-  var mediaPlaylistContentIdPlaceholder: any;
-  var mediaPlaylistContentTypeKnown: any;
-  var mediaPlaylistContentTypeOptions: any;
-  var mediaPlaylistSourceDefinition: any;
-  var mediaPlaylistSourceOptions: any;
-  var mediaStateDisplayModeSupported: any;
   var monthNameForIndex: any;
   var moveSelectedGridEntries: any;
   var moveSelectedToCell: any;
@@ -367,7 +348,6 @@ declare global {
   var optionValue: any;
   var parseEntityId: any;
   var parseHomeAssistantEntity: any;
-  var parseMediaPlaylistContentId: any;
   var parseOrder: any;
   var pasteButton: any;
   var pasteSubpageButton: any;

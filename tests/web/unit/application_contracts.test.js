@@ -238,6 +238,18 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:SENSOR_CARD_LOCAL_SENSOR|SENSOR_CARD_METADATA|renderSensorLocalSettings|sensorCardIsLocal|sensorLocalPreview):/);
   });
 
+  test("registers media cards through context-owned media options", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/media.ts"), "utf8");
+    const options = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_media_options.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.match(options, /mediaPlaylistSourceDefinitions/);
+    assert.match(entry, /registerMediaCardTypes\(registry, context\.configuration\.mediaOptions\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerMediaCardTypes/);
+    assert.doesNotMatch(globals, /\bvar (?:MEDIA_CARD_METADATA|MEDIA_PLAYLIST_SOURCE_DEFINITIONS|mediaBehaviorSpec|mediaDefaultMode|mediaEditorMode|mediaEditorValidMode|mediaLabelIsGenerated|mediaModeOptionValues|mediaNowPlayingControlValues|mediaNowPlayingControls|mediaNowPlayingPlayPauseEnabled|mediaNowPlayingProgressEnabled|mediaPlaylistContentIdPlaceholder|mediaPlaylistContentTypeKnown|mediaPlaylistContentTypeOptions|mediaPlaylistSourceDefinition|mediaPlaylistSourceOptions|mediaStateDisplayModeSupported|parseMediaPlaylistContentId|buildMediaPlaylistContentId):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",

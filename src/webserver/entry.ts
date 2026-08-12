@@ -310,10 +310,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registerLawnMowerCardTypes(registry, context.configuration.robotOptions);
   registry.registerCompatibility(registerLightTemperatureCardTypes(registry, context.configuration.modalTabs));
   registerLockCardTypes(registry, context.configuration.lockOptions);
-  registry.registerCompatibility(registerMediaCardTypes(
-    registry,
-    context.configuration.mediaOptions,
-  ));
+  registerMediaCardTypes(registry, context.configuration.mediaOptions);
   registerPresenceCardTypes(registry, context.configuration.options);
   registerPushCardTypes(registry);
   registerScreenLockCardTypes(registry);
