@@ -274,14 +274,14 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerActionCardTypes(registry, context.configuration.confirmationOptions));
   registry.registerCompatibility(registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm));
   registry.registerCompatibility(registerCalendarCardTypes(registry));
-  registry.registerCompatibility(registerClimateCardTypes(
+  registerClimateCardTypes(
     registry,
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
-  ));
+  );
   registerClockCardTypes(registry);
   registry.registerCompatibility(coverLikeCards.descriptors);
-  registry.registerCompatibility(registerDoorWindowCardTypes(registry, context.configuration.options));
+  registerDoorWindowCardTypes(registry, context.configuration.options);
   registry.registerCompatibility(registerEntityModeCardHelpers());
   registry.registerCompatibility(registerFanCardTypes(registry, context.configuration.modalTabs));
   registry.registerCompatibility(registerGarageCardTypes(
@@ -305,7 +305,7 @@ function installCardCompatibility(context: ApplicationContext): void {
     registry,
     context.configuration.mediaOptions,
   ));
-  registry.registerCompatibility(registerPresenceCardTypes(registry, context.configuration.options));
+  registerPresenceCardTypes(registry, context.configuration.options);
   registerPushCardTypes(registry);
   registerScreenLockCardTypes(registry);
   registry.registerCompatibility(registerSensorCardTypes(registry, context.configuration.options));

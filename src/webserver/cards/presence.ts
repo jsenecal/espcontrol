@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -13,14 +12,14 @@ import type { ConfigSensorOptionsFeature } from "../application/config_sensor_op
 export function registerPresenceCardTypes(
     registry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
         presenceActiveColorEnabled,
         normalizePresenceOptions,
         setPresenceActiveColorEnabled,
     } = sensorOptions;
     // Read-only presence card: shows a sensor where Detected is active and Clear is inactive.
-    var PRESENCE_CARD_METADATA: any = {
+    const PRESENCE_CARD_METADATA: any = {
         entity: {
             label: "Sensor Entity",
             idSuffix: "sensor",
@@ -90,7 +89,4 @@ export function registerPresenceCardTypes(
             });
         },
     });
-    return {
-        "PRESENCE_CARD_METADATA": liveGlobal(() => PRESENCE_CARD_METADATA, (value?: any) => { PRESENCE_CARD_METADATA = value; }),
-    };
 }

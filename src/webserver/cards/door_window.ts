@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -14,7 +13,7 @@ import type { ConfigSensorOptionsFeature } from "../application/config_sensor_op
 export function registerDoorWindowCardTypes(
     registry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
         normalizeDoorWindowSubtype,
         doorWindowActiveColorEnabled,
@@ -24,7 +23,7 @@ export function registerDoorWindowCardTypes(
         setDoorWindowActiveColorEnabled,
     } = sensorOptions;
     // Read-only door/window card: shows a binary sensor with subtype-specific icons.
-    var DOOR_WINDOW_CARD_METADATA: any = {
+    const DOOR_WINDOW_CARD_METADATA: any = {
         mode: {
             label: "Type",
             idSuffix: "door-window-type",
@@ -143,7 +142,4 @@ export function registerDoorWindowCardTypes(
             });
         },
     });
-    return {
-        "DOOR_WINDOW_CARD_METADATA": liveGlobal(() => DOOR_WINDOW_CARD_METADATA, (value?: any) => { DOOR_WINDOW_CARD_METADATA = value; }),
-    };
 }

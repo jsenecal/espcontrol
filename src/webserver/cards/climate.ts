@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -16,7 +15,7 @@ export function registerClimateCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
         climateControlTabDefinitions,
         climateControlTabs,
@@ -35,7 +34,7 @@ export function registerClimateCardTypes(
         climatePrecisionConfig,
     } = accessOptions;
     // Climate card: thermostat status plus full-screen climate controls.
-    var CLIMATE_CARD_METADATA: any = {
+    const CLIMATE_CARD_METADATA: any = {
         entity: {
             label: "Climate Entity",
             idSuffix: "entity",
@@ -267,7 +266,4 @@ export function registerClimateCardTypes(
         hidden: function (this: any) { return cardContractHidden("climate_control"); },
         defaultConfig: function (this: any) { return cardContractDefaultConfig("climate_control"); },
     }));
-    return {
-        "CLIMATE_CARD_METADATA": liveGlobal(() => CLIMATE_CARD_METADATA, (value?: any) => { CLIMATE_CARD_METADATA = value; }),
-    };
 }

@@ -88,6 +88,19 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:PUSH_CARD_METADATA|SCREEN_LOCK_CARD_METADATA|pushActionSpec|pushDefaultIcon|pushDefaultIconOn|timezoneCardCityLabel|timezoneCardTimeParts):/);
   });
 
+  test("keeps card metadata private to registry definitions", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    for (const card of ["climate", "door_window", "presence"]) {
+      const source = fs.readFileSync(path.join(ROOT, `src/webserver/cards/${card}.ts`), "utf8");
+      assert.doesNotMatch(source, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    }
+    for (const registration of ["registerClimateCardTypes", "registerDoorWindowCardTypes", "registerPresenceCardTypes"]) {
+      assert.doesNotMatch(entry, new RegExp(`registerCompatibility\\(${registration}`));
+    }
+    assert.doesNotMatch(globals, /\bvar (?:CLIMATE_CARD_METADATA|DOOR_WINDOW_CARD_METADATA|PRESENCE_CARD_METADATA):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",

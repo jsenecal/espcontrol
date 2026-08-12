@@ -8,7 +8,6 @@ declare global {
   var AUTOMATIC_BRIGHTNESS_UNAVAILABLE: any;
   var BRIGHTNESS_TIME_UNAVAILABLE: any;
   var CFG: any;
-  var CLIMATE_CARD_METADATA: any;
   var CLOCK_BAR_NIGHT_MODE_UNAVAILABLE: any;
   var CLOCK_BAR_TIME_UNAVAILABLE: any;
   var CLOCK_BAR_UNAVAILABLE: any;
@@ -17,7 +16,6 @@ declare global {
   var applyScreenScheduleControllerState: any;
   var DATE_TIME_CARD_METADATA: any;
   var DEVICE_ID: any;
-  var DOOR_WINDOW_CARD_METADATA: any;
   var FAN_CARD_METADATA: any;
   var FAN_CONTROL_TYPE_OPTIONS: any;
   var FAVICON_SVG: any;
@@ -46,7 +44,6 @@ declare global {
   var MEDIA_PLAYLIST_SOURCE_DEFINITIONS: any;
   var NETWORK_STATUS_ICON_UNAVAILABLE: any;
   var NUM_SLOTS: any;
-  var PRESENCE_CARD_METADATA: any;
   var SCREENSAVER_ACTION_UNAVAILABLE: any;
   var SCREENSAVER_TIMEOUT_OPTIONS: any;
   var SCREEN_ROTATION_STARTUP_FALLBACK_MS: any;
