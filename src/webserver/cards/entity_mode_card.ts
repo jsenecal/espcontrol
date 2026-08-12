@@ -1,4 +1,5 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { cardContractOptionSpec } from "../application/config_option_core";
 export function registerEntityModeCardHelpers(): GlobalDescriptors {
     function entityModeValues(this: any, cardType?: any, optionName?: any, fallbackModes?: any) {
         var spec: any = cardContractOptionSpec(cardType, optionName);

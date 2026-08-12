@@ -26,6 +26,11 @@ import { normalizeSavedConfigSubpage } from "../generated/saved_config_subpage";
 import { normalizeSavedConfigSwitch } from "../generated/saved_config_switch";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
+import {
+    IMAGE_ICON_OPTION,
+    MEDIA_COVER_ART_OPTION,
+    copyLargeNumbersOption,
+} from "./config_option_core";
 export function installConfigCodecModule(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,

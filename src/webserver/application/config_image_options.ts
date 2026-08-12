@@ -1,6 +1,15 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installConfigImageOptionsModule(): GlobalDescriptors {
+import type { ApplicationLayoutState } from "./application_context";
+import {
+    IMAGE_ICON_OPTION,
+    IMAGE_LABEL_OPTION,
+    IMAGE_MODAL_MODE_OPTION,
+    cardContractOptionDefaultValue,
+    cardContractOptionSpec,
+} from "./config_option_core";
+export function installConfigImageOptionsModule(layout: ApplicationLayoutState): GlobalDescriptors {
+    const IMAGE_SLOT_CAPACITY = Math.max(0, Number(layout.config.imageSlotCapacity) || 0);
     // ── Image Card Options ─────────────────────────────────────────────
     function imageModalModeValues(this: any) {
         var spec: any = cardContractOptionSpec("image", IMAGE_MODAL_MODE_OPTION);

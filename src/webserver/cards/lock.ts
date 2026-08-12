@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import { cardContractOptionSpec } from "../application/config_option_core";
 export function registerLockCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Lock card: lock/unlock toggle with safe default-to-lock behavior and state display.
     function lockCommandMode(this: any, mode?: any) {

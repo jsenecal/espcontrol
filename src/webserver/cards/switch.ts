@@ -1,5 +1,10 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import {
+    SWITCH_CONFIRM_DEFAULT_MESSAGE,
+    SWITCH_CONFIRM_DEFAULT_NO,
+    SWITCH_CONFIRM_DEFAULT_YES,
+} from "../application/config_option_core";
 export function registerSwitchCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Default button type: HA entity toggle (on/off switch)
     var SWITCH_CARD_METADATA: any = {

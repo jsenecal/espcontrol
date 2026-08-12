@@ -1,4 +1,20 @@
 import type { CardRegistry } from "./card_registry";
+import {
+    SENSOR_ACTIVE_COLOR_OPTION,
+    SENSOR_LARGE_NUMBERS_OFF_VALUE,
+    SENSOR_LARGE_NUMBERS_OPTION,
+    SENSOR_STATE_HIGH_LABEL_OPTION,
+    SENSOR_STATE_INPUT_2_OPTION,
+    SENSOR_STATE_INPUT_OPTION,
+    SENSOR_STATE_LABELS_OPTION,
+    SENSOR_STATE_LOW_LABEL_OPTION,
+    SENSOR_STATE_OUTPUT_2_OPTION,
+    SENSOR_STATE_OUTPUT_OPTION,
+    SENSOR_TIME_UNIT_OPTION,
+    cardContractOptionSupportedFor,
+    copyLargeNumbersOption,
+    largeNumbersExplicitlyDisabled,
+} from "./config_option_core";
 export function createConfigSensorOptionsFeature(cardRegistry: CardRegistry) {
     // ── Sensor Card Options ────────────────────────────────────────────
     function cardLargeNumbersSupported(this: any, b?: any) {

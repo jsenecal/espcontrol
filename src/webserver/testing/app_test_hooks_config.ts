@@ -3,6 +3,7 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import { infoOnlyCardVisible } from "../features/preview";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
+import { cardContractOptionSupportedFor } from "../application/config_option_core";
 export function installAppTestHooksConfig(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,

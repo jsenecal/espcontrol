@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import { cardContractOptionSpec } from "../application/config_option_core";
 export function registerInternalCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Internal relay card: controls built-in relay hardware locally on the device.
     function internalRelayOptions(this: any) {

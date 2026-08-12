@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import { cardContractOptionSpec } from "../application/config_option_core";
 export function registerSliderCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Slider and cover button types: draggable brightness/position control.
     // Factory creates both "slider" (light.turn_on w/ brightness) and "cover"

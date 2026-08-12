@@ -44,7 +44,6 @@ import { installGridModule } from "./application/grid";
 import { installApiModule } from "./application/api";
 import { installFirmwareUpdatePostApiModule } from "./application/firmware_update_post_api";
 import { installPublicFirmwareInstallModule } from "./application/public_firmware_install";
-import { installConfigOptionCoreModule } from "./application/config_option_core";
 import { installConfigMediaOptionsModule } from "./application/config_media_options";
 import { installConfigImageOptionsModule } from "./application/config_image_options";
 import { installConfigModalTabOptionsModule } from "./application/config_modal_tab_options";
@@ -181,9 +180,8 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
-  installGlobals(installConfigOptionCoreModule());
   installGlobals(installConfigMediaOptionsModule());
-  installGlobals(installConfigImageOptionsModule());
+  installGlobals(installConfigImageOptionsModule(context.layout));
   installGlobals(installConfigModalTabOptionsModule());
   installGlobals(installConfigSubpageOptionsModule());
   installGlobals(installConfigConfirmationOptionsModule());

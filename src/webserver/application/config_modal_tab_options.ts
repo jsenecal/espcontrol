@@ -1,4 +1,13 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import {
+    CLIMATE_CONTROL_TABS_OPTION,
+    COVER_CONTROL_TABS_OPTION,
+    FAN_CONTROL_TABS_OPTION,
+    FAN_LIGHT_ENTITY_OPTION,
+    LIGHT_CONTROL_TABS_OPTION,
+    cardContractOptionDefaultValue,
+    cardContractOptionSpec,
+} from "./config_option_core";
 export function installConfigModalTabOptionsModule(): GlobalDescriptors {
     // ── Modal Tab Options ──────────────────────────────────────────────
     function lightControlTabDefinitions(this: any) {

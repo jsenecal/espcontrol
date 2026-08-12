@@ -100,6 +100,15 @@ describe("browserless application contracts", () => {
     assert.match(entry, /configurationOptions = createConfigSensorOptionsFeature\(cards\)/);
   });
 
+  test("imports shared option contracts without installing globals", () => {
+    const core = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_option_core.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.doesNotMatch(core, /\b(?:staticGlobal|liveGlobal|GlobalDescriptors)\b/);
+    assert.doesNotMatch(entry, /installConfigOptionCoreModule/);
+    assert.match(core, /from "\.\.\/model\/config_primitives"/);
+    assert.match(core, /export \{/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

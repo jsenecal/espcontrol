@@ -1,4 +1,18 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import {
+    MEDIA_COVER_ART_DETAILS_OPTION,
+    MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION,
+    MEDIA_LABEL_DISPLAY_OPTION,
+    MEDIA_NUMBER_DISPLAY_OPTION,
+    MEDIA_PLAYLIST_CONTENT_ID_OPTION,
+    MEDIA_PLAYLIST_CONTENT_TYPE_OPTION,
+    MEDIA_PLAYLIST_PLAYER_SOURCE_OPTION,
+    MEDIA_SPEAKER_GROUP_ENTITY_OPTION,
+    MEDIA_VOLUME_MAX_OPTION,
+    cardContractOptionDefaultValue,
+    cardContractOptionSpec,
+    copyLargeNumbersOption,
+} from "./config_option_core";
 export function installConfigMediaOptionsModule(): GlobalDescriptors {
     // ── Media Card Options ─────────────────────────────────────────────
     function normalizeMediaVolumeMax(this: any, value?: any) {

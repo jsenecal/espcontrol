@@ -1,4 +1,20 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import {
+    ALARM_ACTIONS_OPTION,
+    ALARM_ICON_DISPLAY_OPTION,
+    ALARM_LABEL_DISPLAY_OPTION,
+    ALARM_PIN_ARM_OPTION,
+    ALARM_PIN_DISARM_OPTION,
+    CLIMATE_CONTROL_TABS_OPTION,
+    CLIMATE_LABEL_DISPLAY_OPTION,
+    CLIMATE_NUMBER_DISPLAY_OPTION,
+    CLIMATE_TEMPERATURE_STEP_OPTION,
+    GARAGE_LABEL_DISPLAY_OPTION,
+    GATE_LABEL_DISPLAY_OPTION,
+    cardContractOptionDefaultValue,
+    cardContractOptionSpec,
+    copyLargeNumbersOption,
+} from "./config_option_core";
 export function installConfigAccessClimateAlarmOptionsModule(): GlobalDescriptors {
     // ── Access, Climate, and Alarm Card Options ───────────────────────
     function alarmBehaviorSpec(this: any) {

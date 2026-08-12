@@ -1,6 +1,11 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import {
+    MEDIA_COVER_ART_OPTION,
+    MEDIA_PLAYLIST_CONTENT_TYPE_OPTION,
+    cardContractOptionSpec,
+} from "../application/config_option_core";
 export function registerMediaCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Media player card: playback buttons, volume, track position, or now-playing details.
     function mediaBehaviorSpec(this: any) {

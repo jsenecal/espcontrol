@@ -1,5 +1,9 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import {
+    cardContractOptionSpec,
+    cardContractOptionSupportedFor,
+} from "../application/config_option_core";
 export function registerWeatherCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Read-only weather card: displays either current conditions or high / low temperatures.
     var WEATHER_CARD_METADATA: any = {

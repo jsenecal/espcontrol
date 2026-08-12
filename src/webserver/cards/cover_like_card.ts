@@ -1,5 +1,10 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import {
+    SWITCH_CONFIRM_DEFAULT_NO,
+    SWITCH_CONFIRM_DEFAULT_YES,
+    cardContractOptionSpec,
+} from "../application/config_option_core";
 
 export interface CoverLikeCardRegistration {
     readonly descriptors: GlobalDescriptors;

@@ -1,4 +1,20 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import {
+    ACTION_SCRIPT_CONFIRM_DEFAULT_MESSAGE,
+    ACTION_SCRIPT_FIELDS_OPTION,
+    CARD_ON_PATTERN_OPTION,
+    SWITCH_CONFIRM_DEFAULT_MESSAGE,
+    SWITCH_CONFIRM_DEFAULT_NO,
+    SWITCH_CONFIRM_DEFAULT_YES,
+    SWITCH_CONFIRM_MESSAGE_OPTION,
+    SWITCH_CONFIRM_NO_OPTION,
+    SWITCH_CONFIRM_OFF_OPTION,
+    SWITCH_CONFIRM_ON_OPTION,
+    SWITCH_CONFIRM_YES_OPTION,
+    cardContractOptionDefaultValue,
+    cardContractOptionSpec,
+    copyLargeNumbersOption,
+} from "./config_option_core";
 export function installConfigConfirmationOptionsModule(): GlobalDescriptors {
     // ── Confirmation Card Options ─────────────────────────────────────
     function switchConfirmationModeStorage(this: any) {

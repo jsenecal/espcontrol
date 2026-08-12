@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import { cardContractOptionSpec } from "../application/config_option_core";
 export function registerCalendarCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Read-only date card: displays either the day/month or local time/date.
     var DATE_TIME_CARD_METADATA: any = {

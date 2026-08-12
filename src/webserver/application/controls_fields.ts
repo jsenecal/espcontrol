@@ -1,6 +1,10 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
+import {
+    SENSOR_LARGE_NUMBERS_OPTION,
+    largeNumbersExplicitlyDisabled,
+} from "./config_option_core";
 export function installControlsFieldsModule(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,

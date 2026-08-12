@@ -1,6 +1,10 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import {
+    SWITCH_CONFIRM_DEFAULT_NO,
+    SWITCH_CONFIRM_DEFAULT_YES,
+} from "../application/config_option_core";
 export function registerActionCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Action card: one-tap Home Assistant shortcuts for scenes, scripts, buttons, and helpers.
     var ACTION_CARD_ACTIONS: any = [

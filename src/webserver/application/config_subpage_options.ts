@@ -1,4 +1,10 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import {
+    SENSOR_LARGE_NUMBERS_OPTION,
+    SUBPAGE_KIND_OPTION,
+    copyLargeNumbersOption,
+    largeNumbersExplicitlyDisabled,
+} from "./config_option_core";
 export function installConfigSubpageOptionsModule(): GlobalDescriptors {
     // ── Subpage Card Options ───────────────────────────────────────────
     function normalizeSubpageKind(this: any, value?: any) {

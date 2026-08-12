@@ -1,5 +1,10 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CoverLikeCardRegistration } from "./cover_like_card";
+import {
+    SWITCH_CONFIRM_DEFAULT_MESSAGE,
+    SWITCH_CONFIRM_DEFAULT_NO,
+    SWITCH_CONFIRM_DEFAULT_YES,
+} from "../application/config_option_core";
 export function registerGarageCardTypes(registerCard: CoverLikeCardRegistration["register"]): GlobalDescriptors {
     // Garage door card: cover toggle or one-tap open/close commands.
     var GARAGE_MODE_OPTIONS: any = [
