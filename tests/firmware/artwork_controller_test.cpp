@@ -9,6 +9,7 @@ using espcontrol::artwork::ARTWORK_SOURCE_BOTH;
 using espcontrol::artwork::ARTWORK_SOURCE_LOCAL;
 using espcontrol::artwork::ARTWORK_SOURCE_REMOTE;
 using espcontrol::artwork::RefreshBatch;
+using espcontrol::artwork::RefreshTrigger;
 using espcontrol::artwork::artwork_source_failed_mask;
 using espcontrol::artwork::artwork_source_mark_received;
 using espcontrol::artwork::artwork_source_request_mask;
@@ -22,6 +23,16 @@ using espcontrol::cover_art::RuntimeState;
 using espcontrol::cover_art::media_card_artwork_suppressed;
 
 int main() {
+  RefreshTrigger trigger;
+  trigger.schedule(false);
+  trigger.schedule(true);
+  trigger.schedule(false);
+  assert(trigger.pending && trigger.forced);
+  assert(trigger.consume());
+  assert(!trigger.pending && !trigger.forced);
+  trigger.schedule(false);
+  assert(!trigger.consume());
+
   // A media entity may not expose a source attribute. Valid downloaded artwork
   // remains visible until an external input is positively identified.
   assert(!media_card_artwork_suppressed(false, false));

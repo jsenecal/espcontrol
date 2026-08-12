@@ -131,6 +131,16 @@ export class NativePanelConfigController {
     return false;
   }
 
+  writeDocument(document: PanelConfigDocument): Promise<NativePanelConfigSaveOutcome> | null {
+    if (!this.client_ || !this.supported()) return null;
+    return this.schedule((current) => {
+      if (current.deviceProfile !== document.deviceProfile) {
+        throw new Error("The backup targets a different device profile.");
+      }
+      return document;
+    });
+  }
+
   writeSubpage(slot: number, value: string): Promise<NativePanelConfigSaveOutcome> | false | null {
     if (!Number.isInteger(slot) || slot < 1 || slot > this.dependencies.slotCount()) return false;
     return this.schedule((current) => updateNativePanelConfigDocument(

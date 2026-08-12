@@ -54,10 +54,21 @@ class HaReadCoordinator {
                  void *owner = nullptr) {
     if (!available() || entity_id.empty() || !callback) return false;
     auto callback_ref = std::make_shared<Callback>(std::move(callback));
-    subscriptions_.push_back({callback_ref, scope, owner});
-    transport_.subscribe(
-        entity_id, attribute,
-        [this, callback_ref](State state) { invoke(callback_ref, state); });
+    size_t channel = subscription_channels_.size();
+    for (size_t i = 0; i < subscription_channels_.size(); i++) {
+      if (subscription_channels_[i].entity_id == entity_id &&
+          subscription_channels_[i].attribute == attribute) {
+        channel = i;
+        break;
+      }
+    }
+    if (channel == subscription_channels_.size()) {
+      subscription_channels_.push_back({entity_id, attribute});
+      transport_.subscribe(
+          entity_id, attribute,
+          [this, channel](State state) { invoke_subscription_channel(channel, state); });
+    }
+    subscriptions_.push_back({callback_ref, scope, owner, channel});
     return true;
   }
 
@@ -136,6 +147,12 @@ class HaReadCoordinator {
     std::shared_ptr<Callback> callback;
     uint32_t scope = 0;
     void *owner = nullptr;
+    size_t channel = 0;
+  };
+
+  struct SubscriptionChannel {
+    std::string entity_id;
+    std::string attribute;
   };
 
   static constexpr size_t MAX_DEFERRED_REQUESTS = 64;
@@ -231,6 +248,17 @@ class HaReadCoordinator {
     }
   }
 
+  void invoke_subscription_channel(size_t channel, State state) {
+    std::vector<std::shared_ptr<Callback>> callbacks;
+    callbacks.reserve(subscriptions_.size());
+    for (const auto &ref : subscriptions_) {
+      if (ref.channel == channel && ref.callback && *ref.callback) {
+        callbacks.push_back(ref.callback);
+      }
+    }
+    for (const auto &callback : callbacks) invoke(callback, state);
+  }
+
   void release_subscriptions(uint32_t scope) {
     size_t write_index = 0;
     for (size_t read_index = 0; read_index < subscriptions_.size(); read_index++) {
@@ -270,6 +298,7 @@ class HaReadCoordinator {
   HeapProbe heap_probe_;
   std::vector<DeferredRequest> deferred_;
   std::vector<SubscriptionRef> subscriptions_;
+  std::vector<SubscriptionChannel> subscription_channels_;
   std::vector<OwnerGeneration> owner_generations_;
   uint32_t generation_ = 1;
   uint32_t next_owner_generation_ = 1;

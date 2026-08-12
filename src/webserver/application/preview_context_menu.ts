@@ -105,7 +105,7 @@ export function installPreviewContextMenuModule(dependencies: PreviewContextMenu
             saveSubpageConfig(state.editingSubpage);
         }
         else {
-            postText(entityName("button_order"), serializeGrid(state.grid));
+            scheduleMainGridSave();
         }
         renderPreview();
         renderButtonSettings();

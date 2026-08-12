@@ -23,7 +23,8 @@ constexpr uint32_t IMAGE_CARD_MODAL_REFRESH_DELAY_MS = 1000;
 constexpr uint32_t IMAGE_CARD_MODAL_REQUEST_DELAY_MS = 100;
 constexpr uint32_t IMAGE_CARD_MODAL_CLEANUP_DELAY_MS = 100;
 constexpr uint32_t IMAGE_CARD_MODAL_CLOSE_GUARD_MS = 350;
-constexpr uint32_t IMAGE_CARD_MEDIA_ARTWORK_DEBOUNCE_MS = 300;
+constexpr uint32_t IMAGE_CARD_MEDIA_ARTWORK_TRIGGER_DEBOUNCE_MS = 75;
+constexpr uint32_t IMAGE_CARD_MEDIA_ARTWORK_RESPONSE_DEBOUNCE_MS = 300;
 constexpr uint8_t IMAGE_CARD_STARTUP_DOWNLOAD_RETRIES = 10;
 constexpr int IMAGE_CARD_MAX_CONTEXTS = 6;
 constexpr int IMAGE_CARD_MODAL_MAX_TARGET_SIDE_PX = 800;
@@ -79,7 +80,9 @@ struct ImageCardCtx {
   std::string pending_fallback_picture;
   espcontrol::artwork::SourceCandidates media_artwork_sources;
   espcontrol::artwork::RefreshBatch media_artwork_refresh;
+  espcontrol::artwork::RefreshTrigger media_artwork_trigger;
   uint8_t media_artwork_retry_mask = 0;
+  lv_timer_t *media_artwork_trigger_timer = nullptr;
   lv_timer_t *media_artwork_timer = nullptr;
   lv_timer_t *modal_cleanup_timer = nullptr;
   uint8_t startup_download_errors = 0;
@@ -522,9 +525,14 @@ inline void image_card_clear_media_artwork(ImageCardCtx *ctx) {
   ctx->pending_fallback_picture.clear();
   ctx->media_artwork_sources.clear();
   ctx->media_artwork_refresh.reset();
+  ctx->media_artwork_trigger.reset();
   ctx->media_artwork_retry_mask = 0;
   ctx->media_artwork_refresh_forced = false;
   ctx->media_artwork_remote_refresh_pending = false;
+  if (ctx->media_artwork_trigger_timer) {
+    lv_timer_del(ctx->media_artwork_trigger_timer);
+    ctx->media_artwork_trigger_timer = nullptr;
+  }
   if (ctx->media_artwork_timer) {
     lv_timer_del(ctx->media_artwork_timer);
     ctx->media_artwork_timer = nullptr;
@@ -875,7 +883,12 @@ inline void reset_image_card_pool(const GridConfig &cfg) {
     contexts[i].pending_fallback_picture.clear();
     contexts[i].media_artwork_sources.clear();
     contexts[i].media_artwork_refresh.reset();
+    contexts[i].media_artwork_trigger.reset();
     contexts[i].media_artwork_retry_mask = 0;
+    if (contexts[i].media_artwork_trigger_timer) {
+      lv_timer_del(contexts[i].media_artwork_trigger_timer);
+      contexts[i].media_artwork_trigger_timer = nullptr;
+    }
     if (contexts[i].media_artwork_timer) {
       lv_timer_del(contexts[i].media_artwork_timer);
       contexts[i].media_artwork_timer = nullptr;
@@ -1450,6 +1463,8 @@ inline void image_card_handle_media_artwork_picture(ImageCardCtx *ctx,
 inline void image_card_request_picture(ImageCardCtx *ctx);
 inline void image_card_request_media_artwork(ImageCardCtx *ctx,
                                              bool force_refresh = false);
+inline void image_card_schedule_media_artwork_refresh(ImageCardCtx *ctx,
+                                                      bool force_refresh = false);
 inline bool image_card_context_current(ImageCardCtx *ctx,
                                        const std::string &entity_id,
                                        uint32_t generation);
@@ -1457,8 +1472,13 @@ inline bool image_card_context_current(ImageCardCtx *ctx,
 inline void image_card_request_current_picture(ImageCardCtx *ctx) {
   if (!ctx) return;
   if (ctx->media_artwork) {
-    image_card_request_media_artwork(
-      ctx, ctx->media_artwork_retry_mask != 0);
+    // Failed reads keep their existing immediate retry path. Ordinary triggers
+    // are coalesced separately before starting a new paired read.
+    if (ctx->media_artwork_retry_mask != 0) {
+      image_card_request_media_artwork(ctx, true);
+    } else {
+      image_card_schedule_media_artwork_refresh(ctx);
+    }
   } else {
     image_card_request_picture(ctx);
   }
@@ -1472,13 +1492,18 @@ inline void image_card_refresh_current_picture(ImageCardCtx *ctx) {
   if (ctx->media_artwork) {
     ctx->media_artwork_retry_mask = 0;
     ctx->pending_fallback_picture.clear();
+    // Explicit recovery refreshes (notably after reconnect) supersede an
+    // incomplete batch whose callbacks may have been lost with the old API
+    // connection. The next begin() advances the generation, so any late
+    // callback from that connection remains stale.
+    ctx->media_artwork_refresh.reset();
     if (ctx->media_artwork_timer) {
       lv_timer_del(ctx->media_artwork_timer);
       ctx->media_artwork_timer = nullptr;
     }
   }
   if (ctx->media_artwork) {
-    image_card_request_media_artwork(ctx, true);
+    image_card_schedule_media_artwork_refresh(ctx, true);
   } else {
     image_card_request_current_picture(ctx);
   }
@@ -2129,7 +2154,7 @@ inline void image_card_schedule_media_artwork_process(ImageCardCtx *ctx) {
   if (!ctx || !ctx->active || !ctx->media_artwork) return;
   if (ctx->media_artwork_timer) lv_timer_del(ctx->media_artwork_timer);
   ctx->media_artwork_timer = lv_timer_create(
-    image_card_media_artwork_timer_cb, IMAGE_CARD_MEDIA_ARTWORK_DEBOUNCE_MS, ctx);
+    image_card_media_artwork_timer_cb, IMAGE_CARD_MEDIA_ARTWORK_RESPONSE_DEBOUNCE_MS, ctx);
   if (!ctx->media_artwork_timer) image_card_process_media_artwork(ctx);
 }
 
@@ -2235,9 +2260,42 @@ inline void image_card_request_media_artwork(ImageCardCtx *ctx, bool force_refre
   }
 }
 
+inline void image_card_media_artwork_trigger_timer_cb(lv_timer_t *timer) {
+  ImageCardCtx *ctx = static_cast<ImageCardCtx *>(lv_timer_get_user_data(timer));
+  if (ctx && ctx->media_artwork_trigger_timer == timer) {
+    ctx->media_artwork_trigger_timer = nullptr;
+  }
+  lv_timer_del(timer);
+  if (!ctx || !ctx->active || !ctx->media_artwork) return;
+  // Notifications produced while Home Assistant is returning the current
+  // remote/local pair belong to the active batch. Keep their coalesced trigger
+  // pending until that batch settles; starting another read here would advance
+  // the generation and reject both in-flight replies as stale.
+  if (ctx->media_artwork_refresh.active()) {
+    ctx->media_artwork_trigger_timer = lv_timer_create(
+      image_card_media_artwork_trigger_timer_cb,
+      IMAGE_CARD_MEDIA_ARTWORK_TRIGGER_DEBOUNCE_MS, ctx);
+    return;
+  }
+  image_card_request_media_artwork(ctx, ctx->media_artwork_trigger.consume());
+}
+
+inline void image_card_schedule_media_artwork_refresh(ImageCardCtx *ctx,
+                                                      bool force_refresh) {
+  if (!ctx || !ctx->active || !ctx->media_artwork || ctx->entity_id.empty()) return;
+  ctx->media_artwork_trigger.schedule(force_refresh);
+  if (ctx->media_artwork_trigger_timer) lv_timer_del(ctx->media_artwork_trigger_timer);
+  ctx->media_artwork_trigger_timer = lv_timer_create(
+    image_card_media_artwork_trigger_timer_cb,
+    IMAGE_CARD_MEDIA_ARTWORK_TRIGGER_DEBOUNCE_MS, ctx);
+  if (!ctx->media_artwork_trigger_timer) {
+    image_card_request_media_artwork(ctx, ctx->media_artwork_trigger.consume());
+  }
+}
+
 inline void image_card_refresh_media_artwork_on_metadata_change(ImageCardCtx *ctx) {
   if (!ctx || !ctx->active || !ctx->media_artwork) return;
-  image_card_request_media_artwork(ctx, true);
+  image_card_schedule_media_artwork_refresh(ctx, true);
 }
 
 inline void refresh_image_cards() {

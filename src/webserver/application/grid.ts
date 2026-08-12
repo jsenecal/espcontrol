@@ -2,6 +2,18 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 export function installGridModule(): GlobalDescriptors {
     // ── Context abstraction ────────────────────────────────────────────────
+    var mainGridSaveTimer: any = null;
+    function scheduleMainGridSave(this: any) {
+        clearTimeout(mainGridSaveTimer);
+        mainGridSaveTimer = setTimeout(function () {
+            mainGridSaveTimer = null;
+            postText(entityName("button_order"), serializeGrid(state.grid));
+        }, 500);
+    }
+    function cancelMainGridSave(this: any) {
+        clearTimeout(mainGridSaveTimer);
+        mainGridSaveTimer = null;
+    }
     function ctx(this: any) {
         if (state.editingSubpage) {
             var sp: any = getSubpage(state.editingSubpage);
@@ -22,7 +34,7 @@ export function installGridModule(): GlobalDescriptors {
             setSelected: function (this: any, s?: any) { state.selectedSlots = s; },
             setLastClicked: function (this: any, s?: any) { state.lastClickedSlot = s; },
             getLastClicked: function (this: any) { return state.lastClickedSlot; },
-            save: function (this: any) { postText(entityName("button_order"), serializeGrid(state.grid)); },
+            save: function (this: any) { scheduleMainGridSave(); },
         };
     }
     // ── Grid helpers ───────────────────────────────────────────────────────
@@ -107,6 +119,8 @@ export function installGridModule(): GlobalDescriptors {
     }
     return {
         "ctx": staticGlobal(ctx),
+        "scheduleMainGridSave": staticGlobal(scheduleMainGridSave),
+        "cancelMainGridSave": staticGlobal(cancelMainGridSave),
         "CARD_SIZE_SINGLE": liveGlobal(() => CARD_SIZE_SINGLE, (value?: any) => { CARD_SIZE_SINGLE = value; }),
         "CARD_SIZE_TALL": liveGlobal(() => CARD_SIZE_TALL, (value?: any) => { CARD_SIZE_TALL = value; }),
         "CARD_SIZE_WIDE": liveGlobal(() => CARD_SIZE_WIDE, (value?: any) => { CARD_SIZE_WIDE = value; }),

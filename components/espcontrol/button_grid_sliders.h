@@ -36,6 +36,8 @@ struct SliderCtx {
   lv_timer_t *media_timer = nullptr;
   uint8_t media_position_refresh_remaining = 0;
   lv_obj_t *media_track_bg = nullptr;
+  lv_obj_t *geometry_parent = nullptr;
+  lv_timer_t *geometry_timer = nullptr;
   lv_obj_t *media_value_lbl = nullptr;
   lv_obj_t *media_status_lbl = nullptr;
   lv_coord_t content_pad = 0;
@@ -1341,17 +1343,45 @@ inline void slider_refresh_geometry(lv_obj_t *slider) {
 inline void slider_deferred_geometry_refresh_cb(lv_timer_t *timer) {
   if (!timer) return;
   lv_obj_t *slider = (lv_obj_t *)lv_timer_get_user_data(timer);
+  SliderCtx *ctx = slider ? (SliderCtx *)lv_obj_get_user_data(slider) : nullptr;
+  if (ctx && ctx->geometry_timer == timer) ctx->geometry_timer = nullptr;
   slider_refresh_geometry(slider);
   lv_timer_del(timer);
 }
 
+inline void slider_geometry_refresh_event_cb(lv_event_t *e) {
+  if (!e) return;
+  lv_obj_t *slider = (lv_obj_t *)lv_event_get_user_data(e);
+  slider_refresh_geometry(slider);
+}
+
+inline void slider_geometry_delete_event_cb(lv_event_t *e) {
+  if (!e) return;
+  lv_obj_t *slider = static_cast<lv_obj_t *>(lv_event_get_target(e));
+  SliderCtx *ctx = slider ? (SliderCtx *)lv_obj_get_user_data(slider) : nullptr;
+  if (!ctx) return;
+  if (ctx->geometry_timer) {
+    lv_timer_del(ctx->geometry_timer);
+    ctx->geometry_timer = nullptr;
+  }
+  if (ctx->geometry_parent) {
+    lv_obj_remove_event_cb_with_user_data(
+        ctx->geometry_parent, slider_geometry_refresh_event_cb, slider);
+    ctx->geometry_parent = nullptr;
+  }
+}
+
 inline void slider_bind_geometry_refresh(lv_obj_t *btn, lv_obj_t *slider) {
   if (!btn || !slider) return;
-  lv_obj_add_event_cb(btn, [](lv_event_t *e) {
-    lv_obj_t *sl = (lv_obj_t *)lv_event_get_user_data(e);
-    slider_refresh_geometry(sl);
-  }, LV_EVENT_SIZE_CHANGED, slider);
-  lv_timer_create(slider_deferred_geometry_refresh_cb, 1, slider);
+  SliderCtx *ctx = (SliderCtx *)lv_obj_get_user_data(slider);
+  if (!ctx) return;
+  ctx->geometry_parent = btn;
+  lv_obj_add_event_cb(
+      btn, slider_geometry_refresh_event_cb, LV_EVENT_SIZE_CHANGED, slider);
+  lv_obj_add_event_cb(
+      slider, slider_geometry_delete_event_cb, LV_EVENT_DELETE, nullptr);
+  ctx->geometry_timer =
+      lv_timer_create(slider_deferred_geometry_refresh_cb, 1, slider);
 }
 
 inline bool slider_apply_vertical_pointer_value(lv_obj_t *slider) {

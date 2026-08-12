@@ -161,22 +161,40 @@ for required in (
 image_cards = (ROOT / "components" / "espcontrol" / "button_grid_image.h").read_text(encoding="utf-8")
 for required in (
     "RefreshBatch media_artwork_refresh",
+    "RefreshTrigger media_artwork_trigger",
+    "IMAGE_CARD_MEDIA_ARTWORK_TRIGGER_DEBOUNCE_MS = 75",
+    "IMAGE_CARD_MEDIA_ARTWORK_RESPONSE_DEBOUNCE_MS = 300",
+    "if (ctx->media_artwork_refresh.active())",
     "media_artwork_refresh.begin(",
     "media_artwork_refresh.complete()",
     "Ignoring stale media artwork response",
 ):
     if required not in image_cards:
         raise SystemExit(f"Media artwork refresh-batch contract missing: {required}")
+image_grid = (ROOT / "components" / "espcontrol" / "button_grid_grid.h").read_text(encoding="utf-8")
+if "image_card_schedule_media_artwork_refresh(art)" not in image_grid:
+    raise SystemExit("Media artwork subscriptions must use the trigger scheduler")
 screen_cover_art = (ROOT / "common" / "device" / "screen_cover_art.yaml").read_text(encoding="utf-8")
 for required in (
     "artwork_refresh.begin(",
     "artwork_refresh.receive(",
     "artwork_refresh.finish();",
     "cover_art_request_paired_artwork",
+    "cover_art_schedule_paired_artwork",
+    "ARTWORK_TRIGGER_DEBOUNCE_MS",
+    "cover_art_artwork_trigger).schedule(force_refresh)",
+    "cover_art_artwork_trigger).consume()",
     "Ignoring stale %s artwork response",
 ):
     if required not in screen_cover_art:
         raise SystemExit(f"Cover-art screensaver refresh-batch contract missing: {required}")
+deferred_retry_start = screen_cover_art.index("  - id: cover_art_deferred_request_artwork")
+trigger_scheduler_start = screen_cover_art.index("  - id: cover_art_schedule_paired_artwork")
+deferred_retry = screen_cover_art[deferred_retry_start:trigger_scheduler_start]
+if "script.execute: cover_art_request_paired_artwork" not in deferred_retry:
+    raise SystemExit("Cover-art failed reads must retry the paired request immediately")
+if "id: cover_art_schedule_paired_artwork" in deferred_retry:
+    raise SystemExit("Cover-art failed reads must not use the trigger debounce")
 image_decoder = (ROOT / "components" / "artwork_image" / "image_decoder.cpp").read_text(encoding="utf-8")
 for required in (
     "if (!this->buffer_ || offset > this->size_)",
@@ -441,7 +459,7 @@ for required in (
 ):
     if required not in grid:
         raise SystemExit(f"2x2 cover art refresh must reuse All Controls fonts: {required}")
-if "if (ha_api_state_connected()) refresh_image_cards();" not in grid:
+if "if (ha_api_state_connected()) {" not in grid or "refresh_image_cards();" not in grid:
     raise SystemExit("Grid startup must refresh bound cover artwork after Home Assistant state is ready")
 for required in (
     "lv_obj_set_height(title_lbl, LV_SIZE_CONTENT);",
@@ -458,7 +476,7 @@ media_art = grid[media_art_start:media_art_end]
 for required in (
     'std::string("entity_picture")',
     'std::string("entity_picture_local")',
-    "image_card_request_media_artwork(art)",
+    "image_card_schedule_media_artwork_refresh(art)",
 ):
     if required not in media_art:
         raise SystemExit(f"Media card cover art subscription contract missing: {required}")

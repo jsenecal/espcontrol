@@ -140,7 +140,7 @@ ATTRIBUTE_HELPER_PATTERN = re.compile(
     re.DOTALL,
 )
 SUBSCRIPTION_TRACKING_PATTERN = re.compile(
-    r"subscriptions_\.push_back\(\s*\{\s*callback_ref\s*,\s*scope(?:\s*,\s*owner)?\s*\}\s*\)"
+    r"subscriptions_\.push_back\(\s*\{\s*callback_ref\s*,\s*scope(?:\s*,\s*owner)?(?:\s*,\s*channel)?\s*\}\s*\)"
 )
 DEFERRED_CALLBACK_FANOUT_PATTERN = re.compile(
     r"for\s*\(\s*const\s+auto\s*&\s*callback(?:_ref)?\s*:\s*\*callback_refs\s*\)"
@@ -248,6 +248,22 @@ def firmware_ha_boundary_errors(firmware_dir: Path, root: Path) -> list[str]:
         errors.append(f"{rel}: track Home Assistant subscription callbacks for generation cleanup")
     if "release_subscriptions" not in coordinator_text or "*ref.callback = nullptr" not in coordinator_text:
         errors.append(f"{rel}: release retired Home Assistant subscription callback bodies")
+    if (
+        "subscription_channels_" not in coordinator_text
+        or "invoke_subscription_channel" not in coordinator_text
+        or "subscription_channels_[i].entity_id == entity_id" not in coordinator_text
+        or "subscription_channels_[i].attribute == attribute" not in coordinator_text
+    ):
+        errors.append(f"{rel}: reuse one Home Assistant transport subscription across grid rebuilds")
+    if (
+        "inline void ha_reannounce_state_subscriptions()" not in text
+        or "client->get_name()" not in text
+        or "client->on_subscribe_home_assistant_states_request();" not in text
+    ):
+        errors.append(f"{rel}: re-announce runtime card subscriptions to the connected Home Assistant client")
+    grid_path = firmware_dir / "button_grid_grid.h"
+    if grid_path.exists() and "ha_reannounce_state_subscriptions();" not in grid_path.read_text(encoding="utf-8"):
+        errors.append(f"{grid_path.relative_to(root)}: re-announce subscriptions after runtime grid rebuilds")
 
     return errors
 

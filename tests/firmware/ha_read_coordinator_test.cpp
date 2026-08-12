@@ -160,6 +160,25 @@ void cancellation_is_safe_during_callback() {
           "callback cancellation was not deferred safely");
 }
 
+void rebuilt_subscriptions_share_one_transport_channel() {
+  Coordinator coordinator;
+  constexpr uint32_t scope = 1u;
+  int old_calls = 0;
+  int new_calls = 0;
+  require(coordinator.subscribe("media_player.room", "media_title",
+                                [&](std::string) { old_calls++; }, scope),
+          "initial subscription should register");
+  coordinator.reset_subscriptions(scope);
+  require(coordinator.subscribe("media_player.room", "media_title",
+                                [&](std::string) { new_calls++; }, scope),
+          "rebuilt subscription should register");
+  require(coordinator.transport().subscriptions.size() == 1,
+          "rebuilt subscription created a duplicate transport channel");
+  coordinator.transport().publish(0, "Track");
+  require(old_calls == 0 && new_calls == 1,
+          "shared transport channel did not invoke only the current callback");
+}
+
 void stale_generations_do_not_deliver() {
   Coordinator coordinator;
   int calls = 0;
@@ -258,6 +277,7 @@ int main() {
   duplicate_reads_fan_out_once();
   reentrant_reads_are_deferred();
   cancellation_is_safe_during_callback();
+  rebuilt_subscriptions_share_one_transport_channel();
   stale_generations_do_not_deliver();
   attribute_requests_preserve_attribute();
   released_owner_drops_pending_reads_even_if_its_address_is_reused();

@@ -15,6 +15,7 @@ namespace espcontrol::cover_art {
 constexpr int MAX_DOWNLOAD_RETRIES = 5;
 constexpr uint32_t DEFERRED_DOWNLOAD_MS = 100;
 constexpr uint32_t CACHED_ARTWORK_DEBOUNCE_MS = 300;
+constexpr uint32_t ARTWORK_TRIGGER_DEBOUNCE_MS = 75;
 constexpr uint32_t ARTWORK_ATTRIBUTE_RETRY_MS = 1500;
 constexpr uint32_t SUBSCRIPTION_RECONCILE_MS = 5000;
 constexpr size_t MAX_ARTWORK_URL_LENGTH = 4096;
