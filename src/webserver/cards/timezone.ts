@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerTimezoneCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerTimezoneCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Read-only world clock card: displays local time for a selected city.
     function timezoneCardCityLabel(this: any, tzOption?: any) {
         var tzId: any = getTzId(effectiveTimezoneOptionForWeb(tzOption || ""));
@@ -40,7 +41,7 @@ export function registerTimezoneCardTypes(): GlobalDescriptors {
             return { value: "--:--", unit: "" };
         }
     }
-    registerButtonType("timezone", {
+    registry.register("timezone", {
         label: function (this: any) { return cardContractCardLabel("timezone"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("timezone"); },
         pickerKey: function (this: any) { return cardContractPickerKey("timezone"); },

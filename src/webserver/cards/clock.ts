@@ -1,7 +1,8 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerClockCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerClockCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Read-only local clock card: displays the panel's local time only.
-    registerButtonType("clock", {
+    registry.register("clock", {
         label: function (this: any) { return cardContractCardLabel("clock"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("clock"); },
         pickerKey: function (this: any) { return cardContractPickerKey("clock"); },

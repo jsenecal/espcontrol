@@ -270,31 +270,31 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerAlarmCardTypes());
   registry.registerCompatibility(registerCalendarCardTypes());
   registry.registerCompatibility(registerClimateCardTypes());
-  registry.registerCompatibility(registerClockCardTypes());
+  registry.registerCompatibility(registerClockCardTypes(registry));
   registry.registerCompatibility(registerCoverLikeCardHelpers());
-  registry.registerCompatibility(registerDoorWindowCardTypes());
+  registry.registerCompatibility(registerDoorWindowCardTypes(registry));
   registry.registerCompatibility(registerEntityModeCardHelpers());
   registry.registerCompatibility(registerFanCardTypes());
   registry.registerCompatibility(registerGarageCardTypes());
   registry.registerCompatibility(registerGateCardTypes());
-  registry.registerCompatibility(registerImageCardTypes());
-  registry.registerCompatibility(registerInternalCardTypes());
-  registry.registerCompatibility(registerLawnMowerCardTypes());
+  registry.registerCompatibility(registerImageCardTypes(registry));
+  registry.registerCompatibility(registerInternalCardTypes(registry));
+  registry.registerCompatibility(registerLawnMowerCardTypes(registry));
   registry.registerCompatibility(registerLightTemperatureCardTypes());
   registry.registerCompatibility(registerLockCardTypes());
   registry.registerCompatibility(registerMediaCardTypes());
-  registry.registerCompatibility(registerPresenceCardTypes());
-  registry.registerCompatibility(registerPushCardTypes());
-  registry.registerCompatibility(registerScreenLockCardTypes());
+  registry.registerCompatibility(registerPresenceCardTypes(registry));
+  registry.registerCompatibility(registerPushCardTypes(registry));
+  registry.registerCompatibility(registerScreenLockCardTypes(registry));
   registry.registerCompatibility(registerSensorCardTypes(registry));
   registry.registerCompatibility(registerSliderCardTypes());
   registry.registerCompatibility(registerSubpageCardTypes());
   registry.registerCompatibility(registerSwitchCardTypes(registry));
-  registry.registerCompatibility(registerTimezoneCardTypes());
+  registry.registerCompatibility(registerTimezoneCardTypes(registry));
   registry.registerCompatibility(registerVacuumCardTypes());
   registry.registerCompatibility(registerWeatherCardTypes());
-  registry.registerCompatibility(registerWeatherForecastCardTypes());
-  registry.registerCompatibility(registerWebhookCardTypes());
+  registry.registerCompatibility(registerWeatherForecastCardTypes(registry));
+  registry.registerCompatibility(registerWebhookCardTypes(registry));
 }
 
 function installTestCompatibility(): void {

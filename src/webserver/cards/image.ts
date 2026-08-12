@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerImageCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerImageCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Read-only Home Assistant camera/image entity card.
     var IMAGE_CARD_METADATA: any = {
         entity: {
@@ -81,7 +82,7 @@ export function registerImageCardTypes(): GlobalDescriptors {
             helpers.saveField("options", b.options);
         });
     }
-    registerButtonType("image", {
+    registry.register("image", {
         label: function (this: any) { return cardContractCardLabel("image"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("image"); },
         pickerKey: function (this: any) { return cardContractPickerKey("image"); },

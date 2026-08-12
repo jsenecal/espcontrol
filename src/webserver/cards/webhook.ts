@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerWebhookCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerWebhookCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Webhook card: sends a direct HTTP request from the panel.
     var WEBHOOK_HEADERS_OPTION: any = "webhook_headers";
     var WEBHOOK_METHODS: any = [
@@ -60,7 +61,7 @@ export function registerWebhookCardTypes(): GlobalDescriptors {
             badge: "webhook",
         },
     };
-    registerButtonType("webhook", {
+    registry.register("webhook", {
         label: function (this: any) { return cardContractCardLabel("webhook"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("webhook"); },
         pickerKey: function (this: any) { return cardContractPickerKey("webhook"); },

@@ -1,11 +1,12 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerWeatherForecastCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerWeatherForecastCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Legacy read-only forecast card: displays tomorrow's high / low temperature.
     var WEATHER_FORECAST_CARD_METADATA: any = {
         entity: WEATHER_CARD_METADATA.entity,
         preview: WEATHER_CARD_METADATA.preview,
     };
-    registerButtonType("weather_forecast", {
+    registry.register("weather_forecast", {
         label: "Weather Forecast",
         allowInSubpage: true,
         hideLabel: true,

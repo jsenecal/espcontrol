@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerDoorWindowCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerDoorWindowCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Read-only door/window card: shows a binary sensor with subtype-specific icons.
     var DOOR_WINDOW_CARD_METADATA: any = {
         mode: {
@@ -35,7 +36,7 @@ export function registerDoorWindowCardTypes(): GlobalDescriptors {
             checked: doorWindowActiveColorEnabled,
         },
     };
-    registerButtonType("door_window", {
+    registry.register("door_window", {
         label: function (this: any) { return cardContractCardLabel("door_window"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("door_window"); },
         pickerKey: function (this: any) { return cardContractPickerKey("door_window"); },

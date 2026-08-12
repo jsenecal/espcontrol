@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerInternalCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerInternalCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Internal relay card: controls built-in relay hardware locally on the device.
     function internalRelayOptions(this: any) {
         return (CFG.features && CFG.features.internalRelays) || [];
@@ -88,7 +89,7 @@ export function registerInternalCardTypes(): GlobalDescriptors {
             pushBadge: "gesture-tap",
         },
     };
-    registerButtonType("internal", {
+    registry.register("internal", {
         label: function (this: any) { return cardContractCardLabel("internal"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("internal"); },
         pickerKey: function (this: any) { return cardContractPickerKey("internal"); },

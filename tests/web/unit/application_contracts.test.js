@@ -23,15 +23,30 @@ describe("browserless application contracts", () => {
     runApplicationContextTests();
   });
 
-  test("registers migrated sensor and switch cards through the typed registry", () => {
-    for (const relativePath of ["src/webserver/cards/sensor.ts", "src/webserver/cards/switch.ts"]) {
+  test("registers migrated card families through the typed registry", () => {
+    const migratedCards = [
+      ["sensor", "registerSensorCardTypes"],
+      ["switch", "registerSwitchCardTypes"],
+      ["clock", "registerClockCardTypes"],
+      ["door_window", "registerDoorWindowCardTypes"],
+      ["image", "registerImageCardTypes"],
+      ["internal", "registerInternalCardTypes"],
+      ["lawn_mower", "registerLawnMowerCardTypes"],
+      ["presence", "registerPresenceCardTypes"],
+      ["push", "registerPushCardTypes"],
+      ["screen_lock", "registerScreenLockCardTypes"],
+      ["timezone", "registerTimezoneCardTypes"],
+      ["weather_forecast", "registerWeatherForecastCardTypes"],
+      ["webhook", "registerWebhookCardTypes"],
+    ];
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    for (const [fileName, registrationFunction] of migratedCards) {
+      const relativePath = `src/webserver/cards/${fileName}.ts`;
       const source = fs.readFileSync(path.join(ROOT, relativePath), "utf8");
       assert.match(source, /registry\.register\(/, `${relativePath} should use the typed card registry`);
       assert.doesNotMatch(source, /\bregisterButtonType\s*\(/, `${relativePath} should not read ambient registration state`);
+      assert.match(entry, new RegExp(`${registrationFunction}\\(registry\\)`));
     }
-    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /registerSensorCardTypes\(registry\)/);
-    assert.match(entry, /registerSwitchCardTypes\(registry\)/);
   });
 
   test("preserves settings normalization", () => {

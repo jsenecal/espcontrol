@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerPushCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerPushCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Momentary trigger card: stored as "push" for config compatibility.
     // Fires an esphome.push_button_pressed event with no toggle state.
     var PUSH_CARD_METADATA: any = {
@@ -24,7 +25,7 @@ export function registerPushCardTypes(): GlobalDescriptors {
     function pushDefaultIconOn(this: any) {
         return pushActionSpec().defaultIconOn || "Auto";
     }
-    registerButtonType("push", {
+    registry.register("push", {
         label: function (this: any) { return cardContractCardLabel("push"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("push"); },
         pickerKey: function (this: any) { return cardContractPickerKey("push"); },

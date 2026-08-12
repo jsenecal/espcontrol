@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerPresenceCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerPresenceCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Read-only presence card: shows a sensor where Detected is active and Clear is inactive.
     var PRESENCE_CARD_METADATA: any = {
         entity: {
@@ -38,7 +39,7 @@ export function registerPresenceCardTypes(): GlobalDescriptors {
             checked: presenceActiveColorEnabled,
         },
     };
-    registerButtonType("presence", {
+    registry.register("presence", {
         label: function (this: any) { return cardContractCardLabel("presence"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("presence"); },
         pickerKey: function (this: any) { return cardContractPickerKey("presence"); },

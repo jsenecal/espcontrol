@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerLawnMowerCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerLawnMowerCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Lawn Mower card: touchscreen-friendly controls for Home Assistant mower entities.
     var LAWN_MOWER_CARD_MODES: any = [
         ["status", "Status"],
@@ -68,7 +69,7 @@ export function registerLawnMowerCardTypes(): GlobalDescriptors {
             rerender: true,
         },
     };
-    registerButtonType("lawn_mower", {
+    registry.register("lawn_mower", {
         label: function (this: any) { return cardContractCardLabel("lawn_mower"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("lawn_mower"); },
         pickerKey: function (this: any) { return cardContractPickerKey("lawn_mower"); },
