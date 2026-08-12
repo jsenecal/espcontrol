@@ -150,25 +150,24 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installCore(context.layout, context.configuration.codec, context.runtime));
   installGlobals(installFirmwareMetadataModule());
   installGlobals(installStylesModule());
-  installGlobals(context.runtime.globals);
-  installGlobals(installLanguageStateModule());
+  installGlobals(installLanguageStateModule(context.runtime));
   const voiceServicesController = context.controllers.voiceServices;
   installGlobals(installEnvironmentStateModule(voiceServicesController));
   installGlobals(installScreenRotationStateModule(context.runtime));
   const screenScheduleController = context.controllers.screenSchedule;
-  installGlobals(installScreenScheduleStateModule(screenScheduleController));
-  installGlobals(installNtpStateModule());
-  installGlobals(installAppearanceStateModule());
-  installGlobals(installIdleStateModule());
+  installGlobals(installScreenScheduleStateModule(screenScheduleController, context.runtime));
+  installGlobals(installNtpStateModule(context.runtime));
+  installGlobals(installAppearanceStateModule(context.runtime));
+  installGlobals(installIdleStateModule(context.runtime));
   installGlobals(installArtworkStateModule());
   installGlobals(installScreensaverStateModule());
-  installGlobals(installFirmwareVersionStateModule());
+  installGlobals(installFirmwareVersionStateModule(context.runtime));
   installGlobals(installEntityStateModule());
   const clockBarController = context.controllers.clockBar;
-  installGlobals(installClockBarStateModule(clockBarController));
-  installGlobals(installFirmwareUpdateStateModule());
-  installGlobals(installScreensaverTimeoutModule());
-  installGlobals(installC6FirmwareUiModule());
+  installGlobals(installClockBarStateModule(clockBarController, context.runtime));
+  installGlobals(installFirmwareUpdateStateModule(context.runtime));
+  installGlobals(installScreensaverTimeoutModule(context.runtime));
+  installGlobals(installC6FirmwareUiModule(context.runtime));
   installGlobals(installGridModule(context.configuration.codec, context.runtime));
   const deviceApi = context.api;
   const nativePanelConfig = context.configuration.native;
@@ -211,8 +210,9 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     cards: context.cards,
     confirmationOptions: context.configuration.confirmationOptions,
     codec: context.configuration.codec,
+    runtime: context.runtime,
   }));
-  installGlobals(installButtonSettingsSelectionModule());
+  installGlobals(installButtonSettingsSelectionModule(context.runtime));
   installGlobals(installButtonSettingsRenderQueueModule(context.runtime));
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
@@ -549,6 +549,7 @@ function composeApplicationContext(): ApplicationContext {
     gridColsForImportedSettings,
     nativePanelConfig,
     codec: configurationCodec,
+    runtime,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),

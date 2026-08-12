@@ -1,10 +1,13 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ClockBarController } from "../features/clock_bar_controller";
+import type { UiRuntimeState } from "./state";
 
 export function installClockBarStateModule(
     clockBarController: ClockBarController,
+    runtime: UiRuntimeState,
 ): GlobalDescriptors {
+    const els = runtime.els;
     // ── Clock Bar State ───────────────────────────────────────────────────
     var clockBarControllerInstance: ClockBarController = clockBarController;
     function clockBarControllerState(this: any) {

@@ -2,6 +2,7 @@ import { state } from "../state/app_instance";
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 export function installControlsShellModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // ── Build UI ───────────────────────────────────────────────────────────
     function createMdiIcon(this: any, name?: any, className?: any) {
         var icon: any = document.createElement("span");

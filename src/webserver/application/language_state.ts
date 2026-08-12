@@ -1,7 +1,9 @@
 import { state } from "../state/app_instance";
 import { uniqueOptions } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installLanguageStateModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installLanguageStateModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // ── Language State ─────────────────────────────────────────────────────
     function languageLabel(this: any, value?: any) {
         value = normalizeLanguage(value);

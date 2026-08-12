@@ -22,6 +22,7 @@ export function installPreviewInteractionsModule(
     const configPersistence = dependencies.configPersistence;
     const window = dependencies.window;
     const runtime = dependencies.runtime;
+    const els = runtime.els;
     const {
         isImageCard,
         imageCardCountInSubpage,

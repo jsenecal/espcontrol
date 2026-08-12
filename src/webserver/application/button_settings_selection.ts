@@ -1,6 +1,8 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installButtonSettingsSelectionModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installButtonSettingsSelectionModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // ── Button Settings Selection ─────────────────────────────────────
     function hideSettingsOverlay(this: any) {
         if (els.settingsOverlay)

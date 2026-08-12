@@ -339,7 +339,6 @@ declare global {
   var duplicateButton: any;
   var duplicateSubpageButton: any;
   var effectiveTimezoneOptionForWeb: any;
-  var els: any;
   var emptyButtonConfig: any;
   var emptyCardConfig: any;
   var encodePanelConfig: any;

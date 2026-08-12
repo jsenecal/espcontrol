@@ -2,10 +2,13 @@ import { state } from "../state/app_instance";
 import { setSelectValue } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ScreenScheduleController } from "../features/screen_schedule_controller";
+import type { UiRuntimeState } from "./state";
 
 export function installScreenScheduleStateModule(
     screenScheduleController: ScreenScheduleController,
+    runtime: UiRuntimeState,
 ): GlobalDescriptors {
+    const els = runtime.els;
     // ── Screen Schedule State ──────────────────────────────────────────────
     var screenScheduleControllerInstance: ScreenScheduleController = screenScheduleController;
     function screenScheduleControllerState(this: any) {

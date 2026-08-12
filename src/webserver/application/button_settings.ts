@@ -21,6 +21,7 @@ export function installButtonSettingsModule(
     codec: ConfigCodecFeature,
     runtime: UiRuntimeState,
 ): GlobalDescriptors {
+    const els = runtime.els;
     const {
         imageSlotCapacity,
         imageCardCountWithCandidate,

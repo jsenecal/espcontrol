@@ -13,15 +13,18 @@ import type { ApplicationLayoutState } from "./application_context";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
 import type { ConfigCodecFeature } from "./config_codec";
+import type { UiRuntimeState } from "./state";
 export interface PreviewRenderDependencies {
     readonly document: Document;
     readonly layout: ApplicationLayoutState;
     readonly cards: CardRegistry;
     readonly confirmationOptions: ConfigConfirmationOptionsFeature;
     readonly codec: ConfigCodecFeature;
+    readonly runtime: UiRuntimeState;
 }
 export function installPreviewRenderModule(dependencies: PreviewRenderDependencies): GlobalDescriptors {
     const document = dependencies.document;
+    const els = dependencies.runtime.els;
     const { cardOnPattern } = dependencies.confirmationOptions;
     const { getSubpage } = dependencies.codec;
     // ── Preview rendering (unified) ────────────────────────────────────────

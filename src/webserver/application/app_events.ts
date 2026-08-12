@@ -9,6 +9,7 @@ export function installAppEventsModule(
     createSseHandlers: SseHandlerFactory,
     runtime: UiRuntimeState,
 ): GlobalDescriptors {
+    const els = runtime.els;
     // ── SSE ────────────────────────────────────────────────────────────────
     function connectEvents(this: any) {
         function markConnected(this: any) {

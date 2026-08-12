@@ -3,6 +3,7 @@ import { uniqueOptions } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 export function installScreenRotationStateModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // ── Screen Rotation State ──────────────────────────────────────────────
     var SCREEN_ROTATION_STARTUP_FALLBACK_MS: any = 1200;
     function normalizeScreenRotation(this: any, value?: any) {

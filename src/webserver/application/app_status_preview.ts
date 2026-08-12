@@ -2,6 +2,7 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 export function installAppStatusPreviewModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // ── Clock (minute-aligned) ─────────────────────────────────────────────
     function getTzId(this: any, tz?: any) {
         if (typeof isHomeAssistantAutoTimezone === "function" && isHomeAssistantAutoTimezone(tz))

@@ -1,4 +1,3 @@
-import { liveGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ApplicationLayoutState } from "./application_context";
 
 export interface UiRuntimeState {
@@ -15,7 +14,6 @@ export interface UiRuntimeState {
     sliderMigrationTimer: number | null;
     pendingSliderSubpageMigrations: Record<string, true>;
     eventSource: any;
-    globals: GlobalDescriptors;
     isSettingsFocused(): boolean;
     isSettingsOpen(): boolean;
 }
@@ -38,7 +36,6 @@ export function createUiRuntimeState(
         sliderMigrationTimer: null,
         pendingSliderSubpageMigrations: {},
         eventSource: null,
-        globals: {},
         isSettingsFocused() {
             const activeElement = document.activeElement;
             return !!(activeElement && runtime.els.buttonSettings && runtime.els.buttonSettings.contains(activeElement));
@@ -46,9 +43,6 @@ export function createUiRuntimeState(
         isSettingsOpen() {
             return !!(runtime.els.settingsOverlay && runtime.els.settingsOverlay.classList.contains("sp-visible"));
         },
-    };
-    runtime.globals = {
-        "els": liveGlobal(() => runtime.els, (value) => { runtime.els = value; }),
     };
     return runtime;
 }

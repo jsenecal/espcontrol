@@ -1,7 +1,9 @@
 import { state } from "../state/app_instance";
 import { setSelectValue } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installScreensaverTimeoutModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installScreensaverTimeoutModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // Screensaver timeout options and UI syncing.
     var SCREENSAVER_TIMEOUT_OPTIONS: any = [
         { label: "10 seconds", value: 10 },

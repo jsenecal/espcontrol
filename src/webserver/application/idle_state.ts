@@ -1,6 +1,8 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installIdleStateModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installIdleStateModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // ── Idle State ─────────────────────────────────────────────────────────
     function syncIdleUi(this: any) {
         state.homeScreenTimeout = Number(state.homeScreenTimeout) || 0;

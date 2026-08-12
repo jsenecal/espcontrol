@@ -1,6 +1,8 @@
 import { state } from "../state/app_instance";
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installAppearanceStateModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installAppearanceStateModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // ── Appearance State ───────────────────────────────────────────────────
     function syncColorUi(this: any) {
         if (els.setOnColor && els.setOnColor._syncColor)

@@ -8,6 +8,7 @@ import type { ApplicationLayoutState } from "./application_context";
 import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
 import type { PanelConfigDocument } from "../model";
 import type { ConfigCodecFeature } from "./config_codec";
+import type { UiRuntimeState } from "./state";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -19,6 +20,7 @@ export interface AppBackupControllers {
     readonly gridColsForImportedSettings: (settings: any) => number;
     readonly nativePanelConfig?: NativePanelConfigController;
     readonly codec: ConfigCodecFeature;
+    readonly runtime: UiRuntimeState;
 }
 
 export interface AppBackupFeature {
@@ -29,6 +31,7 @@ export interface AppBackupFeature {
 
 export function createAppBackupFeature(controllers: AppBackupControllers): AppBackupFeature {
     const { serializeButtonConfig, serializeSubpageConfig } = controllers.codec;
+    const els = controllers.runtime.els;
     // ── Export / Import ────────────────────────────────────────────────────
     var backupExportController: BackupExportController = controllers.backupExport;
     function backupExportScreenSizeSlug(this: any, value?: any) {

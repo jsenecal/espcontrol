@@ -9,6 +9,7 @@ export function installAppStateEventHandlersModule(
     runtime: UiRuntimeState,
     onCreateSseHandlers?: (factory: SseHandlerFactory) => void,
 ): GlobalDescriptors {
+    const els = runtime.els;
     // ── State Event Handlers ──────────────────────────────────────────
     const createSseHandlers: SseHandlerFactory = () => {
         return {

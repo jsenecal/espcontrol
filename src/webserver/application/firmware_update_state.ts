@@ -1,7 +1,9 @@
 import { state } from "../state/app_instance";
 import { escHtml } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installFirmwareUpdateStateModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installFirmwareUpdateStateModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // ── Firmware Update State ─────────────────────────────────────────────
     var firmwareInstallRefreshTimer: any = null;
     var firmwareInstallRefreshUntil: any = 0;

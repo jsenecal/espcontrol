@@ -1,6 +1,8 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installFirmwareVersionStateModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installFirmwareVersionStateModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // ── Firmware Version State ─────────────────────────────────────────────
     var FIRMWARE_CHECKING_VERSION_LABEL: any = "Checking version...";
     var FIRMWARE_DEV_VERSION_LABEL: any = "Dev build";

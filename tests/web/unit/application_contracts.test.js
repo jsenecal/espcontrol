@@ -267,7 +267,7 @@ describe("browserless application contracts", () => {
     assert.match(runtime, /createUiRuntimeState/);
     assert.doesNotMatch(entry, /installStateModule/);
     assert.match(entry, /runtime = createUiRuntimeState\(layout, dom\.document\)/);
-    assert.match(entry, /installGlobals\(context\.runtime\.globals\)/);
+    assert.doesNotMatch(entry, /installGlobals\(context\.runtime\.globals\)/);
     assert.match(entry, /getActiveSource: \(\) => runtime\.eventSource/);
   });
 
@@ -326,6 +326,39 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime\)\)/);
+  });
+
+  test("injects display-state DOM references", () => {
+    const modules = [
+      "appearance_state.ts", "c6_firmware_ui.ts", "clock_bar_state.ts",
+      "firmware_update_state.ts", "firmware_version_state.ts", "idle_state.ts",
+      "language_state.ts", "ntp_state.ts", "screen_schedule_state.ts", "screensaver_timeout.ts",
+    ];
+    for (const moduleName of modules) {
+      const source = fs.readFileSync(path.join(ROOT, "src/webserver/application", moduleName), "utf8");
+      assert.match(source, /UiRuntimeState/, `${moduleName} should declare its runtime dependency`);
+      assert.match(source, /const els = runtime\.els/, `${moduleName} should use context-owned DOM references`);
+    }
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.match(entry, /installScreenScheduleStateModule\(screenScheduleController, context\.runtime\)/);
+    assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime\)/);
+  });
+
+  test("removes the ambient DOM registry", () => {
+    const runtime = fs.readFileSync(path.join(ROOT, "src/webserver/application/state.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const consumers = fs.readdirSync(path.join(ROOT, "src/webserver/application"))
+      .filter((name) => name.endsWith(".ts"))
+      .map((name) => [name, fs.readFileSync(path.join(ROOT, "src/webserver/application", name), "utf8")])
+      .filter(([, source]) => /\bels\b/.test(source));
+    for (const [name, source] of consumers) {
+      if (name === "state.ts") continue;
+      assert.match(source, /const els = .*runtime\.els/, `${name} should use the injected DOM registry`);
+    }
+    assert.doesNotMatch(runtime, /globals: GlobalDescriptors/);
+    assert.doesNotMatch(entry, /context\.runtime\.globals/);
+    assert.doesNotMatch(globals, /\bvar els:/);
   });
 
   test("preserves settings normalization", () => {

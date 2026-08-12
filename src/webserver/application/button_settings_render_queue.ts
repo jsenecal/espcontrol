@@ -1,6 +1,7 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 export function installButtonSettingsRenderQueueModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // ── Button Settings Render Queue ──────────────────────────────────
     // ── Render debouncing ──────────────────────────────────────────────────
     var _renderPending: any = false;

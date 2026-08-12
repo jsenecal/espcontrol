@@ -1,6 +1,8 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installNtpStateModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installNtpStateModule(runtime: UiRuntimeState): GlobalDescriptors {
+    const els = runtime.els;
     // ── NTP State ──────────────────────────────────────────────────────────
     function hasCustomNtpServers(this: any) {
         return normalizeNtpServer(state.ntpServer1, NTP_SERVER_DEFAULTS[0]) !== NTP_SERVER_DEFAULTS[0] ||
