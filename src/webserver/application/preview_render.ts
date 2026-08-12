@@ -8,7 +8,13 @@ import {
     previewValue,
     registryValue,
 } from "../features/preview";
-export function installPreviewRenderModule(): GlobalDescriptors {
+import type { ApplicationLayoutState } from "./application_context";
+export interface PreviewRenderDependencies {
+    readonly document: Document;
+    readonly layout: ApplicationLayoutState;
+}
+export function installPreviewRenderModule(dependencies: PreviewRenderDependencies): GlobalDescriptors {
+    const document = dependencies.document;
     // ── Preview rendering (unified) ────────────────────────────────────────
     function previewHtmlValue(this: any, typePreview?: any, key?: any, fallback?: any) {
         return previewValue(typePreview, key, fallback);
@@ -17,7 +23,7 @@ export function installPreviewRenderModule(): GlobalDescriptors {
         return registryValue(typeDef, key, fallback);
     }
     function buttonTypeDisabledForDevice(this: any, key?: any) {
-        var disabled: any = CFG.disabledCardTypes || [];
+        var disabled: any = dependencies.layout.config.disabledCardTypes || [];
         return disabled.indexOf(key || "") !== -1;
     }
     function buttonConfigDisabledForDevice(this: any, button?: any) {
@@ -29,7 +35,7 @@ export function installPreviewRenderModule(): GlobalDescriptors {
         return !!pickerKey && buttonTypeDisabledForDevice(pickerKey);
     }
     function buttonTypeInfoOnlyVisible(this: any, key?: any) {
-        return infoOnlyCardVisible(key || "", !!CFG.infoOnly);
+        return infoOnlyCardVisible(key || "", !!dependencies.layout.config.infoOnly);
     }
     function defaultButtonTypeForPicker(this: any, key?: any) {
         return defaultCardTypeForPicker(key);
@@ -38,7 +44,7 @@ export function installPreviewRenderModule(): GlobalDescriptors {
         return cardTypePickerDetails(key || "", label || "");
     }
     function buttonTypePickerOptionList(this: any, isSub?: any, selectedTypeKey?: any) {
-        return cardTypePickerOptions(BUTTON_TYPES, CFG.disabledCardTypes || [], !!CFG.infoOnly, !!isSub, selectedTypeKey);
+        return cardTypePickerOptions(BUTTON_TYPES, dependencies.layout.config.disabledCardTypes || [], !!dependencies.layout.config.infoOnly, !!isSub, selectedTypeKey);
     }
     function buttonTypePickerKeys(this: any, isSub?: any, selectedTypeKey?: any) {
         return buttonTypePickerOptionList(!!isSub, selectedTypeKey).map(function (this: any, opt?: any) {

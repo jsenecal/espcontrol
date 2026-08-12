@@ -2,9 +2,17 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createClipboardEntry } from "../features/clipboard";
 import type { ConfigPersistenceFeature } from "./config_post_api";
+import type { ApplicationLayoutState } from "./application_context";
+export interface PreviewClipboardDependencies {
+    readonly configPersistence: ConfigPersistenceFeature;
+    readonly document: Document;
+    readonly layout: ApplicationLayoutState;
+}
 export function installPreviewClipboardModule(
-    configPersistence: ConfigPersistenceFeature,
+    dependencies: PreviewClipboardDependencies,
 ): GlobalDescriptors {
+    const configPersistence = dependencies.configPersistence;
+    const document = dependencies.document;
     // ── Preview Clipboard ─────────────────────────────────────────────
     // ── Cut / Paste ────────────────────────────────────────────────────────
     function buildClipboardEntry(this: any, slot?: any) {
@@ -66,7 +74,7 @@ export function installPreviewClipboardModule(
                 entries.push(cardTransferEntryFromClipboard(entry));
         });
         return EspControlModel.createCardTransferCode({
-            device: DEVICE_ID,
+            device: dependencies.layout.deviceId,
             firmware: String(state.firmwareVersion || ""),
         }, entries);
     }
@@ -138,7 +146,7 @@ export function installPreviewClipboardModule(
             layoutSlots.unshift(-2);
             requestedSizes[-2] = 1;
         }
-        if (orderedSlots.length > NUM_SLOTS) {
+        if (orderedSlots.length > dependencies.layout.numSlots) {
             throw cardTransferError("A copied subpage has more cards than this controller can display.");
         }
         var targetSizes: any = {};
@@ -149,8 +157,8 @@ export function installPreviewClipboardModule(
                 : {};
             targetSizes[requestedSlot] = normalizeCardSizeForConfig(requestedButton, requestedSizes[requestedSlot]);
         }
-        var placementOrder: any = layoutSlots.length <= NUM_SLOTS ? layoutSlots : orderedSlots;
-        var targetGrid: any = placeOrderedGridEntries(placementOrder, targetSizes, NUM_SLOTS);
+        var placementOrder: any = layoutSlots.length <= dependencies.layout.numSlots ? layoutSlots : orderedSlots;
+        var targetGrid: any = placeOrderedGridEntries(placementOrder, targetSizes, dependencies.layout.numSlots);
         var placed: any = {};
         targetGrid.forEach(function (slot: any) {
             if (slot > 0 || slot === -2)
@@ -288,12 +296,12 @@ export function installPreviewClipboardModule(
         var slots: any = [];
         var resized: any = 0;
         for (var i: any = 0; i < entries.length; i++) {
-            var newSlot: any = firstUnusedClipboardSlot(nextGrid, NUM_SLOTS);
+            var newSlot: any = firstUnusedClipboardSlot(nextGrid, dependencies.layout.numSlots);
             if (newSlot < 0)
                 return { error: "There is not enough room to paste every card." };
             var entry: any = entries[i];
             var requestedSize: any = entry.size || 1;
-            var placement: any = findDuplicatePlacement(nextGrid, pos, requestedSize, NUM_SLOTS);
+            var placement: any = findDuplicatePlacement(nextGrid, pos, requestedSize, dependencies.layout.numSlots);
             if (placement.pos < 0)
                 return { error: "There is not enough room to paste every card." };
             if (placement.size !== requestedSize)
@@ -357,11 +365,11 @@ export function installPreviewClipboardModule(
                 return { error: "The " + cardTransferTypeLabel(entry.type || "") +
                         " card type cannot be placed inside a subpage." };
             }
-            var newSlot: any = firstUnusedClipboardSlot(subpage.grid, NUM_SLOTS);
+            var newSlot: any = firstUnusedClipboardSlot(subpage.grid, dependencies.layout.numSlots);
             if (newSlot < 0)
                 return { error: "There is not enough room to paste every card." };
             var requestedSize: any = entry.size || 1;
-            var placement: any = findDuplicatePlacement(subpage.grid, pos, requestedSize, NUM_SLOTS);
+            var placement: any = findDuplicatePlacement(subpage.grid, pos, requestedSize, dependencies.layout.numSlots);
             if (placement.pos < 0)
                 return { error: "There is not enough room to paste every card." };
             if (placement.size !== requestedSize)

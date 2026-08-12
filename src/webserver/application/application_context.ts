@@ -34,6 +34,7 @@ export interface ApplicationLayoutState {
 
 export interface ApplicationDomServices {
   readonly document: Document;
+  readonly window: Window;
   readonly fetch: typeof fetch;
   readonly createEventSource: () => EventSource;
   readonly schedule: typeof setTimeout;

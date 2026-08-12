@@ -214,17 +214,36 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsCoverArtSectionModule());
   installGlobals(installSettingsPageModule());
   installGlobals(installControlsFieldsModule());
-  installGlobals(installPreviewRenderModule());
+  installGlobals(installPreviewRenderModule({
+    document: context.dom.document,
+    layout: context.layout,
+  }));
   installGlobals(installButtonSettingsSelectionModule());
   installGlobals(installButtonSettingsRenderQueueModule());
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence,
   ));
-  installGlobals(installPreviewGridPlacementModule(previewPlacementController));
-  installGlobals(installPreviewContextMenuModule());
-  installGlobals(installPreviewClipboardModule(configPersistence));
-  installGlobals(installPreviewInteractionsModule(cardEditorDraft, configPersistence));
+  installGlobals(installPreviewGridPlacementModule({
+    controller: previewPlacementController,
+    layout: context.layout,
+  }));
+  installGlobals(installPreviewContextMenuModule({
+    document: context.dom.document,
+    window: context.dom.window,
+    layout: context.layout,
+  }));
+  installGlobals(installPreviewClipboardModule({
+    configPersistence,
+    document: context.dom.document,
+    layout: context.layout,
+  }));
+  installGlobals(installPreviewInteractionsModule({
+    cardEditorDraft,
+    configPersistence,
+    layout: context.layout,
+    window: context.dom.window,
+  }));
   installGlobals(installBackupContractModule(context.backup.contract));
   const backupUiFeature = context.backup.application;
   installGlobals(installSettingsSystemSectionModule({
@@ -292,6 +311,7 @@ function composeApplicationContext(): ApplicationContext {
     : (() => Promise.reject(new Error("Fetch is not available"))) as typeof fetch;
   const dom: ApplicationDomServices = {
     document,
+    window,
     fetch: fetchService,
     createEventSource: () => new EventSource("/events"),
     schedule: setTimeout,
