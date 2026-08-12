@@ -6,7 +6,18 @@ import {
     normalizeCoverMode,
     normalizeCoverPosition,
 } from "../application/config_cover_contract";
-export function registerSliderCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
+export function registerSliderCardTypes(
+    registry: CardRegistry,
+    modalTabs: ConfigModalTabOptionsFeature,
+): GlobalDescriptors {
+    const {
+        coverControlTabDefinitions,
+        coverControlTabs,
+        normalizeCoverOptions,
+        setCoverControlTabs,
+        renderModalTabSettings,
+    } = modalTabs;
     // Slider and cover button types: draggable brightness/position control.
     // Factory creates both "slider" (light.turn_on w/ brightness) and "cover"
     // variants. Slider cards are always vertical. For covers, b.sensor stores

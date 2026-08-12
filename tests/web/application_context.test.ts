@@ -34,6 +34,7 @@ export function runApplicationContextTests(): void {
   const configurationOptions = {} as any;
   const mediaConfigurationOptions = {} as any;
   const imageConfigurationOptions = {} as any;
+  const modalTabOptions = {} as any;
   const backupContract = {} as any;
   const backupExport = {} as any;
   const backupFile = {} as any;
@@ -66,6 +67,7 @@ export function runApplicationContextTests(): void {
     configurationOptions,
     mediaConfigurationOptions,
     imageConfigurationOptions,
+    modalTabOptions,
     backupContract,
     backupExport,
     backupFile,
@@ -100,6 +102,7 @@ export function runApplicationContextTests(): void {
   equal(context.configuration.options, configurationOptions, "context retains typed configuration options");
   equal(context.configuration.mediaOptions, mediaConfigurationOptions, "context retains typed media options");
   equal(context.configuration.imageOptions, imageConfigurationOptions, "context retains typed image options");
+  equal(context.configuration.modalTabs, modalTabOptions, "context retains typed modal-tab options");
   equal(context.backup.contract, backupContract, "context retains the backup contract");
   equal(context.backup.export, backupExport, "context retains backup export ownership");
   equal(context.backup.file, backupFile, "context retains backup file ownership");

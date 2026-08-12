@@ -5,6 +5,7 @@ import type { CardRegistry } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
 import type { ConfigMediaOptionsFeature } from "../application/config_media_options";
 import type { ConfigImageOptionsFeature } from "../application/config_image_options";
+import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 import {
@@ -18,6 +19,7 @@ export function installAppTestHooksConfig(
     sensorOptions: ConfigSensorOptionsFeature,
     mediaOptions: ConfigMediaOptionsFeature,
     imageOptions: ConfigImageOptionsFeature,
+    modalTabs: ConfigModalTabOptionsFeature,
 ): GlobalDescriptors {
     const {
         cardLargeNumbersEnabled,
@@ -64,6 +66,26 @@ export function installAppTestHooksConfig(
         imageIconEnabled,
         normalizeImageOptions,
     } = imageOptions;
+    const {
+        coverControlTabDefinitions,
+        coverControlTabs,
+        normalizeCoverControlTabs,
+        normalizeCoverOptions,
+        fanControlTabDefinitions,
+        fanControlTabs,
+        normalizeFanControlTabs,
+        fanLightEntity,
+        normalizeFanControlOptions,
+        setFanControlTabs,
+        setFanLightEntity,
+        lightControlTabDefinitions,
+        lightControlTabs,
+        normalizeLightControlTabs,
+        normalizeLightControlOptions,
+        climateControlTabDefinitions,
+        climateControlTabs,
+        normalizeClimateControlTabs,
+    } = modalTabs;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("config", {
             parseButtonConfig: parseButtonConfig,

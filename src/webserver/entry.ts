@@ -46,7 +46,7 @@ import { installFirmwareUpdatePostApiModule } from "./application/firmware_updat
 import { installPublicFirmwareInstallModule } from "./application/public_firmware_install";
 import { createConfigMediaOptionsFeature } from "./application/config_media_options";
 import { createConfigImageOptionsFeature } from "./application/config_image_options";
-import { installConfigModalTabOptionsModule } from "./application/config_modal_tab_options";
+import { createConfigModalTabOptionsFeature } from "./application/config_modal_tab_options";
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
 import { installConfigConfirmationOptionsModule } from "./application/config_confirmation_options";
 import { installConfigAccessClimateAlarmOptionsModule } from "./application/config_access_climate_alarm_options";
@@ -179,14 +179,14 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
-  installGlobals(installConfigModalTabOptionsModule());
   installGlobals(installConfigConfirmationOptionsModule());
-  installGlobals(installConfigAccessClimateAlarmOptionsModule());
+  installGlobals(installConfigAccessClimateAlarmOptionsModule(context.configuration.modalTabs));
   installGlobals(installConfigCodecModule(
     context.cards,
     context.configuration.options,
     context.configuration.mediaOptions,
     context.configuration.imageOptions,
+    context.configuration.modalTabs,
   ));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
@@ -274,12 +274,12 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerActionCardTypes(registry));
   registry.registerCompatibility(registerAlarmCardTypes(registry));
   registry.registerCompatibility(registerCalendarCardTypes(registry));
-  registry.registerCompatibility(registerClimateCardTypes(registry));
+  registry.registerCompatibility(registerClimateCardTypes(registry, context.configuration.modalTabs));
   registry.registerCompatibility(registerClockCardTypes(registry));
   registry.registerCompatibility(coverLikeCards.descriptors);
   registry.registerCompatibility(registerDoorWindowCardTypes(registry, context.configuration.options));
   registry.registerCompatibility(registerEntityModeCardHelpers());
-  registry.registerCompatibility(registerFanCardTypes(registry));
+  registry.registerCompatibility(registerFanCardTypes(registry, context.configuration.modalTabs));
   registry.registerCompatibility(registerGarageCardTypes(coverLikeCards.register));
   registry.registerCompatibility(registerGateCardTypes(coverLikeCards.register));
   registry.registerCompatibility(registerImageCardTypes(
@@ -288,7 +288,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   ));
   registry.registerCompatibility(registerInternalCardTypes(registry));
   registry.registerCompatibility(registerLawnMowerCardTypes(registry));
-  registry.registerCompatibility(registerLightTemperatureCardTypes(registry));
+  registry.registerCompatibility(registerLightTemperatureCardTypes(registry, context.configuration.modalTabs));
   registry.registerCompatibility(registerLockCardTypes(registry));
   registry.registerCompatibility(registerMediaCardTypes(
     registry,
@@ -298,7 +298,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerPushCardTypes(registry));
   registry.registerCompatibility(registerScreenLockCardTypes(registry));
   registry.registerCompatibility(registerSensorCardTypes(registry, context.configuration.options));
-  registry.registerCompatibility(registerSliderCardTypes(registry));
+  registry.registerCompatibility(registerSliderCardTypes(registry, context.configuration.modalTabs));
   registry.registerCompatibility(registerSubpageCardTypes(registry));
   registry.registerCompatibility(registerSwitchCardTypes(registry));
   registry.registerCompatibility(registerTimezoneCardTypes(registry));
@@ -315,6 +315,7 @@ function installTestCompatibility(context: ApplicationContext): void {
     context.configuration.options,
     context.configuration.mediaOptions,
     context.configuration.imageOptions,
+    context.configuration.modalTabs,
   ));
   installGlobals(installAppTestHooksPreview(context.cards));
   installGlobals(installAppTestHooksBackup());
@@ -355,6 +356,10 @@ function composeApplicationContext(): ApplicationContext {
     layout,
     mediaOptions: mediaConfigurationOptions,
     showBanner: (message, kind) => showBanner(message, kind),
+  });
+  const modalTabOptions = createConfigModalTabOptionsFeature({
+    document: dom.document,
+    renderButtonSettings: () => renderButtonSettings(),
   });
   const cardEditorDraft = createCardEditorDraftController({
     cloneCard: (button) => Model.cloneCardConfig(button),
@@ -533,6 +538,7 @@ function composeApplicationContext(): ApplicationContext {
     configurationOptions,
     mediaConfigurationOptions,
     imageConfigurationOptions,
+    modalTabOptions,
     backupContract,
     backupExport,
     backupFile,

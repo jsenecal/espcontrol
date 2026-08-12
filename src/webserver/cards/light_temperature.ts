@@ -1,6 +1,17 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
-export function registerLightTemperatureCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
+export function registerLightTemperatureCardTypes(
+    registry: CardRegistry,
+    modalTabs: ConfigModalTabOptionsFeature,
+): GlobalDescriptors {
+    const {
+        lightControlTabDefinitions,
+        lightControlTabs,
+        normalizeLightControlOptions,
+        setLightControlTabs,
+        renderModalTabSettings,
+    } = modalTabs;
     // Light temperature slider card: controls color_temp_kelvin on a light entity.
     // Slider bottom = min kelvin (warm), top = max kelvin (cool).
     // Config fields: unit="min-max" (kelvin range),

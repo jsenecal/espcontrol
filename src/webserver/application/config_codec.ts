@@ -28,6 +28,7 @@ import type { CardRegistry } from "./card_registry";
 import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
 import type { ConfigMediaOptionsFeature } from "./config_media_options";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
+import type { ConfigModalTabOptionsFeature } from "./config_modal_tab_options";
 import {
     IMAGE_ICON_OPTION,
     MEDIA_COVER_ART_OPTION,
@@ -48,6 +49,7 @@ export function installConfigCodecModule(
     sensorOptions: ConfigSensorOptionsFeature,
     mediaOptions: ConfigMediaOptionsFeature,
     imageOptions: ConfigImageOptionsFeature,
+    modalTabs: ConfigModalTabOptionsFeature,
 ): GlobalDescriptors {
     const {
         cardLargeNumbersSupported,
@@ -70,6 +72,11 @@ export function installConfigCodecModule(
         normalizeImageOptions,
     } = imageOptions;
     imageOptions.connectSubpageParser((value) => parseSubpageConfig(value));
+    const {
+        normalizeLightControlOptions,
+        normalizeCoverOptionsForMode,
+        normalizeFanControlOptions,
+    } = modalTabs;
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
         if (!b)

@@ -58,7 +58,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /registry\.register\(/, `${relativePath} should use the typed card registry`);
       assert.doesNotMatch(source, /\bregisterButtonType\s*\(/, `${relativePath} should not read ambient registration state`);
       assert.match(entry, new RegExp(
-        `${registrationFunction}\\(\\s*registry(?:,\\s*context\\.configuration\\.(?:options|mediaOptions|imageOptions))?,?\\s*\\)`,
+        `${registrationFunction}\\(\\s*registry(?:,\\s*context\\.configuration\\.(?:options|mediaOptions|imageOptions|modalTabs))?,?\\s*\\)`,
       ));
     }
   });
@@ -157,6 +157,16 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /installConfigImageOptionsModule/);
     assert.match(entry, /imageConfigurationOptions = createConfigImageOptionsFeature/);
     assert.match(options, /connectSubpageParser/);
+  });
+
+  test("owns modal-tab behavior in the application context", () => {
+    const options = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_modal_tab_options.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.match(options, /createConfigModalTabOptionsFeature/);
+    assert.doesNotMatch(options, /\b(?:staticGlobal|liveGlobal|GlobalDescriptors)\b/);
+    assert.doesNotMatch(entry, /installConfigModalTabOptionsModule/);
+    assert.match(entry, /modalTabOptions = createConfigModalTabOptionsFeature/);
+    assert.match(options, /from "\.\.\/model\/config_primitives"/);
   });
 
   test("preserves settings normalization", () => {

@@ -15,7 +15,16 @@ import {
     cardContractOptionSpec,
     copyLargeNumbersOption,
 } from "./config_option_core";
-export function installConfigAccessClimateAlarmOptionsModule(): GlobalDescriptors {
+import type { ConfigModalTabOptionsFeature } from "./config_modal_tab_options";
+export function installConfigAccessClimateAlarmOptionsModule(
+    modalTabs: ConfigModalTabOptionsFeature,
+): GlobalDescriptors {
+    const {
+        normalizeClimateControlTabs,
+        climateControlTabsAreDefault,
+    } = modalTabs;
+    modalTabs.connectClimateOptionsNormalizer((options, includeControlTabs) =>
+        normalizeClimateOptions(options, includeControlTabs));
     // ── Access, Climate, and Alarm Card Options ───────────────────────
     function alarmBehaviorSpec(this: any) {
         var card: any = cardContractCard("alarm");

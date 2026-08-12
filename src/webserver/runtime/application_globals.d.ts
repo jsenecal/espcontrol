@@ -294,10 +294,6 @@ declare global {
   var clearSpans: any;
   var clearTextSelection: any;
   var climateBehaviorSpec: any;
-  var climateControlDefaultTabs: any;
-  var climateControlTabDefinitions: any;
-  var climateControlTabs: any;
-  var climateControlTabsAreDefault: any;
   var climateDefaultLabelDisplayMode: any;
   var climateDefaultNumberDisplayMode: any;
   var climateDefaultTemperatureStep: any;
@@ -338,10 +334,6 @@ declare global {
   var coverArtHideExternalInputPostUrls: any;
   var coverArtTrackOverlayDurationPostUrls: any;
   var coverArtTrackOverlayDurationSupported: any;
-  var coverControlDefaultTabs: any;
-  var coverControlTabDefinitions: any;
-  var coverControlTabs: any;
-  var coverControlTabsAreDefault: any;
   var coverLikeModeValues: any;
   var coveredCells: any;
   var createActionButton: any;
@@ -446,11 +438,6 @@ declare global {
   var fanCardDefaultIcon: any;
   var fanControlBadgeIcon: any;
   var fanControlDefaultIcon: any;
-  var fanControlDefaultTabs: any;
-  var fanControlTabDefinitions: any;
-  var fanControlTabs: any;
-  var fanControlTabsAreDefault: any;
-  var fanLightEntity: any;
   var fanTypeFactory: any;
   var fieldLabel: any;
   var fieldWithControl: any;
@@ -573,10 +560,6 @@ declare global {
   var legacyClockBarTemperatureEntities: any;
   var legacySubpageConfigSafe: any;
   var legacySubpageFieldsSafe: any;
-  var lightControlDefaultTabs: any;
-  var lightControlTabDefinitions: any;
-  var lightControlTabs: any;
-  var lightControlTabsAreDefault: any;
   var lightTempClampMax: any;
   var lightTempClampMin: any;
   var lightTempDefaultRange: any;
@@ -636,7 +619,6 @@ declare global {
   var normalizeBackupScreenSettings: any;
   var normalizeButtonConfig: any;
   var normalizeCardOnPattern: any;
-  var normalizeClimateControlTabs: any;
   var normalizeClimateLabelDisplayMode: any;
   var normalizeClimateNumberDisplayMode: any;
   var normalizeClimateOptions: any;
@@ -645,15 +627,10 @@ declare global {
   var normalizeClockBarTemperatureEntities: any;
   var normalizeClockBarTemperatureEntries: any;
   var normalizeClockBrightness: any;
-  var normalizeCoverControlTabs: any;
   var normalizeCoverLikeMode: any;
-  var normalizeCoverOptions: any;
-  var normalizeCoverOptionsForMode: any;
   var normalizeDateTimeCardMode: any;
   var normalizeEntityMode: any;
   var normalizeEntityModeCardConfig: any;
-  var normalizeFanControlOptions: any;
-  var normalizeFanControlTabs: any;
   var normalizeFanControlType: any;
   var normalizeGarageConfirmationOptions: any;
   var normalizeGarageLabelDisplayMode: any;
@@ -671,8 +648,6 @@ declare global {
   var normalizeLanguage: any;
   var normalizeLawnMowerConfig: any;
   var normalizeLawnMowerMode: any;
-  var normalizeLightControlOptions: any;
-  var normalizeLightControlTabs: any;
   var normalizeLightControlType: any;
   var normalizeLockMode: any;
   var normalizeCardSizeForConfig: any;
@@ -694,7 +669,6 @@ declare global {
   var normalizeScreensaverAction: any;
   var normalizeScreensaverDimmedBrightness: any;
   var normalizeSwitchConfirmationOptions: any;
-  var normalizeTabList: any;
   var brightnessModeOption: any;
   var normalizeTemperatureUnit: any;
   var normalizeTimeOfDay: any;
@@ -867,7 +841,6 @@ declare global {
   var renderInternalRelayField: any;
   var renderLightControlTabSettings: any;
   var renderLightControlTypeField: any;
-  var renderModalTabSettings: any;
   var renderPreview: any;
   var renderSelectionBar: any;
   var renderSensorLocalSettings: any;
@@ -933,7 +906,6 @@ declare global {
   var setC6FirmwareLatestVersion: any;
   var setC6FirmwareUpdateAvailable: any;
   var setCardOnPattern: any;
-  var setClimateControlTabs: any;
   var setClimateLabelDisplayMode: any;
   var setClimateNumberDisplayMode: any;
   var setClimateTemperatureStep: any;
@@ -941,10 +913,7 @@ declare global {
   var setConfigLocked: any;
   var setConfigOption: any;
   var setConfigOptionValue: any;
-  var setCoverControlTabs: any;
   var setDateTimeCardMode: any;
-  var setFanControlTabs: any;
-  var setFanLightEntity: any;
   var setFanControlType: any;
   var setFavicon: any;
   var setFirmwareUpdateInfo: any;
@@ -952,7 +921,6 @@ declare global {
   var setGarageConfirmationOptions: any;
   var setGarageLabelDisplayMode: any;
   var setGateLabelDisplayMode: any;
-  var setLightControlTabs: any;
   var setLightControlType: any;
   var setPostThrottle: any;
   var setPublicFirmwareInfo: any;
@@ -1038,7 +1006,6 @@ declare global {
   var syncScreensaverTimeoutUi: any;
   var syncTabChrome: any;
   var syncTemperatureUi: any;
-  var tabListIsDefault: any;
   var temperatureUnitSymbol: any;
   var textInput: any;
   var textSpan: any;

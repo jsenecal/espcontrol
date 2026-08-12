@@ -1,6 +1,19 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
-export function registerFanCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
+export function registerFanCardTypes(
+    registry: CardRegistry,
+    modalTabs: ConfigModalTabOptionsFeature,
+): GlobalDescriptors {
+    const {
+        fanControlTabDefinitions,
+        fanControlTabs,
+        fanLightEntity,
+        normalizeFanControlOptions,
+        setFanControlTabs,
+        setFanLightEntity,
+        renderModalTabSettings,
+    } = modalTabs;
     // Fan cards: grouped controls for Home Assistant fan entities.
     var FAN_CONTROL_TYPE_OPTIONS: any = [
         ["fan_control", "All Controls"],
