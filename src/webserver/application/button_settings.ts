@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import * as EspControlModel from "../model";
 import { iconSlug, mdiIcon, textSpan } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardEditorDraftController } from "../features/card_editor_draft_controller";

@@ -35,7 +35,6 @@ declare global {
   var DEVICE_ID: any;
   var DOOR_WINDOW_CARD_METADATA: any;
   var ENTITY_CATALOG: any;
-  var EspControlModel: any;
   var FAN_CARD_METADATA: any;
   var FAN_CONTROL_TYPE_OPTIONS: any;
   var FAVICON_SVG: any;

@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import * as EspControlModel from "../model";
 import { configOptionEnabled, configOptionValue, setConfigOptionValue } from "../model/config_primitives";
 import {
     cardContractDefaultConfig,

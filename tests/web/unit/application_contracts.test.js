@@ -510,6 +510,22 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:configOptionEnabled|configOptionValue|setConfigOption|setConfigOptionValue):/);
   });
 
+  test("imports the shared model namespace directly", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const roots = ["application", "testing"];
+    for (const directory of roots) {
+      const root = path.join(ROOT, "src/webserver", directory);
+      for (const name of fs.readdirSync(root).filter((file) => file.endsWith(".ts"))) {
+        const source = fs.readFileSync(path.join(root, name), "utf8");
+        if (!/\bEspControlModel\b/.test(source)) continue;
+        assert.match(source, /import \* as EspControlModel from "\.\.\/model"/, `${directory}/${name} should import the shared model`);
+      }
+    }
+    assert.doesNotMatch(entry, /EspControlModel\s*:/);
+    assert.doesNotMatch(globals, /\bvar EspControlModel:/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

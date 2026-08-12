@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import * as EspControlModel from "../model";
 import { domainIcons as DOMAIN_ICONS, iconSlug } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";

@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import * as EspControlModel from "../model";
 import { escHtml } from "../application/ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";

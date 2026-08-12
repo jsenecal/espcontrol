@@ -607,7 +607,6 @@ function startEspControl(): void {
   if (startupState.__ESPCONTROL_UI_STARTED__ || startupState.__ESPCONTROL_UI_STARTING__) return;
   AppInstance.initializeAppState();
   installStaticGlobals({
-    EspControlModel: Model,
     ...Model,
     ENTITY_CATALOG,
     defaultTimezoneOptions: () =>
