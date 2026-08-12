@@ -23,7 +23,7 @@ import {
 } from "./application/application_context";
 import { createCardRegistry } from "./application/card_registry";
 import { installFirmwareMetadataModule } from "./application/firmware_metadata";
-import { installStylesModule } from "./application/styles";
+import { createWebStyles } from "./application/styles";
 import { createUiRuntimeState } from "./application/state";
 import { installLanguageStateModule } from "./application/language_state";
 import { installEnvironmentStateModule } from "./application/environment_state";
@@ -149,7 +149,6 @@ const startupState = globalThis as typeof globalThis & {
 function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installCore(context.layout, context.configuration.codec, context.runtime));
   installGlobals(installFirmwareMetadataModule());
-  installGlobals(installStylesModule());
   installGlobals(installLanguageStateModule(context.runtime));
   const voiceServicesController = context.controllers.voiceServices;
   installGlobals(installEnvironmentStateModule(voiceServicesController));
@@ -269,7 +268,10 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installAppEventsModule(
     reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle,
   ));
-  installGlobals(installAppModule(context.controllers.pageTitle));
+  installGlobals(installAppModule(
+    context.controllers.pageTitle,
+    createWebStyles(context.layout.config.dragAnimation),
+  ));
 }
 
 function installCardCompatibility(context: ApplicationContext): void {

@@ -374,6 +374,20 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:applyPageTitle|handleWebServerPingEvent|loadPageTitleFromEventStream):/);
   });
 
+  test("imports web styles directly", () => {
+    const styles = fs.readFileSync(path.join(ROOT, "src/webserver/application/styles.ts"), "utf8");
+    const app = fs.readFileSync(path.join(ROOT, "src/webserver/application/app.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(styles, /export function createWebStyles\(dragAnimation: boolean\)/);
+    assert.match(styles, /import \{ WEB_UI_COLORS \} from "\.\.\/state\/ui_tokens"/);
+    assert.match(app, /style\.textContent = webStyles/);
+    assert.match(entry, /createWebStyles\(context\.layout\.config\.dragAnimation\)/);
+    assert.doesNotMatch(styles, /\bCFG\b/);
+    assert.doesNotMatch(entry, /installStylesModule/);
+    assert.doesNotMatch(globals, /\bvar WEB_STYLES:/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });
