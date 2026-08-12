@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { cardContractDomains } from "../generated/card_contract";
 import type { CoverLikeCardRegistration } from "./cover_like_card";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
@@ -12,9 +11,11 @@ export function registerGarageCardTypes(
     registerCard: CoverLikeCardRegistration["register"],
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
         normalizeGarageOptions,
+        garageModeOptionValues,
+        normalizeGarageMode,
         garageLabelDisplayMode,
         setGarageLabelDisplayMode,
     } = accessOptions;
@@ -35,12 +36,6 @@ export function registerGarageCardTypes(
     ];
     function garageCommandMode(this: any, mode?: any) {
         return mode === "open" || mode === "close";
-    }
-    function garageModeOptionValues(this: any) {
-        return coverLikeModeValues("garage", "garage_mode", GARAGE_MODE_OPTIONS);
-    }
-    function normalizeGarageMode(this: any, mode?: any) {
-        return normalizeCoverLikeMode(mode, garageModeOptionValues());
     }
     function garageModeDefaultIcon(this: any, mode?: any) {
         return mode === "open" ? "Garage Open" : "Garage";
@@ -148,14 +143,4 @@ export function registerGarageCardTypes(
             setOptions: setGarageConfirmationOptions,
         },
     });
-    return {
-        "GARAGE_MODE_OPTIONS": liveGlobal(() => GARAGE_MODE_OPTIONS, (value?: any) => { GARAGE_MODE_OPTIONS = value; }),
-        "garageCommandMode": staticGlobal(garageCommandMode),
-        "garageModeOptionValues": staticGlobal(garageModeOptionValues),
-        "normalizeGarageMode": staticGlobal(normalizeGarageMode),
-        "garageModeDefaultIcon": staticGlobal(garageModeDefaultIcon),
-        "garageModeDefaultLabel": staticGlobal(garageModeDefaultLabel),
-        "garageUsesDefaultIcon": staticGlobal(garageUsesDefaultIcon),
-        "GARAGE_CARD_METADATA": liveGlobal(() => GARAGE_CARD_METADATA, (value?: any) => { GARAGE_CARD_METADATA = value; }),
-    };
 }

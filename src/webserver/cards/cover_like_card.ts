@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -16,7 +15,6 @@ import {
 } from "../application/config_option_core";
 
 export interface CoverLikeCardRegistration {
-    readonly descriptors: GlobalDescriptors;
     register(config: any): void;
 }
 
@@ -230,10 +228,5 @@ export function createCoverLikeCardRegistration(registry: CardRegistry): CoverLi
     }
     return {
         register: (config: any) => registerCardDefinition(config),
-        descriptors: {
-            "coverLikeModeValues": staticGlobal(coverLikeModeValues),
-            "normalizeCoverLikeMode": staticGlobal(normalizeCoverLikeMode),
-            "renderCoverLikeConfirmationSettings": staticGlobal(renderCoverLikeConfirmationSettings),
-        },
     };
 }

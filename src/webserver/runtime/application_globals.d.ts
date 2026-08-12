@@ -18,10 +18,6 @@ declare global {
   var FIRMWARE_DEV_VERSION_LABEL: any;
   var FIRMWARE_UNKNOWN_VERSION_LABEL: any;
   var FIRMWARE_WEB_OTA_FALLBACK_DELAY_MS: any;
-  var GARAGE_CARD_METADATA: any;
-  var GARAGE_MODE_OPTIONS: any;
-  var GATE_CARD_METADATA: any;
-  var GATE_MODE_OPTIONS: any;
   var GRID_COLS: any;
   var GRID_ROWS: any;
   var LIGHT_CONTROL_TYPE_METADATA: any;
@@ -170,7 +166,6 @@ declare global {
   var coverArtHideExternalInputPostUrls: any;
   var coverArtTrackOverlayDurationPostUrls: any;
   var coverArtTrackOverlayDurationSupported: any;
-  var coverLikeModeValues: any;
   var createActionButton: any;
   var createBackupConfig: any;
   var createClipboardEntry: any;
@@ -257,16 +252,6 @@ declare global {
   var formatGmtOffset: any;
   var formatHour: any;
   var formatTimezoneOption: any;
-  var garageCommandMode: any;
-  var garageModeDefaultIcon: any;
-  var garageModeDefaultLabel: any;
-  var garageModeOptionValues: any;
-  var garageUsesDefaultIcon: any;
-  var gateCommandMode: any;
-  var gateModeDefaultIcon: any;
-  var gateModeDefaultLabel: any;
-  var gateModeOptionValues: any;
-  var gateUsesDefaultIcon: any;
   var getActiveScreensaverMode: any;
   var getCellFromEvent: any;
   var getJsonFirst: any;
@@ -330,9 +315,6 @@ declare global {
   var normalizeBackupConfig: any;
   var normalizeClockBarTemperatureEntities: any;
   var normalizeClockBarTemperatureEntries: any;
-  var normalizeCoverLikeMode: any;
-  var normalizeGarageMode: any;
-  var normalizeGateMode: any;
   var normalizeGridSpansForLayout: any;
   var normalizeLightControlType: any;
   var normalizeNetworkTransport: any;
@@ -465,7 +447,6 @@ declare global {
   var renderCardTextField: any;
   var renderClockBarLayout: any;
   var renderClockBarSelectionBar: any;
-  var renderCoverLikeConfirmationSettings: any;
   var renderFirmwareUpdateStatus: any;
   var renderFirmwareVersion: any;
   var renderLightControlTabSettings: any;

@@ -71,6 +71,14 @@ export function createConfigAccessClimateAlarmOptionsFeature(
         var fallback: any = cardContractOptionDefaultValue("garage", GARAGE_LABEL_DISPLAY_OPTION, "label");
         return values.indexOf(value) >= 0 ? value : fallback;
     }
+    function garageModeOptionValues(this: any) {
+        var spec: any = cardContractOptionSpec("garage", "garage_mode");
+        return spec && spec.values ? spec.values.slice() : ["", "open", "close"];
+    }
+    function normalizeGarageMode(this: any, mode?: any) {
+        mode = String(mode || "");
+        return garageModeOptionValues().indexOf(mode) >= 0 ? mode : "";
+    }
     function normalizeGarageOptions(this: any, options?: any, mode?: any) {
         var labelMode: any = normalizeGarageLabelDisplayMode(configOptionValue(options, GARAGE_LABEL_DISPLAY_OPTION));
         var out: any = labelMode !== cardContractOptionDefaultValue("garage", GARAGE_LABEL_DISPLAY_OPTION, "label")
@@ -95,6 +103,14 @@ export function createConfigAccessClimateAlarmOptionsFeature(
         var values: any = spec && spec.values ? spec.values : [];
         var fallback: any = cardContractOptionDefaultValue("gate", GATE_LABEL_DISPLAY_OPTION, "label");
         return values.indexOf(value) >= 0 ? value : fallback;
+    }
+    function gateModeOptionValues(this: any) {
+        var spec: any = cardContractOptionSpec("gate", "gate_mode");
+        return spec && spec.values ? spec.values.slice() : ["", "open", "close", "stop"];
+    }
+    function normalizeGateMode(this: any, mode?: any) {
+        mode = String(mode || "");
+        return gateModeOptionValues().indexOf(mode) >= 0 ? mode : "";
     }
     function normalizeGateOptions(this: any, options?: any, mode?: any) {
         var labelMode: any = normalizeGateLabelDisplayMode(configOptionValue(options, GATE_LABEL_DISPLAY_OPTION));
@@ -376,10 +392,14 @@ export function createConfigAccessClimateAlarmOptionsFeature(
         alarmActionLegacyIcon,
         alarmActionIconIsGenerated,
         normalizeGarageLabelDisplayMode,
+        garageModeOptionValues,
+        normalizeGarageMode,
         normalizeGarageOptions,
         garageLabelDisplayMode,
         setGarageLabelDisplayMode,
         normalizeGateLabelDisplayMode,
+        gateModeOptionValues,
+        normalizeGateMode,
         normalizeGateOptions,
         gateLabelDisplayMode,
         setGateLabelDisplayMode,

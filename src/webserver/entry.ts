@@ -286,18 +286,17 @@ function installCardCompatibility(context: ApplicationContext): void {
     context.configuration.accessClimateAlarm,
   );
   registerClockCardTypes(registry, context.configuration.dateTimeOptions);
-  registry.registerCompatibility(coverLikeCards.descriptors);
   registerDoorWindowCardTypes(registry, context.configuration.options);
   registerFanCardTypes(registry, context.configuration.modalTabs);
-  registry.registerCompatibility(registerGarageCardTypes(
+  registerGarageCardTypes(
     coverLikeCards.register,
     context.configuration.accessClimateAlarm,
     context.configuration.confirmationOptions,
-  ));
-  registry.registerCompatibility(registerGateCardTypes(
+  );
+  registerGateCardTypes(
     coverLikeCards.register,
     context.configuration.accessClimateAlarm,
-  ));
+  );
   registerImageCardTypes(
     registry,
     context.configuration.imageOptions,

@@ -1,13 +1,14 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { cardContractDomains } from "../generated/card_contract";
 import type { CoverLikeCardRegistration } from "./cover_like_card";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 export function registerGateCardTypes(
     registerCard: CoverLikeCardRegistration["register"],
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
         normalizeGateOptions,
+        gateModeOptionValues,
+        normalizeGateMode,
         gateLabelDisplayMode,
         setGateLabelDisplayMode,
     } = accessOptions;
@@ -20,12 +21,6 @@ export function registerGateCardTypes(
     ];
     function gateCommandMode(this: any, mode?: any) {
         return mode === "open" || mode === "close" || mode === "stop";
-    }
-    function gateModeOptionValues(this: any) {
-        return coverLikeModeValues("gate", "gate_mode", GATE_MODE_OPTIONS);
-    }
-    function normalizeGateMode(this: any, mode?: any) {
-        return normalizeCoverLikeMode(mode, gateModeOptionValues());
     }
     function gateModeDefaultIcon(this: any, mode?: any) {
         if (mode === "open")
@@ -98,14 +93,4 @@ export function registerGateCardTypes(
         labelDisplayMode: gateLabelDisplayMode,
         setLabelDisplayMode: setGateLabelDisplayMode,
     });
-    return {
-        "GATE_MODE_OPTIONS": liveGlobal(() => GATE_MODE_OPTIONS, (value?: any) => { GATE_MODE_OPTIONS = value; }),
-        "gateCommandMode": staticGlobal(gateCommandMode),
-        "gateModeOptionValues": staticGlobal(gateModeOptionValues),
-        "normalizeGateMode": staticGlobal(normalizeGateMode),
-        "gateModeDefaultIcon": staticGlobal(gateModeDefaultIcon),
-        "gateModeDefaultLabel": staticGlobal(gateModeDefaultLabel),
-        "gateUsesDefaultIcon": staticGlobal(gateUsesDefaultIcon),
-        "GATE_CARD_METADATA": liveGlobal(() => GATE_CARD_METADATA, (value?: any) => { GATE_CARD_METADATA = value; }),
-    };
 }

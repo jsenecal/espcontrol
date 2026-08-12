@@ -127,7 +127,9 @@ export function createConfigCodecFeature(
     const {
         alarmActionSpecs,
         alarmActionLegacyIcon,
+        normalizeGarageMode,
         normalizeGarageOptions,
+        normalizeGateMode,
         normalizeGateOptions,
         normalizeClimateOptions,
         alarmActionInfo,

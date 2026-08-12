@@ -59,9 +59,13 @@ describe("browserless application contracts", () => {
     const coverFactory = fs.readFileSync(path.join(ROOT, "src/webserver/cards/cover_like_card.ts"), "utf8");
     assert.match(coverFactory, /registry\.register\(config\.type/);
     assert.doesNotMatch(coverFactory, /\bregisterButtonType\s*\(/);
+    assert.doesNotMatch(coverFactory, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|descriptors)\b/);
     assert.match(entry, /registerGarageCardTypes\(\s*coverLikeCards\.register,\s*context\.configuration\.accessClimateAlarm,\s*context\.configuration\.confirmationOptions,?\s*\)/);
     assert.match(entry, /registerGateCardTypes\(\s*coverLikeCards\.register,\s*context\.configuration\.accessClimateAlarm,?\s*\)/);
     assert.doesNotMatch(entry, /registerCoverLikeCardType/);
+    assert.doesNotMatch(entry, /registerCompatibility\((?:coverLikeCards\.descriptors|registerGarageCardTypes|registerGateCardTypes)/);
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(globals, /\bvar (?:GARAGE_CARD_METADATA|GARAGE_MODE_OPTIONS|GATE_CARD_METADATA|GATE_MODE_OPTIONS|coverLikeModeValues|normalizeCoverLikeMode|renderCoverLikeConfirmationSettings|garageCommandMode|garageModeDefaultIcon|garageModeDefaultLabel|garageModeOptionValues|garageUsesDefaultIcon|gateCommandMode|gateModeDefaultIcon|gateModeDefaultLabel|gateModeOptionValues|gateUsesDefaultIcon|normalizeGarageMode|normalizeGateMode):/);
   });
 
   test("registers static card families without compatibility descriptors", () => {
