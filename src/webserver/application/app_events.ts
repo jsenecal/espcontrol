@@ -2,16 +2,18 @@ import { state } from "../state/app_instance";
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ReconnectController } from "../features/reconnect";
 import type { SseHandlerFactory } from "./app_state_event_handlers";
+import type { UiRuntimeState } from "./state";
 
 export function installAppEventsModule(
     reconnectController: ReconnectController<unknown>,
     createSseHandlers: SseHandlerFactory,
+    runtime: UiRuntimeState,
 ): GlobalDescriptors {
     // ── SSE ────────────────────────────────────────────────────────────────
     function connectEvents(this: any) {
         function markConnected(this: any) {
             resetStateForConnection(state);
-            orderReceived = false;
+            runtime.orderReceived = false;
             setConfigLocked(false);
             if (els.banner)
                 els.banner.className = "sp-banner";
@@ -19,10 +21,10 @@ export function installAppEventsModule(
                 btn.disabled = false;
                 btn.textContent = "Apply Configuration";
             });
-            clearTimeout(migrationTimer);
-            migrationTimer = setTimeout(scheduleMigration, 5000);
-            clearTimeout(sliderMigrationTimer);
-            pendingSliderSubpageMigrations = {};
+            clearTimeout(runtime.migrationTimer as any);
+            runtime.migrationTimer = setTimeout(scheduleMigration, 5000);
+            clearTimeout(runtime.sliderMigrationTimer as any);
+            runtime.pendingSliderSubpageMigrations = {};
             refreshFirmwareVersion();
             refreshScreensaverTimeout();
         }

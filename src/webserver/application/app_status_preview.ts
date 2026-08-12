@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installAppStatusPreviewModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installAppStatusPreviewModule(runtime: UiRuntimeState): GlobalDescriptors {
     // ── Clock (minute-aligned) ─────────────────────────────────────────────
     function getTzId(this: any, tz?: any) {
         if (typeof isHomeAssistantAutoTimezone === "function" && isHomeAssistantAutoTimezone(tz))
@@ -248,11 +249,11 @@ export function installAppStatusPreviewModule(): GlobalDescriptors {
         return false;
     }
     function scheduleMigration(this: any) {
-        if (orderReceived || gridHasAny())
+        if (runtime.orderReceived || gridHasAny())
             return;
-        clearTimeout(migrationTimer);
-        migrationTimer = setTimeout(function (this: any) {
-            if (orderReceived || gridHasAny())
+        clearTimeout(runtime.migrationTimer as any);
+        runtime.migrationTimer = setTimeout(function (this: any) {
+            if (runtime.orderReceived || gridHasAny())
                 return;
             var pos: any = 0;
             for (var i: any = 0; i < NUM_SLOTS; i++) {

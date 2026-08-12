@@ -2,9 +2,11 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ApplicationLayoutState } from "./application_context";
 import type { ConfigCodecFeature } from "./config_codec";
+import type { UiRuntimeState } from "./state";
 export function installCore(
     applicationLayout: ApplicationLayoutState,
     codec: ConfigCodecFeature,
+    runtime: UiRuntimeState,
 ): GlobalDescriptors {
     const { serializeSubpageGrid } = codec;
     function isPortraitRotation(this: any, value?: any) {
@@ -126,11 +128,11 @@ export function installCore(
         r.setProperty("--large-sensor-unit-offset-y", "calc(var(--btn-icon) * 2.5 * " + (largeSensorUnitOffsetPercent / 100) + ")");
         if (!preservePendingGrid && state.grid && state.grid.length) {
             normalizeGridSpansForLayout(state.grid, state.sizes, applicationLayout.numSlots, applicationLayout.gridCols, function (this: any, normalizedOrder?: any) {
-                if (orderReceived)
+                if (runtime.orderReceived)
                     postText(entityName("button_order"), normalizedOrder);
             });
         }
-        if (!preservePendingGrid && orderReceived) {
+        if (!preservePendingGrid && runtime.orderReceived) {
             for (var homeSlot in state.subpages) {
                 var sp: any = state.subpages[homeSlot];
                 if (!sp || !sp.grid || !sp.grid.length)

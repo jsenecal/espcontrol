@@ -2,7 +2,8 @@ import { state } from "../state/app_instance";
 import { domainIcons as DOMAIN_ICONS, iconSlug } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";
-export function installGridModule(codec: ConfigCodecFeature): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeState): GlobalDescriptors {
     const { getSubpage, saveSubpageConfig } = codec;
     // ── Context abstraction ────────────────────────────────────────────────
     var mainGridSaveTimer: any = null;
@@ -86,7 +87,7 @@ export function installGridModule(codec: ConfigCodecFeature): GlobalDescriptors 
         return parsed.grid;
     }
     function applyButtonOrderValue(this: any, val?: any, skipRender?: any) {
-        orderReceived = !!(val && val.trim());
+        runtime.orderReceived = !!(val && val.trim());
         state.sizes = {};
         state.grid = parseOrder(val);
         state.selectedSlots = state.selectedSlots.filter(function (this: any, s?: any) {

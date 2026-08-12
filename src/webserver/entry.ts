@@ -147,14 +147,14 @@ const startupState = globalThis as typeof globalThis & {
 };
 
 function installApplicationCompatibility(context: ApplicationContext): void {
-  installGlobals(installCore(context.layout, context.configuration.codec));
+  installGlobals(installCore(context.layout, context.configuration.codec, context.runtime));
   installGlobals(installFirmwareMetadataModule());
   installGlobals(installStylesModule());
   installGlobals(context.runtime.globals);
   installGlobals(installLanguageStateModule());
   const voiceServicesController = context.controllers.voiceServices;
   installGlobals(installEnvironmentStateModule(voiceServicesController));
-  installGlobals(installScreenRotationStateModule());
+  installGlobals(installScreenRotationStateModule(context.runtime));
   const screenScheduleController = context.controllers.screenSchedule;
   installGlobals(installScreenScheduleStateModule(screenScheduleController));
   installGlobals(installNtpStateModule());
@@ -169,7 +169,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installFirmwareUpdateStateModule());
   installGlobals(installScreensaverTimeoutModule());
   installGlobals(installC6FirmwareUiModule());
-  installGlobals(installGridModule(context.configuration.codec));
+  installGlobals(installGridModule(context.configuration.codec, context.runtime));
   const deviceApi = context.api;
   const nativePanelConfig = context.configuration.native;
   const configPersistence = context.configuration.persistence;
@@ -181,7 +181,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installStateLoaderApiModule());
+  installGlobals(installStateLoaderApiModule(context.runtime));
   installGlobals(installArtworkPostApiModule());
   installGlobals(installScreenSchedulePostApiModule());
   installGlobals(installClockBarPostApiModule());
@@ -256,16 +256,16 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     importBackup: backupUiFeature.importConfig,
   }));
   installGlobals(backupUiFeature.globals);
-  installGlobals(installAppStatusPreviewModule());
+  installGlobals(installAppStatusPreviewModule(context.runtime));
   installGlobals(installAppTitleModule());
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec));
   let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule((factory) => {
+  installGlobals(installAppStateEventHandlersModule(context.runtime, (factory) => {
     sseHandlerFactory = factory;
   }));
   const reconnectController = context.controllers.reconnect;
   if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
-  installGlobals(installAppEventsModule(reconnectController, sseHandlerFactory));
+  installGlobals(installAppEventsModule(reconnectController, sseHandlerFactory, context.runtime));
   installGlobals(installAppModule());
 }
 
@@ -332,7 +332,7 @@ function installTestCompatibility(context: ApplicationContext): void {
     context.configuration.confirmationOptions,
     context.configuration.codec,
   ));
-  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec));
+  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime));
   installGlobals(installAppTestHooksBackup());
   installGlobals(installAppTestHooksSettings());
 }
@@ -364,7 +364,7 @@ function composeApplicationContext(): ApplicationContext {
     showBanner: (message, level) => showBanner(message, level),
     delay: (callback, milliseconds) => dom.schedule(callback, milliseconds),
   });
-  const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig);
+  const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime);
   const cards = createCardRegistry(installGlobals);
   const configurationOptions = createConfigSensorOptionsFeature(cards);
   const mediaConfigurationOptions = createConfigMediaOptionsFeature(layout.config);

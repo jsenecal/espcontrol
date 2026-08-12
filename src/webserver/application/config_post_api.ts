@@ -2,6 +2,7 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
 import type { ConfigCodecFeature } from "./config_codec";
+import type { UiRuntimeState } from "./state";
 
 export interface ConfigPersistenceFeature {
     readonly globals: GlobalDescriptors;
@@ -12,6 +13,7 @@ export interface ConfigPersistenceFeature {
 
 export function createConfigPersistenceFeature(
     nativePanelConfig: NativePanelConfigController | null = null,
+    runtime: UiRuntimeState,
 ): ConfigPersistenceFeature {
     let codec: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig"> | undefined;
     function connectCodec(value: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig">) {
@@ -97,11 +99,11 @@ export function createConfigPersistenceFeature(
         saveSubpageEntityLegacy(slot, full);
     }
     function scheduleSliderSubpageMigration(this: any, slot?: any) {
-        pendingSliderSubpageMigrations[slot] = true;
-        clearTimeout(sliderMigrationTimer);
-        sliderMigrationTimer = setTimeout(function (this: any) {
-            var pending: any = pendingSliderSubpageMigrations;
-            pendingSliderSubpageMigrations = {};
+        runtime.pendingSliderSubpageMigrations[slot] = true;
+        clearTimeout(runtime.sliderMigrationTimer as any);
+        runtime.sliderMigrationTimer = setTimeout(function (this: any) {
+            var pending: any = runtime.pendingSliderSubpageMigrations;
+            runtime.pendingSliderSubpageMigrations = {};
             for (var key in pending) {
                 if (state.subpages[key])
                     saveSubpageEntity(key);
@@ -122,12 +124,4 @@ export function createConfigPersistenceFeature(
         saveButtonConfig: (slot) => saveButtonConfig(slot),
         saveSubpageEntity: (slot) => saveSubpageEntity(slot),
     };
-}
-
-// The remaining compatibility modules still reference these names directly.
-// New editor/preview code receives ConfigPersistenceFeature instead.
-export function installConfigPostApiModule(
-    nativePanelConfig: NativePanelConfigController | null = null,
-): GlobalDescriptors {
-    return createConfigPersistenceFeature(nativePanelConfig).globals;
 }

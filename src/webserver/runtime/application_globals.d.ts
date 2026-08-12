@@ -513,7 +513,6 @@ declare global {
   var mediaPlaylistSourceDefinition: any;
   var mediaPlaylistSourceOptions: any;
   var mediaStateDisplayModeSupported: any;
-  var migrationTimer: any;
   var monthNameForIndex: any;
   var moveSelectedGridEntries: any;
   var moveSelectedToCell: any;
@@ -579,7 +578,6 @@ declare global {
   var optionLabel: any;
   var optionLabelForEntity: any;
   var optionValue: any;
-  var orderReceived: any;
   var parseEntityEventData: any;
   var parseEntityId: any;
   var parseGridOrder: any;
@@ -591,7 +589,6 @@ declare global {
   var parseStructuredSubpageConfig: any;
   var pasteButton: any;
   var pasteSubpageButton: any;
-  var pendingSliderSubpageMigrations: any;
   var placeOrderedGridEntries: any;
   var placeSlotAt: any;
   var planBackupButtonLayout: any;
@@ -810,7 +807,6 @@ declare global {
   var sizeRowSpan: any;
   var sizeToken: any;
   var sliderCardMetadata: any;
-  var sliderMigrationTimer: any;
   var sliderTypeFactory: any;
   var sortScreenRotationOptions: any;
   var splitSubpageConfigChunks: any;

@@ -148,7 +148,7 @@ export function runApplicationContextTests(): void {
   const compatibilityGlobals: Record<string, unknown> = {};
   Object.defineProperties(compatibilityGlobals, installCore(context.layout, {
     serializeSubpageGrid() { return ""; },
-  } as any));
+  } as any, runtime));
   compatibilityGlobals.GRID_COLS = 6;
   compatibilityGlobals.GRID_ROWS = 2;
   compatibilityGlobals.NUM_SLOTS = 10;

@@ -1,10 +1,12 @@
 import { state } from "../state/app_instance";
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { UiRuntimeState } from "./state";
 
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
 
 export function installAppStateEventHandlersModule(
+    runtime: UiRuntimeState,
     onCreateSseHandlers?: (factory: SseHandlerFactory) => void,
 ): GlobalDescriptors {
     // ── State Event Handlers ──────────────────────────────────────────
@@ -12,7 +14,7 @@ export function installAppStateEventHandlersModule(
         return {
             "text-button_order": function (this: any, val?: any) {
                 if (gridPreviewBlockedByRotationStartup() || state.screenRotationInitialFallbackActive) {
-                    orderReceived = !!(val && val.trim());
+                    runtime.orderReceived = !!(val && val.trim());
                     state.pendingButtonOrderRaw = val;
                     if (state.screenRotationInitialFallbackActive)
                         applyButtonOrderValue(val);

@@ -3,9 +3,11 @@ import { escHtml } from "../application/ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigCodecFeature } from "../application/config_codec";
+import type { UiRuntimeState } from "../application/state";
 export function installAppTestHooksPreview(
     cardRegistry: CardRegistry,
     codec: ConfigCodecFeature,
+    runtime: UiRuntimeState,
 ): GlobalDescriptors {
     const {
         buildSubpageGrid,
@@ -108,12 +110,12 @@ export function installAppTestHooksPreview(
                 var oldGrid: any = state.grid;
                 var oldSizes: any = state.sizes;
                 var oldSelectedSlots: any = state.selectedSlots;
-                var oldOrderReceived: any = orderReceived;
+                var oldOrderReceived: any = runtime.orderReceived;
                 GRID_COLS = toCols;
                 state.grid = [];
                 state.sizes = {};
                 state.selectedSlots = [];
-                orderReceived = !!(orderStr && orderStr.trim());
+                runtime.orderReceived = !!(orderStr && orderStr.trim());
                 var persistedOrder: any = null;
                 var normalizedOrder: any = applyDeferredButtonOrderValue(orderStr, function (this: any, value?: any) {
                     persistedOrder = value;
@@ -123,7 +125,7 @@ export function installAppTestHooksPreview(
                 state.grid = oldGrid;
                 state.sizes = oldSizes;
                 state.selectedSlots = oldSelectedSlots;
-                orderReceived = oldOrderReceived;
+                runtime.orderReceived = oldOrderReceived;
                 return { order: normalizedOrder, persistedOrder: persistedOrder, sizes: sizes };
             },
             normalizeSubpageOrderForLayoutChange: function (this: any, order?: any, maxSlots?: any, fromCols?: any, toCols?: any) {

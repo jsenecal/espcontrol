@@ -10,10 +10,10 @@ export interface UiRuntimeState {
     dragRafPending: any;
     dragSrcEl: any;
     dragEnterCount: any;
-    orderReceived: any;
-    migrationTimer: any;
-    sliderMigrationTimer: any;
-    pendingSliderSubpageMigrations: any;
+    orderReceived: boolean;
+    migrationTimer: number | null;
+    sliderMigrationTimer: number | null;
+    pendingSliderSubpageMigrations: Record<string, true>;
     eventSource: any;
     globals: GlobalDescriptors;
     isSettingsFocused(): boolean;
@@ -49,13 +49,6 @@ export function createUiRuntimeState(
     };
     runtime.globals = {
         "els": liveGlobal(() => runtime.els, (value) => { runtime.els = value; }),
-        "orderReceived": liveGlobal(() => runtime.orderReceived, (value) => { runtime.orderReceived = value; }),
-        "migrationTimer": liveGlobal(() => runtime.migrationTimer, (value) => { runtime.migrationTimer = value; }),
-        "sliderMigrationTimer": liveGlobal(() => runtime.sliderMigrationTimer, (value) => { runtime.sliderMigrationTimer = value; }),
-        "pendingSliderSubpageMigrations": liveGlobal(
-            () => runtime.pendingSliderSubpageMigrations,
-            (value) => { runtime.pendingSliderSubpageMigrations = value; },
-        ),
         "_eventSource": liveGlobal(() => runtime.eventSource, (value) => { runtime.eventSource = value; }),
         "isSettingsFocused": staticGlobal(() => runtime.isSettingsFocused()),
         "isSettingsOpen": staticGlobal(() => runtime.isSettingsOpen()),

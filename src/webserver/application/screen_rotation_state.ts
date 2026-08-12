@@ -1,7 +1,8 @@
 import { state } from "../state/app_instance";
 import { uniqueOptions } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installScreenRotationStateModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installScreenRotationStateModule(runtime: UiRuntimeState): GlobalDescriptors {
     // ── Screen Rotation State ──────────────────────────────────────────────
     var SCREEN_ROTATION_STARTUP_FALLBACK_MS: any = 1200;
     function normalizeScreenRotation(this: any, value?: any) {
@@ -96,7 +97,7 @@ export function installScreenRotationStateModule(): GlobalDescriptors {
             }
             else {
                 applyDeferredButtonOrderValue(state.pendingButtonOrderRaw, function (this: any, normalizedOrder?: any) {
-                    if (orderReceived)
+                    if (runtime.orderReceived)
                         postText(entityName("button_order"), normalizedOrder);
                 });
                 state.pendingButtonOrderRaw = null;

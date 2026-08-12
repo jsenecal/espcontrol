@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installStateLoaderApiModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installStateLoaderApiModule(runtime: UiRuntimeState): GlobalDescriptors {
     // ── State Loader API ──────────────────────────────────────────────────
     function eventStreamEnabled(this: any) {
         try {
@@ -72,10 +73,10 @@ export function installStateLoaderApiModule(): GlobalDescriptors {
             }
             if (onLoaded)
                 onLoaded();
-            clearTimeout(migrationTimer);
-            migrationTimer = setTimeout(scheduleMigration, 5000);
-            clearTimeout(sliderMigrationTimer);
-            pendingSliderSubpageMigrations = {};
+            clearTimeout(runtime.migrationTimer as any);
+            runtime.migrationTimer = setTimeout(scheduleMigration, 5000);
+            clearTimeout(runtime.sliderMigrationTimer as any);
+            runtime.pendingSliderSubpageMigrations = {};
             loadStateItems(settingsStateEntities(), handleState, 2).then(function (this: any) {
                 loadStateItems(subpageStateEntities(), handleState, 2);
             });
