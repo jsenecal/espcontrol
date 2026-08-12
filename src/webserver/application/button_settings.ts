@@ -3,10 +3,12 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { CardEditorDraftController } from "../features/card_editor_draft_controller";
 import type { CardEditorValidationController } from "../features/card_editor_validation_controller";
 import type { CardEditorSaveController } from "../features/card_editor_save_controller";
+import type { ConfigPersistenceFeature } from "./config_post_api";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
     cardEditorSaveController: CardEditorSaveController,
+    configPersistence: ConfigPersistenceFeature,
 ): GlobalDescriptors {
     // ── Button settings panel (unified) ────────────────────────────────────
     function openCardSettings(this: any, slot?: any) {
@@ -276,7 +278,7 @@ export function installButtonSettingsModule(
                 if (saved.saveGrid || sizeChanged)
                     postText(entityName("button_order"), serializeGrid(state.grid));
                 if (saved.saveButton)
-                saveButtonConfig(slot);
+                configPersistence.saveButtonConfig(slot);
             }
             var savedTypeDef: any = BUTTON_TYPES[savedButton.type || ""];
             if (savedTypeDef && savedTypeDef.afterSave) {

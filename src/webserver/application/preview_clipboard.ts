@@ -1,7 +1,10 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createClipboardEntry } from "../features/clipboard";
-export function installPreviewClipboardModule(): GlobalDescriptors {
+import type { ConfigPersistenceFeature } from "./config_post_api";
+export function installPreviewClipboardModule(
+    configPersistence: ConfigPersistenceFeature,
+): GlobalDescriptors {
     // ── Preview Clipboard ─────────────────────────────────────────────
     // ── Cut / Paste ────────────────────────────────────────────────────────
     function buildClipboardEntry(this: any, slot?: any) {
@@ -407,8 +410,8 @@ export function installPreviewClipboardModule(): GlobalDescriptors {
             state.buttons = plan.buttons;
             state.subpages = plan.subpages;
             for (var i: any = 0; i < plan.slots.length; i++) {
-                saveButtonConfig(plan.slots[i]);
-                saveSubpageEntity(plan.slots[i]);
+                configPersistence.saveButtonConfig(plan.slots[i]);
+                configPersistence.saveSubpageEntity(plan.slots[i]);
             }
             postText(entityName("button_order"), serializeGrid(state.grid));
             state.selectedSlots = [];

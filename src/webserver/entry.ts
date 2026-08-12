@@ -47,7 +47,7 @@ import { installConfigConfirmationOptionsModule } from "./application/config_con
 import { installConfigAccessClimateAlarmOptionsModule } from "./application/config_access_climate_alarm_options";
 import { installConfigCodecModule } from "./application/config_codec";
 import { createNativePanelConfigMigrationController } from "./application/native_panel_config_migration";
-import { installConfigPostApiModule } from "./application/config_post_api";
+import { createConfigPersistenceFeature } from "./application/config_post_api";
 import { installStateLoaderApiModule } from "./application/state_loader_api";
 import { installArtworkPostApiModule } from "./application/artwork_post_api";
 import { installScreenSchedulePostApiModule } from "./application/screen_schedule_post_api";
@@ -177,6 +177,7 @@ function installApplicationCompatibility(): void {
   const deviceApi = createDeviceApi((url, init) =>
     fetch(url, init as RequestInit));
   const nativePanelConfig = createNativePanelConfigMigrationController();
+  const configPersistence = createConfigPersistenceFeature(nativePanelConfig);
   const cardEditorDraft = createCardEditorDraftController({
     cloneCard: (button) => Model.cloneCardConfig(button),
     emptyCard: () => Model.emptyCardConfig(),
@@ -202,7 +203,7 @@ function installApplicationCompatibility(): void {
       normalizeButtonConfig(target);
     },
   });
-  installGlobals(installConfigPostApiModule(nativePanelConfig));
+  installGlobals(configPersistence.globals);
   installGlobals(installStateLoaderApiModule());
   installGlobals(installArtworkPostApiModule());
   installGlobals(installScreenSchedulePostApiModule());
@@ -245,12 +246,12 @@ function installApplicationCompatibility(): void {
   installGlobals(installButtonSettingsRenderQueueModule());
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
-    cardEditorDraft, cardEditorValidation, cardEditorSave,
+    cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence,
   ));
   installGlobals(installPreviewGridPlacementModule(previewPlacementController));
   installGlobals(installPreviewContextMenuModule());
-  installGlobals(installPreviewClipboardModule());
-  installGlobals(installPreviewInteractionsModule(cardEditorDraft));
+  installGlobals(installPreviewClipboardModule(configPersistence));
+  installGlobals(installPreviewInteractionsModule(cardEditorDraft, configPersistence));
   const backupFeature = createBackupFeature({
     deviceId: DEVICE_ID,
     gridCols: GRID_COLS,
@@ -369,7 +370,7 @@ function installApplicationCompatibility(): void {
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule());
   installGlobals(installAppTitleModule());
-  installGlobals(installAppConfigEventsModule());
+  installGlobals(installAppConfigEventsModule(configPersistence));
   let sseHandlerFactory: SseHandlerFactory | undefined;
   installGlobals(installAppStateEventHandlersModule((factory) => {
     sseHandlerFactory = factory;

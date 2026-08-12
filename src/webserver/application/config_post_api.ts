@@ -2,9 +2,15 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
 
-export function installConfigPostApiModule(
+export interface ConfigPersistenceFeature {
+    readonly globals: GlobalDescriptors;
+    saveButtonConfig(slot: number): void;
+    saveSubpageEntity(slot: number): unknown;
+}
+
+export function createConfigPersistenceFeature(
     nativePanelConfig: NativePanelConfigController | null = null,
-): GlobalDescriptors {
+): ConfigPersistenceFeature {
     // ── Config Post API ───────────────────────────────────────────────────
     function saveButtonConfig(this: any, slot?: any) {
         var b: any = state.buttons[slot - 1];
@@ -87,12 +93,24 @@ export function installConfigPostApiModule(
         }, 5000);
     }
     return {
-        "saveButtonConfig": staticGlobal(saveButtonConfig),
-        "subpageEntityKeys": staticGlobal(subpageEntityKeys),
-        "SUBPAGE_RAW_CHUNK_FIELDS": liveGlobal(() => SUBPAGE_RAW_CHUNK_FIELDS, (value?: any) => { SUBPAGE_RAW_CHUNK_FIELDS = value; }),
-        "subpageChunkShouldPost": staticGlobal(subpageChunkShouldPost),
-        "saveSubpageEntityLegacy": staticGlobal(saveSubpageEntityLegacy),
-        "saveSubpageEntity": staticGlobal(saveSubpageEntity),
-        "scheduleSliderSubpageMigration": staticGlobal(scheduleSliderSubpageMigration),
+        globals: {
+            "saveButtonConfig": staticGlobal(saveButtonConfig),
+            "subpageEntityKeys": staticGlobal(subpageEntityKeys),
+            "SUBPAGE_RAW_CHUNK_FIELDS": liveGlobal(() => SUBPAGE_RAW_CHUNK_FIELDS, (value?: any) => { SUBPAGE_RAW_CHUNK_FIELDS = value; }),
+            "subpageChunkShouldPost": staticGlobal(subpageChunkShouldPost),
+            "saveSubpageEntityLegacy": staticGlobal(saveSubpageEntityLegacy),
+            "saveSubpageEntity": staticGlobal(saveSubpageEntity),
+            "scheduleSliderSubpageMigration": staticGlobal(scheduleSliderSubpageMigration),
+        },
+        saveButtonConfig: (slot) => saveButtonConfig(slot),
+        saveSubpageEntity: (slot) => saveSubpageEntity(slot),
     };
+}
+
+// The remaining compatibility modules still reference these names directly.
+// New editor/preview code receives ConfigPersistenceFeature instead.
+export function installConfigPostApiModule(
+    nativePanelConfig: NativePanelConfigController | null = null,
+): GlobalDescriptors {
+    return createConfigPersistenceFeature(nativePanelConfig).globals;
 }

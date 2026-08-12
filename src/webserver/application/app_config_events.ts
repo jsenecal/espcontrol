@@ -1,6 +1,9 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installAppConfigEventsModule(): GlobalDescriptors {
+import type { ConfigPersistenceFeature } from "./config_post_api";
+export function installAppConfigEventsModule(
+    configPersistence: ConfigPersistenceFeature,
+): GlobalDescriptors {
     // ── Config Event Handlers ─────────────────────────────────────────────
     function ensureSubpageRaw(this: any, slot?: any) {
         if (!state.subpageRaw[slot]) {
@@ -22,7 +25,7 @@ export function installAppConfigEventsModule(): GlobalDescriptors {
         b.precision = parsed.precision;
         b.options = parsed.options;
         if (migrateConfig)
-            saveButtonConfig(slot);
+            configPersistence.saveButtonConfig(slot);
         scheduleRender();
     }
     function applySubpageConfigStateEvent(this: any, slot?: any, key?: any, val?: any) {
