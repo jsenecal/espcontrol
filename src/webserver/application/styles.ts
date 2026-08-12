@@ -251,7 +251,8 @@ export function installStylesModule(): GlobalDescriptors {
         ".sp-card-type-option:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}" +
         ".sp-card-type-option:disabled{opacity:.48;cursor:not-allowed;transform:none}" +
         ".sp-card-type-icon{width:34px;height:34px;border-radius:8px;background:var(--accent-soft);" +
-        "color:var(--accent-hover);display:inline-flex;align-items:center;justify-content:center;font-size:22px;line-height:1;flex:0 0 auto}" +
+        "color:var(--accent-hover);position:relative;font-size:22px;line-height:1;flex:0 0 auto}" +
+        ".sp-card-type-icon::before{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);line-height:1}" +
         ".sp-card-type-copy{display:grid;gap:6px;min-width:0}" +
         ".sp-card-type-title{font-size:.93rem;font-weight:600;line-height:1.25;color:var(--text);overflow-wrap:anywhere}" +
         ".sp-card-type-description{font-size:.78rem;line-height:1.35;color:var(--text2);overflow-wrap:anywhere}" +
