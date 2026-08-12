@@ -1,15 +1,43 @@
-import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ApplicationLayoutState } from "./application_context";
-import type { ConfigCodecFeature } from "./config_codec";
+import type { AppState } from "../state/types";
 import type { UiRuntimeState } from "./state";
-export function installCore(
+
+export interface CoreFeatureDependencies {
+    readonly state: AppState;
+    readonly document: Document;
+    readonly clockBarVisibleInPreview: () => boolean;
+    readonly postButtonOrder: (value: string) => void;
+    readonly saveSubpage: (homeSlot: string) => void;
+}
+
+export interface CoreFeature {
+    isPortraitRotation(value?: any): boolean;
+    activeLayout(): any;
+    screenWidthPercent(screen?: any): number | null;
+    previewLayoutScale(layout?: any): number;
+    layoutSection(layout?: any, key?: any): any;
+    scaledCqw(value?: any, scale?: any): string;
+    scaledCqwText(value?: any, scale?: any): string;
+    syncPreviewGridTop(layout?: any, scale?: any): void;
+    syncPreviewStyleVars(layout?: any, scale?: any): void;
+    normalizeGridSpansForLayout(grid?: any, sizes?: any, maxSlots?: any, gridCols?: any, onChanged?: any): any;
+    syncPreviewOrientation(preservePendingGrid?: any): void;
+    subpageStateDisplayMode(button?: any): string;
+    mockNowIso: any;
+    useMockNowForTest: any;
+    mockNow(): Date;
+    now(): Date;
+    withMockNow<T>(callback: () => T): T;
+}
+
+export function createCoreFeature(
     applicationLayout: ApplicationLayoutState,
-    codec: ConfigCodecFeature,
+    serializeSubpageGrid: (subpage: any) => any,
     runtime: UiRuntimeState,
-): GlobalDescriptors {
-    const { serializeSubpageGrid } = codec;
+    dependencies: CoreFeatureDependencies,
+): CoreFeature {
+    const { state, document, clockBarVisibleInPreview, postButtonOrder, saveSubpage } = dependencies;
     function isPortraitRotation(this: any, value?: any) {
         value = String(value == null ? "0" : value);
         return value === "90" || value === "270";
@@ -130,7 +158,7 @@ export function installCore(
         if (!preservePendingGrid && state.grid && state.grid.length) {
             normalizeGridSpansForLayout(state.grid, state.sizes, applicationLayout.numSlots, applicationLayout.gridCols, function (this: any, normalizedOrder?: any) {
                 if (runtime.orderReceived)
-                    postText(entityName("button_order"), normalizedOrder);
+                    postButtonOrder(normalizedOrder);
             });
         }
         if (!preservePendingGrid && runtime.orderReceived) {
@@ -142,7 +170,7 @@ export function installCore(
                 normalizeGridSpansForLayout(sp.grid, sp.sizes, applicationLayout.numSlots, applicationLayout.gridCols);
                 sp.order = serializeSubpageGrid(sp);
                 if (JSON.stringify(sp.order) !== previousSubpageOrder) {
-                    saveSubpageEntity(homeSlot);
+                    saveSubpage(homeSlot);
                 }
             }
         }
@@ -174,28 +202,24 @@ export function installCore(
         }
     }
     return {
-        "DEVICE_ID": liveGlobal(() => applicationLayout.deviceId, (value?: any) => { applicationLayout.deviceId = String(value || ""); }),
-        "CFG": liveGlobal(() => applicationLayout.config, (value?: any) => { applicationLayout.config = value; }),
-        "NUM_SLOTS": liveGlobal(() => applicationLayout.numSlots, (value?: any) => { applicationLayout.numSlots = value; }),
-        "TOTAL_SLOTS": liveGlobal(() => applicationLayout.totalSlots, (value?: any) => { applicationLayout.totalSlots = value; }),
-        "GRID_COLS": liveGlobal(() => applicationLayout.gridCols, (value?: any) => { applicationLayout.gridCols = value; }),
-        "GRID_ROWS": liveGlobal(() => applicationLayout.gridRows, (value?: any) => { applicationLayout.gridRows = value; }),
-        "isPortraitRotation": staticGlobal(isPortraitRotation),
-        "activeLayout": staticGlobal(activeLayout),
-        "screenWidthPercent": staticGlobal(screenWidthPercent),
-        "previewLayoutScale": staticGlobal(previewLayoutScale),
-        "layoutSection": staticGlobal(layoutSection),
-        "scaledCqw": staticGlobal(scaledCqw),
-        "scaledCqwText": staticGlobal(scaledCqwText),
-        "syncPreviewGridTop": staticGlobal(syncPreviewGridTop),
-        "syncPreviewStyleVars": staticGlobal(syncPreviewStyleVars),
-        "normalizeGridSpansForLayout": staticGlobal(normalizeGridSpansForLayout),
-        "syncPreviewOrientation": staticGlobal(syncPreviewOrientation),
-        "subpageStateDisplayMode": staticGlobal(subpageStateDisplayMode),
-        "WEBSERVER_MOCK_NOW_ISO": liveGlobal(() => WEBSERVER_MOCK_NOW_ISO, (value?: any) => { WEBSERVER_MOCK_NOW_ISO = value; }),
-        "webserverUseMockNowForTest": liveGlobal(() => webserverUseMockNowForTest, (value?: any) => { webserverUseMockNowForTest = value; }),
-        "webserverMockNow": staticGlobal(webserverMockNow),
-        "webserverNow": staticGlobal(webserverNow),
-        "withWebserverMockNow": staticGlobal(withWebserverMockNow),
+        isPortraitRotation,
+        activeLayout,
+        screenWidthPercent,
+        previewLayoutScale,
+        layoutSection,
+        scaledCqw,
+        scaledCqwText,
+        syncPreviewGridTop,
+        syncPreviewStyleVars,
+        normalizeGridSpansForLayout,
+        syncPreviewOrientation,
+        subpageStateDisplayMode,
+        get mockNowIso() { return WEBSERVER_MOCK_NOW_ISO; },
+        set mockNowIso(value: any) { WEBSERVER_MOCK_NOW_ISO = value; },
+        get useMockNowForTest() { return webserverUseMockNowForTest; },
+        set useMockNowForTest(value: any) { webserverUseMockNowForTest = value; },
+        mockNow: webserverMockNow,
+        now: webserverNow,
+        withMockNow: withWebserverMockNow,
     };
 }

@@ -6,7 +6,8 @@ import * as AppInstance from "./state/app_instance";
 import { state } from "./state/app_instance";
 import { textSpan } from "./application/ui_primitives";
 import { installGlobals } from "./runtime/globals";
-import { installCore } from "./application/core";
+import { createCoreFeature } from "./application/core";
+import { coreCompatibilityDescriptors } from "./runtime/core_compatibility";
 import {
   createApplicationContext,
   createApplicationLayoutState,
@@ -143,7 +144,7 @@ const startupState = globalThis as typeof globalThis & {
 };
 
 function installApplicationCompatibility(context: ApplicationContext): void {
-  installGlobals(installCore(context.layout, context.configuration.codec, context.runtime));
+  installGlobals(coreCompatibilityDescriptors(context.layout, context.core));
   installGlobals(installLanguageStateModule(context.runtime));
   const voiceServicesController = context.controllers.voiceServices;
   installGlobals(installEnvironmentStateModule(
@@ -315,7 +316,7 @@ function registerCards(context: ApplicationContext) {
   registerScreenLockCardTypes(registry);
   registerSensorCardTypes(registry, context.configuration.options);
   registerSliderCardTypes(registry, context.configuration.modalTabs, lightCards);
-  registerSubpageCardTypes(registry, context.configuration.codec);
+  registerSubpageCardTypes(registry, context.configuration.codec, context.core);
   registerSwitchCardTypes(registry, context.configuration.confirmationOptions, lightCards);
   registerTimezoneCardTypes(registry, context.configuration.dateTimeOptions, context.dom.document);
   registerVacuumCardTypes(registry, context.configuration.robotOptions);
@@ -400,9 +401,22 @@ function composeApplicationContext(): ApplicationContext {
   const internalRelayConfigurationOptions = createConfigInternalRelayOptionsFeature(layout.config);
   const robotConfigurationOptions = createConfigRobotCardOptionsFeature();
   const lockConfigurationOptions = createConfigLockOptionsFeature();
+  let configurationCodec: ReturnType<typeof createConfigCodecFeature>;
+  const core = createCoreFeature(
+    layout,
+    (subpage) => configurationCodec.serializeSubpageGrid(subpage),
+    runtime,
+    {
+      state: AppInstance.state,
+      document: dom.document,
+      clockBarVisibleInPreview: () => clockBarVisibleInPreview(),
+      postButtonOrder: (value) => postText(entityName("button_order"), value),
+      saveSubpage: (homeSlot) => saveSubpageEntity(homeSlot),
+    },
+  );
   const dateTimeConfigurationOptions = createConfigDateTimeOptionsFeature({
     state: AppInstance.state,
-    now: () => webserverNow(),
+    now: core.now,
     renderButtonSettings: () => renderButtonSettings(),
     effectiveTimezoneOption: (value) => effectiveTimezoneOptionForWeb(value),
     timezoneId: (value) => getTzId(value),
@@ -416,7 +430,7 @@ function composeApplicationContext(): ApplicationContext {
   });
   const accessClimateAlarmOptions = createConfigAccessClimateAlarmOptionsFeature(modalTabOptions);
   const confirmationOptions = createConfigConfirmationOptionsFeature(accessClimateAlarmOptions);
-  const configurationCodec = createConfigCodecFeature(
+  configurationCodec = createConfigCodecFeature(
     cards,
     configurationOptions,
     mediaConfigurationOptions,
@@ -509,7 +523,7 @@ function composeApplicationContext(): ApplicationContext {
   };
   const gridColsForImportedSettings = (importedSettings: any): number => {
     const rotation = importedSettings ? importedSettings.screenRotation : state.screenRotation;
-    const profile = isPortraitRotation(rotation) && layout.config.portrait
+    const profile = core.isPortraitRotation(rotation) && layout.config.portrait
       ? layout.config.portrait
       : layout.config;
     return profile.cols || layout.config.cols;
@@ -605,6 +619,7 @@ function composeApplicationContext(): ApplicationContext {
     model: Model,
     state: AppInstance.state,
     runtime,
+    core,
     api: deviceApi,
     nativeConfiguration: nativePanelConfig,
     configurationPersistence,

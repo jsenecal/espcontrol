@@ -3,7 +3,8 @@ import {
   createApplicationLayoutState,
 } from "../../src/webserver/application/application_context";
 import { createCardRegistry } from "../../src/webserver/application/card_registry";
-import { installCore } from "../../src/webserver/application/core";
+import { createCoreFeature } from "../../src/webserver/application/core";
+import { coreCompatibilityDescriptors } from "../../src/webserver/runtime/core_compatibility";
 import { createConfigWeatherOptionsFeature } from "../../src/webserver/application/config_weather_options";
 import { createConfigWebhookOptionsFeature } from "../../src/webserver/application/config_webhook_options";
 import { createConfigInternalRelayOptionsFeature } from "../../src/webserver/application/config_internal_relay_options";
@@ -70,6 +71,7 @@ export function runApplicationContextTests(): void {
   const voiceServices = {} as any;
   const state = { grid: [] } as any;
   const runtime = {} as any;
+  const core = {} as any;
   const model = {} as any;
   const dom = {} as any;
   const context = createApplicationContext({
@@ -77,6 +79,7 @@ export function runApplicationContextTests(): void {
     model,
     state,
     runtime,
+    core,
     api,
     nativeConfiguration,
     configurationPersistence,
@@ -124,6 +127,7 @@ export function runApplicationContextTests(): void {
   equal(context.layout.gridRows, 3, "context initializes grid rows");
   equal(context.api, api, "context retains the API instance");
   equal(context.runtime, runtime, "context retains mutable UI runtime state");
+  equal(context.core, core, "context retains the typed core service");
   equal(context.configuration.native, nativeConfiguration, "context retains native persistence");
   equal(context.configuration.persistence, configurationPersistence, "context retains save persistence");
   equal(context.configuration.options, configurationOptions, "context retains typed configuration options");
@@ -223,9 +227,17 @@ export function runApplicationContextTests(): void {
   equal(sensor.runtimeSpec != null, true, "registry attaches the generated runtime contract");
 
   const compatibilityGlobals: Record<string, unknown> = {};
-  Object.defineProperties(compatibilityGlobals, installCore(context.layout, {
-    serializeSubpageGrid() { return ""; },
-  } as any, runtime));
+  const testedCore = createCoreFeature(context.layout, () => "", runtime, {
+    state: { grid: [], subpages: {}, sizes: {}, screenRotation: "0" } as any,
+    document: { documentElement: { style: { setProperty() {}, removeProperty() {} } } } as any,
+    clockBarVisibleInPreview: () => false,
+    postButtonOrder() {},
+    saveSubpage() {},
+  });
+  Object.defineProperties(
+    compatibilityGlobals,
+    coreCompatibilityDescriptors(context.layout, testedCore),
+  );
   compatibilityGlobals.GRID_COLS = 6;
   compatibilityGlobals.GRID_ROWS = 2;
   compatibilityGlobals.NUM_SLOTS = 10;

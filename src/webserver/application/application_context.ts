@@ -37,6 +37,7 @@ import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_opt
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { AppTitleFeature } from "./app_title";
+import type { CoreFeature } from "./core";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -65,6 +66,7 @@ export interface ApplicationContext {
   readonly model: typeof import("../model");
   readonly state: AppState;
   readonly runtime: UiRuntimeState;
+  readonly core: CoreFeature;
   readonly layout: ApplicationLayoutState;
   readonly api: DeviceApi;
   readonly configuration: {
@@ -117,6 +119,7 @@ export interface ApplicationContextOptions {
   readonly model: typeof import("../model");
   readonly state: AppState;
   readonly runtime: UiRuntimeState;
+  readonly core: CoreFeature;
   readonly api: DeviceApi;
   readonly nativeConfiguration: NativePanelConfigController;
   readonly configurationPersistence: ConfigPersistenceFeature;
@@ -177,6 +180,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
     model: options.model,
     state: options.state,
     runtime: options.runtime,
+    core: options.core,
     layout: options.layout,
     api: options.api,
     configuration: {

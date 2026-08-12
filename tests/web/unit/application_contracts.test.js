@@ -49,7 +49,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /registry\.register\(/, `${relativePath} should use the typed card registry`);
       assert.doesNotMatch(source, /\bregisterButtonType\s*\(/, `${relativePath} should not read ambient registration state`);
       assert.match(entry, new RegExp(
-        `${registrationFunction}\\(\\s*registry(?:,\\s*(?:context\\.configuration\\.[A-Za-z]+|lightCards))*[,]?\\s*\\)`,
+        `${registrationFunction}\\(\\s*registry(?:,\\s*(?:context\\.(?:configuration\\.[A-Za-z]+|core)|lightCards))*[,]?\\s*\\)`,
       ));
     }
   });
@@ -267,7 +267,9 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/subpage.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerSubpageCardTypes\(registry, context\.configuration\.codec\);/);
+    assert.match(entry, /registerSubpageCardTypes\(registry, context\.configuration\.codec, context\.core\);/);
+    assert.match(card, /core: Pick<CoreFeature, "subpageStateDisplayMode">/);
+    assert.match(card, /const \{ subpageStateDisplayMode \} = core;/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerSubpageCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:SUBPAGE_CARD_METADATA|appendEditSubpageButton|subpageBadgeLabelHtml):/);
   });
@@ -457,7 +459,6 @@ describe("browserless application contracts", () => {
       "src/webserver/application/app_config_events.ts",
       "src/webserver/application/backup_contract.ts",
       "src/webserver/application/app_backup.ts",
-      "src/webserver/application/core.ts",
       "src/webserver/application/grid.ts",
       "src/webserver/application/settings_page.ts",
       "src/webserver/application/settings_page_helpers.ts",
@@ -469,6 +470,12 @@ describe("browserless application contracts", () => {
       assert.match(source, /ConfigCodecFeature/, `${relativePath} should declare its codec dependency`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const core = fs.readFileSync(path.join(ROOT, "src/webserver/application/core.ts"), "utf8");
+    assert.doesNotMatch(core, /ConfigCodecFeature|GlobalDescriptors|staticGlobal|liveGlobal/);
+    assert.doesNotMatch(core, /from "\.\.\/state\/app_instance"|\bpostText\(|\bentityName\(|\bsaveSubpageEntity\(/);
+    assert.match(core, /CoreFeatureDependencies/);
+    assert.match(core, /serializeSubpageGrid: \(subpage: any\) => any/);
+    assert.match(entry, /\(subpage\) => configurationCodec\.serializeSubpageGrid\(subpage\)/);
     assert.match(entry, /configurationPersistence\.connectCodec\(configurationCodec\)/);
     assert.match(entry, /installAppConfigEventsModule\(configPersistence, context\.configuration\.codec\)/);
     assert.doesNotMatch(entry, /configuration\.codec\.globals/);

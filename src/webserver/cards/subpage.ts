@@ -3,6 +3,7 @@ import { setConfigOptionValue } from "../model/config_primitives";
 import { escHtml, iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigCodecFeature } from "../application/config_codec";
+import type { CoreFeature } from "../application/core";
 import { SUBPAGE_KIND_OPTION } from "../application/config_option_core";
 import {
     applySubpagePresetConfig,
@@ -15,8 +16,10 @@ import {
 export function registerSubpageCardTypes(
     registry: CardRegistry,
     codec: ConfigCodecFeature,
+    core: Pick<CoreFeature, "subpageStateDisplayMode">,
 ): void {
     const { enterSubpage } = codec;
+    const { subpageStateDisplayMode } = core;
     // Navigation folder: tap opens a nested grid screen with its own button layout
     var SUBPAGE_CARD_METADATA: any = {
         kind: {
