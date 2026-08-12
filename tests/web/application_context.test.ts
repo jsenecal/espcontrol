@@ -31,6 +31,7 @@ export function runApplicationContextTests(): void {
   const api = { request() {} } as any;
   const nativeConfiguration = { begin() {} } as any;
   const configurationPersistence = { globals: {}, saveButtonConfig() {}, saveSubpageEntity() {} } as any;
+  const configurationOptions = {} as any;
   const backupContract = {} as any;
   const backupExport = {} as any;
   const backupFile = {} as any;
@@ -60,6 +61,7 @@ export function runApplicationContextTests(): void {
     api,
     nativeConfiguration,
     configurationPersistence,
+    configurationOptions,
     backupContract,
     backupExport,
     backupFile,
@@ -91,6 +93,7 @@ export function runApplicationContextTests(): void {
   equal(context.api, api, "context retains the API instance");
   equal(context.configuration.native, nativeConfiguration, "context retains native persistence");
   equal(context.configuration.persistence, configurationPersistence, "context retains save persistence");
+  equal(context.configuration.options, configurationOptions, "context retains typed configuration options");
   equal(context.backup.contract, backupContract, "context retains the backup contract");
   equal(context.backup.export, backupExport, "context retains backup export ownership");
   equal(context.backup.file, backupFile, "context retains backup file ownership");

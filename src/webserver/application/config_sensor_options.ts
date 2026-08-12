@@ -1,6 +1,5 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "./card_registry";
-export function installConfigSensorOptionsModule(cardRegistry: CardRegistry): GlobalDescriptors {
+export function createConfigSensorOptionsFeature(cardRegistry: CardRegistry) {
     // ── Sensor Card Options ────────────────────────────────────────────
     function cardLargeNumbersSupported(this: any, b?: any) {
         if (!b)
@@ -201,36 +200,38 @@ export function installConfigSensorOptionsModule(cardRegistry: CardRegistry): Gl
         return out;
     }
     return {
-        "cardLargeNumbersSupported": staticGlobal(cardLargeNumbersSupported),
-        "cardLargeNumbersEnabled": staticGlobal(cardLargeNumbersEnabled),
-        "sensorLargeNumbersEnabled": staticGlobal(sensorLargeNumbersEnabled),
-        "setSensorLargeNumbersEnabled": staticGlobal(setSensorLargeNumbersEnabled),
-        "normalizeSensorTimeUnit": staticGlobal(normalizeSensorTimeUnit),
-        "sensorTimeUnit": staticGlobal(sensorTimeUnit),
-        "setSensorTimeUnit": staticGlobal(setSensorTimeUnit),
-        "sensorActiveColorEnabled": staticGlobal(sensorActiveColorEnabled),
-        "setSensorActiveColorEnabled": staticGlobal(setSensorActiveColorEnabled),
-        "sensorStateLabelsEnabled": staticGlobal(sensorStateLabelsEnabled),
-        "legacySensorStateInput": staticGlobal(legacySensorStateInput),
-        "legacySensorStateOutput": staticGlobal(legacySensorStateOutput),
-        "sensorStateInput": staticGlobal(sensorStateInput),
-        "sensorStateOutput": staticGlobal(sensorStateOutput),
-        "sensorStateInput2": staticGlobal(sensorStateInput2),
-        "sensorStateOutput2": staticGlobal(sensorStateOutput2),
-        "setSensorStateTranslation": staticGlobal(setSensorStateTranslation),
-        "setSensorStateTranslations": staticGlobal(setSensorStateTranslations),
-        "normalizeSensorOptions": staticGlobal(normalizeSensorOptions),
-        "normalizeDateTimeOptions": staticGlobal(normalizeDateTimeOptions),
-        "normalizeDoorWindowSubtype": staticGlobal(normalizeDoorWindowSubtype),
-        "doorWindowClosedIcon": staticGlobal(doorWindowClosedIcon),
-        "doorWindowOpenIcon": staticGlobal(doorWindowOpenIcon),
-        "doorWindowActiveColorEnabled": staticGlobal(doorWindowActiveColorEnabled),
-        "setDoorWindowActiveColorEnabled": staticGlobal(setDoorWindowActiveColorEnabled),
-        "normalizeDoorWindowOptions": staticGlobal(normalizeDoorWindowOptions),
-        "presenceActiveColorEnabled": staticGlobal(presenceActiveColorEnabled),
-        "setPresenceActiveColorEnabled": staticGlobal(setPresenceActiveColorEnabled),
-        "normalizePresenceOptions": staticGlobal(normalizePresenceOptions),
-        "normalizeTodoCountDisplay": staticGlobal(normalizeTodoCountDisplay),
-        "normalizeTodoOptions": staticGlobal(normalizeTodoOptions),
+        cardLargeNumbersSupported,
+        cardLargeNumbersEnabled,
+        sensorLargeNumbersEnabled,
+        setSensorLargeNumbersEnabled,
+        normalizeSensorTimeUnit,
+        sensorTimeUnit,
+        setSensorTimeUnit,
+        sensorActiveColorEnabled,
+        setSensorActiveColorEnabled,
+        sensorStateLabelsEnabled,
+        legacySensorStateInput,
+        legacySensorStateOutput,
+        sensorStateInput,
+        sensorStateOutput,
+        sensorStateInput2,
+        sensorStateOutput2,
+        setSensorStateTranslation,
+        setSensorStateTranslations,
+        normalizeSensorOptions,
+        normalizeDateTimeOptions,
+        normalizeDoorWindowSubtype,
+        doorWindowClosedIcon,
+        doorWindowOpenIcon,
+        doorWindowActiveColorEnabled,
+        setDoorWindowActiveColorEnabled,
+        normalizeDoorWindowOptions,
+        presenceActiveColorEnabled,
+        setPresenceActiveColorEnabled,
+        normalizePresenceOptions,
+        normalizeTodoCountDisplay,
+        normalizeTodoOptions,
     };
 }
+
+export type ConfigSensorOptionsFeature = ReturnType<typeof createConfigSensorOptionsFeature>;

@@ -22,6 +22,7 @@ import type { AppBackupFeature } from "./app_backup";
 import type { DeviceConfig, AppState } from "../state/types";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { CardRegistry } from "./card_registry";
+import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -54,6 +55,7 @@ export interface ApplicationContext {
   readonly configuration: {
     readonly native: NativePanelConfigController;
     readonly persistence: ConfigPersistenceFeature;
+    readonly options: ConfigSensorOptionsFeature;
   };
   readonly backup: {
     readonly contract: BackupFeature;
@@ -89,6 +91,7 @@ export interface ApplicationContextOptions {
   readonly api: DeviceApi;
   readonly nativeConfiguration: NativePanelConfigController;
   readonly configurationPersistence: ConfigPersistenceFeature;
+  readonly configurationOptions: ConfigSensorOptionsFeature;
   readonly backupContract: BackupFeature;
   readonly backupExport: BackupExportController;
   readonly backupFile: BackupFileController;
@@ -136,6 +139,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
     configuration: {
       native: options.nativeConfiguration,
       persistence: options.configurationPersistence,
+      options: options.configurationOptions,
     },
     backup: {
       contract: options.backupContract,

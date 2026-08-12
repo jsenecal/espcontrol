@@ -2,7 +2,27 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { infoOnlyCardVisible } from "../features/preview";
 import type { CardRegistry } from "../application/card_registry";
-export function installAppTestHooksConfig(cardRegistry: CardRegistry): GlobalDescriptors {
+import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
+export function installAppTestHooksConfig(
+    cardRegistry: CardRegistry,
+    sensorOptions: ConfigSensorOptionsFeature,
+): GlobalDescriptors {
+    const {
+        cardLargeNumbersEnabled,
+        sensorActiveColorEnabled,
+        sensorTimeUnit,
+        setSensorTimeUnit,
+        normalizeSensorOptions,
+        sensorStateLabelsEnabled,
+        sensorStateInput,
+        sensorStateOutput,
+        sensorStateInput2,
+        sensorStateOutput2,
+        setSensorStateTranslation,
+        setSensorStateTranslations,
+        doorWindowActiveColorEnabled,
+        presenceActiveColorEnabled,
+    } = sensorOptions;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("config", {
             parseButtonConfig: parseButtonConfig,

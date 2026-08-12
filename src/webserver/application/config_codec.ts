@@ -25,7 +25,22 @@ import { normalizeSavedConfigWebhook } from "../generated/saved_config_webhook";
 import { normalizeSavedConfigSubpage } from "../generated/saved_config_subpage";
 import { normalizeSavedConfigSwitch } from "../generated/saved_config_switch";
 import type { CardRegistry } from "./card_registry";
-export function installConfigCodecModule(cardRegistry: CardRegistry): GlobalDescriptors {
+import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
+export function installConfigCodecModule(
+    cardRegistry: CardRegistry,
+    sensorOptions: ConfigSensorOptionsFeature,
+): GlobalDescriptors {
+    const {
+        cardLargeNumbersSupported,
+        normalizeDateTimeOptions,
+        normalizeDoorWindowSubtype,
+        doorWindowClosedIcon,
+        doorWindowOpenIcon,
+        normalizeDoorWindowOptions,
+        normalizePresenceOptions,
+        normalizeSensorOptions,
+        normalizeTodoOptions,
+    } = sensorOptions;
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
         if (!b)

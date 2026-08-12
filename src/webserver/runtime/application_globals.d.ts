@@ -339,10 +339,8 @@ declare global {
   var cardIconHtml: any;
   var cardIconSlug: any;
   var cardLargeNumbersActiveForCardSize: any;
-  var cardLargeNumbersEnabled: any;
   var cardLargeNumbersHidePreviewLabel: any;
   var cardLargeNumbersMetadata: any;
-  var cardLargeNumbersSupported: any;
   var cardLargeNumbersSupportsCardSize: any;
   var cardMetadataValue: any;
   var cardOnPattern: any;
@@ -472,9 +470,6 @@ declare global {
   var displayC6FirmwareVersion: any;
   var displayFirmwareVersion: any;
   var displayScreenRotation: any;
-  var doorWindowActiveColorEnabled: any;
-  var doorWindowClosedIcon: any;
-  var doorWindowOpenIcon: any;
   var dragEnterCount: any;
   var dragIsSubpage: any;
   var dragRafPending: any;
@@ -659,8 +654,6 @@ declare global {
   var layoutSection: any;
   var legacyButtonConfigSafe: any;
   var legacyClockBarTemperatureEntities: any;
-  var legacySensorStateInput: any;
-  var legacySensorStateOutput: any;
   var legacySubpageConfigSafe: any;
   var legacySubpageFieldsSafe: any;
   var lightControlDefaultTabs: any;
@@ -750,9 +743,6 @@ declare global {
   var normalizeCoverOptionsForMode: any;
   var normalizeCoverPosition: any;
   var normalizeDateTimeCardMode: any;
-  var normalizeDateTimeOptions: any;
-  var normalizeDoorWindowOptions: any;
-  var normalizeDoorWindowSubtype: any;
   var normalizeEntityMode: any;
   var normalizeEntityModeCardConfig: any;
   var normalizeFanControlOptions: any;
@@ -792,7 +782,6 @@ declare global {
   var normalizeMediaVolumeMax: any;
   var normalizeNetworkTransport: any;
   var normalizeNtpServer: any;
-  var normalizePresenceOptions: any;
   var normalizeScheduleClockBrightness: any;
   var normalizeScheduleDimmedBrightness: any;
   var normalizeScheduleMode: any;
@@ -803,8 +792,6 @@ declare global {
   var normalizeScreenRotation: any;
   var normalizeScreensaverAction: any;
   var normalizeScreensaverDimmedBrightness: any;
-  var normalizeSensorOptions: any;
-  var normalizeSensorTimeUnit: any;
   var normalizeSubpageKind: any;
   var normalizeSubpageOptions: any;
   var normalizeSwitchConfirmationOptions: any;
@@ -812,8 +799,6 @@ declare global {
   var brightnessModeOption: any;
   var normalizeTemperatureUnit: any;
   var normalizeTimeOfDay: any;
-  var normalizeTodoCountDisplay: any;
-  var normalizeTodoOptions: any;
   var normalizeVacuumConfig: any;
   var normalizeVacuumMode: any;
   var normalizeWeatherCardMode: any;
@@ -928,7 +913,6 @@ declare global {
   var postVoiceServices: any;
   var postWithObjectId: any;
   var postWithObjectIds: any;
-  var presenceActiveColorEnabled: any;
   var previewDropIdx: any;
   var previewHtmlValue: any;
   var previewLayoutScale: any;
@@ -1028,16 +1012,8 @@ declare global {
   var previousFirmwareInstallAvailable: any;
   var selectedPreviousFirmwareInfo: any;
   var syncPreviousFirmwareUi: any;
-  var sensorActiveColorEnabled: any;
   var sensorCardIsLocal: any;
-  var sensorLargeNumbersEnabled: any;
-  var sensorTimeUnit: any;
   var sensorLocalPreview: any;
-  var sensorStateInput: any;
-  var sensorStateInput2: any;
-  var sensorStateLabelsEnabled: any;
-  var sensorStateOutput: any;
-  var sensorStateOutput2: any;
   var serializeButtonConfig: any;
   var serializeClockBarTemperatureEntities: any;
   var serializeCompactSubpageConfig: any;
@@ -1068,7 +1044,6 @@ declare global {
   var setConfigOptionValue: any;
   var setCoverControlTabs: any;
   var setDateTimeCardMode: any;
-  var setDoorWindowActiveColorEnabled: any;
   var setFanControlTabs: any;
   var setFanLightEntity: any;
   var setFanControlType: any;
@@ -1094,15 +1069,9 @@ declare global {
   var mediaSpeakerGroupEntity: any;
   var setMediaSpeakerGroupEntity: any;
   var setPostThrottle: any;
-  var setPresenceActiveColorEnabled: any;
   var setPublicFirmwareInfo: any;
   var setPublicFirmwareVersions: any;
   var setSelectValue: any;
-  var setSensorActiveColorEnabled: any;
-  var setSensorLargeNumbersEnabled: any;
-  var setSensorTimeUnit: any;
-  var setSensorStateTranslation: any;
-  var setSensorStateTranslations: any;
   var setSwitchConfirmationOptions: any;
   var setViewportMeta: any;
   var setWebhookHeaders: any;

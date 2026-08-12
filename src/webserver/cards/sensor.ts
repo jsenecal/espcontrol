@@ -2,7 +2,24 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createSensorCardModeController } from "../features/sensor_card_mode_controller";
 import type { CardRegistry } from "../application/card_registry";
-export function registerSensorCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
+export function registerSensorCardTypes(
+    registry: CardRegistry,
+    sensorOptions: ConfigSensorOptionsFeature,
+): GlobalDescriptors {
+    const {
+        normalizeSensorOptions,
+        sensorActiveColorEnabled,
+        sensorTimeUnit,
+        setSensorTimeUnit,
+        setSensorActiveColorEnabled,
+        sensorStateLabelsEnabled,
+        sensorStateInput,
+        sensorStateOutput,
+        sensorStateInput2,
+        sensorStateOutput2,
+        setSensorStateTranslations,
+    } = sensorOptions;
     // Read-only sensor card: displays either numeric data or a text state.
     var SENSOR_CARD_LOCAL_SENSOR: any = "local";
     function sensorCardModeController(this: any) {

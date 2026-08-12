@@ -1,6 +1,15 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "./card_registry";
-export function installControlsFieldsModule(cardRegistry: CardRegistry): GlobalDescriptors {
+import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
+export function installControlsFieldsModule(
+    cardRegistry: CardRegistry,
+    sensorOptions: ConfigSensorOptionsFeature,
+): GlobalDescriptors {
+    const {
+        cardLargeNumbersSupported,
+        cardLargeNumbersEnabled,
+        setSensorLargeNumbersEnabled,
+    } = sensorOptions;
     // ── Settings helpers ───────────────────────────────────────────────────
     function makeCollapsibleCard(this: any, title?: any, bodyElement?: any, defaultCollapsed?: any, badgeElement?: any, actionElement?: any) {
         var card: any = document.createElement("div");

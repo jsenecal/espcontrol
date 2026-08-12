@@ -1,6 +1,15 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
-export function registerPresenceCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
+export function registerPresenceCardTypes(
+    registry: CardRegistry,
+    sensorOptions: ConfigSensorOptionsFeature,
+): GlobalDescriptors {
+    const {
+        presenceActiveColorEnabled,
+        normalizePresenceOptions,
+        setPresenceActiveColorEnabled,
+    } = sensorOptions;
     // Read-only presence card: shows a sensor where Detected is active and Clear is inactive.
     var PRESENCE_CARD_METADATA: any = {
         entity: {

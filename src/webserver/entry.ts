@@ -49,7 +49,7 @@ import { installConfigMediaOptionsModule } from "./application/config_media_opti
 import { installConfigImageOptionsModule } from "./application/config_image_options";
 import { installConfigModalTabOptionsModule } from "./application/config_modal_tab_options";
 import { installConfigSubpageOptionsModule } from "./application/config_subpage_options";
-import { installConfigSensorOptionsModule } from "./application/config_sensor_options";
+import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
 import { installConfigConfirmationOptionsModule } from "./application/config_confirmation_options";
 import { installConfigAccessClimateAlarmOptionsModule } from "./application/config_access_climate_alarm_options";
 import { installConfigCodecModule } from "./application/config_codec";
@@ -186,10 +186,9 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installConfigImageOptionsModule());
   installGlobals(installConfigModalTabOptionsModule());
   installGlobals(installConfigSubpageOptionsModule());
-  installGlobals(installConfigSensorOptionsModule(context.cards));
   installGlobals(installConfigConfirmationOptionsModule());
   installGlobals(installConfigAccessClimateAlarmOptionsModule());
-  installGlobals(installConfigCodecModule(context.cards));
+  installGlobals(installConfigCodecModule(context.cards, context.configuration.options));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
   installGlobals(installStateLoaderApiModule());
@@ -213,7 +212,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsScheduleSectionModule());
   installGlobals(installSettingsCoverArtSectionModule());
   installGlobals(installSettingsPageModule());
-  installGlobals(installControlsFieldsModule(context.cards));
+  installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
     layout: context.layout,
@@ -276,7 +275,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerClimateCardTypes(registry));
   registry.registerCompatibility(registerClockCardTypes(registry));
   registry.registerCompatibility(coverLikeCards.descriptors);
-  registry.registerCompatibility(registerDoorWindowCardTypes(registry));
+  registry.registerCompatibility(registerDoorWindowCardTypes(registry, context.configuration.options));
   registry.registerCompatibility(registerEntityModeCardHelpers());
   registry.registerCompatibility(registerFanCardTypes(registry));
   registry.registerCompatibility(registerGarageCardTypes(coverLikeCards.register));
@@ -287,10 +286,10 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerLightTemperatureCardTypes(registry));
   registry.registerCompatibility(registerLockCardTypes(registry));
   registry.registerCompatibility(registerMediaCardTypes(registry));
-  registry.registerCompatibility(registerPresenceCardTypes(registry));
+  registry.registerCompatibility(registerPresenceCardTypes(registry, context.configuration.options));
   registry.registerCompatibility(registerPushCardTypes(registry));
   registry.registerCompatibility(registerScreenLockCardTypes(registry));
-  registry.registerCompatibility(registerSensorCardTypes(registry));
+  registry.registerCompatibility(registerSensorCardTypes(registry, context.configuration.options));
   registry.registerCompatibility(registerSliderCardTypes(registry));
   registry.registerCompatibility(registerSubpageCardTypes(registry));
   registry.registerCompatibility(registerSwitchCardTypes(registry));
@@ -303,7 +302,7 @@ function installCardCompatibility(context: ApplicationContext): void {
 
 function installTestCompatibility(context: ApplicationContext): void {
   installGlobals(installAppTestHooks());
-  installGlobals(installAppTestHooksConfig(context.cards));
+  installGlobals(installAppTestHooksConfig(context.cards, context.configuration.options));
   installGlobals(installAppTestHooksPreview(context.cards));
   installGlobals(installAppTestHooksBackup());
   installGlobals(installAppTestHooksSettings());
@@ -336,6 +335,8 @@ function composeApplicationContext(): ApplicationContext {
     delay: (callback, milliseconds) => dom.schedule(callback, milliseconds),
   });
   const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig);
+  const cards = createCardRegistry(installGlobals);
+  const configurationOptions = createConfigSensorOptionsFeature(cards);
   const cardEditorDraft = createCardEditorDraftController({
     cloneCard: (button) => Model.cloneCardConfig(button),
     emptyCard: () => Model.emptyCardConfig(),
@@ -510,6 +511,7 @@ function composeApplicationContext(): ApplicationContext {
     api: deviceApi,
     nativeConfiguration: nativePanelConfig,
     configurationPersistence,
+    configurationOptions,
     backupContract,
     backupExport,
     backupFile,
@@ -530,7 +532,7 @@ function composeApplicationContext(): ApplicationContext {
     settingsUi,
     voiceServices,
     dom,
-    cards: createCardRegistry(installGlobals),
+    cards,
   });
 }
 
