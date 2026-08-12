@@ -34,6 +34,11 @@ esp32:
       disable_vfs_support_dir: false
     sdkconfig_options:
       CONFIG_SDMMC_HOST_DEFAULT: "y"
+      # ESPHome's default API pool permits five native clients, while its
+      # automatic socket estimate reserves the typical three.  This panel can
+      # have the browser event stream and Home Assistant reconnect at once;
+      # reserve the two additional sockets so HA is not refused mid-session.
+      CONFIG_LWIP_MAX_SOCKETS: "16"
       # HTTPS firmware checks need more stack on ESP32-P4; the default main
       # task stack can trip the stack protector during mbedTLS setup.
       CONFIG_ESP_MAIN_TASK_STACK_SIZE: "8192"
