@@ -1,4 +1,13 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import {
+    cardContractAllowInSubpage,
+    cardContractCard,
+    cardContractCardLabel,
+    cardContractDefaultConfig,
+    cardContractDomains,
+    cardContractHidden,
+    cardContractPickerKey,
+} from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
 export function registerScreenLockCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Local display card: toggles screen lock on the device without Home Assistant.

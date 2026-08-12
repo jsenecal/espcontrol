@@ -1,5 +1,14 @@
 import { state } from "../state/app_instance";
 import {
+    cardContractDefaultConfig,
+    cardContractFanDefaultIcon,
+    cardContractIsBrightnessSliderType,
+    cardContractIsFanCardType,
+    cardContractIsOptionSelectType,
+    cardContractSubpageTypeCode,
+    cardContractSubpageTypeFromCode,
+} from "../generated/card_contract";
+import {
     migrateSavedConfigVacuumLegacy,
     normalizeSavedConfigVacuumIconOn,
     normalizeSavedConfigVacuumOptions,

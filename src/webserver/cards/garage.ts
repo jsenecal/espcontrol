@@ -1,4 +1,5 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { cardContractDomains } from "../generated/card_contract";
 import type { CoverLikeCardRegistration } from "./cover_like_card";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";

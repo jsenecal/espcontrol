@@ -1,4 +1,13 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import {
+    cardContractAllowInSubpage,
+    cardContractCard,
+    cardContractCardLabel,
+    cardContractDefaultConfig,
+    cardContractDomains,
+    cardContractHidden,
+    cardContractPickerKey,
+} from "../generated/card_contract";
 import { iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 export function registerLawnMowerCardTypes(registry: CardRegistry): GlobalDescriptors {

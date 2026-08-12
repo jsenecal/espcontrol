@@ -467,6 +467,22 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:AUTO_TIMEZONE_OPTION|FALLBACK_TIMEZONE_OPTION|NTP_SERVER_DEFAULTS|LANGUAGE_LABELS|defaultTimezoneOptionsForDevice|createInitialState):/);
   });
 
+  test("imports generated card contracts directly", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const roots = ["application", "cards", "testing"];
+    for (const directory of roots) {
+      const root = path.join(ROOT, "src/webserver", directory);
+      for (const name of fs.readdirSync(root).filter((file) => file.endsWith(".ts"))) {
+        const source = fs.readFileSync(path.join(root, name), "utf8");
+        if (!/\b(?:cardContract[A-Z]|CARD_RUNTIME_SPECS)\b/.test(source)) continue;
+        assert.match(source, /from "\.\.\/generated\/card_contract"/, `${directory}/${name} should import its generated card contract`);
+      }
+    }
+    assert.doesNotMatch(entry, /\bCardContract\b/);
+    assert.doesNotMatch(globals, /\bvar (?:CARD_CONFIG_FIELDS|CARD_CONTRACT_[A-Z_]+|cardContract[A-Z][A-Za-z]+):/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

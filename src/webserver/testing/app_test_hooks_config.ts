@@ -1,4 +1,18 @@
 import { state } from "../state/app_instance";
+import {
+    cardContractAllowInSubpage,
+    cardContractCardKeys,
+    cardContractCardLabel,
+    cardContractDefaultConfig,
+    cardContractDomains,
+    cardContractHidden,
+    cardContractLargeNumbersSupported,
+    cardContractMigrationAlias,
+    cardContractOptions,
+    cardContractPickerKey,
+    cardContractSubpageTypeCode,
+    cardContractSubpageTypeFromCode,
+} from "../generated/card_contract";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { infoOnlyCardVisible } from "../features/preview";
 import type { CardRegistry } from "../application/card_registry";

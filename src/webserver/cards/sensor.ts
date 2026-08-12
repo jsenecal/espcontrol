@@ -1,4 +1,13 @@
 import { state } from "../state/app_instance";
+import {
+    cardContractAllowInSubpage,
+    cardContractCard,
+    cardContractCardLabel,
+    cardContractDefaultConfig,
+    cardContractDomains,
+    cardContractHidden,
+    cardContractPickerKey,
+} from "../generated/card_contract";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { escHtml, iconSlug } from "../application/ui_primitives";
 import { createSensorCardModeController } from "../features/sensor_card_mode_controller";

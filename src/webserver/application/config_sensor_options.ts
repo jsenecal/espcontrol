@@ -1,4 +1,5 @@
 import type { CardRegistry } from "./card_registry";
+import { cardContractLargeNumbersSupported } from "../generated/card_contract";
 import {
     SENSOR_ACTIVE_COLOR_OPTION,
     SENSOR_LARGE_NUMBERS_OFF_VALUE,

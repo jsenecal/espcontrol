@@ -5,7 +5,6 @@ import { NTP_SERVER_DEFAULTS, defaultTimezoneOptionsForDevice } from "./state/ap
 import * as AppInstance from "./state/app_instance";
 import { state } from "./state/app_instance";
 import * as ConfigPrimitives from "./model/config_primitives";
-import * as CardContract from "./generated/card_contract";
 import { textSpan } from "./application/ui_primitives";
 import { ENTITY_CATALOG } from "./generated/entity_catalog";
 import { installGlobals, installStaticGlobals } from "./runtime/globals";
@@ -613,7 +612,6 @@ function startEspControl(): void {
     EspControlModel: Model,
     ...Model,
     ...ConfigPrimitives,
-    ...CardContract,
     ENTITY_CATALOG,
     defaultTimezoneOptions: () =>
       defaultTimezoneOptionsForDevice(DeviceConfig.deviceConfig),
