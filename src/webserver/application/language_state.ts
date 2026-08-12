@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { LANGUAGE_LABELS } from "../state/app_state";
 import { uniqueOptions } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";

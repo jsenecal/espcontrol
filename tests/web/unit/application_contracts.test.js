@@ -448,6 +448,25 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:SSE_ALIAS_GROUPS|requestFailureInfo|applySseHandlerAliases|entityStateKeys|applyClockBarStateValue|isRemovedLegacyStateEvent|resetStateForConnection|parseEntityEventData|isFirmwareVersionEvent|isFirmwareUpdateEvent|isFirmwareCheckButtonEvent|isFirmwareInstallButtonEvent|isC6FirmwareCurrentEvent|isC6FirmwareLatestEvent|isC6FirmwareUpdateAvailableEvent|isC6FirmwareAutoUpdateEvent|isC6FirmwareCheckButtonEvent|isC6FirmwareInstallButtonEvent):/);
   });
 
+  test("imports initial application-state contracts directly", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const consumers = [
+      "application/app_state_event_handlers.ts",
+      "application/environment_state.ts",
+      "application/language_state.ts",
+      "application/ntp_state.ts",
+      "application/settings_page.ts",
+    ];
+    for (const consumer of consumers) {
+      const source = fs.readFileSync(path.join(ROOT, "src/webserver", consumer), "utf8");
+      assert.match(source, /from "\.\.\/state\/app_state"/, `${consumer} should import application-state contracts`);
+    }
+    assert.match(entry, /import \{ NTP_SERVER_DEFAULTS, defaultTimezoneOptionsForDevice \} from "\.\/state\/app_state"/);
+    assert.doesNotMatch(entry, /\bAppState\b/);
+    assert.doesNotMatch(globals, /\bvar (?:AUTO_TIMEZONE_OPTION|FALLBACK_TIMEZONE_OPTION|NTP_SERVER_DEFAULTS|LANGUAGE_LABELS|defaultTimezoneOptionsForDevice|createInitialState):/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

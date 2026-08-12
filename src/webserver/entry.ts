@@ -1,7 +1,7 @@
 import * as DeviceConfig from "./device_config";
 import * as Model from "./model";
 import { createDeviceApi } from "./api/device_api";
-import * as AppState from "./state/app_state";
+import { NTP_SERVER_DEFAULTS, defaultTimezoneOptionsForDevice } from "./state/app_state";
 import * as AppInstance from "./state/app_instance";
 import { state } from "./state/app_instance";
 import * as ConfigPrimitives from "./model/config_primitives";
@@ -612,12 +612,11 @@ function startEspControl(): void {
     ...DeviceConfig,
     EspControlModel: Model,
     ...Model,
-    ...AppState,
     ...ConfigPrimitives,
     ...CardContract,
     ENTITY_CATALOG,
     defaultTimezoneOptions: () =>
-      AppState.defaultTimezoneOptionsForDevice(DeviceConfig.deviceConfig),
+      defaultTimezoneOptionsForDevice(DeviceConfig.deviceConfig),
   });
 
   const context = composeApplicationContext();

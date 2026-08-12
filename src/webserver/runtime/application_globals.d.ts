@@ -8,7 +8,6 @@ declare global {
   var ALARM_CARD_METADATA: any;
   var ALARM_CONTROL_PANEL_VALUE: any;
   var AUTOMATIC_BRIGHTNESS_UNAVAILABLE: any;
-  var AUTO_TIMEZONE_OPTION: any;
   var BACKUP_CONFIG_VERSION: any;
   var BACKUP_FORMAT: any;
   var BRIGHTNESS_TIME_UNAVAILABLE: any;
@@ -49,7 +48,6 @@ declare global {
   var DOOR_WINDOW_CARD_METADATA: any;
   var ENTITY_CATALOG: any;
   var EspControlModel: any;
-  var FALLBACK_TIMEZONE_OPTION: any;
   var FAN_CARD_METADATA: any;
   var FAN_CONTROL_TYPE_OPTIONS: any;
   var FAVICON_SVG: any;
@@ -65,7 +63,6 @@ declare global {
   var GRID_ROWS: any;
   var IMAGE_CARD_METADATA: any;
   var INTERNAL_CARD_METADATA: any;
-  var LANGUAGE_LABELS: any;
   var LAWN_MOWER_CARD_METADATA: any;
   var LAWN_MOWER_CARD_MODES: any;
   var LIGHT_CONTROL_TYPE_METADATA: any;
@@ -78,7 +75,6 @@ declare global {
   var MEDIA_CARD_METADATA: any;
   var MEDIA_PLAYLIST_SOURCE_DEFINITIONS: any;
   var NETWORK_STATUS_ICON_UNAVAILABLE: any;
-  var NTP_SERVER_DEFAULTS: any;
   var NUM_SLOTS: any;
   var PRESENCE_CARD_METADATA: any;
   var PUSH_CARD_METADATA: any;
@@ -283,7 +279,6 @@ declare global {
   var createDisclosureChevron: any;
   var createEntityToggleSection: any;
   var createHourSelect: any;
-  var createInitialState: any;
   var createMdiIcon: any;
   var createPanelConfigBackupPayload: any;
   var createRangeSlider: any;
@@ -319,7 +314,6 @@ declare global {
   var defaultTimezoneCardEntity: any;
   var defaultTimezoneOptions: any;
   var downloadBackupConfig: any;
-  var defaultTimezoneOptionsForDevice: any;
   var deleteButtons: any;
   var deleteSlot: any;
   var deviceConfig: any;
