@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { normalizeHomeAssistantArtworkPort, normalizeHomeAssistantArtworkProtocol } from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 import {

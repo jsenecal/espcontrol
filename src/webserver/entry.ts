@@ -5,7 +5,7 @@ import { NTP_SERVER_DEFAULTS, defaultTimezoneOptionsForDevice } from "./state/ap
 import * as AppInstance from "./state/app_instance";
 import { state } from "./state/app_instance";
 import { textSpan } from "./application/ui_primitives";
-import { installGlobals, installStaticGlobals } from "./runtime/globals";
+import { installGlobals } from "./runtime/globals";
 import { installCore } from "./application/core";
 import {
   createApplicationContext,
@@ -212,6 +212,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.configuration.imageOptions,
     context.configuration.confirmationOptions,
     context.configuration.codec,
+    context.layout,
     context.runtime,
   ));
   installGlobals(installPreviewGridPlacementModule({
@@ -413,14 +414,14 @@ function composeApplicationContext(): ApplicationContext {
   const previewPlacement = createPreviewPlacementController();
   const voiceServices = createVoiceServicesController();
   const screenSchedule = createScreenScheduleController({
-    trigger: (value, enabled) => normalizeScheduleTrigger(value, enabled),
-    sensorActivation: (value) => normalizeScheduleSensorActivation(value),
-    hour: (value, fallback) => normalizeHour(value, fallback),
-    mode: (value) => normalizeScheduleMode(value),
-    wakeTimeout: (value) => normalizeScheduleWakeTimeout(value),
-    wakeBrightness: (value) => normalizeScheduleWakeBrightness(value),
-    dimmedBrightness: (value) => normalizeScheduleDimmedBrightness(value),
-    clockBrightness: (value) => normalizeScheduleClockBrightness(value),
+    trigger: (value, enabled) => Model.normalizeScheduleTrigger(value, enabled),
+    sensorActivation: (value) => Model.normalizeScheduleSensorActivation(value),
+    hour: (value, fallback) => Model.normalizeHour(value, fallback),
+    mode: (value) => Model.normalizeScheduleMode(value),
+    wakeTimeout: (value) => Model.normalizeScheduleWakeTimeout(value),
+    wakeBrightness: (value) => Model.normalizeScheduleWakeBrightness(value),
+    dimmedBrightness: (value) => Model.normalizeScheduleDimmedBrightness(value),
+    clockBrightness: (value) => Model.normalizeScheduleClockBrightness(value),
   });
   const clockBar = createClockBarController();
   const settingsUi = createSettingsUiFeature({
@@ -429,17 +430,17 @@ function composeApplicationContext(): ApplicationContext {
     createDisclosureChevron: (className) => createDisclosureChevron(className),
   });
   const alarmDelayAudio = createAlarmDelayAudioController({
-    announcement: (value, fallback) => normalizeAlarmDelayAnnouncement(value, fallback),
-    beepVolume: (value) => normalizeAlarmDelayBeepVolume(value),
-    finalCountdown: (value) => normalizeAlarmDelayFinalCountdown(value),
+    announcement: (value, fallback) => Model.normalizeAlarmDelayAnnouncement(value, fallback),
+    beepVolume: (value) => Model.normalizeAlarmDelayBeepVolume(value),
+    finalCountdown: (value) => Model.normalizeAlarmDelayFinalCountdown(value),
   });
   const screensaver = createScreensaverController({
-    action: (value) => normalizeScreensaverAction(value),
-    dimBrightness: (value) => normalizeScreensaverDimmedBrightness(value),
-    clockBrightness: (value, fallback) => normalizeClockBrightness(value, fallback),
+    action: (value) => Model.normalizeScreensaverAction(value),
+    dimBrightness: (value) => Model.normalizeScreensaverDimmedBrightness(value),
+    clockBrightness: (value, fallback) => Model.normalizeClockBrightness(value, fallback),
   });
   const coverArtScreensaver = createCoverArtScreensaverController({
-    delay: (value) => normalizeCoverArtDelay(value),
+    delay: (value) => Model.normalizeCoverArtDelay(value),
     trackOverlayDuration: (value) => parseFloat(String(value)) || 0,
   });
   const mediaPlayback = createMediaPlaybackController();
@@ -610,9 +611,6 @@ function composeApplicationContext(): ApplicationContext {
 function startEspControl(): void {
   if (startupState.__ESPCONTROL_UI_STARTED__ || startupState.__ESPCONTROL_UI_STARTING__) return;
   AppInstance.initializeAppState();
-  installStaticGlobals({
-    ...Model,
-  });
 
   const context = composeApplicationContext();
 

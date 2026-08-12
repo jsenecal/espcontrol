@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import { NTP_SERVER_DEFAULTS } from "../state/app_state";
+import { normalizeNtpServer } from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 export function installNtpStateModule(runtime: UiRuntimeState): GlobalDescriptors {

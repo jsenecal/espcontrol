@@ -1,5 +1,24 @@
 import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
+import {
+    normalizeBrightnessMode,
+    normalizeHexColor,
+    normalizeHomeAssistantArtworkPort,
+    normalizeHomeAssistantArtworkProtocol,
+    normalizeHour,
+    normalizeLanguage,
+    normalizeScheduleClockBrightness,
+    normalizeScheduleDimmedBrightness,
+    normalizeScheduleMode,
+    normalizeScheduleSensorActivation,
+    normalizeScheduleTrigger,
+    normalizeScheduleWakeBrightness,
+    normalizeScheduleWakeTimeout,
+    normalizeScreensaverAction,
+    normalizeScreensaverDimmedBrightness,
+    normalizeTemperatureUnit,
+    normalizeTimeOfDay,
+} from "../model/settings";
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { BackupImportController } from "../features/backup_import_controller";
 import type { BackupExportController } from "../features/backup_export_controller";

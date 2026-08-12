@@ -1,6 +1,12 @@
 import { state } from "../state/app_instance";
 import { NTP_SERVER_DEFAULTS } from "../state/app_state";
 import { WEB_UI_COLORS } from "../state/ui_tokens";
+import {
+    normalizeBrightnessMode,
+    normalizeLanguage,
+    normalizeTemperatureUnit,
+    normalizeTimeOfDay,
+} from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";

@@ -1,4 +1,11 @@
 import { state } from "../state/app_instance";
+import {
+    brightnessModeOption,
+    normalizeScheduleTrigger,
+    normalizeTimeOfDay,
+    scheduleModeOption,
+    scheduleSensorActivationOption,
+} from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 export function installScreenSchedulePostApiModule(): GlobalDescriptors {
     // ── Screen Schedule Post API ──────────────────────────────────────────

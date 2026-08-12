@@ -1,4 +1,17 @@
 import { state } from "../state/app_instance";
+import {
+    CARD_SIZE_EXTRA_LARGE,
+    CARD_SIZE_EXTRA_TALL,
+    CARD_SIZE_EXTRA_WIDE,
+    CARD_SIZE_LANDSCAPE_LARGE,
+    CARD_SIZE_LARGE,
+    CARD_SIZE_MAX_TALL,
+    CARD_SIZE_MAX_WIDE,
+    CARD_SIZE_PORTRAIT_LARGE,
+    CARD_SIZE_SINGLE,
+    CARD_SIZE_TALL,
+    CARD_SIZE_WIDE,
+} from "../model/grid";
 import { mdiIcon } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { clampMenuPosition } from "../features/preview";

@@ -1,4 +1,12 @@
 import { state } from "../state/app_instance";
+import {
+    normalizeBrightnessMode,
+    normalizeHour,
+    normalizeScheduleWakeTimeout,
+    normalizeTimeOfDay,
+    scheduleModeOption,
+    scheduleSensorActivationOption,
+} from "../model/settings";
 import { setSelectValue } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ScreenScheduleController } from "../features/screen_schedule_controller";

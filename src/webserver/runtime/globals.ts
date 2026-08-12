@@ -11,14 +11,3 @@ export function staticGlobal(value: unknown): PropertyDescriptor {
 export function installGlobals(descriptors: GlobalDescriptors): void {
   Object.defineProperties(globalThis, descriptors);
 }
-
-export function installStaticGlobals(values: Record<string, unknown>): void {
-  for (const [name, value] of Object.entries(values)) {
-    Object.defineProperty(globalThis, name, {
-      configurable: true,
-      enumerable: false,
-      writable: true,
-      value,
-    });
-  }
-}

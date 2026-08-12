@@ -1,6 +1,33 @@
 import { state } from "../state/app_instance";
 import { FALLBACK_TIMEZONE_OPTION, NTP_SERVER_DEFAULTS } from "../state/app_state";
 import { applyClockBarStateValue } from "../state/event_state";
+import {
+    DEFAULT_ALARM_DELAY_ENTRY_ANNOUNCEMENT,
+    DEFAULT_ALARM_DELAY_EXIT_ANNOUNCEMENT,
+    normalizeAlarmDelayAnnouncement,
+    normalizeAlarmDelayBeepVolume,
+    normalizeAlarmDelayFinalCountdown,
+    normalizeBrightnessMode,
+    normalizeClockBrightness,
+    normalizeCoverArtDelay,
+    normalizeHexColor,
+    normalizeHomeAssistantArtworkPort,
+    normalizeHomeAssistantArtworkProtocol,
+    normalizeHour,
+    normalizeLanguage,
+    normalizeNtpServer,
+    normalizeScheduleClockBrightness,
+    normalizeScheduleDimmedBrightness,
+    normalizeScheduleMode,
+    normalizeScheduleSensorActivation,
+    normalizeScheduleTrigger,
+    normalizeScheduleWakeBrightness,
+    normalizeScheduleWakeTimeout,
+    normalizeScreensaverAction,
+    normalizeScreensaverDimmedBrightness,
+    normalizeTemperatureUnit,
+    normalizeTimeOfDay,
+} from "../model/settings";
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 

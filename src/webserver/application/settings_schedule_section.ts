@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { normalizeHexColor } from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";

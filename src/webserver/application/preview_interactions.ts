@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
+import { coveredCells } from "../model/grid";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardEditorDraftController } from "../features/card_editor_draft_controller";
 import type { ConfigPersistenceFeature } from "./config_post_api";
@@ -542,7 +543,7 @@ export function installPreviewInteractionsModule(
         for (var i: any = 0; i < c.maxSlots; i++) {
             if (c.grid[i] === slot) {
                 c.grid[i] = 0;
-                var cells: any = coveredCells(i, c.sizes[slot] || 1, c.maxSlots, false);
+                var cells: any = coveredCells(i, c.sizes[slot] || 1, c.maxSlots, dependencies.layout.gridCols, false);
                 for (var ci: any = 0; ci < cells.length; ci++) {
                     if (c.grid[cells[ci]] === -1)
                         c.grid[cells[ci]] = 0;
@@ -579,7 +580,7 @@ export function installPreviewInteractionsModule(
         var c: any = ctx();
         for (var i: any = 0; i < c.maxSlots; i++) {
             if (slots.indexOf(c.grid[i]) !== -1) {
-                var cells: any = coveredCells(i, c.sizes[c.grid[i]] || 1, c.maxSlots, false);
+                var cells: any = coveredCells(i, c.sizes[c.grid[i]] || 1, c.maxSlots, dependencies.layout.gridCols, false);
                 for (var ci: any = 0; ci < cells.length; ci++) {
                     if (c.grid[cells[ci]] === -1)
                         c.grid[cells[ci]] = 0;

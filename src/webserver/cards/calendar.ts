@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { CARD_SIZE_LARGE, CARD_SIZE_SINGLE, CARD_SIZE_WIDE } from "../model/grid";
 import {
     cardContractAllowInSubpage,
     cardContractCard,

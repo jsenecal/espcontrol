@@ -541,6 +541,22 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:ENTITY_CATALOG|defaultTimezoneOptions):/);
   });
 
+  test("removes the static Product Model bootstrap", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const runtime = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/globals.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const model = fs.readFileSync(path.join(ROOT, "src/webserver/model/index.ts"), "utf8");
+    const exportedValues = [...model.matchAll(/export \{([\s\S]*?)\} from/g)]
+      .flatMap((match) => match[1].split(","))
+      .map((name) => name.trim())
+      .filter((name) => /^[A-Za-z_$][\w$]*$/.test(name));
+    assert.doesNotMatch(entry, /installStaticGlobals|\.\.\.Model/);
+    assert.doesNotMatch(runtime, /function installStaticGlobals/);
+    for (const name of exportedValues) {
+      assert.doesNotMatch(globals, new RegExp(`\\bvar ${name}:`), `${name} should not be ambient`);
+    }
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

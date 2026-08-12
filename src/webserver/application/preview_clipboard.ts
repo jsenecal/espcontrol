@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
+import { sizeFromToken } from "../model/grid";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createClipboardEntry } from "../features/clipboard";
 import type { ConfigPersistenceFeature } from "./config_post_api";

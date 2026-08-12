@@ -1,5 +1,13 @@
 import { state } from "../state/app_instance";
 import {
+    normalizeCoverArtDelay,
+    normalizeHomeAssistantArtworkPort,
+    normalizeScreensaverAction,
+    normalizeScreensaverDimmedBrightness,
+    normalizeTemperatureUnit,
+    screensaverActionOption,
+} from "../model/settings";
+import {
     firmwareInfoFromPublicManifest,
     firmwareInfosFromPublicVersions,
     firmwareVersionFromMetadata,

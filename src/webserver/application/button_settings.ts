@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
+import { applySpans, CARD_SIZE_SINGLE, clearSpans } from "../model/grid";
 import { iconSlug, mdiIcon, textSpan } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardEditorDraftController } from "../features/card_editor_draft_controller";
@@ -10,6 +11,7 @@ import type { CardRegistry } from "./card_registry";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
 import type { ConfigCodecFeature } from "./config_codec";
+import type { ApplicationLayoutState } from "./application_context";
 import type { UiRuntimeState } from "./state";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
@@ -20,6 +22,7 @@ export function installButtonSettingsModule(
     imageOptions: ConfigImageOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
     codec: ConfigCodecFeature,
+    layout: ApplicationLayoutState,
     runtime: UiRuntimeState,
 ): GlobalDescriptors {
     const els = runtime.els;
@@ -278,7 +281,7 @@ export function installButtonSettingsModule(
             else
                 c.sizes[slot] = nextSize;
             clearSpans(c.grid, c.maxSlots);
-            applySpans(c.grid, c.sizes, c.maxSlots);
+            applySpans(c.grid, c.sizes, c.maxSlots, layout.gridCols);
             return true;
         }
         function applySettingsDraft(this: any) {

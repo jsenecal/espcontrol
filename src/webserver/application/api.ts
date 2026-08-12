@@ -3,6 +3,7 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
 import type { DeviceApi } from "../api/device_api";
 import { requestFailureInfo } from "../api/request_failure";
+import { screensaverActionOption } from "../model/settings";
 
 export function installApiModule(
     nativePanelConfig: NativePanelConfigController,

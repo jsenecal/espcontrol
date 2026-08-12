@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { BACKUP_CONFIG_VERSION, BACKUP_FORMAT } from "../model/backup";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 export function installAppTestHooksBackup(): GlobalDescriptors {
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {

@@ -1,4 +1,5 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { normalizeCoverArtDelay, normalizeHomeAssistantArtworkProtocol } from "../model/settings";
 export function installArtworkPostApiModule(): GlobalDescriptors {
     // ── Artwork Post API ──────────────────────────────────────────────────
     function postPresenceSensorEntity(this: any, value?: any) {

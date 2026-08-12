@@ -1,4 +1,5 @@
 import { NativePanelConfigController } from "../controllers/native_panel_config_controller";
+import { normalizeHexColor } from "../model/settings";
 import type { NativePanelConfigFetch, NativePanelConfigRequest, NativePanelConfigResponse } from "../features/native_panel_config";
 import type { NativePanelConfigControllerDependencies } from "../controllers/native_panel_config_controller";
 

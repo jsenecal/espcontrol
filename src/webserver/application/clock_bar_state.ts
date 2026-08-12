@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { normalizeTemperatureUnit } from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ClockBarController } from "../features/clock_bar_controller";
 import type { UiRuntimeState } from "./state";
