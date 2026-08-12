@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -9,7 +8,7 @@ import {
     cardContractPickerKey,
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
-export function registerClockCardTypes(registry: CardRegistry): GlobalDescriptors {
+export function registerClockCardTypes(registry: CardRegistry): void {
     // Read-only local clock card: displays the panel's local time only.
     registry.register("clock", {
         label: function (this: any) { return cardContractCardLabel("clock"); },
@@ -48,5 +47,4 @@ export function registerClockCardTypes(registry: CardRegistry): GlobalDescriptor
             };
         },
     });
-    return {};
 }

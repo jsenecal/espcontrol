@@ -8,9 +8,8 @@ import {
     cardContractHidden,
     cardContractPickerKey,
 } from "../generated/card_contract";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
-export function registerTimezoneCardTypes(registry: CardRegistry): GlobalDescriptors {
+export function registerTimezoneCardTypes(registry: CardRegistry): void {
     // Read-only world clock card: displays local time for a selected city.
     function timezoneCardCityLabel(this: any, tzOption?: any) {
         var tzId: any = getTzId(effectiveTimezoneOptionForWeb(tzOption || ""));
@@ -106,8 +105,4 @@ export function registerTimezoneCardTypes(registry: CardRegistry): GlobalDescrip
             };
         },
     });
-    return {
-        "timezoneCardCityLabel": staticGlobal(timezoneCardCityLabel),
-        "timezoneCardTimeParts": staticGlobal(timezoneCardTimeParts),
-    };
 }

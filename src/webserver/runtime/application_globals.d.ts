@@ -47,10 +47,8 @@ declare global {
   var NETWORK_STATUS_ICON_UNAVAILABLE: any;
   var NUM_SLOTS: any;
   var PRESENCE_CARD_METADATA: any;
-  var PUSH_CARD_METADATA: any;
   var SCREENSAVER_ACTION_UNAVAILABLE: any;
   var SCREENSAVER_TIMEOUT_OPTIONS: any;
-  var SCREEN_LOCK_CARD_METADATA: any;
   var SCREEN_ROTATION_STARTUP_FALLBACK_MS: any;
   var SCREEN_SCHEDULE_CLOCK_BRIGHTNESS_UNAVAILABLE: any;
   var SCREEN_SCHEDULE_DIMMED_BRIGHTNESS_UNAVAILABLE: any;
@@ -532,9 +530,6 @@ declare global {
   var publicFirmwareInstallAvailable: any;
   var publicFirmwareOtaFilename: any;
   var publicFirmwareReleaseKnown: any;
-  var pushActionSpec: any;
-  var pushDefaultIcon: any;
-  var pushDefaultIconOn: any;
   var readNumberMeta: any;
   var refreshEntityDatalist: any;
   var refreshFirmwareVersion: any;
@@ -688,8 +683,6 @@ declare global {
   var syncTemperatureUi: any;
   var temperatureUnitSymbol: any;
   var textInput: any;
-  var timezoneCardCityLabel: any;
-  var timezoneCardTimeParts: any;
   var timezoneOffsetMinutes: any;
   var timezoneOptionsWithFallback: any;
   var timezonePrefersFahrenheit: any;

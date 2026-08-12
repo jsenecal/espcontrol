@@ -26,6 +26,7 @@ import type { ConfigConfirmationOptionsFeature } from "../application/config_con
 import type { ConfigCodecFeature } from "../application/config_codec";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
+import { pushDefaultIcon, pushDefaultIconOn } from "../cards/push";
 import {
     coverModeOptionValues,
     coverModeOptionsForSettings,

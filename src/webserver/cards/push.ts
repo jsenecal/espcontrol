@@ -8,32 +8,36 @@ import {
     cardContractHidden,
     cardContractPickerKey,
 } from "../generated/card_contract";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
-export function registerPushCardTypes(registry: CardRegistry): GlobalDescriptors {
+
+const PUSH_CARD_METADATA: any = {
+    icon: {
+        pickerIdSuffix: "icon-picker",
+        idSuffix: "icon",
+        field: "icon",
+        fallback: "Auto",
+    },
+    preview: {
+        badge: "gesture-tap",
+    },
+};
+
+function pushActionSpec() {
+    var card: any = cardContractCard("push");
+    return card && card.behavior && card.behavior.pushAction || {};
+}
+
+export function pushDefaultIcon() {
+    return pushActionSpec().defaultIcon || "Gesture Tap";
+}
+
+export function pushDefaultIconOn() {
+    return pushActionSpec().defaultIconOn || "Auto";
+}
+
+export function registerPushCardTypes(registry: CardRegistry): void {
     // Momentary trigger card: stored as "push" for config compatibility.
     // Fires an esphome.push_button_pressed event with no toggle state.
-    var PUSH_CARD_METADATA: any = {
-        icon: {
-            pickerIdSuffix: "icon-picker",
-            idSuffix: "icon",
-            field: "icon",
-            fallback: "Auto",
-        },
-        preview: {
-            badge: "gesture-tap",
-        },
-    };
-    function pushActionSpec(this: any) {
-        var card: any = cardContractCard("push");
-        return card && card.behavior && card.behavior.pushAction || {};
-    }
-    function pushDefaultIcon(this: any) {
-        return pushActionSpec().defaultIcon || "Gesture Tap";
-    }
-    function pushDefaultIconOn(this: any) {
-        return pushActionSpec().defaultIconOn || "Auto";
-    }
     registry.register("push", {
         label: function (this: any) { return cardContractCardLabel("push"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("push"); },
@@ -58,10 +62,4 @@ export function registerPushCardTypes(registry: CardRegistry): GlobalDescriptors
             });
         },
     });
-    return {
-        "PUSH_CARD_METADATA": liveGlobal(() => PUSH_CARD_METADATA, (value?: any) => { PUSH_CARD_METADATA = value; }),
-        "pushActionSpec": staticGlobal(pushActionSpec),
-        "pushDefaultIcon": staticGlobal(pushDefaultIcon),
-        "pushDefaultIconOn": staticGlobal(pushDefaultIconOn),
-    };
 }

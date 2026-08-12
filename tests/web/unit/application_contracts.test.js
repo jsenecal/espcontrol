@@ -73,6 +73,21 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /registerCoverLikeCardType/);
   });
 
+  test("registers static card families without compatibility descriptors", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const cards = ["clock", "push", "screen_lock", "timezone"];
+    for (const card of cards) {
+      const source = fs.readFileSync(path.join(ROOT, `src/webserver/cards/${card}.ts`), "utf8");
+      assert.doesNotMatch(source, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    }
+    for (const registration of ["registerClockCardTypes", "registerPushCardTypes", "registerScreenLockCardTypes", "registerTimezoneCardTypes"]) {
+      assert.match(entry, new RegExp(`^  ${registration}\\(registry\\);`, "m"));
+      assert.doesNotMatch(entry, new RegExp(`registerCompatibility\\(${registration}`));
+    }
+    assert.doesNotMatch(globals, /\bvar (?:PUSH_CARD_METADATA|SCREEN_LOCK_CARD_METADATA|pushActionSpec|pushDefaultIcon|pushDefaultIconOn|timezoneCardCityLabel|timezoneCardTimeParts):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",
