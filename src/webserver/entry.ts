@@ -154,19 +154,10 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installStylesModule());
   installGlobals(installStateModule());
   installGlobals(installLanguageStateModule());
-  const voiceServicesController = createVoiceServicesController();
+  const voiceServicesController = context.controllers.voiceServices;
   installGlobals(installEnvironmentStateModule(voiceServicesController));
   installGlobals(installScreenRotationStateModule());
-  const screenScheduleController = createScreenScheduleController({
-    trigger: normalizeScheduleTrigger,
-    sensorActivation: normalizeScheduleSensorActivation,
-    hour: normalizeHour,
-    mode: normalizeScheduleMode,
-    wakeTimeout: normalizeScheduleWakeTimeout,
-    wakeBrightness: normalizeScheduleWakeBrightness,
-    dimmedBrightness: normalizeScheduleDimmedBrightness,
-    clockBrightness: normalizeScheduleClockBrightness,
-  });
+  const screenScheduleController = context.controllers.screenSchedule;
   installGlobals(installScreenScheduleStateModule(screenScheduleController));
   installGlobals(installNtpStateModule());
   installGlobals(installAppearanceStateModule());
@@ -175,7 +166,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installScreensaverStateModule());
   installGlobals(installFirmwareVersionStateModule());
   installGlobals(installEntityStateModule());
-  const clockBarController = createClockBarController();
+  const clockBarController = context.controllers.clockBar;
   installGlobals(installClockBarStateModule(clockBarController));
   installGlobals(installFirmwareUpdateStateModule());
   installGlobals(installScreensaverTimeoutModule());
@@ -207,26 +198,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installClockBarPostApiModule());
   installGlobals(installControlsModule());
   installGlobals(installControlsShellModule());
-  const settingsUiFeature = createSettingsUiFeature({
-    document,
-    textSpan,
-    createDisclosureChevron,
-  });
-  const alarmDelayAudioController = createAlarmDelayAudioController({
-    announcement: normalizeAlarmDelayAnnouncement,
-    beepVolume: normalizeAlarmDelayBeepVolume,
-    finalCountdown: normalizeAlarmDelayFinalCountdown,
-  });
-  const screensaverController = createScreensaverController({
-    action: normalizeScreensaverAction,
-    dimBrightness: normalizeScreensaverDimmedBrightness,
-    clockBrightness: normalizeClockBrightness,
-  });
-  const coverArtScreensaverController = createCoverArtScreensaverController({
-    delay: normalizeCoverArtDelay,
-    trackOverlayDuration: (value) => parseFloat(String(value)) || 0,
-  });
-  const mediaPlaybackController = createMediaPlaybackController();
+  const settingsUiFeature = context.controllers.settingsUi;
+  const alarmDelayAudioController = context.controllers.alarmDelayAudio;
+  const screensaverController = context.controllers.screensaver;
+  const coverArtScreensaverController = context.controllers.coverArtScreensaver;
+  const mediaPlaybackController = context.controllers.mediaPlayback;
   installGlobals(installSettingsPageHelpersModule({
     settingsUiFeature,
     alarmDelayAudio: alarmDelayAudioController,
@@ -458,6 +434,38 @@ function composeApplicationContext(): ApplicationContext {
   });
   const cardEditorValidation = createCardEditorValidationController();
   const previewPlacement = createPreviewPlacementController();
+  const voiceServices = createVoiceServicesController();
+  const screenSchedule = createScreenScheduleController({
+    trigger: (value, enabled) => normalizeScheduleTrigger(value, enabled),
+    sensorActivation: (value) => normalizeScheduleSensorActivation(value),
+    hour: (value, fallback) => normalizeHour(value, fallback),
+    mode: (value) => normalizeScheduleMode(value),
+    wakeTimeout: (value) => normalizeScheduleWakeTimeout(value),
+    wakeBrightness: (value) => normalizeScheduleWakeBrightness(value),
+    dimmedBrightness: (value) => normalizeScheduleDimmedBrightness(value),
+    clockBrightness: (value) => normalizeScheduleClockBrightness(value),
+  });
+  const clockBar = createClockBarController();
+  const settingsUi = createSettingsUiFeature({
+    document: dom.document,
+    textSpan: (text, className) => textSpan(text, className),
+    createDisclosureChevron: (className) => createDisclosureChevron(className),
+  });
+  const alarmDelayAudio = createAlarmDelayAudioController({
+    announcement: (value, fallback) => normalizeAlarmDelayAnnouncement(value, fallback),
+    beepVolume: (value) => normalizeAlarmDelayBeepVolume(value),
+    finalCountdown: (value) => normalizeAlarmDelayFinalCountdown(value),
+  });
+  const screensaver = createScreensaverController({
+    action: (value) => normalizeScreensaverAction(value),
+    dimBrightness: (value) => normalizeScreensaverDimmedBrightness(value),
+    clockBrightness: (value, fallback) => normalizeClockBrightness(value, fallback),
+  });
+  const coverArtScreensaver = createCoverArtScreensaverController({
+    delay: (value) => normalizeCoverArtDelay(value),
+    trackOverlayDuration: (value) => parseFloat(String(value)) || 0,
+  });
+  const mediaPlayback = createMediaPlaybackController();
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),
     loadInitialState: (handleState, markConnected) =>
@@ -474,11 +482,19 @@ function composeApplicationContext(): ApplicationContext {
     api: deviceApi,
     nativeConfiguration: nativePanelConfig,
     configurationPersistence,
+    alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,
     cardEditorValidation,
+    clockBar,
+    coverArtScreensaver,
+    mediaPlayback,
     previewPlacement,
     reconnect,
+    screenSchedule,
+    screensaver,
+    settingsUi,
+    voiceServices,
     dom,
     cards: createCompatibilityCardRegistry(installGlobals),
   });
