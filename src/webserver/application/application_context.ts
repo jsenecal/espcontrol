@@ -13,6 +13,12 @@ import type { ScreenScheduleController } from "../features/screen_schedule_contr
 import type { ScreensaverController } from "../features/screensaver_controller";
 import type { SettingsUiFeature } from "../features/settings";
 import type { VoiceServicesController } from "../features/voice_services_controller";
+import type { BackupFeature } from "../features/backup";
+import type { BackupExportController } from "../features/backup_export_controller";
+import type { BackupFileController } from "../features/backup_file_controller";
+import type { BackupImportController } from "../features/backup_import_controller";
+import type { BackupRestoreController } from "../features/backup_restore_controller";
+import type { AppBackupFeature } from "./app_backup";
 import type { DeviceConfig, AppState } from "../state/types";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { GlobalDescriptors } from "../runtime/globals";
@@ -71,6 +77,14 @@ export interface ApplicationContext {
     readonly native: NativePanelConfigController;
     readonly persistence: ConfigPersistenceFeature;
   };
+  readonly backup: {
+    readonly contract: BackupFeature;
+    readonly export: BackupExportController;
+    readonly file: BackupFileController;
+    readonly import: BackupImportController<any, any, any>;
+    readonly restore: BackupRestoreController<any, any>;
+    readonly application: AppBackupFeature;
+  };
   readonly controllers: {
     readonly alarmDelayAudio: AlarmDelayAudioController;
     readonly cardEditorDraft: CardEditorDraftController;
@@ -97,6 +111,12 @@ export interface ApplicationContextOptions {
   readonly api: DeviceApi;
   readonly nativeConfiguration: NativePanelConfigController;
   readonly configurationPersistence: ConfigPersistenceFeature;
+  readonly backupContract: BackupFeature;
+  readonly backupExport: BackupExportController;
+  readonly backupFile: BackupFileController;
+  readonly backupImport: BackupImportController<any, any, any>;
+  readonly backupRestore: BackupRestoreController<any, any>;
+  readonly backupApplication: AppBackupFeature;
   readonly alarmDelayAudio: AlarmDelayAudioController;
   readonly cardEditorDraft: CardEditorDraftController;
   readonly cardEditorSave: CardEditorSaveController;
@@ -138,6 +158,14 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
     configuration: {
       native: options.nativeConfiguration,
       persistence: options.configurationPersistence,
+    },
+    backup: {
+      contract: options.backupContract,
+      export: options.backupExport,
+      file: options.backupFile,
+      import: options.backupImport,
+      restore: options.backupRestore,
+      application: options.backupApplication,
     },
     controllers: {
       alarmDelayAudio: options.alarmDelayAudio,

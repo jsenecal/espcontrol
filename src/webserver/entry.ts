@@ -225,117 +225,8 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installPreviewContextMenuModule());
   installGlobals(installPreviewClipboardModule(configPersistence));
   installGlobals(installPreviewInteractionsModule(cardEditorDraft, configPersistence));
-  const backupFeature = createBackupFeature({
-    deviceId: context.layout.deviceId,
-    gridCols: context.layout.gridCols,
-    numSlots: context.layout.numSlots,
-    normalizeButtonConfig,
-    parseSubpageConfig,
-    serializeSubpageConfig,
-    buildSubpageGrid: (subpage) => {
-      buildSubpageGridAndNormalizeOrder(subpage);
-      return subpage.grid || [];
-    },
-  });
-  installGlobals(installBackupContractModule(backupFeature));
-  const normalizeImportedPanelSettings = (settings: any) => {
-    if (!settings) return null;
-    return EspControlModel.normalizeBackupPanelSettings(settings, {
-      timezone: state.timezone,
-      language: state.language,
-      clockFormat: state.clockFormat,
-      clockFormatOptions: state.clockFormatOptions,
-      ntpDefaults: NTP_SERVER_DEFAULTS,
-      ntpServer1: state.ntpServer1,
-      ntpServer2: state.ntpServer2,
-      ntpServer3: state.ntpServer3,
-      coverArtHomeAssistantProtocol: state.homeAssistantArtworkProtocol,
-      coverArtHomeAssistantPort: state.coverArtHomeAssistantPort,
-      coverArtHomeAssistantBaseUrl: state.coverArtHomeAssistantBaseUrl,
-      autoUpdate: state.autoUpdate,
-      updateFrequency: state.updateFrequency,
-      updateFrequencyOptions: state.updateFreqOptions,
-      screenRotationOptions: allScreenRotationOptions(),
-    });
-  };
-  const gridColsForImportedSettings = (importedSettings: any): number => {
-    const rotation = importedSettings ? importedSettings.screenRotation : state.screenRotation;
-    const layout = isPortraitRotation(rotation) && CFG.portrait ? CFG.portrait : CFG;
-    return layout.cols || CFG.cols;
-  };
-  const backupExportController = createBackupExportController({
-    serializeButtonConfig,
-    serializeSubpageConfig,
-  });
-  const backupImportController = createBackupImportController<any, any, any, any>({
-    normalizeBackup: normalizeBackupConfig,
-    normalizeSettings: normalizeImportedPanelSettings,
-    gridColsForSettings: gridColsForImportedSettings,
-    getGridCols: () => context.layout.gridCols,
-    setGridCols: (gridCols) => { context.layout.gridCols = gridCols; },
-    planBackupImport,
-  });
-  const backupRestoreController = createBackupRestoreController<any, any>({
-    plan: backupImportController.plan,
-    warnings: (plannedImport) => plannedImport.backupPlan.warnings,
-    showBanner,
-    setPostThrottle,
-    resetPostQueueError,
-    postQueueIdle,
-    postQueueHadError,
-  });
-  const backupFileController = createBackupFileController({
-    transport: {
-      download(content, filename) {
-        const blob = new Blob([content], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = filename;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-      },
-      chooseJsonFile(onText, onError) {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = ".json";
-        input.style.display = "none";
-        const cleanupInput = () => {
-          if (input.parentNode) input.parentNode.removeChild(input);
-        };
-        input.addEventListener("cancel", cleanupInput);
-        input.addEventListener("change", () => {
-          if (!input.files || !input.files[0]) {
-            cleanupInput();
-            return;
-          }
-          const reader = new FileReader();
-          reader.onerror = () => {
-            cleanupInput();
-            onError();
-          };
-          reader.onload = () => {
-            cleanupInput();
-            onText(String(reader.result || ""));
-          };
-          reader.readAsText(input.files[0]);
-        });
-        document.body.appendChild(input);
-        input.click();
-      },
-    },
-    showBanner,
-  });
-  const backupUiFeature = createAppBackupFeature({
-    backupExport: backupExportController,
-    backupImport: backupImportController,
-    backupRestore: backupRestoreController,
-    backupFile: backupFileController,
-    normalizeImportedPanelSettings,
-    gridColsForImportedSettings,
-  });
+  installGlobals(installBackupContractModule(context.backup.contract));
+  const backupUiFeature = context.backup.application;
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
@@ -466,6 +357,119 @@ function composeApplicationContext(): ApplicationContext {
     trackOverlayDuration: (value) => parseFloat(String(value)) || 0,
   });
   const mediaPlayback = createMediaPlaybackController();
+  const backupContract = createBackupFeature({
+    deviceId: layout.deviceId,
+    gridCols: layout.gridCols,
+    numSlots: layout.numSlots,
+    normalizeButtonConfig: (button) => normalizeButtonConfig(button),
+    parseSubpageConfig: (value) => parseSubpageConfig(value),
+    serializeSubpageConfig: (subpage) => serializeSubpageConfig(subpage),
+    buildSubpageGrid: (subpage) => {
+      buildSubpageGridAndNormalizeOrder(subpage);
+      return subpage.grid || [];
+    },
+  });
+  const normalizeImportedPanelSettings = (settings: any) => {
+    if (!settings) return null;
+    return Model.normalizeBackupPanelSettings(settings, {
+      timezone: state.timezone,
+      language: state.language,
+      clockFormat: state.clockFormat,
+      clockFormatOptions: state.clockFormatOptions,
+      ntpDefaults: NTP_SERVER_DEFAULTS,
+      ntpServer1: state.ntpServer1,
+      ntpServer2: state.ntpServer2,
+      ntpServer3: state.ntpServer3,
+      coverArtHomeAssistantProtocol: state.homeAssistantArtworkProtocol,
+      coverArtHomeAssistantPort: state.coverArtHomeAssistantPort,
+      coverArtHomeAssistantBaseUrl: state.coverArtHomeAssistantBaseUrl,
+      autoUpdate: state.autoUpdate,
+      updateFrequency: state.updateFrequency,
+      updateFrequencyOptions: state.updateFreqOptions,
+      screenRotationOptions: allScreenRotationOptions(),
+    });
+  };
+  const gridColsForImportedSettings = (importedSettings: any): number => {
+    const rotation = importedSettings ? importedSettings.screenRotation : state.screenRotation;
+    const profile = isPortraitRotation(rotation) && layout.config.portrait
+      ? layout.config.portrait
+      : layout.config;
+    return profile.cols || layout.config.cols;
+  };
+  const backupExport = createBackupExportController({
+    serializeButtonConfig: (button) => serializeButtonConfig(button),
+    serializeSubpageConfig: (subpage) => serializeSubpageConfig(subpage),
+  });
+  const backupImport = createBackupImportController<any, any, any, any>({
+    normalizeBackup: (data) => backupContract.normalizeBackupConfig(data),
+    normalizeSettings: normalizeImportedPanelSettings,
+    gridColsForSettings: gridColsForImportedSettings,
+    getGridCols: () => layout.gridCols,
+    setGridCols: (gridCols) => { layout.gridCols = gridCols; },
+    planBackupImport: (data, target) => backupContract.planBackupImport(data, target),
+  });
+  const backupRestore = createBackupRestoreController<any, any>({
+    plan: backupImport.plan,
+    warnings: (plannedImport) => plannedImport.backupPlan.warnings,
+    showBanner: (message, kind) => showBanner(message, kind),
+    setPostThrottle: (milliseconds) => setPostThrottle(milliseconds),
+    resetPostQueueError: () => resetPostQueueError(),
+    postQueueIdle: () => postQueueIdle(),
+    postQueueHadError: () => postQueueHadError(),
+  });
+  const backupFile = createBackupFileController({
+    transport: {
+      download(content, filename) {
+        const blob = new Blob([content], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const link = dom.document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        dom.document.body.appendChild(link);
+        link.click();
+        dom.document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      },
+      chooseJsonFile(onText, onError) {
+        const input = dom.document.createElement("input");
+        input.type = "file";
+        input.accept = ".json";
+        input.style.display = "none";
+        const cleanupInput = () => {
+          if (input.parentNode) input.parentNode.removeChild(input);
+        };
+        input.addEventListener("cancel", cleanupInput);
+        input.addEventListener("change", () => {
+          if (!input.files || !input.files[0]) {
+            cleanupInput();
+            return;
+          }
+          const reader = new FileReader();
+          reader.onerror = () => {
+            cleanupInput();
+            onError();
+          };
+          reader.onload = () => {
+            cleanupInput();
+            onText(String(reader.result || ""));
+          };
+          reader.readAsText(input.files[0]);
+        });
+        dom.document.body.appendChild(input);
+        input.click();
+      },
+    },
+    showBanner: (message, kind) => showBanner(message, kind),
+  });
+  const backupApplication = createAppBackupFeature({
+    layout,
+    backupExport,
+    backupImport,
+    backupRestore,
+    backupFile,
+    normalizeImportedPanelSettings,
+    gridColsForImportedSettings,
+  });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),
     loadInitialState: (handleState, markConnected) =>
@@ -482,6 +486,12 @@ function composeApplicationContext(): ApplicationContext {
     api: deviceApi,
     nativeConfiguration: nativePanelConfig,
     configurationPersistence,
+    backupContract,
+    backupExport,
+    backupFile,
+    backupImport,
+    backupRestore,
+    backupApplication,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,
