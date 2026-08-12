@@ -231,8 +231,9 @@ void AsyncWebServer::begin() {
   config.close_fn = AsyncWebServer::safe_close_with_shutdown;
   if (httpd_start(&this->server_, &config) == ESP_OK) {
     global_async_web_server() = this;
-    // Register static EspControl routes before the generic dispatcher starts
-    // accepting requests. Adding handlers later can disrupt API clients.
+    // Let an external component add its static handlers before the generic
+    // dispatcher is exposed to browsers or API clients. Handlers added later
+    // can disrupt concurrent network activity on ESP32-P4 panels.
     if (espcontrol_register_web_server_handlers != nullptr) {
       espcontrol_register_web_server_handlers(this);
     }

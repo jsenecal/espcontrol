@@ -78,6 +78,7 @@ class EspControlApp : public esphome::Component {
   std::unique_ptr<NativeConfigurationRuntime> native_configuration_runtime_;
   EspControlAppCore core_{};
   bool native_configuration_initialized_{false};
+  bool panel_config_http_context_bound_{false};
   const char *web_auth_username_{nullptr};
   const char *web_auth_password_{nullptr};
 };
