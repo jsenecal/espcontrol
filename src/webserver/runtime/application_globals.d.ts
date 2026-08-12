@@ -18,10 +18,6 @@ declare global {
   var FIRMWARE_WEB_OTA_FALLBACK_DELAY_MS: any;
   var GRID_COLS: any;
   var GRID_ROWS: any;
-  var LIGHT_CONTROL_TYPE_METADATA: any;
-  var LIGHT_CONTROL_TYPE_OPTIONS: any;
-  var LIGHT_FULL_CONTROL_CARD_METADATA: any;
-  var LIGHT_TEMPERATURE_CARD_METADATA: any;
   var MAX_CLOCK_BAR_TEMPERATURES: any;
   var NETWORK_STATUS_ICON_UNAVAILABLE: any;
   var NUM_SLOTS: any;
@@ -277,17 +273,6 @@ declare global {
   var latestFirmwareInstallAvailable: any;
   var layoutSection: any;
   var legacyClockBarTemperatureEntities: any;
-  var lightTempClampMax: any;
-  var lightTempClampMin: any;
-  var lightTempDefaultRange: any;
-  var lightTempLegacySensorValues: any;
-  var lightTempMaxLimit: any;
-  var lightTempMinLimit: any;
-  var lightTempMinMaxLimit: any;
-  var lightTempParseRange: any;
-  var lightTempSensorNeedsCleanup: any;
-  var lightTempSpec: any;
-  var lightTempStep: any;
   var loadInitialState: any;
   var loadStateItems: any;
   var makeCollapsibleCard: any;
@@ -302,7 +287,6 @@ declare global {
   var normalizeClockBarTemperatureEntities: any;
   var normalizeClockBarTemperatureEntries: any;
   var normalizeGridSpansForLayout: any;
-  var normalizeLightControlType: any;
   var normalizeNetworkTransport: any;
   var normalizeScreenRotation: any;
   var normalizeVacuumMode: any;
@@ -434,8 +418,6 @@ declare global {
   var renderClockBarSelectionBar: any;
   var renderFirmwareUpdateStatus: any;
   var renderFirmwareVersion: any;
-  var renderLightControlTabSettings: any;
-  var renderLightControlTypeField: any;
   var renderPreview: any;
   var renderSelectionBar: any;
   var resetAppearanceColors: any;
@@ -481,7 +463,6 @@ declare global {
   var setFavicon: any;
   var setFirmwareUpdateInfo: any;
   var setFirmwareVersion: any;
-  var setLightControlType: any;
   var setPostThrottle: any;
   var setPublicFirmwareInfo: any;
   var setPublicFirmwareVersions: any;

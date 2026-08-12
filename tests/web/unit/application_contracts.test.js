@@ -49,7 +49,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /registry\.register\(/, `${relativePath} should use the typed card registry`);
       assert.doesNotMatch(source, /\bregisterButtonType\s*\(/, `${relativePath} should not read ambient registration state`);
       assert.match(entry, new RegExp(
-        `${registrationFunction}\\(\\s*registry(?:,\\s*context\\.configuration\\.[A-Za-z]+)*,?\\s*\\)`,
+        `${registrationFunction}\\(\\s*registry(?:,\\s*(?:context\\.configuration\\.[A-Za-z]+|lightCards))*[,]?\\s*\\)`,
       ));
     }
   });
@@ -101,7 +101,7 @@ describe("browserless application contracts", () => {
     const source = fs.readFileSync(path.join(ROOT, "src/webserver/cards/switch.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(source, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /^  registerSwitchCardTypes\(registry, context\.configuration\.confirmationOptions\);/m);
+    assert.match(entry, /^  registerSwitchCardTypes\(registry, context\.configuration\.confirmationOptions, lightCards\);/m);
     assert.doesNotMatch(entry, /registerCompatibility\(registerSwitchCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:SWITCH_CARD_METADATA|LIGHT_SWITCH_CARD_METADATA):/);
   });
@@ -203,7 +203,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/slider.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs\);/);
+    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs, lightCards\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerSliderCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:renderCoverControlTabSettings|sliderCardMetadata|sliderTypeFactory):/);
   });
@@ -275,6 +275,22 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /registerCompatibility\(registerActionCardTypes/);
     assert.match(entry, /installEntityStateModule\(context\.configuration\.confirmationOptions\)/);
     assert.doesNotMatch(globals, /\bvar (?:ACTION_CARD_ACTIONS|ACTION_CARD_METADATA|actionCardInfo|actionCardIsLocal|actionCardIsOptionSelect|actionCardNeedsExtraValue|actionCardStateDisplayMode|actionCardStateEntity|actionCardStatePrecision|actionCardStateUnit|normalizeActionCardConfig|normalizeSavedConfigActionFields|renderActionCardLocalSettings|setActionCardStateOptions):/);
+  });
+
+  test("registers light card families through an explicit shared interface", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const light = fs.readFileSync(path.join(ROOT, "src/webserver/cards/light_temperature.ts"), "utf8");
+    const slider = fs.readFileSync(path.join(ROOT, "src/webserver/cards/slider.ts"), "utf8");
+    const switchCard = fs.readFileSync(path.join(ROOT, "src/webserver/cards/switch.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(light, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.match(entry, /const lightCards = registerLightTemperatureCardTypes\(registry, context\.configuration\.modalTabs\);/);
+    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs, lightCards\);/);
+    assert.match(entry, /registerSwitchCardTypes\(registry, context\.configuration\.confirmationOptions, lightCards\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerLightTemperatureCardTypes/);
+    assert.match(slider, /lightCards: LightCardRegistration/);
+    assert.match(switchCard, /lightCards: LightCardRegistration/);
+    assert.doesNotMatch(globals, /\bvar (?:LIGHT_CONTROL_TYPE_METADATA|LIGHT_CONTROL_TYPE_OPTIONS|LIGHT_FULL_CONTROL_CARD_METADATA|LIGHT_TEMPERATURE_CARD_METADATA|lightTempClampMax|lightTempClampMin|lightTempDefaultRange|lightTempLegacySensorValues|lightTempMaxLimit|lightTempMinLimit|lightTempMinMaxLimit|lightTempParseRange|lightTempSensorNeedsCleanup|lightTempSpec|lightTempStep|normalizeLightControlType|renderLightControlTabSettings|renderLightControlTypeField|setLightControlType):/);
   });
 
   test("injects the card registry into editor and preview consumers", () => {

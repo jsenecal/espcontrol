@@ -29,6 +29,7 @@ import type { ConfigModalTabOptionsFeature } from "../application/config_modal_t
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
 import type { ConfigCodecFeature } from "../application/config_codec";
+import type { LightCardRegistration } from "../cards/light_temperature";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 import { pushDefaultIcon, pushDefaultIconOn } from "../cards/push";
@@ -52,6 +53,7 @@ export function installAppTestHooksConfig(
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
     codec: ConfigCodecFeature,
+    lightCards: LightCardRegistration,
 ): GlobalDescriptors {
     const {
         sensorCardIsLocal,
@@ -220,6 +222,14 @@ export function installAppTestHooksConfig(
         actionScriptFields,
         setActionScriptFields,
     } = confirmationOptions;
+    const {
+        lightTempDefaultRange,
+        lightTempParseRange,
+        lightTempClampMin,
+        lightTempClampMax,
+        lightTempLegacySensorValues,
+        lightTempSensorNeedsCleanup,
+    } = lightCards;
     const {
         cardRequiresSquareSize,
         cardSupportsMaxSize,

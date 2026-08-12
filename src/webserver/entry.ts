@@ -274,7 +274,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   ));
 }
 
-function installCardCompatibility(context: ApplicationContext): void {
+function registerCards(context: ApplicationContext) {
   const registry = context.cards;
   const coverLikeCards = createCoverLikeCardRegistration(registry);
   registerActionCardTypes(registry, context.configuration.confirmationOptions);
@@ -307,24 +307,25 @@ function installCardCompatibility(context: ApplicationContext): void {
     context.dom.document,
   );
   registerLawnMowerCardTypes(registry, context.configuration.robotOptions);
-  registry.registerCompatibility(registerLightTemperatureCardTypes(registry, context.configuration.modalTabs));
+  const lightCards = registerLightTemperatureCardTypes(registry, context.configuration.modalTabs);
   registerLockCardTypes(registry, context.configuration.lockOptions);
   registerMediaCardTypes(registry, context.configuration.mediaOptions);
   registerPresenceCardTypes(registry, context.configuration.options);
   registerPushCardTypes(registry);
   registerScreenLockCardTypes(registry);
   registerSensorCardTypes(registry, context.configuration.options);
-  registerSliderCardTypes(registry, context.configuration.modalTabs);
+  registerSliderCardTypes(registry, context.configuration.modalTabs, lightCards);
   registerSubpageCardTypes(registry, context.configuration.codec);
-  registerSwitchCardTypes(registry, context.configuration.confirmationOptions);
+  registerSwitchCardTypes(registry, context.configuration.confirmationOptions, lightCards);
   registerTimezoneCardTypes(registry, context.configuration.dateTimeOptions, context.dom.document);
   registerVacuumCardTypes(registry, context.configuration.robotOptions);
   const weatherCards = registerWeatherCardTypes(registry, context.configuration.weatherOptions);
   registerWeatherForecastCardTypes(registry, weatherCards);
   registerWebhookCardTypes(registry, context.configuration.webhookOptions);
+  return lightCards;
 }
 
-function installTestCompatibility(context: ApplicationContext): void {
+function installTestCompatibility(context: ApplicationContext, lightCards: ReturnType<typeof registerLightTemperatureCardTypes>): void {
   installGlobals(installAppTestHooks());
   installGlobals(installAppTestHooksConfig(
     context.cards,
@@ -340,6 +341,7 @@ function installTestCompatibility(context: ApplicationContext): void {
     context.configuration.accessClimateAlarm,
     context.configuration.confirmationOptions,
     context.configuration.codec,
+    lightCards,
   ));
   installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime));
   installGlobals(installAppTestHooksBackup());
@@ -651,9 +653,9 @@ function startEspControl(): void {
   const context = composeApplicationContext();
 
   installApplicationCompatibility(context);
-  installCardCompatibility(context);
+  const lightCards = registerCards(context);
   if (__ESPCONTROL_TEST_HOOKS_ENABLED__) {
-    installTestCompatibility(context);
+    installTestCompatibility(context, lightCards);
   }
   installGlobals(installAppStartModule());
 }

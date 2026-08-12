@@ -9,6 +9,7 @@ import {
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
+import type { LightCardRegistration } from "./light_temperature";
 import {
     SWITCH_CONFIRM_DEFAULT_MESSAGE,
     SWITCH_CONFIRM_DEFAULT_NO,
@@ -17,7 +18,12 @@ import {
 export function registerSwitchCardTypes(
     registry: CardRegistry,
     confirmationOptions: ConfigConfirmationOptionsFeature,
+    lightCards: LightCardRegistration,
 ): void {
+    const {
+        controlTypeMetadata: LIGHT_CONTROL_TYPE_METADATA,
+        renderControlTypeField: renderLightControlTypeField,
+    } = lightCards;
     const {
         setSwitchConfirmationOptions,
         switchConfirmationDefaultMessageForMode,

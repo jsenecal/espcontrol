@@ -16,10 +16,13 @@ import {
     normalizeCoverPosition,
 } from "../application/config_cover_contract";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
+import type { LightCardRegistration } from "./light_temperature";
 export function registerSliderCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
+    lightCards: LightCardRegistration,
 ): void {
+    const { renderControlTypeField: renderLightControlTypeField } = lightCards;
     const {
         coverControlTabDefinitions,
         coverControlTabs,
