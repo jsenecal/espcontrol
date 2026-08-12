@@ -1,8 +1,10 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardEditorDraftController } from "../features/card_editor_draft_controller";
+import type { ConfigPersistenceFeature } from "./config_post_api";
 export function installPreviewInteractionsModule(
     cardEditorDraftController: CardEditorDraftController,
+    configPersistence: ConfigPersistenceFeature,
 ): GlobalDescriptors {
     // ── Preview event delegation & drag ────────────────────────────────────
     function clearPlaceholder(this: any) {
@@ -419,8 +421,8 @@ export function installPreviewInteractionsModule(
         state.subpages[slot] = { order: [], buttons: [], grid: [], sizes: {} };
         buildSubpageGrid(state.subpages[slot]);
         postText(entityName("button_order"), serializeGrid(state.grid));
-        saveButtonConfig(slot);
-        saveSubpageEntity(slot);
+        configPersistence.saveButtonConfig(slot);
+        configPersistence.saveSubpageEntity(slot);
         selectButton(slot);
     }
     function duplicateButton(this: any, srcSlot?: any) {
@@ -461,8 +463,8 @@ export function installPreviewInteractionsModule(
             state.subpages[newSlot] = spCopy;
         }
         postText(entityName("button_order"), serializeGrid(state.grid));
-        saveButtonConfig(newSlot);
-        saveSubpageEntity(newSlot);
+        configPersistence.saveButtonConfig(newSlot);
+        configPersistence.saveSubpageEntity(newSlot);
         state.selectedSlots = [newSlot];
         state.lastClickedSlot = newSlot;
         renderPreview();
@@ -535,8 +537,8 @@ export function installPreviewInteractionsModule(
             postText(entityName("button_order"), serializeGrid(state.grid));
             state.buttons[slot - 1] = emptyButtonConfig();
             delete state.subpages[slot];
-            saveButtonConfig(slot);
-            saveSubpageEntity(slot);
+            configPersistence.saveButtonConfig(slot);
+            configPersistence.saveSubpageEntity(slot);
         }
         renderPreview();
         renderButtonSettings();
@@ -572,8 +574,8 @@ export function installPreviewInteractionsModule(
             slots.forEach(function (this: any, slot?: any) {
                 state.buttons[slot - 1] = emptyButtonConfig();
                 delete state.subpages[slot];
-                saveButtonConfig(slot);
-                saveSubpageEntity(slot);
+                configPersistence.saveButtonConfig(slot);
+                configPersistence.saveSubpageEntity(slot);
             });
             postText(entityName("button_order"), serializeGrid(state.grid));
         }
