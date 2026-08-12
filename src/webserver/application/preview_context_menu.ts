@@ -2,7 +2,15 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { clampMenuPosition } from "../features/preview";
 import { resizeGridSlot } from "../features/preview_grid";
-export function installPreviewContextMenuModule(): GlobalDescriptors {
+import type { ApplicationLayoutState } from "./application_context";
+export interface PreviewContextMenuDependencies {
+    readonly document: Document;
+    readonly window: Window;
+    readonly layout: ApplicationLayoutState;
+}
+export function installPreviewContextMenuModule(dependencies: PreviewContextMenuDependencies): GlobalDescriptors {
+    const document = dependencies.document;
+    const window = dependencies.window;
     // ── Preview Context Menu ──────────────────────────────────────────
     // ── Context menu (unified) ─────────────────────────────────────────────
     var ctxMenu: any = null;
@@ -82,7 +90,7 @@ export function installPreviewContextMenuModule(): GlobalDescriptors {
         var curSz: any = c.sizes[slot] || 1;
         if (curSz === targetSz)
             return;
-        var resized: any = resizeGridSlot(c.grid, c.sizes, slot, slotPos, targetSz, c.maxSlots, GRID_COLS, !c.isSub);
+        var resized: any = resizeGridSlot(c.grid, c.sizes, slot, slotPos, targetSz, c.maxSlots, dependencies.layout.gridCols, !c.isSub);
         if (!resized.accepted)
             return;
         c.grid.splice(0, c.grid.length);
@@ -119,7 +127,7 @@ export function installPreviewContextMenuModule(): GlobalDescriptors {
             options.push({ size: CARD_SIZE_EXTRA_WIDE, label: "Extra Wide (1x3)" });
         }
         options.push({ size: CARD_SIZE_LARGE, label: "Large (2x2)" });
-        if (cardRequiresSquareSize(b) && GRID_COLS >= 3 && GRID_ROWS >= 3)
+        if (cardRequiresSquareSize(b) && dependencies.layout.gridCols >= 3 && dependencies.layout.gridRows >= 3)
             options.push({ size: CARD_SIZE_EXTRA_LARGE, label: "Extra Large (3x3)" });
         if (cardSupportsMaxSize(b)) {
             options.push({ size: CARD_SIZE_MAX_WIDE, label: "Max Wide (3x2)" });

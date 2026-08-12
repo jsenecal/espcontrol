@@ -2796,6 +2796,11 @@ async function assertMediaCoverArtSettingsPanels(page, label) {
     await cardSettings.getByText("Show Track Details", { exact: true }).isVisible(),
     `${label}: Cover Art Card Settings should reveal Show Track Details`,
   );
+  assert.strictEqual(
+    await cardSettings.locator("> .sp-disclosure-body").evaluate((el) => getComputedStyle(el).padding),
+    "14px",
+    `${label}: Cover Art Card Settings should keep compact spacing around its single toggle`,
+  );
   await externalSources.locator("> .sp-disclosure-button").click();
   const info = externalSources.locator("#sp-inp-media-cover-art-secondary-player-info");
   assert(await info.isVisible(), `${label}: Cover Art secondary media player explanation should be visible`);

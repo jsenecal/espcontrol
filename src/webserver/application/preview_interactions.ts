@@ -2,10 +2,19 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardEditorDraftController } from "../features/card_editor_draft_controller";
 import type { ConfigPersistenceFeature } from "./config_post_api";
+import type { ApplicationLayoutState } from "./application_context";
+export interface PreviewInteractionsDependencies {
+    readonly cardEditorDraft: CardEditorDraftController;
+    readonly configPersistence: ConfigPersistenceFeature;
+    readonly layout: ApplicationLayoutState;
+    readonly window: Window;
+}
 export function installPreviewInteractionsModule(
-    cardEditorDraftController: CardEditorDraftController,
-    configPersistence: ConfigPersistenceFeature,
+    dependencies: PreviewInteractionsDependencies,
 ): GlobalDescriptors {
+    const cardEditorDraftController = dependencies.cardEditorDraft;
+    const configPersistence = dependencies.configPersistence;
+    const window = dependencies.window;
     // ── Preview event delegation & drag ────────────────────────────────────
     function clearPlaceholder(this: any) {
         if (previewPlaceholder) {
@@ -158,7 +167,7 @@ export function installPreviewInteractionsModule(
                 return;
             var pos: any = parseInt(target.getAttribute("data-pos"), 10);
             dragSrcPos = pos;
-            if (CFG.dragAnimation)
+            if (dependencies.layout.config.dragAnimation)
                 dragSrcEl = target;
             dragIsSubpage = !!state.editingSubpage;
             didDrag = true;
@@ -166,7 +175,7 @@ export function installPreviewInteractionsModule(
             container.classList.add("sp-drag-active");
             e.dataTransfer.effectAllowed = "move";
             e.dataTransfer.setData("text/plain", String(pos));
-            if (CFG.dragAnimation) {
+            if (dependencies.layout.config.dragAnimation) {
                 requestAnimationFrame(function (this: any) { target.classList.add("sp-dragging"); });
             }
         });
@@ -209,7 +218,7 @@ export function installPreviewInteractionsModule(
                 return;
             e.preventDefault();
             e.dataTransfer.dropEffect = "move";
-            if (CFG.dragAnimation) {
+            if (dependencies.layout.config.dragAnimation) {
                 pendingCellIdx = getCellFromEvent(e, container);
                 if (dragRafPending)
                     return;
@@ -353,7 +362,7 @@ export function installPreviewInteractionsModule(
             if (s > 0)
                 used[s] = true;
         });
-        for (var i: any = 1; i <= NUM_SLOTS; i++) {
+        for (var i: any = 1; i <= dependencies.layout.numSlots; i++) {
             if (!used[i])
                 return i;
         }
@@ -361,8 +370,8 @@ export function installPreviewInteractionsModule(
     }
     function firstFreeCell(this: any, afterPos?: any) {
         var start: any = afterPos != null ? afterPos : 0;
-        for (var i: any = 0; i < NUM_SLOTS; i++) {
-            var candidate: any = (start + i) % NUM_SLOTS;
+        for (var i: any = 0; i < dependencies.layout.numSlots; i++) {
+            var candidate: any = (start + i) % dependencies.layout.numSlots;
             if (state.grid[candidate] === 0)
                 return candidate;
         }
@@ -433,7 +442,7 @@ export function installPreviewInteractionsModule(
             return;
         var srcSz: any = state.sizes[srcSlot] || 1;
         var srcPos: any = state.grid.indexOf(srcSlot);
-        var placement: any = findDuplicatePlacement(state.grid, srcPos + 1, srcSz, NUM_SLOTS);
+        var placement: any = findDuplicatePlacement(state.grid, srcPos + 1, srcSz, dependencies.layout.numSlots);
         if (placement.pos < 0)
             return;
         var src: any = state.buttons[srcSlot - 1];
@@ -480,7 +489,7 @@ export function installPreviewInteractionsModule(
         }
         var srcSz: any = sp.sizes[srcSlot] || 1;
         var srcPos: any = sp.grid.indexOf(srcSlot);
-        var placement: any = findDuplicatePlacement(sp.grid, srcPos + 1, srcSz, NUM_SLOTS);
+        var placement: any = findDuplicatePlacement(sp.grid, srcPos + 1, srcSz, dependencies.layout.numSlots);
         if (placement.pos < 0)
             return;
         var src: any = sp.buttons[srcSlot - 1];

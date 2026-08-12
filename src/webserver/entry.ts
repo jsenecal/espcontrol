@@ -15,6 +15,13 @@ import * as Icons from "./generated/icons";
 import { ENTITY_CATALOG } from "./generated/entity_catalog";
 import { installGlobals, installStaticGlobals } from "./runtime/globals";
 import { installCore } from "./application/core";
+import {
+  createApplicationContext,
+  createApplicationLayoutState,
+  createCompatibilityCardRegistry,
+  type ApplicationContext,
+  type ApplicationDomServices,
+} from "./application/application_context";
 import { installFirmwareMetadataModule } from "./application/firmware_metadata";
 import { installStylesModule } from "./application/styles";
 import { installStateModule } from "./application/state";
@@ -141,25 +148,16 @@ const startupState = globalThis as typeof globalThis & {
   __ESPCONTROL_UI_STARTING__?: boolean;
 };
 
-function installApplicationCompatibility(): void {
-  installGlobals(installCore());
+function installApplicationCompatibility(context: ApplicationContext): void {
+  installGlobals(installCore(context.layout));
   installGlobals(installFirmwareMetadataModule());
   installGlobals(installStylesModule());
   installGlobals(installStateModule());
   installGlobals(installLanguageStateModule());
-  const voiceServicesController = createVoiceServicesController();
+  const voiceServicesController = context.controllers.voiceServices;
   installGlobals(installEnvironmentStateModule(voiceServicesController));
   installGlobals(installScreenRotationStateModule());
-  const screenScheduleController = createScreenScheduleController({
-    trigger: normalizeScheduleTrigger,
-    sensorActivation: normalizeScheduleSensorActivation,
-    hour: normalizeHour,
-    mode: normalizeScheduleMode,
-    wakeTimeout: normalizeScheduleWakeTimeout,
-    wakeBrightness: normalizeScheduleWakeBrightness,
-    dimmedBrightness: normalizeScheduleDimmedBrightness,
-    clockBrightness: normalizeScheduleClockBrightness,
-  });
+  const screenScheduleController = context.controllers.screenSchedule;
   installGlobals(installScreenScheduleStateModule(screenScheduleController));
   installGlobals(installNtpStateModule());
   installGlobals(installAppearanceStateModule());
@@ -168,22 +166,18 @@ function installApplicationCompatibility(): void {
   installGlobals(installScreensaverStateModule());
   installGlobals(installFirmwareVersionStateModule());
   installGlobals(installEntityStateModule());
-  const clockBarController = createClockBarController();
+  const clockBarController = context.controllers.clockBar;
   installGlobals(installClockBarStateModule(clockBarController));
   installGlobals(installFirmwareUpdateStateModule());
   installGlobals(installScreensaverTimeoutModule());
   installGlobals(installC6FirmwareUiModule());
   installGlobals(installGridModule());
-  const deviceApi = createDeviceApi((url, init) =>
-    fetch(url, init as RequestInit));
-  const nativePanelConfig = createNativePanelConfigMigrationController();
-  const configPersistence = createConfigPersistenceFeature(nativePanelConfig);
-  const cardEditorDraft = createCardEditorDraftController({
-    cloneCard: (button) => Model.cloneCardConfig(button),
-    emptyCard: () => Model.emptyCardConfig(),
-  });
-  const cardEditorValidation = createCardEditorValidationController();
-  const previewPlacementController = createPreviewPlacementController();
+  const deviceApi = context.api;
+  const nativePanelConfig = context.configuration.native;
+  const configPersistence = context.configuration.persistence;
+  const cardEditorDraft = context.controllers.cardEditorDraft;
+  const cardEditorValidation = context.controllers.cardEditorValidation;
+  const previewPlacementController = context.controllers.previewPlacement;
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
@@ -196,13 +190,7 @@ function installApplicationCompatibility(): void {
   installGlobals(installConfigConfirmationOptionsModule());
   installGlobals(installConfigAccessClimateAlarmOptionsModule());
   installGlobals(installConfigCodecModule());
-  const cardEditorSave = createCardEditorSaveController({
-    emptyCard: () => Model.emptyCardConfig(),
-    copyCard: (target, source) => {
-      Model.copyCardConfig(target, source);
-      normalizeButtonConfig(target);
-    },
-  });
+  const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
   installGlobals(installStateLoaderApiModule());
   installGlobals(installArtworkPostApiModule());
@@ -210,26 +198,11 @@ function installApplicationCompatibility(): void {
   installGlobals(installClockBarPostApiModule());
   installGlobals(installControlsModule());
   installGlobals(installControlsShellModule());
-  const settingsUiFeature = createSettingsUiFeature({
-    document,
-    textSpan,
-    createDisclosureChevron,
-  });
-  const alarmDelayAudioController = createAlarmDelayAudioController({
-    announcement: normalizeAlarmDelayAnnouncement,
-    beepVolume: normalizeAlarmDelayBeepVolume,
-    finalCountdown: normalizeAlarmDelayFinalCountdown,
-  });
-  const screensaverController = createScreensaverController({
-    action: normalizeScreensaverAction,
-    dimBrightness: normalizeScreensaverDimmedBrightness,
-    clockBrightness: normalizeClockBrightness,
-  });
-  const coverArtScreensaverController = createCoverArtScreensaverController({
-    delay: normalizeCoverArtDelay,
-    trackOverlayDuration: (value) => parseFloat(String(value)) || 0,
-  });
-  const mediaPlaybackController = createMediaPlaybackController();
+  const settingsUiFeature = context.controllers.settingsUi;
+  const alarmDelayAudioController = context.controllers.alarmDelayAudio;
+  const screensaverController = context.controllers.screensaver;
+  const coverArtScreensaverController = context.controllers.coverArtScreensaver;
+  const mediaPlaybackController = context.controllers.mediaPlayback;
   installGlobals(installSettingsPageHelpersModule({
     settingsUiFeature,
     alarmDelayAudio: alarmDelayAudioController,
@@ -241,33 +214,184 @@ function installApplicationCompatibility(): void {
   installGlobals(installSettingsCoverArtSectionModule());
   installGlobals(installSettingsPageModule());
   installGlobals(installControlsFieldsModule());
-  installGlobals(installPreviewRenderModule());
+  installGlobals(installPreviewRenderModule({
+    document: context.dom.document,
+    layout: context.layout,
+  }));
   installGlobals(installButtonSettingsSelectionModule());
   installGlobals(installButtonSettingsRenderQueueModule());
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence,
   ));
-  installGlobals(installPreviewGridPlacementModule(previewPlacementController));
-  installGlobals(installPreviewContextMenuModule());
-  installGlobals(installPreviewClipboardModule(configPersistence));
-  installGlobals(installPreviewInteractionsModule(cardEditorDraft, configPersistence));
-  const backupFeature = createBackupFeature({
-    deviceId: DEVICE_ID,
-    gridCols: GRID_COLS,
-    numSlots: NUM_SLOTS,
-    normalizeButtonConfig,
-    parseSubpageConfig,
-    serializeSubpageConfig,
+  installGlobals(installPreviewGridPlacementModule({
+    controller: previewPlacementController,
+    layout: context.layout,
+  }));
+  installGlobals(installPreviewContextMenuModule({
+    document: context.dom.document,
+    window: context.dom.window,
+    layout: context.layout,
+  }));
+  installGlobals(installPreviewClipboardModule({
+    configPersistence,
+    document: context.dom.document,
+    layout: context.layout,
+  }));
+  installGlobals(installPreviewInteractionsModule({
+    cardEditorDraft,
+    configPersistence,
+    layout: context.layout,
+    window: context.dom.window,
+  }));
+  installGlobals(installBackupContractModule(context.backup.contract));
+  const backupUiFeature = context.backup.application;
+  installGlobals(installSettingsSystemSectionModule({
+    exportBackup: backupUiFeature.exportConfig,
+    importBackup: backupUiFeature.importConfig,
+  }));
+  installGlobals(backupUiFeature.globals);
+  installGlobals(installAppStatusPreviewModule());
+  installGlobals(installAppTitleModule());
+  installGlobals(installAppConfigEventsModule(configPersistence));
+  let sseHandlerFactory: SseHandlerFactory | undefined;
+  installGlobals(installAppStateEventHandlersModule((factory) => {
+    sseHandlerFactory = factory;
+  }));
+  const reconnectController = context.controllers.reconnect;
+  if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
+  installGlobals(installAppEventsModule(reconnectController, sseHandlerFactory));
+  installGlobals(installAppModule());
+}
+
+function installCardCompatibility(context: ApplicationContext): void {
+  const registry = context.cards;
+  registry.registerCompatibility(registerActionCardTypes());
+  registry.registerCompatibility(registerAlarmCardTypes());
+  registry.registerCompatibility(registerCalendarCardTypes());
+  registry.registerCompatibility(registerClimateCardTypes());
+  registry.registerCompatibility(registerClockCardTypes());
+  registry.registerCompatibility(registerCoverLikeCardHelpers());
+  registry.registerCompatibility(registerDoorWindowCardTypes());
+  registry.registerCompatibility(registerEntityModeCardHelpers());
+  registry.registerCompatibility(registerFanCardTypes());
+  registry.registerCompatibility(registerGarageCardTypes());
+  registry.registerCompatibility(registerGateCardTypes());
+  registry.registerCompatibility(registerImageCardTypes());
+  registry.registerCompatibility(registerInternalCardTypes());
+  registry.registerCompatibility(registerLawnMowerCardTypes());
+  registry.registerCompatibility(registerLightTemperatureCardTypes());
+  registry.registerCompatibility(registerLockCardTypes());
+  registry.registerCompatibility(registerMediaCardTypes());
+  registry.registerCompatibility(registerPresenceCardTypes());
+  registry.registerCompatibility(registerPushCardTypes());
+  registry.registerCompatibility(registerScreenLockCardTypes());
+  registry.registerCompatibility(registerSensorCardTypes());
+  registry.registerCompatibility(registerSliderCardTypes());
+  registry.registerCompatibility(registerSubpageCardTypes());
+  registry.registerCompatibility(registerSwitchCardTypes());
+  registry.registerCompatibility(registerTimezoneCardTypes());
+  registry.registerCompatibility(registerVacuumCardTypes());
+  registry.registerCompatibility(registerWeatherCardTypes());
+  registry.registerCompatibility(registerWeatherForecastCardTypes());
+  registry.registerCompatibility(registerWebhookCardTypes());
+}
+
+function installTestCompatibility(): void {
+  installGlobals(installAppTestHooks());
+  installGlobals(installAppTestHooksConfig());
+  installGlobals(installAppTestHooksPreview());
+  installGlobals(installAppTestHooksBackup());
+  installGlobals(installAppTestHooksSettings());
+}
+
+function composeApplicationContext(): ApplicationContext {
+  const fetchService: typeof fetch = typeof fetch === "function"
+    ? fetch.bind(globalThis)
+    : (() => Promise.reject(new Error("Fetch is not available"))) as typeof fetch;
+  const dom: ApplicationDomServices = {
+    document,
+    window,
+    fetch: fetchService,
+    createEventSource: () => new EventSource("/events"),
+    schedule: setTimeout,
+  };
+  const deviceApi = createDeviceApi((url, init) =>
+    dom.fetch(url, init as RequestInit));
+  const layout = createApplicationLayoutState(
+    DeviceConfig.deviceId,
+    DeviceConfig.deviceConfig,
+  );
+  const nativePanelConfig = createNativePanelConfigMigrationController({
+    deviceProfile: () => layout.deviceId,
+    slotCount: () => layout.numSlots,
+    entityName: (name) => entityName(name),
+    entityNameForSlot: (name, slot) => entityNameForSlot(name, slot),
+    normalizeHexColor: (value, fallback) => Model.normalizeHexColor(value, fallback),
+    showBanner: (message, level) => showBanner(message, level),
+    delay: (callback, milliseconds) => dom.schedule(callback, milliseconds),
+  });
+  const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig);
+  const cardEditorDraft = createCardEditorDraftController({
+    cloneCard: (button) => Model.cloneCardConfig(button),
+    emptyCard: () => Model.emptyCardConfig(),
+  });
+  const cardEditorSave = createCardEditorSaveController({
+    emptyCard: () => Model.emptyCardConfig(),
+    copyCard: (target, source) => {
+      Model.copyCardConfig(target, source);
+      normalizeButtonConfig(target);
+    },
+  });
+  const cardEditorValidation = createCardEditorValidationController();
+  const previewPlacement = createPreviewPlacementController();
+  const voiceServices = createVoiceServicesController();
+  const screenSchedule = createScreenScheduleController({
+    trigger: (value, enabled) => normalizeScheduleTrigger(value, enabled),
+    sensorActivation: (value) => normalizeScheduleSensorActivation(value),
+    hour: (value, fallback) => normalizeHour(value, fallback),
+    mode: (value) => normalizeScheduleMode(value),
+    wakeTimeout: (value) => normalizeScheduleWakeTimeout(value),
+    wakeBrightness: (value) => normalizeScheduleWakeBrightness(value),
+    dimmedBrightness: (value) => normalizeScheduleDimmedBrightness(value),
+    clockBrightness: (value) => normalizeScheduleClockBrightness(value),
+  });
+  const clockBar = createClockBarController();
+  const settingsUi = createSettingsUiFeature({
+    document: dom.document,
+    textSpan: (text, className) => textSpan(text, className),
+    createDisclosureChevron: (className) => createDisclosureChevron(className),
+  });
+  const alarmDelayAudio = createAlarmDelayAudioController({
+    announcement: (value, fallback) => normalizeAlarmDelayAnnouncement(value, fallback),
+    beepVolume: (value) => normalizeAlarmDelayBeepVolume(value),
+    finalCountdown: (value) => normalizeAlarmDelayFinalCountdown(value),
+  });
+  const screensaver = createScreensaverController({
+    action: (value) => normalizeScreensaverAction(value),
+    dimBrightness: (value) => normalizeScreensaverDimmedBrightness(value),
+    clockBrightness: (value, fallback) => normalizeClockBrightness(value, fallback),
+  });
+  const coverArtScreensaver = createCoverArtScreensaverController({
+    delay: (value) => normalizeCoverArtDelay(value),
+    trackOverlayDuration: (value) => parseFloat(String(value)) || 0,
+  });
+  const mediaPlayback = createMediaPlaybackController();
+  const backupContract = createBackupFeature({
+    deviceId: layout.deviceId,
+    gridCols: layout.gridCols,
+    numSlots: layout.numSlots,
+    normalizeButtonConfig: (button) => normalizeButtonConfig(button),
+    parseSubpageConfig: (value) => parseSubpageConfig(value),
+    serializeSubpageConfig: (subpage) => serializeSubpageConfig(subpage),
     buildSubpageGrid: (subpage) => {
       buildSubpageGridAndNormalizeOrder(subpage);
       return subpage.grid || [];
     },
   });
-  installGlobals(installBackupContractModule(backupFeature));
   const normalizeImportedPanelSettings = (settings: any) => {
     if (!settings) return null;
-    return EspControlModel.normalizeBackupPanelSettings(settings, {
+    return Model.normalizeBackupPanelSettings(settings, {
       timezone: state.timezone,
       language: state.language,
       clockFormat: state.clockFormat,
@@ -286,45 +410,47 @@ function installApplicationCompatibility(): void {
   };
   const gridColsForImportedSettings = (importedSettings: any): number => {
     const rotation = importedSettings ? importedSettings.screenRotation : state.screenRotation;
-    const layout = isPortraitRotation(rotation) && CFG.portrait ? CFG.portrait : CFG;
-    return layout.cols || CFG.cols;
+    const profile = isPortraitRotation(rotation) && layout.config.portrait
+      ? layout.config.portrait
+      : layout.config;
+    return profile.cols || layout.config.cols;
   };
-  const backupExportController = createBackupExportController({
-    serializeButtonConfig,
-    serializeSubpageConfig,
+  const backupExport = createBackupExportController({
+    serializeButtonConfig: (button) => serializeButtonConfig(button),
+    serializeSubpageConfig: (subpage) => serializeSubpageConfig(subpage),
   });
-  const backupImportController = createBackupImportController<any, any, any, any>({
-    normalizeBackup: normalizeBackupConfig,
+  const backupImport = createBackupImportController<any, any, any, any>({
+    normalizeBackup: (data) => backupContract.normalizeBackupConfig(data),
     normalizeSettings: normalizeImportedPanelSettings,
     gridColsForSettings: gridColsForImportedSettings,
-    getGridCols: () => GRID_COLS,
-    setGridCols: (gridCols) => { GRID_COLS = gridCols; },
-    planBackupImport,
+    getGridCols: () => layout.gridCols,
+    setGridCols: (gridCols) => { layout.gridCols = gridCols; },
+    planBackupImport: (data, target) => backupContract.planBackupImport(data, target),
   });
-  const backupRestoreController = createBackupRestoreController<any, any>({
-    plan: backupImportController.plan,
+  const backupRestore = createBackupRestoreController<any, any>({
+    plan: backupImport.plan,
     warnings: (plannedImport) => plannedImport.backupPlan.warnings,
-    showBanner,
-    setPostThrottle,
-    resetPostQueueError,
-    postQueueIdle,
-    postQueueHadError,
+    showBanner: (message, kind) => showBanner(message, kind),
+    setPostThrottle: (milliseconds) => setPostThrottle(milliseconds),
+    resetPostQueueError: () => resetPostQueueError(),
+    postQueueIdle: () => postQueueIdle(),
+    postQueueHadError: () => postQueueHadError(),
   });
-  const backupFileController = createBackupFileController({
+  const backupFile = createBackupFileController({
     transport: {
       download(content, filename) {
         const blob = new Blob([content], { type: "application/json" });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
+        const link = dom.document.createElement("a");
         link.href = url;
         link.download = filename;
-        document.body.appendChild(link);
+        dom.document.body.appendChild(link);
         link.click();
-        document.body.removeChild(link);
+        dom.document.body.removeChild(link);
         URL.revokeObjectURL(url);
       },
       chooseJsonFile(onText, onError) {
-        const input = document.createElement("input");
+        const input = dom.document.createElement("input");
         input.type = "file";
         input.accept = ".json";
         input.style.display = "none";
@@ -348,84 +474,59 @@ function installApplicationCompatibility(): void {
           };
           reader.readAsText(input.files[0]);
         });
-        document.body.appendChild(input);
+        dom.document.body.appendChild(input);
         input.click();
       },
     },
-    showBanner,
+    showBanner: (message, kind) => showBanner(message, kind),
   });
-  const backupUiFeature = createAppBackupFeature({
-    backupExport: backupExportController,
-    backupImport: backupImportController,
-    backupRestore: backupRestoreController,
-    backupFile: backupFileController,
+  const backupApplication = createAppBackupFeature({
+    layout,
+    backupExport,
+    backupImport,
+    backupRestore,
+    backupFile,
     normalizeImportedPanelSettings,
     gridColsForImportedSettings,
   });
-  installGlobals(installSettingsSystemSectionModule({
-    exportBackup: backupUiFeature.exportConfig,
-    importBackup: backupUiFeature.importConfig,
-  }));
-  installGlobals(backupUiFeature.globals);
-  installGlobals(installAppStatusPreviewModule());
-  installGlobals(installAppTitleModule());
-  installGlobals(installAppConfigEventsModule(configPersistence));
-  let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule((factory) => {
-    sseHandlerFactory = factory;
-  }));
-  const reconnectController = createReconnectController<unknown>({
+  const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),
     loadInitialState: (handleState, markConnected) =>
       loadInitialState(handleState, markConnected),
-    createEventSource: () => new EventSource("/events"),
+    createEventSource: dom.createEventSource,
     getActiveSource: () => _eventSource,
     setActiveSource: (source) => { _eventSource = source; },
-    schedule: (callback, delayMs) => setTimeout(callback, delayMs),
+    schedule: (callback, delayMs) => dom.schedule(callback, delayMs),
   });
-  if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
-  installGlobals(installAppEventsModule(reconnectController, sseHandlerFactory));
-  installGlobals(installAppModule());
-}
-
-function installCardCompatibility(): void {
-  installGlobals(registerActionCardTypes());
-  installGlobals(registerAlarmCardTypes());
-  installGlobals(registerCalendarCardTypes());
-  installGlobals(registerClimateCardTypes());
-  installGlobals(registerClockCardTypes());
-  installGlobals(registerCoverLikeCardHelpers());
-  installGlobals(registerDoorWindowCardTypes());
-  installGlobals(registerEntityModeCardHelpers());
-  installGlobals(registerFanCardTypes());
-  installGlobals(registerGarageCardTypes());
-  installGlobals(registerGateCardTypes());
-  installGlobals(registerImageCardTypes());
-  installGlobals(registerInternalCardTypes());
-  installGlobals(registerLawnMowerCardTypes());
-  installGlobals(registerLightTemperatureCardTypes());
-  installGlobals(registerLockCardTypes());
-  installGlobals(registerMediaCardTypes());
-  installGlobals(registerPresenceCardTypes());
-  installGlobals(registerPushCardTypes());
-  installGlobals(registerScreenLockCardTypes());
-  installGlobals(registerSensorCardTypes());
-  installGlobals(registerSliderCardTypes());
-  installGlobals(registerSubpageCardTypes());
-  installGlobals(registerSwitchCardTypes());
-  installGlobals(registerTimezoneCardTypes());
-  installGlobals(registerVacuumCardTypes());
-  installGlobals(registerWeatherCardTypes());
-  installGlobals(registerWeatherForecastCardTypes());
-  installGlobals(registerWebhookCardTypes());
-}
-
-function installTestCompatibility(): void {
-  installGlobals(installAppTestHooks());
-  installGlobals(installAppTestHooksConfig());
-  installGlobals(installAppTestHooksPreview());
-  installGlobals(installAppTestHooksBackup());
-  installGlobals(installAppTestHooksSettings());
+  return createApplicationContext({
+    layout,
+    model: Model,
+    state: AppInstance.state,
+    api: deviceApi,
+    nativeConfiguration: nativePanelConfig,
+    configurationPersistence,
+    backupContract,
+    backupExport,
+    backupFile,
+    backupImport,
+    backupRestore,
+    backupApplication,
+    alarmDelayAudio,
+    cardEditorDraft,
+    cardEditorSave,
+    cardEditorValidation,
+    clockBar,
+    coverArtScreensaver,
+    mediaPlayback,
+    previewPlacement,
+    reconnect,
+    screenSchedule,
+    screensaver,
+    settingsUi,
+    voiceServices,
+    dom,
+    cards: createCompatibilityCardRegistry(installGlobals),
+  });
 }
 
 function startEspControl(): void {
@@ -449,8 +550,10 @@ function startEspControl(): void {
       AppState.defaultTimezoneOptionsForDevice(DeviceConfig.deviceConfig),
   });
 
-  installApplicationCompatibility();
-  installCardCompatibility();
+  const context = composeApplicationContext();
+
+  installApplicationCompatibility(context);
+  installCardCompatibility(context);
   if (__ESPCONTROL_TEST_HOOKS_ENABLED__) {
     installTestCompatibility();
   }

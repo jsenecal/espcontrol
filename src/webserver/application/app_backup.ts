@@ -4,8 +4,10 @@ import type { BackupImportController } from "../features/backup_import_controlle
 import type { BackupExportController } from "../features/backup_export_controller";
 import type { BackupFileController } from "../features/backup_file_controller";
 import type { BackupRestoreController } from "../features/backup_restore_controller";
+import type { ApplicationLayoutState } from "./application_context";
 
 export interface AppBackupControllers {
+    readonly layout: ApplicationLayoutState;
     readonly backupExport: BackupExportController;
     readonly backupImport: BackupImportController<any, any, any>;
     readonly backupRestore: BackupRestoreController<any, any>;
@@ -30,7 +32,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
         return backupExportController.fileDate(value);
     }
     function backupExportFileName(this: any, value?: any) {
-        return backupExportController.fileName(CFG.screenSize, value);
+        return backupExportController.fileName(controllers.layout.config.screenSize, value);
     }
     function normalizeImportedPanelSettings(this: any, settings?: any) {
         return controllers.normalizeImportedPanelSettings(settings);
@@ -46,7 +48,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
     }
     function addNativeConfigToBackup(this: any, data?: any) {
         return backupExportController.addNativeConfig(data, {
-            "deviceProfile": DEVICE_ID,
+            "deviceProfile": controllers.layout.deviceId,
             "buttons": state.buttons,
             "subpages": state.subpages,
             "buttonOrder": data.button_order,
@@ -55,8 +57,8 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
     }
     function exportConfig(this: any) {
         var data: any = createBackupConfig({
-            device: DEVICE_ID,
-            slots: NUM_SLOTS,
+            device: controllers.layout.deviceId,
+            slots: controllers.layout.numSlots,
             exported_at: new Date().toISOString(),
             grid: state.grid,
             sizes: state.sizes,
@@ -147,7 +149,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                 var importedGridCols: any = plannedImport.importedGridCols;
                 var backupPlan: any = plannedImport.backupPlan;
                 postText(entityName("button_on_color"), backupPlan.config.button_on_color);
-                for (var i: any = 0; i < NUM_SLOTS; i++) {
+                for (var i: any = 0; i < controllers.layout.numSlots; i++) {
                     var b: any = backupPlan.buttons[i];
                     var n: any = i + 1;
                     state.buttons[i] = backupNormalizeButtonConfig(b);
@@ -159,14 +161,14 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                     state.subpages[subpageKey] = backupPlan.subpages[subpageKey];
                     saveSubpageEntity(subpageKey);
                 }
-                var activeGridCols: any = GRID_COLS;
-                GRID_COLS = importedGridCols;
+                var activeGridCols: any = controllers.layout.gridCols;
+                controllers.layout.gridCols = importedGridCols;
                 var normalizedButtonOrder: any;
                 try {
                     normalizedButtonOrder = applyImportedButtonOrder(backupPlan.button_order, backupPlan.importedSizes);
                 }
                 finally {
-                    GRID_COLS = activeGridCols;
+                    controllers.layout.gridCols = activeGridCols;
                 }
                 postText(entityName("button_order"), normalizedButtonOrder);
                 state.onColor = backupPlan.config.button_on_color;
@@ -187,9 +189,9 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                     postClockBarTime(importedSettings.clockBarTime);
                     postClockBarNightMode(importedSettings.clockBarNightMode);
                     postNetworkStatusIcon(importedSettings.networkStatusIcon);
-                    if (CFG.features && CFG.features.voiceServices)
+                    if (controllers.layout.config.features && controllers.layout.config.features.voiceServices)
                         postVoiceServices(importedSettings.voiceServices);
-                    if (CFG.features && CFG.features.alarmDelayAudio) {
+                    if (controllers.layout.config.features && controllers.layout.config.features.alarmDelayAudio) {
                         postAlarmDelayAudio(importedSettings.alarmDelayAudio);
                         postAlarmDelayTts(importedSettings.alarmDelayTts);
                         postAlarmDelayEntryAnnouncement(importedSettings.alarmDelayEntryAnnouncement);
@@ -259,7 +261,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                     postScreensaverTimeout(importedSettings.screensaverTimeout);
                     postHomeScreenTimeout(importedSettings.homeScreenTimeout);
                     var importedScreenRotation: any = importedSettings.screenRotation;
-                    if (CFG.features && CFG.features.screenRotation)
+                    if (controllers.layout.config.features && controllers.layout.config.features.screenRotation)
                         postSelect(entityName("screen_rotation"), importedScreenRotation);
                     state.clockBarTemperatureEntities = importedSettings.clockBarTemperatureEntities;
                     state._clockBarTemperatureEntitiesReceived = true;
@@ -411,7 +413,10 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                 renderButtonSettings();
                 switchTab("screen");
                 }
-                backupRestoreController.restore(data, { device: DEVICE_ID, slots: NUM_SLOTS }, applyBackupRestorePlan);
+                backupRestoreController.restore(data, {
+                    device: controllers.layout.deviceId,
+                    slots: controllers.layout.numSlots,
+                }, applyBackupRestorePlan);
         });
     }
     return {
