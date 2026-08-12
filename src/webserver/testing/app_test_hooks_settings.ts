@@ -6,7 +6,6 @@ export function installAppTestHooksSettings(): GlobalDescriptors {
             normalizeTemperatureUnit: normalizeTemperatureUnit,
             normalizeCoverArtDelay: normalizeCoverArtDelay,
             normalizeHomeAssistantArtworkPort: normalizeHomeAssistantArtworkPort,
-            normalizeHomeAssistantArtworkBaseUrl: normalizeHomeAssistantArtworkBaseUrl,
             defaultTimezoneOptions: defaultTimezoneOptions,
             timezoneOptionsWithFallback: timezoneOptionsWithFallback,
             effectiveTimezoneOptionForWeb: effectiveTimezoneOptionForWeb,
@@ -24,8 +23,6 @@ export function installAppTestHooksSettings(): GlobalDescriptors {
             coverArtDelayPostUrls: coverArtDelayPostUrls,
             coverArtTrackOverlayDurationPostUrls: coverArtTrackOverlayDurationPostUrls,
             homeAssistantArtworkPortPostUrls: homeAssistantArtworkPortPostUrls,
-            homeAssistantArtworkBaseUrlPostUrls: homeAssistantArtworkBaseUrlPostUrls,
-            postHomeAssistantArtworkBaseUrl: postHomeAssistantArtworkBaseUrl,
             voiceServicesPostUrls: voiceServicesPostUrls,
             firmwareUpdateControlsVisibleFor: function (this: any, transport?: any, supported?: any) {
                 var oldTransport: any = state.networkTransport;

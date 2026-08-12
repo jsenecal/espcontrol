@@ -769,8 +769,6 @@ declare global {
   var normalizeHexColor: any;
   var normalizeHomeAssistantArtworkPort: any;
   var normalizeHomeAssistantArtworkProtocol: any;
-  var normalizeHomeAssistantArtworkBaseUrl: any;
-  var homeAssistantArtworkBaseUrlPostUrls: any;
   var normalizeGridSpansForLayout: any;
   var normalizeHour: any;
   var normalizeImageModalMode: any;
@@ -887,7 +885,6 @@ declare global {
   var postFirstAvailable: any;
   var postHomeAssistantArtworkPort: any;
   var postHomeAssistantArtworkProtocol: any;
-  var postHomeAssistantArtworkBaseUrl: any;
   var postHomeScreenTimeout: any;
   var postMediaPlayerSleepPrevention: any;
   var postMediaPlayerSleepPreventionEntity: any;

@@ -1496,6 +1496,11 @@ async function assertSettingsPage(page, label, options = {}, posts = []) {
       .count()) === 1,
     `${label}: Home Assistant port field should hide browser stepper controls`,
   );
+  assert.strictEqual(
+    await homeAssistantSettingsCard.locator("#sp-set-ha-artwork-base-url").count(),
+    0,
+    `${label}: unsupported artwork base URL field should not render`,
+  );
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth + 1,
   );

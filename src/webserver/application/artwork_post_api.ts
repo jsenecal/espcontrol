@@ -49,12 +49,6 @@ export function installArtworkPostApiModule(): GlobalDescriptors {
     function postHomeAssistantArtworkProtocol(this: any, value?: any) {
         return postSelectWithObjectIds(entityName("home_assistant_artwork_protocol"), entityObjectIds("home_assistant_artwork_protocol"), normalizeHomeAssistantArtworkProtocol(value));
     }
-    function homeAssistantArtworkBaseUrlPostUrls(this: any, value?: any) {
-        return entityPostUrls("text", entityName("home_assistant_artwork_base_url"), entityObjectIds("home_assistant_artwork_base_url"), "set?value=" + encodeURIComponent(normalizeHomeAssistantArtworkBaseUrl(value)));
-    }
-    function postHomeAssistantArtworkBaseUrl(this: any, value?: any) {
-        return post(homeAssistantArtworkBaseUrlPostUrls(value));
-    }
     return {
         "postPresenceSensorEntity": staticGlobal(postPresenceSensorEntity),
         "postMediaPlayerSleepPrevention": staticGlobal(postMediaPlayerSleepPrevention),
@@ -72,7 +66,5 @@ export function installArtworkPostApiModule(): GlobalDescriptors {
         "homeAssistantArtworkPortPostUrls": staticGlobal(homeAssistantArtworkPortPostUrls),
         "postHomeAssistantArtworkPort": staticGlobal(postHomeAssistantArtworkPort),
         "postHomeAssistantArtworkProtocol": staticGlobal(postHomeAssistantArtworkProtocol),
-        "homeAssistantArtworkBaseUrlPostUrls": staticGlobal(homeAssistantArtworkBaseUrlPostUrls),
-        "postHomeAssistantArtworkBaseUrl": staticGlobal(postHomeAssistantArtworkBaseUrl),
     };
 }
