@@ -310,6 +310,24 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:_eventSource|isSettingsFocused|isSettingsOpen):/);
   });
 
+  test("injects settings DOM references", () => {
+    const modules = [
+      "settings_page_helpers.ts",
+      "settings_schedule_section.ts",
+      "settings_cover_art_section.ts",
+      "settings_page.ts",
+      "settings_system_section.ts",
+    ];
+    for (const moduleName of modules) {
+      const source = fs.readFileSync(path.join(ROOT, "src/webserver/application", moduleName), "utf8");
+      assert.match(source, /UiRuntimeState/, `${moduleName} should declare its runtime dependency`);
+      assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
+    }
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime\)/);
+    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime\)\)/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

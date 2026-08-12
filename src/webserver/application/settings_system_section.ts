@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { UiRuntimeState } from "./state";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;
@@ -8,7 +9,9 @@ export interface SettingsSystemSectionActions {
 
 export function installSettingsSystemSectionModule(
     actions: SettingsSystemSectionActions,
+    runtime: UiRuntimeState,
 ): GlobalDescriptors {
+    const els = runtime.els;
     // ── Settings System Section ────────────────────────────────────────
     function buildSystemSettingsCards(this: any) {
         var backupBody: any = document.createElement("div");

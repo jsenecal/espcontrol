@@ -199,10 +199,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     coverArtScreensaver: coverArtScreensaverController,
     mediaPlayback: mediaPlaybackController,
     codec: context.configuration.codec,
+    runtime: context.runtime,
   }));
-  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec));
-  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec));
-  installGlobals(installSettingsPageModule(context.configuration.codec));
+  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime));
+  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -255,7 +256,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
-  }));
+  }, context.runtime));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule(context.runtime));
   installGlobals(installAppTitleModule());

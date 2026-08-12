@@ -1,8 +1,10 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";
-export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState): GlobalDescriptors {
     const { bindTextPost } = codec;
+    const els = runtime.els;
     // ── Settings Schedule Section ──────────────────────────────────────
     function buildScreenScheduleSettingsCard(this: any) {
         var scheduleBody: any = document.createElement("div");

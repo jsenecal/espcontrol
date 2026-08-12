@@ -7,6 +7,7 @@ import type { ScreensaverController } from "../features/screensaver_controller";
 import type { CoverArtScreensaverController } from "../features/cover_art_screensaver_controller";
 import type { MediaPlaybackController } from "../features/media_playback_controller";
 import type { ConfigCodecFeature } from "./config_codec";
+import type { UiRuntimeState } from "./state";
 
 export interface SettingsPageHelpersControllers {
     readonly settingsUiFeature: SettingsUiFeature;
@@ -15,12 +16,14 @@ export interface SettingsPageHelpersControllers {
     readonly coverArtScreensaver: CoverArtScreensaverController;
     readonly mediaPlayback: MediaPlaybackController;
     readonly codec: Pick<ConfigCodecFeature, "bindTextPost">;
+    readonly runtime: UiRuntimeState;
 }
 
 export function installSettingsPageHelpersModule(
     controllers: SettingsPageHelpersControllers,
 ): GlobalDescriptors {
     const { bindTextPost } = controllers.codec;
+    const els = controllers.runtime.els;
     // ── Settings Page Helpers ──────────────────────────────────────────
     // ── Settings UI helpers ─────────────────────────────────────────────
     var _settingsUiFeature: SettingsUiFeature = controllers.settingsUiFeature;
