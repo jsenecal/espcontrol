@@ -11,7 +11,7 @@ import * as EventState from "./state/event_state";
 import * as FirmwareEvents from "./state/firmware_events";
 import * as ConfigPrimitives from "./model/config_primitives";
 import * as CardContract from "./generated/card_contract";
-import * as Icons from "./generated/icons";
+import { textSpan } from "./application/ui_primitives";
 import { ENTITY_CATALOG } from "./generated/entity_catalog";
 import { installGlobals, installStaticGlobals } from "./runtime/globals";
 import { installCore } from "./application/core";
@@ -608,7 +608,6 @@ function startEspControl(): void {
     ...FirmwareEvents,
     ...ConfigPrimitives,
     ...CardContract,
-    ...Icons,
     ENTITY_CATALOG,
     defaultTimezoneOptions: () =>
       AppState.defaultTimezoneOptionsForDevice(DeviceConfig.deviceConfig),

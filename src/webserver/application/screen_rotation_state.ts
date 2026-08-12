@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { uniqueOptions } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 export function installScreenRotationStateModule(): GlobalDescriptors {
     // ── Screen Rotation State ──────────────────────────────────────────────

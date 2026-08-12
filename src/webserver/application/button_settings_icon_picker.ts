@@ -1,4 +1,5 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { iconOptions as ICON_OPTIONS, iconSlug, mdiIcon, textSpan } from "./ui_primitives";
 export function installButtonSettingsIconPickerModule(): GlobalDescriptors {
     // ── Button Settings Icon Picker ───────────────────────────────────
     // ── Icon picker (optimized) ────────────────────────────────────────────

@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { escHtml, iconSlug } from "../application/ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigMediaOptionsFeature } from "../application/config_media_options";

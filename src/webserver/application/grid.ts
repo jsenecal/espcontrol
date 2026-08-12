@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { domainIcons as DOMAIN_ICONS, iconSlug } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";
 export function installGridModule(codec: ConfigCodecFeature): GlobalDescriptors {

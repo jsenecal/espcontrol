@@ -142,11 +142,6 @@ export function runApplicationContextTests(): void {
   equal(sensor.label, "Sensor", "registry preserves typed card metadata");
   equal(sensor.runtimeSpec != null, true, "registry attaches the generated runtime contract");
 
-  Object.assign(globalThis, {
-    GENERATED_ICON_EXCEPTIONS: {},
-    GENERATED_ICON_NAMES: [],
-    GENERATED_DOMAIN_ICONS: {},
-  });
   const compatibilityGlobals: Record<string, unknown> = {};
   Object.defineProperties(compatibilityGlobals, installCore(context.layout, {
     serializeSubpageGrid() { return ""; },

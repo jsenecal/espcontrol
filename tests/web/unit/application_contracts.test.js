@@ -246,6 +246,21 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:normalizeButtonConfig|serializeButtonConfig|parseSubpageConfig|serializeSubpageConfig|getSubpage|bindTextPost):/);
   });
 
+  test("imports shared UI primitives without application globals", () => {
+    const primitives = fs.readFileSync(path.join(ROOT, "src/webserver/application/ui_primitives.ts"), "utf8");
+    const stateModule = fs.readFileSync(path.join(ROOT, "src/webserver/application/state.ts"), "utf8");
+    const core = fs.readFileSync(path.join(ROOT, "src/webserver/application/core.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(primitives, /export function iconSlug/);
+    assert.match(primitives, /export function mdiIcon/);
+    assert.match(primitives, /export function escHtml/);
+    assert.doesNotMatch(stateModule, /staticGlobal\((?:uniqueOptions|setSelectValue|escHtml|escAttr|mdiIcon|textSpan)\)/);
+    assert.doesNotMatch(core, /staticGlobal\(iconSlug\)/);
+    assert.doesNotMatch(entry, /\.\.\.Icons/);
+    assert.doesNotMatch(globals, /\bvar (?:iconSlug|mdiIcon|textSpan|escHtml|escAttr|uniqueOptions|setSelectValue|ICON_OPTIONS|DOMAIN_ICONS):/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

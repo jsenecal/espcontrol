@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { setSelectValue } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 export function installScreensaverTimeoutModule(): GlobalDescriptors {
     // Screensaver timeout options and UI syncing.

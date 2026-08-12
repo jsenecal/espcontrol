@@ -1,4 +1,5 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { escHtml, iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 export function registerAlarmCardTypes(

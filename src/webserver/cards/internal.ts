@@ -1,4 +1,5 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import { cardContractOptionSpec } from "../application/config_option_core";
 export function registerInternalCardTypes(registry: CardRegistry): GlobalDescriptors {

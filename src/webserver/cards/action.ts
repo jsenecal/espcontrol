@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { iconSlug } from "../application/ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";

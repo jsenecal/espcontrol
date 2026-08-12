@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { setSelectValue } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { timedSettingLabel, type SettingsUiFeature } from "../features/settings";
 import type { AlarmDelayAudioController } from "../features/alarm_delay_audio_controller";

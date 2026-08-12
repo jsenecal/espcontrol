@@ -1,4 +1,5 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { iconSlug } from "../application/ui_primitives";
 import {
     normalizeSavedConfigVacuumIconOn,
     normalizeSavedConfigVacuumOptions,

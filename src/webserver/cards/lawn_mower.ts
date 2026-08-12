@@ -1,4 +1,5 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 export function registerLawnMowerCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Lawn Mower card: touchscreen-friendly controls for Home Assistant mower entities.

@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { escHtml, iconSlug } from "../application/ui_primitives";
 import { createSensorCardModeController } from "../features/sensor_card_mode_controller";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";

@@ -144,16 +144,6 @@ export function installCore(
             }
         }
     }
-    var ICON_EXCEPTIONS: any = GENERATED_ICON_EXCEPTIONS;
-    var ICON_NAMES: any = GENERATED_ICON_NAMES.slice();
-    // Convert an icon display name to its MDI CSS class slug (e.g. "Lightbulb" → "lightbulb")
-    function iconSlug(this: any, name?: any) {
-        return ICON_EXCEPTIONS[name] || name.toLowerCase().replace(/[^a-z0-9]/g, function (this: any, ch?: any) {
-            return ch === " " ? "-" : "";
-        }) || "cog";
-    }
-    var ICON_OPTIONS: any = ["Auto"].concat(ICON_NAMES).sort();
-    var DOMAIN_ICONS: any = GENERATED_DOMAIN_ICONS;
     // ── Button type plugin registry ──────────────────────────────────────
     function subpageStateDisplayMode(this: any, b?: any) {
         if (!b || !b.sensor)
@@ -198,11 +188,6 @@ export function installCore(
         "syncPreviewStyleVars": staticGlobal(syncPreviewStyleVars),
         "normalizeGridSpansForLayout": staticGlobal(normalizeGridSpansForLayout),
         "syncPreviewOrientation": staticGlobal(syncPreviewOrientation),
-        "ICON_EXCEPTIONS": liveGlobal(() => ICON_EXCEPTIONS, (value?: any) => { ICON_EXCEPTIONS = value; }),
-        "ICON_NAMES": liveGlobal(() => ICON_NAMES, (value?: any) => { ICON_NAMES = value; }),
-        "iconSlug": staticGlobal(iconSlug),
-        "ICON_OPTIONS": liveGlobal(() => ICON_OPTIONS, (value?: any) => { ICON_OPTIONS = value; }),
-        "DOMAIN_ICONS": liveGlobal(() => DOMAIN_ICONS, (value?: any) => { DOMAIN_ICONS = value; }),
         "subpageStateDisplayMode": staticGlobal(subpageStateDisplayMode),
         "WEBSERVER_MOCK_NOW_ISO": liveGlobal(() => WEBSERVER_MOCK_NOW_ISO, (value?: any) => { WEBSERVER_MOCK_NOW_ISO = value; }),
         "webserverUseMockNowForTest": liveGlobal(() => webserverUseMockNowForTest, (value?: any) => { webserverUseMockNowForTest = value; }),

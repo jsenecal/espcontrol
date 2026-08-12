@@ -46,7 +46,6 @@ declare global {
   var applyScreenScheduleControllerState: any;
   var DATE_TIME_CARD_METADATA: any;
   var DEVICE_ID: any;
-  var DOMAIN_ICONS: any;
   var DOOR_WINDOW_CARD_METADATA: any;
   var ENTITY_CATALOG: any;
   var EspControlModel: any;
@@ -64,14 +63,8 @@ declare global {
   var GARAGE_MODE_OPTIONS: any;
   var GATE_CARD_METADATA: any;
   var GATE_MODE_OPTIONS: any;
-  var GENERATED_DOMAIN_ICONS: any;
-  var GENERATED_ICON_EXCEPTIONS: any;
-  var GENERATED_ICON_NAMES: any;
   var GRID_COLS: any;
   var GRID_ROWS: any;
-  var ICON_EXCEPTIONS: any;
-  var ICON_NAMES: any;
-  var ICON_OPTIONS: any;
   var IMAGE_CARD_METADATA: any;
   var INTERNAL_CARD_METADATA: any;
   var LANGUAGE_LABELS: any;
@@ -378,8 +371,6 @@ declare global {
   var entityStateItemsForSlots: any;
   var entityStateKeys: any;
   var entitySuggestions: any;
-  var escAttr: any;
-  var escHtml: any;
   var esphomeObjectId: any;
   var eventStreamEnabled: any;
   var exportConfig: any;
@@ -438,7 +429,6 @@ declare global {
   var hideContextMenu: any;
   var hideSettingsOverlay: any;
   var homeAssistantArtworkPortPostUrls: any;
-  var iconSlug: any;
   var imageModalModeOptions: any;
   var importConfig: any;
   var infoOnlyCardVisible: any;
@@ -513,7 +503,6 @@ declare global {
   var makeCollapsibleCard: any;
   var markCardPrimaryField: any;
   var markSpannedCells: any;
-  var mdiIcon: any;
   var mediaBehaviorSpec: any;
   var mediaDefaultMode: any;
   var mediaEditorMode: any;
@@ -809,7 +798,6 @@ declare global {
   var setPostThrottle: any;
   var setPublicFirmwareInfo: any;
   var setPublicFirmwareVersions: any;
-  var setSelectValue: any;
   var setViewportMeta: any;
   var setWebhookHeaders: any;
   var settingsStateEntities: any;
@@ -875,7 +863,6 @@ declare global {
   var syncTemperatureUi: any;
   var temperatureUnitSymbol: any;
   var textInput: any;
-  var textSpan: any;
   var timezoneCardCityLabel: any;
   var timezoneCardTimeParts: any;
   var timezoneOffsetMinutes: any;
@@ -883,7 +870,6 @@ declare global {
   var timezonePrefersFahrenheit: any;
   var titleFromEntityId: any;
   var toggleRow: any;
-  var uniqueOptions: any;
   var uniquePush: any;
   var updateClock: any;
   var updateClockBarItemUi: any;

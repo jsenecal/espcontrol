@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { mdiIcon } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { clampMenuPosition } from "../features/preview";
 import { resizeGridSlot } from "../features/preview_grid";
