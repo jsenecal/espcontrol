@@ -1,7 +1,6 @@
 import { state } from "../state/app_instance";
 import { setConfigOptionValue } from "../model/config_primitives";
 import { escHtml, iconSlug } from "../application/ui_primitives";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigCodecFeature } from "../application/config_codec";
 import { SUBPAGE_KIND_OPTION } from "../application/config_option_core";
@@ -16,7 +15,7 @@ import {
 export function registerSubpageCardTypes(
     registry: CardRegistry,
     codec: ConfigCodecFeature,
-): GlobalDescriptors {
+): void {
     const { enterSubpage } = codec;
     // Navigation folder: tap opens a nested grid screen with its own button layout
     var SUBPAGE_CARD_METADATA: any = {
@@ -361,9 +360,4 @@ export function registerSubpageCardTypes(
         configBtn.addEventListener("click", function (this: any) { closeSettings(); enterSubpage(slot); });
         panel.appendChild(configBtn);
     }
-    return {
-        "SUBPAGE_CARD_METADATA": liveGlobal(() => SUBPAGE_CARD_METADATA, (value?: any) => { SUBPAGE_CARD_METADATA = value; }),
-        "subpageBadgeLabelHtml": staticGlobal(subpageBadgeLabelHtml),
-        "appendEditSubpageButton": staticGlobal(appendEditSubpageButton),
-    };
 }

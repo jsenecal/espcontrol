@@ -254,6 +254,16 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:MEDIA_CARD_METADATA|MEDIA_PLAYLIST_SOURCE_DEFINITIONS|mediaBehaviorSpec|mediaDefaultMode|mediaEditorMode|mediaEditorValidMode|mediaLabelIsGenerated|mediaModeOptionValues|mediaNowPlayingControlValues|mediaNowPlayingControls|mediaNowPlayingPlayPauseEnabled|mediaNowPlayingProgressEnabled|mediaPlaylistContentIdPlaceholder|mediaPlaylistContentTypeKnown|mediaPlaylistContentTypeOptions|mediaPlaylistSourceDefinition|mediaPlaylistSourceOptions|mediaStateDisplayModeSupported|parseMediaPlaylistContentId|buildMediaPlaylistContentId):/);
   });
 
+  test("registers subpage cards without compatibility descriptors", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/subpage.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.match(entry, /registerSubpageCardTypes\(registry, context\.configuration\.codec\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerSubpageCardTypes/);
+    assert.doesNotMatch(globals, /\bvar (?:SUBPAGE_CARD_METADATA|appendEditSubpageButton|subpageBadgeLabelHtml):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",

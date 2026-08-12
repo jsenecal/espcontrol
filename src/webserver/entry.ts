@@ -315,7 +315,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registerScreenLockCardTypes(registry);
   registerSensorCardTypes(registry, context.configuration.options);
   registerSliderCardTypes(registry, context.configuration.modalTabs);
-  registry.registerCompatibility(registerSubpageCardTypes(registry, context.configuration.codec));
+  registerSubpageCardTypes(registry, context.configuration.codec);
   registerSwitchCardTypes(registry, context.configuration.confirmationOptions);
   registerTimezoneCardTypes(registry, context.configuration.dateTimeOptions, context.dom.document);
   registerVacuumCardTypes(registry, context.configuration.robotOptions);

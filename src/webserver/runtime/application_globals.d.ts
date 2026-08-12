@@ -38,7 +38,6 @@ declare global {
   var SCREEN_SCHEDULE_UNAVAILABLE: any;
   var SCREEN_SCHEDULE_WAKE_BRIGHTNESS_UNAVAILABLE: any;
   var SCREEN_SCHEDULE_WAKE_TIMEOUT_UNAVAILABLE: any;
-  var SUBPAGE_CARD_METADATA: any;
   var SUBPAGE_CHEVRON_UNAVAILABLE: any;
   var SUBPAGE_RAW_CHUNK_FIELDS: any;
   var TEMPERATURE_DEGREE_SYMBOL_UNAVAILABLE: any;
@@ -74,7 +73,6 @@ declare global {
   var addSubpageSlot: any;
   var addSupportButton: any;
   var allScreenRotationOptions: any;
-  var appendEditSubpageButton: any;
   var appendLanguageOption: any;
   var appendScreenRotationOption: any;
   var appendSettingsSection: any;
@@ -520,7 +518,6 @@ declare global {
   var statusBadge: any;
   var stopFirmwareInstallRefresh: any;
   var stopFirmwareInstallRefreshIfComplete: any;
-  var subpageBadgeLabelHtml: any;
   var subpageChunkShouldPost: any;
   var subpageEntityKeys: any;
   var subpageStateDisplayMode: any;
