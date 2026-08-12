@@ -596,6 +596,7 @@ export function registerMediaCardTypes(): GlobalDescriptors {
                     "Card Settings",
                     helpers.idPrefix + "media-cover-art-card-settings",
                     false);
+                cardSettingsDisclosure.panel.classList.add("sp-media-card-settings");
                 var cardSettings: any = cardSettingsDisclosure.section;
                 var detailsToggle: any = helpers.toggleRow(
                     "Show Track Details",
