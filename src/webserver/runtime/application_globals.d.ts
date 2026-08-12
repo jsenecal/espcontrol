@@ -284,8 +284,6 @@ declare global {
   var downloadBackupConfig: any;
   var deleteButtons: any;
   var deleteSlot: any;
-  var deviceConfig: any;
-  var deviceId: any;
   var disclosureSection: any;
   var displayC6FirmwareVersion: any;
   var displayFirmwareVersion: any;

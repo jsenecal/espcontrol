@@ -608,7 +608,6 @@ function startEspControl(): void {
   if (startupState.__ESPCONTROL_UI_STARTED__ || startupState.__ESPCONTROL_UI_STARTING__) return;
   AppInstance.initializeAppState();
   installStaticGlobals({
-    ...DeviceConfig,
     EspControlModel: Model,
     ...Model,
     ...ConfigPrimitives,

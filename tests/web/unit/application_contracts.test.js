@@ -483,6 +483,17 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:CARD_CONFIG_FIELDS|CARD_CONTRACT_[A-Z_]+|cardContract[A-Z][A-Za-z]+):/);
   });
 
+  test("keeps device configuration module-owned", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const metadata = fs.readFileSync(path.join(ROOT, "src/webserver/application/firmware_metadata.ts"), "utf8");
+    const instance = fs.readFileSync(path.join(ROOT, "src/webserver/state/app_instance.ts"), "utf8");
+    assert.doesNotMatch(entry, /\.\.\.DeviceConfig/);
+    assert.match(metadata, /import \{ deviceId \} from "\.\.\/device_config"/);
+    assert.match(instance, /import \{ deviceConfig \} from "\.\.\/device_config"/);
+    assert.doesNotMatch(globals, /\bvar (?:deviceId|deviceConfig):/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });
