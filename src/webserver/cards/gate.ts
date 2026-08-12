@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerGateCardTypes(): GlobalDescriptors {
+import type { CoverLikeCardRegistration } from "./cover_like_card";
+export function registerGateCardTypes(registerCard: CoverLikeCardRegistration["register"]): GlobalDescriptors {
     // Gate card: cover toggle or one-tap open/close/stop commands.
     var GATE_MODE_OPTIONS: any = [
         ["", "Toggle"],
@@ -70,7 +71,7 @@ export function registerGateCardTypes(): GlobalDescriptors {
             badge: "gate",
         },
     };
-    registerCoverLikeCardType({
+    registerCard({
         type: "gate",
         optionName: "gate_mode",
         metadata: GATE_CARD_METADATA,

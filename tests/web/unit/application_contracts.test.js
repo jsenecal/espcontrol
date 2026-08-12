@@ -61,6 +61,16 @@ describe("browserless application contracts", () => {
     }
   });
 
+  test("registers garage and gate through the explicit cover-card factory", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const coverFactory = fs.readFileSync(path.join(ROOT, "src/webserver/cards/cover_like_card.ts"), "utf8");
+    assert.match(coverFactory, /registry\.register\(config\.type/);
+    assert.doesNotMatch(coverFactory, /\bregisterButtonType\s*\(/);
+    assert.match(entry, /registerGarageCardTypes\(coverLikeCards\.register\)/);
+    assert.match(entry, /registerGateCardTypes\(coverLikeCards\.register\)/);
+    assert.doesNotMatch(entry, /registerCoverLikeCardType/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

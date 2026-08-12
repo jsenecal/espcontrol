@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerGarageCardTypes(): GlobalDescriptors {
+import type { CoverLikeCardRegistration } from "./cover_like_card";
+export function registerGarageCardTypes(registerCard: CoverLikeCardRegistration["register"]): GlobalDescriptors {
     // Garage door card: cover toggle or one-tap open/close commands.
     var GARAGE_MODE_OPTIONS: any = [
         ["", "Toggle"],
@@ -97,7 +98,7 @@ export function registerGarageCardTypes(): GlobalDescriptors {
             badge: "garage",
         },
     };
-    registerCoverLikeCardType({
+    registerCard({
         type: "garage",
         optionName: "garage_mode",
         metadata: GARAGE_CARD_METADATA,

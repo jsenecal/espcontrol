@@ -151,9 +151,6 @@ export function installCore(applicationLayout: ApplicationLayoutState, cardRegis
     var ICON_OPTIONS: any = ["Auto"].concat(ICON_NAMES).sort();
     var DOMAIN_ICONS: any = GENERATED_DOMAIN_ICONS;
     // ── Button type plugin registry ──────────────────────────────────────
-    function registerButtonType(this: any, key?: any, def?: any) {
-        cardRegistry.registerLegacy(key, def);
-    }
     function subpageStateDisplayMode(this: any, b?: any) {
         if (!b || !b.sensor)
             return "off";
@@ -203,7 +200,6 @@ export function installCore(applicationLayout: ApplicationLayoutState, cardRegis
         "ICON_OPTIONS": liveGlobal(() => ICON_OPTIONS, (value?: any) => { ICON_OPTIONS = value; }),
         "DOMAIN_ICONS": liveGlobal(() => DOMAIN_ICONS, (value?: any) => { DOMAIN_ICONS = value; }),
         "BUTTON_TYPES": liveGlobal(() => cardRegistry.definitions, (value?: any) => { cardRegistry.replaceDefinitions(value); }),
-        "registerButtonType": staticGlobal(registerButtonType),
         "subpageStateDisplayMode": staticGlobal(subpageStateDisplayMode),
         "WEBSERVER_MOCK_NOW_ISO": liveGlobal(() => WEBSERVER_MOCK_NOW_ISO, (value?: any) => { WEBSERVER_MOCK_NOW_ISO = value; }),
         "webserverUseMockNowForTest": liveGlobal(() => webserverUseMockNowForTest, (value?: any) => { webserverUseMockNowForTest = value; }),

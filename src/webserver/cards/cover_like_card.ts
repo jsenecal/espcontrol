@@ -1,5 +1,12 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerCoverLikeCardHelpers(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+
+export interface CoverLikeCardRegistration {
+    readonly descriptors: GlobalDescriptors;
+    register(config: any): void;
+}
+
+export function createCoverLikeCardRegistration(registry: CardRegistry): CoverLikeCardRegistration {
     function coverLikeModeValues(this: any, cardType?: any, optionName?: any, fallbackModes?: any) {
         var spec: any = cardContractOptionSpec(cardType, optionName);
         return spec && spec.values ? spec.values.slice() : fallbackModes.map(function (this: any, entry?: any) { return entry[0]; });
@@ -61,7 +68,7 @@ export function registerCoverLikeCardHelpers(): GlobalDescriptors {
             input.addEventListener("blur", saveConfirmationOptions);
         });
     }
-    function registerCoverLikeCardType(this: any, config?: any) {
+    function registerCardDefinition(this: any, config?: any) {
         var metadata: any = config.metadata;
         function normalizeMode(this: any, mode?: any) {
             return normalizeCoverLikeMode(mode, coverLikeModeValues(config.type, config.optionName, metadata.mode.options));
@@ -89,7 +96,7 @@ export function registerCoverLikeCardHelpers(): GlobalDescriptors {
                 helpers.saveField("icon_on", config.openIcon);
             }
         }
-        registerButtonType(config.type, {
+        registry.register(config.type, {
             label: function (this: any) { return cardContractCardLabel(config.type); },
             allowInSubpage: function (this: any) { return cardContractAllowInSubpage(config.type); },
             pickerKey: function (this: any) { return cardContractPickerKey(config.type); },
@@ -208,9 +215,11 @@ export function registerCoverLikeCardHelpers(): GlobalDescriptors {
         });
     }
     return {
-        "coverLikeModeValues": staticGlobal(coverLikeModeValues),
-        "normalizeCoverLikeMode": staticGlobal(normalizeCoverLikeMode),
-        "renderCoverLikeConfirmationSettings": staticGlobal(renderCoverLikeConfirmationSettings),
-        "registerCoverLikeCardType": staticGlobal(registerCoverLikeCardType),
+        register: (config: any) => registerCardDefinition(config),
+        descriptors: {
+            "coverLikeModeValues": staticGlobal(coverLikeModeValues),
+            "normalizeCoverLikeMode": staticGlobal(normalizeCoverLikeMode),
+            "renderCoverLikeConfirmationSettings": staticGlobal(renderCoverLikeConfirmationSettings),
+        },
     };
 }

@@ -109,7 +109,7 @@ import { registerAlarmCardTypes } from "./cards/alarm";
 import { registerCalendarCardTypes } from "./cards/calendar";
 import { registerClimateCardTypes } from "./cards/climate";
 import { registerClockCardTypes } from "./cards/clock";
-import { registerCoverLikeCardHelpers } from "./cards/cover_like_card";
+import { createCoverLikeCardRegistration } from "./cards/cover_like_card";
 import { registerDoorWindowCardTypes } from "./cards/door_window";
 import { registerEntityModeCardHelpers } from "./cards/entity_mode_card";
 import { registerFanCardTypes } from "./cards/fan";
@@ -266,17 +266,18 @@ function installApplicationCompatibility(context: ApplicationContext): void {
 
 function installCardCompatibility(context: ApplicationContext): void {
   const registry = context.cards;
+  const coverLikeCards = createCoverLikeCardRegistration(registry);
   registry.registerCompatibility(registerActionCardTypes(registry));
   registry.registerCompatibility(registerAlarmCardTypes(registry));
   registry.registerCompatibility(registerCalendarCardTypes(registry));
   registry.registerCompatibility(registerClimateCardTypes(registry));
   registry.registerCompatibility(registerClockCardTypes(registry));
-  registry.registerCompatibility(registerCoverLikeCardHelpers());
+  registry.registerCompatibility(coverLikeCards.descriptors);
   registry.registerCompatibility(registerDoorWindowCardTypes(registry));
   registry.registerCompatibility(registerEntityModeCardHelpers());
   registry.registerCompatibility(registerFanCardTypes(registry));
-  registry.registerCompatibility(registerGarageCardTypes());
-  registry.registerCompatibility(registerGateCardTypes());
+  registry.registerCompatibility(registerGarageCardTypes(coverLikeCards.register));
+  registry.registerCompatibility(registerGateCardTypes(coverLikeCards.register));
   registry.registerCompatibility(registerImageCardTypes(registry));
   registry.registerCompatibility(registerInternalCardTypes(registry));
   registry.registerCompatibility(registerLawnMowerCardTypes(registry));

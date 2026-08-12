@@ -29,10 +29,8 @@ export type CardDefinitions = Record<string, CardDefinition>;
 export interface CardRegistry {
   readonly definitions: CardDefinitions;
   readonly typedDefinitionCount: number;
-  readonly legacyDefinitionCount: number;
   readonly compatibilityDefinitionCount: number;
   register(key: string, definition: CardDefinition): CardDefinition;
-  registerLegacy(key: string, definition: CardDefinition): CardDefinition;
   registerCompatibility(descriptors: GlobalDescriptors): void;
   replaceDefinitions(definitions: CardDefinitions): void;
 }
@@ -60,7 +58,6 @@ export function createCardRegistry(
 ): CardRegistry {
   let definitions: CardDefinitions = {};
   let typedDefinitionCount = 0;
-  let legacyDefinitionCount = 0;
   let compatibilityDefinitionCount = 0;
 
   const registerDefinition = (key: string, definition: CardDefinition): CardDefinition => {
@@ -82,18 +79,11 @@ export function createCardRegistry(
     get typedDefinitionCount() {
       return typedDefinitionCount;
     },
-    get legacyDefinitionCount() {
-      return legacyDefinitionCount;
-    },
     get compatibilityDefinitionCount() {
       return compatibilityDefinitionCount;
     },
     register(key, definition) {
       typedDefinitionCount += 1;
-      return registerDefinition(key, definition);
-    },
-    registerLegacy(key, definition) {
-      legacyDefinitionCount += 1;
       return registerDefinition(key, definition);
     },
     registerCompatibility(descriptors) {

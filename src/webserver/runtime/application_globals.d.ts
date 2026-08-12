@@ -949,8 +949,6 @@ declare global {
   var refreshEntityDatalist: any;
   var refreshFirmwareVersion: any;
   var refreshScreensaverTimeout: any;
-  var registerButtonType: any;
-  var registerCoverLikeCardType: any;
   var registerEspControlTestHookGroup: any;
   var registryValue: any;
   var rememberConfiguredButtonEntities: any;
