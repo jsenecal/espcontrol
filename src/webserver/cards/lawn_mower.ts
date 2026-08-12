@@ -10,6 +10,13 @@ import {
 } from "../generated/card_contract";
 import { iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
+import {
+    applyEntityModeCardModeChange,
+    entityModeCardUsesDefaultIcon,
+    entityModeValues,
+    normalizeEntityMode,
+    normalizeEntityModeCardConfig,
+} from "./entity_mode_card";
 export function registerLawnMowerCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Lawn Mower card: touchscreen-friendly controls for Home Assistant mower entities.
     var LAWN_MOWER_CARD_MODES: any = [

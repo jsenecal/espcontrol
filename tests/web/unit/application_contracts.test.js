@@ -149,6 +149,19 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:INTERNAL_CARD_METADATA|internalRelayDefaultIcon|internalRelayDefaultOnIcon|internalRelayLabelFor|internalRelayMode|internalRelayModeOptionValues|internalRelayOptions|internalRelaySpec|internalRelayUsesDefaultIcon|internalRelayUsesDefaultOnIcon|normalizeInternalRelayMode):/);
   });
 
+  test("imports entity-mode helpers without compatibility globals", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const helpers = fs.readFileSync(path.join(ROOT, "src/webserver/cards/entity_mode_card.ts"), "utf8");
+    const mower = fs.readFileSync(path.join(ROOT, "src/webserver/cards/lawn_mower.ts"), "utf8");
+    const vacuum = fs.readFileSync(path.join(ROOT, "src/webserver/cards/vacuum.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(helpers, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|registerEntityModeCardHelpers)\b/);
+    assert.match(mower, /from "\.\/entity_mode_card"/);
+    assert.match(vacuum, /from "\.\/entity_mode_card"/);
+    assert.doesNotMatch(entry, /registerEntityModeCardHelpers/);
+    assert.doesNotMatch(globals, /\bvar (?:applyEntityModeCardModeChange|entityModeCardUsesDefaultIcon|entityModeValues|normalizeEntityMode|normalizeEntityModeCardConfig):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",

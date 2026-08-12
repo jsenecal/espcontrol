@@ -103,7 +103,6 @@ import { registerClimateCardTypes } from "./cards/climate";
 import { registerClockCardTypes } from "./cards/clock";
 import { createCoverLikeCardRegistration } from "./cards/cover_like_card";
 import { registerDoorWindowCardTypes } from "./cards/door_window";
-import { registerEntityModeCardHelpers } from "./cards/entity_mode_card";
 import { registerFanCardTypes } from "./cards/fan";
 import { registerGarageCardTypes } from "./cards/garage";
 import { registerGateCardTypes } from "./cards/gate";
@@ -285,7 +284,6 @@ function installCardCompatibility(context: ApplicationContext): void {
   registerClockCardTypes(registry);
   registry.registerCompatibility(coverLikeCards.descriptors);
   registerDoorWindowCardTypes(registry, context.configuration.options);
-  registry.registerCompatibility(registerEntityModeCardHelpers());
   registry.registerCompatibility(registerFanCardTypes(registry, context.configuration.modalTabs));
   registry.registerCompatibility(registerGarageCardTypes(
     coverLikeCards.register,

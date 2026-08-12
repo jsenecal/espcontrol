@@ -108,7 +108,6 @@ declare global {
   var applyDeferredButtonOrderValue: any;
   var applyCardMetadataFields: any;
   var applyClockBarTemperatureEntities: any;
-  var applyEntityModeCardModeChange: any;
   var applyImportedButtonOrder: any;
   var applyScreensaverTimeoutState: any;
   var addNativeConfigToBackup: any;
@@ -252,8 +251,6 @@ declare global {
   var entityInitialDetail: any;
   var entityInput: any;
   var entityLookupNames: any;
-  var entityModeCardUsesDefaultIcon: any;
-  var entityModeValues: any;
   var entityName: any;
   var entityNameForSlot: any;
   var entityObjectIds: any;
@@ -389,8 +386,6 @@ declare global {
   var normalizeClockBarTemperatureEntries: any;
   var normalizeCoverLikeMode: any;
   var normalizeDateTimeCardMode: any;
-  var normalizeEntityMode: any;
-  var normalizeEntityModeCardConfig: any;
   var normalizeFanControlType: any;
   var normalizeGarageMode: any;
   var normalizeGateMode: any;

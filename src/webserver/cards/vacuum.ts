@@ -16,6 +16,11 @@ import {
     normalizeSavedConfigVacuumSensor,
 } from "../generated/saved_config_vacuum";
 import type { CardRegistry } from "../application/card_registry";
+import {
+    applyEntityModeCardModeChange,
+    entityModeCardUsesDefaultIcon,
+    entityModeValues,
+} from "./entity_mode_card";
 export function registerVacuumCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Vacuum card: touchscreen-friendly controls for Home Assistant vacuum entities.
     var VACUUM_CARD_MODES: any = [
