@@ -388,6 +388,26 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar WEB_STYLES:/);
   });
 
+  test("imports shared UI colour tokens directly", () => {
+    const consumers = [
+      "application/appearance_state.ts",
+      "application/preview_render.ts",
+      "application/settings_page.ts",
+      "application/styles.ts",
+      "cards/image.ts",
+      "cards/media.ts",
+      "state/app_state.ts",
+    ];
+    for (const consumer of consumers) {
+      const source = fs.readFileSync(path.join(ROOT, "src/webserver", consumer), "utf8");
+      assert.match(source, /import \{ WEB_UI_COLORS \} from /, `${consumer} should import the UI colours`);
+    }
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(entry, /UiTokens/);
+    assert.doesNotMatch(globals, /\bvar WEB_UI_COLORS:/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

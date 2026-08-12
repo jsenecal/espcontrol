@@ -114,7 +114,6 @@ declare global {
   var WEBHOOK_HEADERS_OPTION: any;
   var WEBHOOK_METHODS: any;
   var WEBSERVER_MOCK_NOW_ISO: any;
-  var WEB_UI_COLORS: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
   var _backupFeature: any;
   var _postQueue: any;

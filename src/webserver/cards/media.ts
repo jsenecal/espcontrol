@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { WEB_UI_COLORS } from "../state/ui_tokens";
 import { escHtml, iconSlug } from "../application/ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";

@@ -2,7 +2,6 @@ import * as DeviceConfig from "./device_config";
 import * as Model from "./model";
 import { createDeviceApi } from "./api/device_api";
 import * as RequestFailure from "./api/request_failure";
-import * as UiTokens from "./state/ui_tokens";
 import * as AppState from "./state/app_state";
 import * as AppInstance from "./state/app_instance";
 import { state } from "./state/app_instance";
@@ -620,7 +619,6 @@ function startEspControl(): void {
     EspControlModel: Model,
     ...Model,
     ...RequestFailure,
-    ...UiTokens,
     ...AppState,
     ...EventAliases,
     ...EventState,

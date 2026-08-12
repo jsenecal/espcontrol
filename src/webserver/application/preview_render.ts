@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { WEB_UI_COLORS } from "../state/ui_tokens";
 import { escHtml } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {

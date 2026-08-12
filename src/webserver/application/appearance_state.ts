@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { WEB_UI_COLORS } from "../state/ui_tokens";
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 export function installAppearanceStateModule(runtime: UiRuntimeState): GlobalDescriptors {

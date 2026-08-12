@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { escHtml, iconSlug } from "../application/ui_primitives";
+import { WEB_UI_COLORS } from "../state/ui_tokens";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigImageOptionsFeature } from "../application/config_image_options";
 export function registerImageCardTypes(
