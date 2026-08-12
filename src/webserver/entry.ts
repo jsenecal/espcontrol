@@ -40,6 +40,7 @@ import { createConfigImageOptionsFeature } from "./application/config_image_opti
 import { createConfigWeatherOptionsFeature } from "./application/config_weather_options";
 import { createConfigWebhookOptionsFeature } from "./application/config_webhook_options";
 import { createConfigInternalRelayOptionsFeature } from "./application/config_internal_relay_options";
+import { createConfigRobotCardOptionsFeature } from "./application/config_robot_card_options";
 import { createConfigModalTabOptionsFeature } from "./application/config_modal_tab_options";
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
 import { createConfigConfirmationOptionsFeature } from "./application/config_confirmation_options";
@@ -303,7 +304,7 @@ function installCardCompatibility(context: ApplicationContext): void {
     context.configuration.internalRelayOptions,
     context.dom.document,
   );
-  registry.registerCompatibility(registerLawnMowerCardTypes(registry));
+  registerLawnMowerCardTypes(registry, context.configuration.robotOptions);
   registry.registerCompatibility(registerLightTemperatureCardTypes(registry, context.configuration.modalTabs));
   registry.registerCompatibility(registerLockCardTypes(registry));
   registry.registerCompatibility(registerMediaCardTypes(
@@ -318,7 +319,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerSubpageCardTypes(registry, context.configuration.codec));
   registerSwitchCardTypes(registry, context.configuration.confirmationOptions);
   registerTimezoneCardTypes(registry);
-  registry.registerCompatibility(registerVacuumCardTypes(registry));
+  registerVacuumCardTypes(registry, context.configuration.robotOptions);
   const weatherCards = registerWeatherCardTypes(registry, context.configuration.weatherOptions);
   registerWeatherForecastCardTypes(registry, weatherCards);
   registerWebhookCardTypes(registry, context.configuration.webhookOptions);
@@ -394,6 +395,7 @@ function composeApplicationContext(): ApplicationContext {
   const weatherConfigurationOptions = createConfigWeatherOptionsFeature(layout.config);
   const webhookConfigurationOptions = createConfigWebhookOptionsFeature();
   const internalRelayConfigurationOptions = createConfigInternalRelayOptionsFeature(layout.config);
+  const robotConfigurationOptions = createConfigRobotCardOptionsFeature();
   const modalTabOptions = createConfigModalTabOptionsFeature({
     document: dom.document,
     renderButtonSettings: () => renderButtonSettings(),
@@ -407,6 +409,7 @@ function composeApplicationContext(): ApplicationContext {
     imageConfigurationOptions,
     weatherConfigurationOptions,
     webhookConfigurationOptions,
+    robotConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
@@ -595,6 +598,7 @@ function composeApplicationContext(): ApplicationContext {
     weatherConfigurationOptions,
     webhookConfigurationOptions,
     internalRelayConfigurationOptions,
+    robotConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,

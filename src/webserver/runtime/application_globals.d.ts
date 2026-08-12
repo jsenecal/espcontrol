@@ -29,8 +29,6 @@ declare global {
   var GATE_MODE_OPTIONS: any;
   var GRID_COLS: any;
   var GRID_ROWS: any;
-  var LAWN_MOWER_CARD_METADATA: any;
-  var LAWN_MOWER_CARD_MODES: any;
   var LIGHT_CONTROL_TYPE_METADATA: any;
   var LIGHT_CONTROL_TYPE_OPTIONS: any;
   var LIGHT_FULL_CONTROL_CARD_METADATA: any;
@@ -59,8 +57,6 @@ declare global {
   var SUBPAGE_RAW_CHUNK_FIELDS: any;
   var TEMPERATURE_DEGREE_SYMBOL_UNAVAILABLE: any;
   var TOTAL_SLOTS: any;
-  var VACUUM_CARD_METADATA: any;
-  var VACUUM_CARD_MODES: any;
   var VOICE_SERVICES_UNAVAILABLE: any;
   var WEBSERVER_MOCK_NOW_ISO: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
@@ -331,10 +327,6 @@ declare global {
   var latestFirmwareInfoFromState: any;
   var latestFirmwareInstallAction: any;
   var latestFirmwareInstallAvailable: any;
-  var lawnMowerModeBadgeIcon: any;
-  var lawnMowerModeDefaultIcon: any;
-  var lawnMowerModeValues: any;
-  var lawnMowerUsesDefaultIcon: any;
   var layoutSection: any;
   var legacyClockBarTemperatureEntities: any;
   var lightTempClampMax: any;
@@ -390,13 +382,10 @@ declare global {
   var normalizeGarageMode: any;
   var normalizeGateMode: any;
   var normalizeGridSpansForLayout: any;
-  var normalizeLawnMowerConfig: any;
-  var normalizeLawnMowerMode: any;
   var normalizeLightControlType: any;
   var normalizeLockMode: any;
   var normalizeNetworkTransport: any;
   var normalizeScreenRotation: any;
-  var normalizeVacuumConfig: any;
   var normalizeVacuumMode: any;
   var normalizeWifiStrengthPercent: any;
   var openCardSettings: any;
@@ -662,10 +651,6 @@ declare global {
   var updateSunInfo: any;
   var updateTempPreview: any;
   var updateVoicePreview: any;
-  var vacuumModeBadgeIcon: any;
-  var vacuumModeDefaultIcon: any;
-  var vacuumModeNeedsArea: any;
-  var vacuumModeValues: any;
   var vacuumUsesDefaultIcon: any;
   var voiceServicesPostUrls: any;
   var postAlarmDelayAudio: any;

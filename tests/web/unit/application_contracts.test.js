@@ -162,6 +162,19 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:applyEntityModeCardModeChange|entityModeCardUsesDefaultIcon|entityModeValues|normalizeEntityMode|normalizeEntityModeCardConfig):/);
   });
 
+  test("registers robot cards through explicit shared options", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const mower = fs.readFileSync(path.join(ROOT, "src/webserver/cards/lawn_mower.ts"), "utf8");
+    const vacuum = fs.readFileSync(path.join(ROOT, "src/webserver/cards/vacuum.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(mower, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.doesNotMatch(vacuum, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.match(entry, /registerLawnMowerCardTypes\(registry, context\.configuration\.robotOptions\);/);
+    assert.match(entry, /registerVacuumCardTypes\(registry, context\.configuration\.robotOptions\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(register(?:LawnMower|Vacuum)CardTypes/);
+    assert.doesNotMatch(globals, /\bvar (?:LAWN_MOWER_CARD_METADATA|LAWN_MOWER_CARD_MODES|VACUUM_CARD_METADATA|VACUUM_CARD_MODES|lawnMowerModeBadgeIcon|lawnMowerModeDefaultIcon|lawnMowerModeValues|lawnMowerUsesDefaultIcon|normalizeLawnMowerConfig|normalizeLawnMowerMode|normalizeVacuumConfig|vacuumModeBadgeIcon|vacuumModeDefaultIcon|vacuumModeNeedsArea|vacuumModeValues):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",

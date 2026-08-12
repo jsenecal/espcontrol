@@ -28,6 +28,7 @@ import type { ConfigImageOptionsFeature } from "./config_image_options";
 import type { ConfigWeatherOptionsFeature } from "./config_weather_options";
 import type { ConfigWebhookOptionsFeature } from "./config_webhook_options";
 import type { ConfigInternalRelayOptionsFeature } from "./config_internal_relay_options";
+import type { ConfigRobotCardOptionsFeature } from "./config_robot_card_options";
 import type { ConfigModalTabOptionsFeature } from "./config_modal_tab_options";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "./config_access_climate_alarm_options";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
@@ -73,6 +74,7 @@ export interface ApplicationContext {
     readonly weatherOptions: ConfigWeatherOptionsFeature;
     readonly webhookOptions: ConfigWebhookOptionsFeature;
     readonly internalRelayOptions: ConfigInternalRelayOptionsFeature;
+    readonly robotOptions: ConfigRobotCardOptionsFeature;
     readonly modalTabs: ConfigModalTabOptionsFeature;
     readonly accessClimateAlarm: ConfigAccessClimateAlarmOptionsFeature;
     readonly confirmationOptions: ConfigConfirmationOptionsFeature;
@@ -120,6 +122,7 @@ export interface ApplicationContextOptions {
   readonly weatherConfigurationOptions: ConfigWeatherOptionsFeature;
   readonly webhookConfigurationOptions: ConfigWebhookOptionsFeature;
   readonly internalRelayConfigurationOptions: ConfigInternalRelayOptionsFeature;
+  readonly robotConfigurationOptions: ConfigRobotCardOptionsFeature;
   readonly modalTabOptions: ConfigModalTabOptionsFeature;
   readonly accessClimateAlarmOptions: ConfigAccessClimateAlarmOptionsFeature;
   readonly confirmationOptions: ConfigConfirmationOptionsFeature;
@@ -179,6 +182,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       weatherOptions: options.weatherConfigurationOptions,
       webhookOptions: options.webhookConfigurationOptions,
       internalRelayOptions: options.internalRelayConfigurationOptions,
+      robotOptions: options.robotConfigurationOptions,
       modalTabs: options.modalTabOptions,
       accessClimateAlarm: options.accessClimateAlarmOptions,
       confirmationOptions: options.confirmationOptions,

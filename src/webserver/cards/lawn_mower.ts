@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -12,59 +11,27 @@ import { iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import {
     applyEntityModeCardModeChange,
-    entityModeCardUsesDefaultIcon,
-    entityModeValues,
-    normalizeEntityMode,
-    normalizeEntityModeCardConfig,
 } from "./entity_mode_card";
-export function registerLawnMowerCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { ConfigRobotCardOptionsFeature } from "../application/config_robot_card_options";
+
+export function registerLawnMowerCardTypes(
+    registry: CardRegistry,
+    robotOptions: ConfigRobotCardOptionsFeature,
+): void {
+    const {
+        lawnMowerModes,
+        lawnMowerModeBadgeIcon,
+        lawnMowerModeDefaultIcon,
+        lawnMowerUsesDefaultIcon,
+        normalizeLawnMowerConfig,
+        normalizeLawnMowerMode,
+    } = robotOptions;
     // Lawn Mower card: touchscreen-friendly controls for Home Assistant mower entities.
-    var LAWN_MOWER_CARD_MODES: any = [
-        ["status", "Status"],
-        ["start_mowing", "Start Mowing"],
-        ["dock", "Dock"],
-        ["pause_resume", "Pause / Resume"],
-    ];
-    function lawnMowerModeValues(this: any) {
-        return entityModeValues("lawn_mower", "lawn_mower_mode", LAWN_MOWER_CARD_MODES);
-    }
-    function normalizeLawnMowerMode(this: any, mode?: any) {
-        return normalizeEntityMode(mode, lawnMowerModeValues(), "start_mowing");
-    }
-    function lawnMowerModeDefaultIcon(this: any, mode?: any) {
-        mode = normalizeLawnMowerMode(mode);
-        if (mode === "dock")
-            return "Robot Mower Outline";
-        return "Robot Mower";
-    }
-    function lawnMowerModeBadgeIcon(this: any, mode?: any) {
-        mode = normalizeLawnMowerMode(mode);
-        if (mode === "status")
-            return "format-text";
-        if (mode === "dock")
-            return "home-import-outline";
-        if (mode === "pause_resume")
-            return "play-pause";
-        return "robot-mower";
-    }
-    function lawnMowerUsesDefaultIcon(this: any, icon?: any) {
-        return entityModeCardUsesDefaultIcon(icon, [
-            "Lawnmower",
-            "Robot Mower",
-            "Robot Mower Outline",
-        ]);
-    }
-    function normalizeLawnMowerConfig(this: any, b?: any) {
-        normalizeEntityModeCardConfig(b, {
-            normalizeMode: normalizeLawnMowerMode,
-            defaultIcon: lawnMowerModeDefaultIcon,
-        });
-    }
-    var LAWN_MOWER_CARD_METADATA: any = {
+    const LAWN_MOWER_CARD_METADATA: any = {
         mode: {
             label: "Type",
             idSuffix: "lawn-mower-type",
-            options: LAWN_MOWER_CARD_MODES,
+            options: lawnMowerModes,
             value: function (this: any, b?: any) {
                 return normalizeLawnMowerMode(b.sensor);
             },
@@ -151,14 +118,4 @@ export function registerLawnMowerCardTypes(registry: CardRegistry): GlobalDescri
             };
         },
     });
-    return {
-        "LAWN_MOWER_CARD_MODES": liveGlobal(() => LAWN_MOWER_CARD_MODES, (value?: any) => { LAWN_MOWER_CARD_MODES = value; }),
-        "lawnMowerModeValues": staticGlobal(lawnMowerModeValues),
-        "normalizeLawnMowerMode": staticGlobal(normalizeLawnMowerMode),
-        "lawnMowerModeDefaultIcon": staticGlobal(lawnMowerModeDefaultIcon),
-        "lawnMowerModeBadgeIcon": staticGlobal(lawnMowerModeBadgeIcon),
-        "lawnMowerUsesDefaultIcon": staticGlobal(lawnMowerUsesDefaultIcon),
-        "normalizeLawnMowerConfig": staticGlobal(normalizeLawnMowerConfig),
-        "LAWN_MOWER_CARD_METADATA": liveGlobal(() => LAWN_MOWER_CARD_METADATA, (value?: any) => { LAWN_MOWER_CARD_METADATA = value; }),
-    };
 }
