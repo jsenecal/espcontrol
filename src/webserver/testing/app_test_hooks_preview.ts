@@ -1,7 +1,16 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
-export function installAppTestHooksPreview(cardRegistry: CardRegistry): GlobalDescriptors {
+import type { ConfigCodecFeature } from "../application/config_codec";
+export function installAppTestHooksPreview(
+    cardRegistry: CardRegistry,
+    codec: ConfigCodecFeature,
+): GlobalDescriptors {
+    const {
+        buildSubpageGrid,
+        buildSubpageGridAndNormalizeOrder,
+        serializeSubpageGrid,
+    } = codec;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("preview", {
             clockBarVisibleInPreviewFor: function (this: any, clockBarOn?: any, screensaverAction?: any) {

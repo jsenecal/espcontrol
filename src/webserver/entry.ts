@@ -209,6 +209,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     layout: context.layout,
     cards: context.cards,
     confirmationOptions: context.configuration.confirmationOptions,
+    codec: context.configuration.codec,
   }));
   installGlobals(installButtonSettingsSelectionModule());
   installGlobals(installButtonSettingsRenderQueueModule());
@@ -217,16 +218,19 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence, context.cards,
     context.configuration.imageOptions,
     context.configuration.confirmationOptions,
+    context.configuration.codec,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,
     layout: context.layout,
+    codec: context.configuration.codec,
   }));
   installGlobals(installPreviewContextMenuModule({
     document: context.dom.document,
     window: context.dom.window,
     layout: context.layout,
     cards: context.cards,
+    codec: context.configuration.codec,
   }));
   installGlobals(installPreviewClipboardModule({
     configPersistence,
@@ -234,6 +238,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     layout: context.layout,
     cards: context.cards,
     imageOptions: context.configuration.imageOptions,
+    codec: context.configuration.codec,
   }));
   installGlobals(installPreviewInteractionsModule({
     cardEditorDraft,
@@ -241,6 +246,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     layout: context.layout,
     window: context.dom.window,
     imageOptions: context.configuration.imageOptions,
+    codec: context.configuration.codec,
   }));
   installGlobals(installBackupContractModule(context.backup.contract));
   const backupUiFeature = context.backup.application;
@@ -304,7 +310,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerScreenLockCardTypes(registry));
   registry.registerCompatibility(registerSensorCardTypes(registry, context.configuration.options));
   registry.registerCompatibility(registerSliderCardTypes(registry, context.configuration.modalTabs));
-  registry.registerCompatibility(registerSubpageCardTypes(registry));
+  registry.registerCompatibility(registerSubpageCardTypes(registry, context.configuration.codec));
   registry.registerCompatibility(registerSwitchCardTypes(registry, context.configuration.confirmationOptions));
   registry.registerCompatibility(registerTimezoneCardTypes(registry));
   registry.registerCompatibility(registerVacuumCardTypes(registry));
@@ -323,8 +329,9 @@ function installTestCompatibility(context: ApplicationContext): void {
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
     context.configuration.confirmationOptions,
+    context.configuration.codec,
   ));
-  installGlobals(installAppTestHooksPreview(context.cards));
+  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec));
   installGlobals(installAppTestHooksBackup());
   installGlobals(installAppTestHooksSettings());
 }

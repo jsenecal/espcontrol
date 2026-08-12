@@ -11,15 +11,18 @@ import {
 import type { ApplicationLayoutState } from "./application_context";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
+import type { ConfigCodecFeature } from "./config_codec";
 export interface PreviewRenderDependencies {
     readonly document: Document;
     readonly layout: ApplicationLayoutState;
     readonly cards: CardRegistry;
     readonly confirmationOptions: ConfigConfirmationOptionsFeature;
+    readonly codec: ConfigCodecFeature;
 }
 export function installPreviewRenderModule(dependencies: PreviewRenderDependencies): GlobalDescriptors {
     const document = dependencies.document;
     const { cardOnPattern } = dependencies.confirmationOptions;
+    const { getSubpage } = dependencies.codec;
     // ── Preview rendering (unified) ────────────────────────────────────────
     function previewHtmlValue(this: any, typePreview?: any, key?: any, fallback?: any) {
         return previewValue(typePreview, key, fallback);

@@ -4,15 +4,28 @@ import { clampMenuPosition } from "../features/preview";
 import { resizeGridSlot } from "../features/preview_grid";
 import type { ApplicationLayoutState } from "./application_context";
 import type { CardRegistry } from "./card_registry";
+import type { ConfigCodecFeature } from "./config_codec";
 export interface PreviewContextMenuDependencies {
     readonly document: Document;
     readonly window: Window;
     readonly layout: ApplicationLayoutState;
     readonly cards: CardRegistry;
+    readonly codec: ConfigCodecFeature;
 }
 export function installPreviewContextMenuModule(dependencies: PreviewContextMenuDependencies): GlobalDescriptors {
     const document = dependencies.document;
     const window = dependencies.window;
+    const {
+        cardRequiresSquareSize,
+        cardSupportsMaxSize,
+        cardSupportsPortraitLargeSize,
+        cardSupportsLandscapeLargeSize,
+        normalizeCardSizeForConfig,
+        getSubpage,
+        serializeSubpageGrid,
+        exitSubpage,
+        saveSubpageConfig,
+    } = dependencies.codec;
     // ── Preview Context Menu ──────────────────────────────────────────
     // ── Context menu (unified) ─────────────────────────────────────────────
     var ctxMenu: any = null;

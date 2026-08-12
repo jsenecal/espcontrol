@@ -6,12 +6,14 @@ import type { ApplicationLayoutState } from "./application_context";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
 import { ACTION_CARD_LOCAL_ACTION } from "./config_action_contract";
+import type { ConfigCodecFeature } from "./config_codec";
 export interface PreviewClipboardDependencies {
     readonly configPersistence: ConfigPersistenceFeature;
     readonly document: Document;
     readonly layout: ApplicationLayoutState;
     readonly cards: CardRegistry;
     readonly imageOptions: ConfigImageOptionsFeature;
+    readonly codec: ConfigCodecFeature;
 }
 export function installPreviewClipboardModule(
     dependencies: PreviewClipboardDependencies,
@@ -24,6 +26,18 @@ export function installPreviewClipboardModule(
         canAddImageCards,
         showImageCardLimitBanner,
     } = dependencies.imageOptions;
+    const {
+        normalizeButtonConfig,
+        normalizeCardSizeForConfig,
+        serializeButtonConfig,
+        parseBackOrderToken,
+        parseSubpageConfig,
+        serializeSubpageConfig,
+        getSubpage,
+        buildSubpageGrid,
+        serializeSubpageGrid,
+        saveSubpageConfig,
+    } = dependencies.codec;
     // ── Preview Clipboard ─────────────────────────────────────────────
     // ── Cut / Paste ────────────────────────────────────────────────────────
     function buildClipboardEntry(this: any, slot?: any) {

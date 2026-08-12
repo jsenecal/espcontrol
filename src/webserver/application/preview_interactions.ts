@@ -4,12 +4,14 @@ import type { CardEditorDraftController } from "../features/card_editor_draft_co
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { ApplicationLayoutState } from "./application_context";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
+import type { ConfigCodecFeature } from "./config_codec";
 export interface PreviewInteractionsDependencies {
     readonly cardEditorDraft: CardEditorDraftController;
     readonly configPersistence: ConfigPersistenceFeature;
     readonly layout: ApplicationLayoutState;
     readonly window: Window;
     readonly imageOptions: ConfigImageOptionsFeature;
+    readonly codec: ConfigCodecFeature;
 }
 export function installPreviewInteractionsModule(
     dependencies: PreviewInteractionsDependencies,
@@ -23,6 +25,17 @@ export function installPreviewInteractionsModule(
         canAddImageCards,
         showImageCardLimitBanner,
     } = dependencies.imageOptions;
+    const {
+        parseSubpageConfig,
+        serializeSubpageConfig,
+        getSubpage,
+        buildSubpageGrid,
+        serializeSubpageGrid,
+        enterSubpage,
+        exitSubpage,
+        saveSubpageConfig,
+        subpageFirstFreeSlot,
+    } = dependencies.codec;
     // ── Preview event delegation & drag ────────────────────────────────────
     function clearPlaceholder(this: any) {
         if (previewPlaceholder) {

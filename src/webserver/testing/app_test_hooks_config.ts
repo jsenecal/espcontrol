@@ -8,6 +8,7 @@ import type { ConfigImageOptionsFeature } from "../application/config_image_opti
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
+import type { ConfigCodecFeature } from "../application/config_codec";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 import {
@@ -24,6 +25,7 @@ export function installAppTestHooksConfig(
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
+    codec: ConfigCodecFeature,
 ): GlobalDescriptors {
     const {
         cardLargeNumbersEnabled,
@@ -140,6 +142,21 @@ export function installAppTestHooksConfig(
         actionScriptFields,
         setActionScriptFields,
     } = confirmationOptions;
+    const {
+        cardRequiresSquareSize,
+        cardSupportsMaxSize,
+        cardSupportsPortraitLargeSize,
+        cardSupportsLandscapeLargeSize,
+        normalizeCardSizeForConfig,
+        serializeButtonConfig,
+        parseButtonConfig,
+        buttonConfigNeedsMigration,
+        parseSubpageConfig,
+        subpageConfigNeedsMigration,
+        serializeSubpageConfig,
+        buildSubpageGrid,
+        serializeSubpageGrid,
+    } = codec;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("config", {
             parseButtonConfig: parseButtonConfig,

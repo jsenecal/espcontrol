@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import type { ConfigCodecFeature } from "../application/config_codec";
 import { SUBPAGE_KIND_OPTION } from "../application/config_option_core";
 import {
     applySubpagePresetConfig,
@@ -10,7 +11,11 @@ import {
     subpageKindOptions,
     subpagePresetDefaults,
 } from "../application/config_subpage_options";
-export function registerSubpageCardTypes(registry: CardRegistry): GlobalDescriptors {
+export function registerSubpageCardTypes(
+    registry: CardRegistry,
+    codec: ConfigCodecFeature,
+): GlobalDescriptors {
+    const { enterSubpage } = codec;
     // Navigation folder: tap opens a nested grid screen with its own button layout
     var SUBPAGE_CARD_METADATA: any = {
         kind: {

@@ -7,6 +7,7 @@ import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
+import type { ConfigCodecFeature } from "./config_codec";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
@@ -15,6 +16,7 @@ export function installButtonSettingsModule(
     cardRegistry: CardRegistry,
     imageOptions: ConfigImageOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
+    codec: ConfigCodecFeature,
 ): GlobalDescriptors {
     const {
         imageSlotCapacity,
@@ -22,6 +24,13 @@ export function installButtonSettingsModule(
         showImageCardLimitBanner,
     } = imageOptions;
     const { cardOnPattern, setCardOnPattern } = confirmationOptions;
+    const {
+        normalizeButtonConfig,
+        normalizeCardSizeForConfig,
+        serializeButtonConfig,
+        getSubpage,
+        saveSubpageConfig,
+    } = codec;
     // ── Button settings panel (unified) ────────────────────────────────────
     function openCardSettings(this: any, slot?: any) {
         if (isConfigLocked())

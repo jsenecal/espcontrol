@@ -11,14 +11,17 @@ import {
     resolveSpanPosition,
 } from "../features/preview_grid";
 import type { ApplicationLayoutState } from "./application_context";
+import type { ConfigCodecFeature } from "./config_codec";
 export interface PreviewGridPlacementDependencies {
     readonly controller: PreviewPlacementController;
     readonly layout: ApplicationLayoutState;
+    readonly codec: ConfigCodecFeature;
 }
 export function installPreviewGridPlacementModule(
     dependencies: PreviewGridPlacementDependencies,
 ): GlobalDescriptors {
     const previewPlacementController = dependencies.controller;
+    const { getSubpage } = dependencies.codec;
     // ── Preview Grid Placement ────────────────────────────────────────
     function resolveSpanPos(this: any, pos?: any) {
         var c: any = ctx();

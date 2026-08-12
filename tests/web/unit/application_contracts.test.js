@@ -200,6 +200,27 @@ describe("browserless application contracts", () => {
     assert.match(entry, /configurationCodec\.serializeSubpageConfig/);
   });
 
+  test("injects the configuration codec into editor and preview consumers", () => {
+    const consumers = [
+      "src/webserver/application/button_settings.ts",
+      "src/webserver/application/preview_render.ts",
+      "src/webserver/application/preview_grid_placement.ts",
+      "src/webserver/application/preview_context_menu.ts",
+      "src/webserver/application/preview_clipboard.ts",
+      "src/webserver/application/preview_interactions.ts",
+      "src/webserver/cards/subpage.ts",
+      "src/webserver/testing/app_test_hooks_config.ts",
+      "src/webserver/testing/app_test_hooks_preview.ts",
+    ];
+    for (const relativePath of consumers) {
+      const source = fs.readFileSync(path.join(ROOT, relativePath), "utf8");
+      assert.match(source, /ConfigCodecFeature/, `${relativePath} should declare its codec dependency`);
+    }
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.match(entry, /codec: context\.configuration\.codec/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec\)/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });
