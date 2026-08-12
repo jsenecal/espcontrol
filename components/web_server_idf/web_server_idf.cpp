@@ -47,6 +47,9 @@ namespace esphome::web_server_idf {
 
 static const char *const TAG = "web_server_idf";
 
+extern "C" void espcontrol_register_web_server_handlers(
+    AsyncWebServer *server) __attribute__((weak));
+
 // Global instance to avoid guard variable (saves 8 bytes)
 // This is initialized at program startup before any threads
 namespace {
@@ -228,6 +231,11 @@ void AsyncWebServer::begin() {
   config.close_fn = AsyncWebServer::safe_close_with_shutdown;
   if (httpd_start(&this->server_, &config) == ESP_OK) {
     global_async_web_server() = this;
+    // Register static EspControl routes before the generic dispatcher starts
+    // accepting requests. Adding handlers later can disrupt API clients.
+    if (espcontrol_register_web_server_handlers != nullptr) {
+      espcontrol_register_web_server_handlers(this);
+    }
     const httpd_uri_t handler_get = {
         .uri = "",
         .method = HTTP_GET,

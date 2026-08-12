@@ -21,6 +21,19 @@
 #include "panel_config_service_validator.h"
 #include "panel_config_storage_backend.h"
 #include "panel_config_write_endpoint.h"
+#include "button_grid.h"
+
+extern "C" void espcontrol_register_web_server_handlers(
+    esphome::web_server_idf::AsyncWebServer *server) {
+#ifdef USE_WEBSERVER
+  if (server == nullptr) return;
+  register_local_sensor_endpoint(*server);
+  register_local_action_endpoint(*server);
+  espcontrol::configuration::register_panel_config_capabilities_endpoint(*server);
+#else
+  (void) server;
+#endif
+}
 
 namespace espcontrol {
 
@@ -131,29 +144,12 @@ bool EspControlApp::create_native_configuration_runtime() {
 }
 
 void EspControlApp::register_panel_config_endpoints() {
-  // Do not let an early reconnect cache a legacy-only capability response
-  // while the deferred native configuration setup is still in progress.
-  if (!native_configuration_initialized_) return;
-  configuration::ConfigurationService *const panel_config_service =
-      core_.configuration_service();
-  NativeConfigurationRuntime *const runtime = native_configuration_runtime_.get();
-  const bool can_register_document_endpoints = panel_config_service != nullptr &&
-      runtime != nullptr && runtime->document_buffer != nullptr;
-  const bool read_endpoint_registered = can_register_document_endpoints &&
-      configuration::register_panel_config_read_endpoint(
-          *panel_config_service, runtime->document_buffer,
-          PANEL_CONFIG_STORAGE_SLOT_CAPACITY,
-          web_auth_username_ == nullptr ? "" : web_auth_username_,
-          web_auth_password_ == nullptr ? "" : web_auth_password_);
-  const bool write_endpoint_registered = can_register_document_endpoints &&
-      configuration::register_panel_config_write_endpoint(
-          *panel_config_service, runtime->document_buffer,
-          PANEL_CONFIG_STORAGE_SLOT_CAPACITY,
-          web_auth_username_ == nullptr ? "" : web_auth_username_,
-          web_auth_password_ == nullptr ? "" : web_auth_password_);
-  configuration::set_panel_config_read_supported(read_endpoint_registered);
-  configuration::set_panel_config_write_supported(write_endpoint_registered);
-  configuration::register_panel_config_capabilities_endpoint();
+  // ESPHome's web server is already serving requests by the time deferred
+  // configuration setup completes. Adding handlers at that point can disrupt
+  // active API clients, so use the established entity API compatibility path
+  // until native endpoint registration can happen during web-server setup.
+  configuration::set_panel_config_read_supported(false);
+  configuration::set_panel_config_write_supported(false);
 }
 
 void EspControlApp::apply_boot_configuration() {

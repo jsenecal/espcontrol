@@ -42,21 +42,25 @@ class PanelConfigCapabilitiesHandler final
   }
 };
 
-inline bool register_panel_config_capabilities_endpoint() {
+inline bool register_panel_config_capabilities_endpoint(
+    esphome::web_server_idf::AsyncWebServer &server) {
   static bool registered = false;
   if (registered) return true;
-  auto *server = esphome::web_server_idf::global_async_web_server();
-  if (server == nullptr) return false;
-  server->addHandler(new PanelConfigCapabilitiesHandler());
+  server.addHandler(new PanelConfigCapabilitiesHandler());
   registered = true;
   return true;
+}
+
+inline bool register_panel_config_capabilities_endpoint() {
+  auto *server = esphome::web_server_idf::global_async_web_server();
+  return server != nullptr && register_panel_config_capabilities_endpoint(*server);
 }
 
 }  // namespace espcontrol::configuration
 #else
 namespace espcontrol::configuration {
 
-inline bool register_panel_config_capabilities_endpoint() { return true; }
+inline bool register_panel_config_capabilities_endpoint(...) { return true; }
 
 }  // namespace espcontrol::configuration
 #endif
