@@ -6,7 +6,7 @@ import {
     firmwareVersionsSame,
 } from "../application/firmware_metadata";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installAppTestHooksSettings(): GlobalDescriptors {
+export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[]): GlobalDescriptors {
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("settings", {
             normalizeTemperatureUnit: normalizeTemperatureUnit,

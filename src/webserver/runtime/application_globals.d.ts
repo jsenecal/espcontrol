@@ -34,7 +34,6 @@ declare global {
   var DATE_TIME_CARD_METADATA: any;
   var DEVICE_ID: any;
   var DOOR_WINDOW_CARD_METADATA: any;
-  var ENTITY_CATALOG: any;
   var FAN_CARD_METADATA: any;
   var FAN_CONTROL_TYPE_OPTIONS: any;
   var FAVICON_SVG: any;
@@ -277,7 +276,6 @@ declare global {
   var defaultCardTypeForPicker: any;
   var defaultClockBarTemperatureEntity: any;
   var defaultTimezoneCardEntity: any;
-  var defaultTimezoneOptions: any;
   var downloadBackupConfig: any;
   var deleteButtons: any;
   var deleteSlot: any;

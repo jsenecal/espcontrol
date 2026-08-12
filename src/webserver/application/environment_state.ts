@@ -5,6 +5,7 @@ import type { VoiceServicesController } from "../features/voice_services_control
 
 export function installEnvironmentStateModule(
     voiceServicesController: VoiceServicesController,
+    defaultTimezoneOptions: () => string[],
 ): GlobalDescriptors {
     // ── Environment State ──────────────────────────────────────────────────
     var voiceServicesControllerInstance: VoiceServicesController = voiceServicesController;

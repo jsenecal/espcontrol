@@ -1,5 +1,6 @@
 import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
+import { ENTITY_CATALOG } from "../generated/entity_catalog";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
 import type { ConfigCodecFeature } from "./config_codec";

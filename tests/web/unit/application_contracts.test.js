@@ -526,6 +526,21 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar EspControlModel:/);
   });
 
+  test("imports static catalogues and injects timezone defaults", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    for (const name of ["config_post_api.ts", "entity_state.ts", "state_loader_api.ts"]) {
+      const source = fs.readFileSync(path.join(ROOT, "src/webserver/application", name), "utf8");
+      assert.match(source, /import \{ ENTITY_CATALOG \} from "\.\.\/generated\/entity_catalog"/);
+    }
+    const environment = fs.readFileSync(path.join(ROOT, "src/webserver/application/environment_state.ts"), "utf8");
+    const settingsHooks = fs.readFileSync(path.join(ROOT, "src/webserver/testing/app_test_hooks_settings.ts"), "utf8");
+    assert.match(environment, /defaultTimezoneOptions: \(\) => string\[\]/);
+    assert.match(settingsHooks, /defaultTimezoneOptions: \(\) => string\[\]/);
+    assert.doesNotMatch(entry, /import \{ ENTITY_CATALOG \}/);
+    assert.doesNotMatch(globals, /\bvar (?:ENTITY_CATALOG|defaultTimezoneOptions):/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

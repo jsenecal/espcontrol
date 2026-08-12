@@ -5,7 +5,6 @@ import { NTP_SERVER_DEFAULTS, defaultTimezoneOptionsForDevice } from "./state/ap
 import * as AppInstance from "./state/app_instance";
 import { state } from "./state/app_instance";
 import { textSpan } from "./application/ui_primitives";
-import { ENTITY_CATALOG } from "./generated/entity_catalog";
 import { installGlobals, installStaticGlobals } from "./runtime/globals";
 import { installCore } from "./application/core";
 import {
@@ -142,7 +141,10 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installCore(context.layout, context.configuration.codec, context.runtime));
   installGlobals(installLanguageStateModule(context.runtime));
   const voiceServicesController = context.controllers.voiceServices;
-  installGlobals(installEnvironmentStateModule(voiceServicesController));
+  installGlobals(installEnvironmentStateModule(
+    voiceServicesController,
+    () => defaultTimezoneOptionsForDevice(context.device.profile),
+  ));
   installGlobals(installScreenRotationStateModule(context.runtime));
   const screenScheduleController = context.controllers.screenSchedule;
   installGlobals(installScreenScheduleStateModule(screenScheduleController, context.runtime));
@@ -330,7 +332,9 @@ function installTestCompatibility(context: ApplicationContext): void {
   ));
   installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime));
   installGlobals(installAppTestHooksBackup());
-  installGlobals(installAppTestHooksSettings());
+  installGlobals(installAppTestHooksSettings(
+    () => defaultTimezoneOptionsForDevice(context.device.profile),
+  ));
 }
 
 function composeApplicationContext(): ApplicationContext {
@@ -608,9 +612,6 @@ function startEspControl(): void {
   AppInstance.initializeAppState();
   installStaticGlobals({
     ...Model,
-    ENTITY_CATALOG,
-    defaultTimezoneOptions: () =>
-      defaultTimezoneOptionsForDevice(DeviceConfig.deviceConfig),
   });
 
   const context = composeApplicationContext();

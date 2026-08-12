@@ -1,6 +1,17 @@
 import { state } from "../state/app_instance";
+import { ENTITY_CATALOG } from "../generated/entity_catalog";
 import { entityStateKeys } from "../state/event_state";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+
+type EntityDefinition = {
+    readonly domain?: string;
+    readonly name?: string;
+    readonly template?: string;
+    readonly objectIds?: readonly string[];
+};
+
+const entityDefinitions = ENTITY_CATALOG.entities as unknown as Readonly<Record<string, EntityDefinition>>;
+
 export function installEntityStateModule(): GlobalDescriptors {
     // ── Entity State Helpers ───────────────────────────────────────────────
     function uniquePush(this: any, list?: any, value?: any) {
@@ -8,7 +19,7 @@ export function installEntityStateModule(): GlobalDescriptors {
             list.push(value);
     }
     function entityDef(this: any, key?: any) {
-        return ENTITY_CATALOG.entities[key] || {};
+        return entityDefinitions[String(key)] || {};
     }
     function entityName(this: any, key?: any) {
         return entityDef(key).name || "";
