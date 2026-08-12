@@ -489,6 +489,11 @@ for (const option of pickerOptions) {
 const switchPickerOption = pickerOptions.find((option) => option.key === "");
 assert(switchPickerOption, "switch card appears in the main card picker");
 assert.strictEqual(switchPickerOption.icon, "toggle-switch", "switch picker option uses the expected icon");
+assert(
+  fs.readFileSync(path.join(ROOT, "src", "webserver", "application", "styles.ts"), "utf8")
+    .includes(".sp-card-type-icon::before{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)"),
+  "card picker icons stay centred inside their accent boxes"
+);
 assert(/Toggle lights/.test(switchPickerOption.description), "switch picker option includes concise help text");
 assert(
   hooks.buttonTypePreviewFor("alarm", { label: "Alarm", icon: "Security", type: "alarm" }).iconHtml.includes("mdi-shield-off"),
