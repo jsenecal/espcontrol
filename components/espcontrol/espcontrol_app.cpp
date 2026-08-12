@@ -159,6 +159,7 @@ void EspControlApp::register_panel_config_endpoints() {
   if (!can_bind_document_endpoints) {
     configuration::set_panel_config_read_supported(false);
     configuration::set_panel_config_write_supported(false);
+    panel_config_http_context_bound_ = true;
     configuration::set_panel_config_http_context_initialization_complete(true);
     return;
   }
