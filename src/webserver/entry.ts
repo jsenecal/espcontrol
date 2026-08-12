@@ -311,7 +311,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerSensorCardTypes(registry, context.configuration.options));
   registry.registerCompatibility(registerSliderCardTypes(registry, context.configuration.modalTabs));
   registry.registerCompatibility(registerSubpageCardTypes(registry, context.configuration.codec));
-  registry.registerCompatibility(registerSwitchCardTypes(registry, context.configuration.confirmationOptions));
+  registerSwitchCardTypes(registry, context.configuration.confirmationOptions);
   registerTimezoneCardTypes(registry);
   registry.registerCompatibility(registerVacuumCardTypes(registry));
   registry.registerCompatibility(registerWeatherCardTypes(registry));

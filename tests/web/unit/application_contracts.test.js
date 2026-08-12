@@ -101,6 +101,16 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:CLIMATE_CARD_METADATA|DOOR_WINDOW_CARD_METADATA|PRESENCE_CARD_METADATA):/);
   });
 
+  test("registers switch cards without compatibility metadata", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const source = fs.readFileSync(path.join(ROOT, "src/webserver/cards/switch.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(source, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.match(entry, /^  registerSwitchCardTypes\(registry, context\.configuration\.confirmationOptions\);/m);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerSwitchCardTypes/);
+    assert.doesNotMatch(globals, /\bvar (?:SWITCH_CARD_METADATA|LIGHT_SWITCH_CARD_METADATA):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",

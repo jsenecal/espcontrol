@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -18,7 +17,7 @@ import {
 export function registerSwitchCardTypes(
     registry: CardRegistry,
     confirmationOptions: ConfigConfirmationOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
         setSwitchConfirmationOptions,
         switchConfirmationDefaultMessageForMode,
@@ -29,7 +28,7 @@ export function registerSwitchCardTypes(
         switchConfirmationYesText,
     } = confirmationOptions;
     // Default button type: HA entity toggle (on/off switch)
-    var SWITCH_CARD_METADATA: any = {
+    const SWITCH_CARD_METADATA: any = {
         entity: {
             label: "Entity",
             placeholder: "e.g. light.kitchen",
@@ -123,7 +122,7 @@ export function registerSwitchCardTypes(
             textBadge: "format-text",
         },
     };
-    var LIGHT_SWITCH_CARD_METADATA: any = {
+    const LIGHT_SWITCH_CARD_METADATA: any = {
         mode: LIGHT_CONTROL_TYPE_METADATA.mode,
         entity: {
             label: "Entity",
@@ -327,8 +326,4 @@ export function registerSwitchCardTypes(
             };
         },
     });
-    return {
-        "SWITCH_CARD_METADATA": liveGlobal(() => SWITCH_CARD_METADATA, (value?: any) => { SWITCH_CARD_METADATA = value; }),
-        "LIGHT_SWITCH_CARD_METADATA": liveGlobal(() => LIGHT_SWITCH_CARD_METADATA, (value?: any) => { LIGHT_SWITCH_CARD_METADATA = value; }),
-    };
 }
