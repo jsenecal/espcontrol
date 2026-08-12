@@ -85,6 +85,8 @@ export function createConfigCodecFeature(
     confirmationOptions: ConfigConfirmationOptionsFeature,
 ) {
     const {
+        sensorCardLocalSource: SENSOR_CARD_LOCAL_SENSOR,
+        sensorCardIsLocal,
         cardLargeNumbersSupported,
         normalizeDateTimeOptions,
         normalizeDoorWindowSubtype,

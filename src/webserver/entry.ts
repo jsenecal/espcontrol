@@ -238,6 +238,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     layout: context.layout,
     cards: context.cards,
     imageOptions: context.configuration.imageOptions,
+    sensorOptions: context.configuration.options,
     codec: context.configuration.codec,
   }));
   installGlobals(installPreviewInteractionsModule({
@@ -316,7 +317,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registerPresenceCardTypes(registry, context.configuration.options);
   registerPushCardTypes(registry);
   registerScreenLockCardTypes(registry);
-  registry.registerCompatibility(registerSensorCardTypes(registry, context.configuration.options));
+  registerSensorCardTypes(registry, context.configuration.options);
   registerSliderCardTypes(registry, context.configuration.modalTabs);
   registry.registerCompatibility(registerSubpageCardTypes(registry, context.configuration.codec));
   registerSwitchCardTypes(registry, context.configuration.confirmationOptions);

@@ -226,6 +226,18 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:ALARM_CARD_METADATA|ALARM_CONTROL_PANEL_VALUE|alarmCardTypeOptions|alarmCardTypeOptionsForSettings|alarmControlPanelValue|alarmIconIsGenerated|alarmLabelIsGenerated|alarmUsesDefaultIcon|renderAlarmCardTypeField|renderAlarmVisibleActionsField|setAlarmCardType):/);
   });
 
+  test("registers sensor cards through context-owned source options", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/sensor.ts"), "utf8");
+    const options = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_sensor_options.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.match(options, /sensorCardLocalSource = LOCAL_SENSOR_SOURCE/);
+    assert.match(entry, /registerSensorCardTypes\(registry, context\.configuration\.options\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerSensorCardTypes/);
+    assert.doesNotMatch(globals, /\bvar (?:SENSOR_CARD_LOCAL_SENSOR|SENSOR_CARD_METADATA|renderSensorLocalSettings|sensorCardIsLocal|sensorLocalPreview):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",

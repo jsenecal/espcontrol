@@ -54,6 +54,7 @@ export function installAppTestHooksConfig(
     codec: ConfigCodecFeature,
 ): GlobalDescriptors {
     const {
+        sensorCardIsLocal,
         cardLargeNumbersEnabled,
         sensorActiveColorEnabled,
         sensorTimeUnit,

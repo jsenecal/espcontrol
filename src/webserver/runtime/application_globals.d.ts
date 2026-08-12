@@ -44,8 +44,6 @@ declare global {
   var SCREEN_SCHEDULE_UNAVAILABLE: any;
   var SCREEN_SCHEDULE_WAKE_BRIGHTNESS_UNAVAILABLE: any;
   var SCREEN_SCHEDULE_WAKE_TIMEOUT_UNAVAILABLE: any;
-  var SENSOR_CARD_LOCAL_SENSOR: any;
-  var SENSOR_CARD_METADATA: any;
   var SUBPAGE_CARD_METADATA: any;
   var SUBPAGE_CHEVRON_UNAVAILABLE: any;
   var SUBPAGE_RAW_CHUNK_FIELDS: any;
@@ -494,7 +492,6 @@ declare global {
   var renderLightControlTypeField: any;
   var renderPreview: any;
   var renderSelectionBar: any;
-  var renderSensorLocalSettings: any;
   var resetAppearanceColors: any;
   var resetNtpServersToDefaults: any;
   var resetPostQueueError: any;
@@ -528,8 +525,6 @@ declare global {
   var previousFirmwareInstallAvailable: any;
   var selectedPreviousFirmwareInfo: any;
   var syncPreviousFirmwareUi: any;
-  var sensorCardIsLocal: any;
-  var sensorLocalPreview: any;
   var serializeClockBarTemperatureEntities: any;
   var serializeGrid: any;
   var setActionCardStateOptions: any;

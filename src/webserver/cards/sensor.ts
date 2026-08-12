@@ -9,16 +9,17 @@ import {
     cardContractHidden,
     cardContractPickerKey,
 } from "../generated/card_contract";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { escHtml, iconSlug } from "../application/ui_primitives";
-import { createSensorCardModeController } from "../features/sensor_card_mode_controller";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
 export function registerSensorCardTypes(
     registry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
+        sensorCardLocalSource: SENSOR_CARD_LOCAL_SENSOR,
+        sensorCardModeController,
+        sensorCardIsLocal,
         normalizeSensorOptions,
         sensorActiveColorEnabled,
         sensorTimeUnit,
@@ -32,16 +33,6 @@ export function registerSensorCardTypes(
         setSensorStateTranslations,
     } = sensorOptions;
     // Read-only sensor card: displays either numeric data or a text state.
-    var SENSOR_CARD_LOCAL_SENSOR: any = "local";
-    function sensorCardModeController(this: any) {
-        return createSensorCardModeController({
-            normalizeOptions: function (options: string, precision: string) { return normalizeSensorOptions(options, precision); },
-            localSensorSource: SENSOR_CARD_LOCAL_SENSOR,
-        });
-    }
-    function sensorCardIsLocal(this: any, b?: any) {
-        return sensorCardModeController().isLocal(b);
-    }
     var SENSOR_CARD_METADATA: any = {
         source: {
             label: "Source",
@@ -600,11 +591,4 @@ export function registerSensorCardTypes(
             labelHtml: cardBadgeLabelHtml(helpers, label, SENSOR_CARD_METADATA.preview.numericBadge),
         };
     }
-    return {
-        "SENSOR_CARD_LOCAL_SENSOR": liveGlobal(() => SENSOR_CARD_LOCAL_SENSOR, (value?: any) => { SENSOR_CARD_LOCAL_SENSOR = value; }),
-        "sensorCardIsLocal": staticGlobal(sensorCardIsLocal),
-        "SENSOR_CARD_METADATA": liveGlobal(() => SENSOR_CARD_METADATA, (value?: any) => { SENSOR_CARD_METADATA = value; }),
-        "renderSensorLocalSettings": staticGlobal(renderSensorLocalSettings),
-        "sensorLocalPreview": staticGlobal(sensorLocalPreview),
-    };
 }

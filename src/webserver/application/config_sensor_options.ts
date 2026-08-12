@@ -6,6 +6,7 @@ import {
     setConfigOptionValue,
 } from "../model/config_primitives";
 import { cardContractLargeNumbersSupported } from "../generated/card_contract";
+import { createSensorCardModeController, LOCAL_SENSOR_SOURCE } from "../features/sensor_card_mode_controller";
 import {
     SENSOR_ACTIVE_COLOR_OPTION,
     SENSOR_LARGE_NUMBERS_OFF_VALUE,
@@ -23,6 +24,16 @@ import {
     largeNumbersExplicitlyDisabled,
 } from "./config_option_core";
 export function createConfigSensorOptionsFeature(cardRegistry: CardRegistry) {
+    const sensorCardLocalSource = LOCAL_SENSOR_SOURCE;
+    function sensorCardModeController(this: any) {
+        return createSensorCardModeController({
+            normalizeOptions: function (options: string, precision: string) { return normalizeSensorOptions(options, precision); },
+            localSensorSource: sensorCardLocalSource,
+        });
+    }
+    function sensorCardIsLocal(this: any, button?: any) {
+        return sensorCardModeController().isLocal(button);
+    }
     // ── Sensor Card Options ────────────────────────────────────────────
     function cardLargeNumbersSupported(this: any, b?: any) {
         if (!b)
@@ -223,6 +234,9 @@ export function createConfigSensorOptionsFeature(cardRegistry: CardRegistry) {
         return out;
     }
     return {
+        sensorCardLocalSource,
+        sensorCardModeController,
+        sensorCardIsLocal,
         cardLargeNumbersSupported,
         cardLargeNumbersEnabled,
         sensorLargeNumbersEnabled,
