@@ -57,7 +57,9 @@ describe("browserless application contracts", () => {
       const source = fs.readFileSync(path.join(ROOT, relativePath), "utf8");
       assert.match(source, /registry\.register\(/, `${relativePath} should use the typed card registry`);
       assert.doesNotMatch(source, /\bregisterButtonType\s*\(/, `${relativePath} should not read ambient registration state`);
-      assert.match(entry, new RegExp(`${registrationFunction}\\(registry(?:, context\\.configuration\\.options)?\\)`));
+      assert.match(entry, new RegExp(
+        `${registrationFunction}\\(\\s*registry(?:,\\s*context\\.configuration\\.(?:options|mediaOptions))?,?\\s*\\)`,
+      ));
     }
   });
 
@@ -114,6 +116,16 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.doesNotMatch(options, /\b(?:staticGlobal|liveGlobal|GlobalDescriptors)\b/);
     assert.doesNotMatch(entry, /installConfigSubpageOptionsModule/);
+    assert.match(options, /from "\.\.\/model\/config_primitives"/);
+  });
+
+  test("owns media option behavior in the application context", () => {
+    const options = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_media_options.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.match(options, /createConfigMediaOptionsFeature/);
+    assert.doesNotMatch(options, /\b(?:staticGlobal|liveGlobal|GlobalDescriptors)\b/);
+    assert.doesNotMatch(entry, /installConfigMediaOptionsModule/);
+    assert.match(entry, /mediaConfigurationOptions = createConfigMediaOptionsFeature\(layout\.config\)/);
     assert.match(options, /from "\.\.\/model\/config_primitives"/);
   });
 

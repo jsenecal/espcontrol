@@ -3,11 +3,13 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import { infoOnlyCardVisible } from "../features/preview";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
+import type { ConfigMediaOptionsFeature } from "../application/config_media_options";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 export function installAppTestHooksConfig(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
+    mediaOptions: ConfigMediaOptionsFeature,
 ): GlobalDescriptors {
     const {
         cardLargeNumbersEnabled,
@@ -25,6 +27,25 @@ export function installAppTestHooksConfig(
         doorWindowActiveColorEnabled,
         presenceActiveColorEnabled,
     } = sensorOptions;
+    const {
+        normalizeMediaOptions,
+        mediaCoverArtDetailsEnabled,
+        setMediaCoverArtDetailsEnabled,
+        mediaVolumeMax,
+        setMediaVolumeMax,
+        mediaSpeakerGroupEntity,
+        setMediaSpeakerGroupEntity,
+        mediaLabelDisplayMode,
+        setMediaLabelDisplayMode,
+        mediaNumberDisplayMode,
+        setMediaNumberDisplayMode,
+        mediaPlaylistContentId,
+        mediaPlaylistContentType,
+        mediaPlaylistPlayerSource,
+        setMediaPlaylistContentId,
+        setMediaPlaylistContentType,
+        setMediaPlaylistPlayerSource,
+    } = mediaOptions;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("config", {
             parseButtonConfig: parseButtonConfig,

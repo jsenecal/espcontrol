@@ -23,6 +23,7 @@ import type { DeviceConfig, AppState } from "../state/types";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
+import type { ConfigMediaOptionsFeature } from "./config_media_options";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -56,6 +57,7 @@ export interface ApplicationContext {
     readonly native: NativePanelConfigController;
     readonly persistence: ConfigPersistenceFeature;
     readonly options: ConfigSensorOptionsFeature;
+    readonly mediaOptions: ConfigMediaOptionsFeature;
   };
   readonly backup: {
     readonly contract: BackupFeature;
@@ -92,6 +94,7 @@ export interface ApplicationContextOptions {
   readonly nativeConfiguration: NativePanelConfigController;
   readonly configurationPersistence: ConfigPersistenceFeature;
   readonly configurationOptions: ConfigSensorOptionsFeature;
+  readonly mediaConfigurationOptions: ConfigMediaOptionsFeature;
   readonly backupContract: BackupFeature;
   readonly backupExport: BackupExportController;
   readonly backupFile: BackupFileController;
@@ -140,6 +143,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       native: options.nativeConfiguration,
       persistence: options.configurationPersistence,
       options: options.configurationOptions,
+      mediaOptions: options.mediaConfigurationOptions,
     },
     backup: {
       contract: options.backupContract,

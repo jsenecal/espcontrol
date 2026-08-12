@@ -32,6 +32,7 @@ export function runApplicationContextTests(): void {
   const nativeConfiguration = { begin() {} } as any;
   const configurationPersistence = { globals: {}, saveButtonConfig() {}, saveSubpageEntity() {} } as any;
   const configurationOptions = {} as any;
+  const mediaConfigurationOptions = {} as any;
   const backupContract = {} as any;
   const backupExport = {} as any;
   const backupFile = {} as any;
@@ -62,6 +63,7 @@ export function runApplicationContextTests(): void {
     nativeConfiguration,
     configurationPersistence,
     configurationOptions,
+    mediaConfigurationOptions,
     backupContract,
     backupExport,
     backupFile,
@@ -94,6 +96,7 @@ export function runApplicationContextTests(): void {
   equal(context.configuration.native, nativeConfiguration, "context retains native persistence");
   equal(context.configuration.persistence, configurationPersistence, "context retains save persistence");
   equal(context.configuration.options, configurationOptions, "context retains typed configuration options");
+  equal(context.configuration.mediaOptions, mediaConfigurationOptions, "context retains typed media options");
   equal(context.backup.contract, backupContract, "context retains the backup contract");
   equal(context.backup.export, backupExport, "context retains backup export ownership");
   equal(context.backup.file, backupFile, "context retains backup file ownership");

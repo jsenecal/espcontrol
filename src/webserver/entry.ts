@@ -44,7 +44,7 @@ import { installGridModule } from "./application/grid";
 import { installApiModule } from "./application/api";
 import { installFirmwareUpdatePostApiModule } from "./application/firmware_update_post_api";
 import { installPublicFirmwareInstallModule } from "./application/public_firmware_install";
-import { installConfigMediaOptionsModule } from "./application/config_media_options";
+import { createConfigMediaOptionsFeature } from "./application/config_media_options";
 import { installConfigImageOptionsModule } from "./application/config_image_options";
 import { installConfigModalTabOptionsModule } from "./application/config_modal_tab_options";
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
@@ -179,12 +179,15 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
-  installGlobals(installConfigMediaOptionsModule());
   installGlobals(installConfigImageOptionsModule(context.layout));
   installGlobals(installConfigModalTabOptionsModule());
   installGlobals(installConfigConfirmationOptionsModule());
   installGlobals(installConfigAccessClimateAlarmOptionsModule());
-  installGlobals(installConfigCodecModule(context.cards, context.configuration.options));
+  installGlobals(installConfigCodecModule(
+    context.cards,
+    context.configuration.options,
+    context.configuration.mediaOptions,
+  ));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
   installGlobals(installStateLoaderApiModule());
@@ -281,7 +284,10 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerLawnMowerCardTypes(registry));
   registry.registerCompatibility(registerLightTemperatureCardTypes(registry));
   registry.registerCompatibility(registerLockCardTypes(registry));
-  registry.registerCompatibility(registerMediaCardTypes(registry));
+  registry.registerCompatibility(registerMediaCardTypes(
+    registry,
+    context.configuration.mediaOptions,
+  ));
   registry.registerCompatibility(registerPresenceCardTypes(registry, context.configuration.options));
   registry.registerCompatibility(registerPushCardTypes(registry));
   registry.registerCompatibility(registerScreenLockCardTypes(registry));
@@ -298,7 +304,11 @@ function installCardCompatibility(context: ApplicationContext): void {
 
 function installTestCompatibility(context: ApplicationContext): void {
   installGlobals(installAppTestHooks());
-  installGlobals(installAppTestHooksConfig(context.cards, context.configuration.options));
+  installGlobals(installAppTestHooksConfig(
+    context.cards,
+    context.configuration.options,
+    context.configuration.mediaOptions,
+  ));
   installGlobals(installAppTestHooksPreview(context.cards));
   installGlobals(installAppTestHooksBackup());
   installGlobals(installAppTestHooksSettings());
@@ -333,6 +343,7 @@ function composeApplicationContext(): ApplicationContext {
   const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig);
   const cards = createCardRegistry(installGlobals);
   const configurationOptions = createConfigSensorOptionsFeature(cards);
+  const mediaConfigurationOptions = createConfigMediaOptionsFeature(layout.config);
   const cardEditorDraft = createCardEditorDraftController({
     cloneCard: (button) => Model.cloneCardConfig(button),
     emptyCard: () => Model.emptyCardConfig(),
@@ -508,6 +519,7 @@ function composeApplicationContext(): ApplicationContext {
     nativeConfiguration: nativePanelConfig,
     configurationPersistence,
     configurationOptions,
+    mediaConfigurationOptions,
     backupContract,
     backupExport,
     backupFile,

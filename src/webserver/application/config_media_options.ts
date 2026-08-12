@@ -1,4 +1,11 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { DeviceConfig } from "../state/types";
+import {
+    configOptionEnabled,
+    configOptionValue,
+    setConfigOption,
+    setConfigOptionValue,
+} from "../model/config_primitives";
+import { cardContractCard } from "../generated/card_contract";
 import {
     MEDIA_COVER_ART_DETAILS_OPTION,
     MEDIA_COVER_ART_SECONDARY_ENTITY_OPTION,
@@ -13,7 +20,37 @@ import {
     cardContractOptionSpec,
     copyLargeNumbersOption,
 } from "./config_option_core";
-export function installConfigMediaOptionsModule(): GlobalDescriptors {
+export function createConfigMediaOptionsFeature(
+    deviceProfile: Pick<DeviceConfig, "disabledCardTypes">,
+) {
+    function mediaBehaviorSpec(this: any) {
+        var card: any = cardContractCard("media");
+        return card && card.behavior && card.behavior.media || {};
+    }
+    function mediaCoverArtCardsSupported(this: any) {
+        var disabled: readonly string[] = deviceProfile.disabledCardTypes || [];
+        return disabled.indexOf("media_cover_art") === -1;
+    }
+    function mediaModeOptionValues(this: any) {
+        var spec: any = cardContractOptionSpec("media", "media_mode");
+        var values: any = spec && spec.values ? spec.values.slice() :
+            ["control_modal", "cover_art", "speaker_group", "play_pause", "previous", "next", "volume", "position", "now_playing", "playlist"];
+        return mediaCoverArtCardsSupported() ? values : values.filter(function (this: any, value?: any) {
+            return value !== "cover_art";
+        });
+    }
+    function mediaDefaultMode(this: any) {
+        return mediaBehaviorSpec().defaultMode || "play_pause";
+    }
+    function mediaEditorMode(this: any, value?: any) {
+        value = String(value || "");
+        var legacy: any = mediaBehaviorSpec().legacyModes || {};
+        value = legacy[value] || value;
+        return mediaModeOptionValues().indexOf(value) >= 0 ? value : mediaDefaultMode();
+    }
+    function mediaEditorValidMode(this: any, value?: any) {
+        return mediaEditorMode(value);
+    }
     // ── Media Card Options ─────────────────────────────────────────────
     function normalizeMediaVolumeMax(this: any, value?: any) {
         value = String(value || "").trim();
@@ -214,28 +251,36 @@ export function installConfigMediaOptionsModule(): GlobalDescriptors {
         return b.options;
     }
     return {
-        "normalizeMediaVolumeMax": staticGlobal(normalizeMediaVolumeMax),
-        "normalizeMediaOptions": staticGlobal(normalizeMediaOptions),
-        "mediaCoverArtDetailsEnabled": staticGlobal(mediaCoverArtDetailsEnabled),
-        "setMediaCoverArtDetailsEnabled": staticGlobal(setMediaCoverArtDetailsEnabled),
-        "mediaCoverArtSecondaryEntity": staticGlobal(mediaCoverArtSecondaryEntity),
-        "setMediaCoverArtSecondaryEntity": staticGlobal(setMediaCoverArtSecondaryEntity),
-        "normalizeMediaLabelDisplayMode": staticGlobal(normalizeMediaLabelDisplayMode),
-        "normalizeMediaNumberDisplayMode": staticGlobal(normalizeMediaNumberDisplayMode),
-        "mediaVolumeMax": staticGlobal(mediaVolumeMax),
-        "setMediaVolumeMax": staticGlobal(setMediaVolumeMax),
-        "normalizeMediaSpeakerGroupEntity": staticGlobal(normalizeMediaSpeakerGroupEntity),
-        "mediaSpeakerGroupEntity": staticGlobal(mediaSpeakerGroupEntity),
-        "setMediaSpeakerGroupEntity": staticGlobal(setMediaSpeakerGroupEntity),
-        "mediaLabelDisplayMode": staticGlobal(mediaLabelDisplayMode),
-        "setMediaLabelDisplayMode": staticGlobal(setMediaLabelDisplayMode),
-        "mediaNumberDisplayMode": staticGlobal(mediaNumberDisplayMode),
-        "setMediaNumberDisplayMode": staticGlobal(setMediaNumberDisplayMode),
-        "mediaPlaylistContentId": staticGlobal(mediaPlaylistContentId),
-        "mediaPlaylistContentType": staticGlobal(mediaPlaylistContentType),
-        "setMediaPlaylistContentId": staticGlobal(setMediaPlaylistContentId),
-        "setMediaPlaylistContentType": staticGlobal(setMediaPlaylistContentType),
-        "mediaPlaylistPlayerSource": staticGlobal(mediaPlaylistPlayerSource),
-        "setMediaPlaylistPlayerSource": staticGlobal(setMediaPlaylistPlayerSource),
+        mediaBehaviorSpec,
+        mediaCoverArtCardsSupported,
+        mediaModeOptionValues,
+        mediaDefaultMode,
+        mediaEditorMode,
+        mediaEditorValidMode,
+        normalizeMediaVolumeMax,
+        normalizeMediaOptions,
+        mediaCoverArtDetailsEnabled,
+        setMediaCoverArtDetailsEnabled,
+        mediaCoverArtSecondaryEntity,
+        setMediaCoverArtSecondaryEntity,
+        normalizeMediaLabelDisplayMode,
+        normalizeMediaNumberDisplayMode,
+        mediaVolumeMax,
+        setMediaVolumeMax,
+        normalizeMediaSpeakerGroupEntity,
+        mediaSpeakerGroupEntity,
+        setMediaSpeakerGroupEntity,
+        mediaLabelDisplayMode,
+        setMediaLabelDisplayMode,
+        mediaNumberDisplayMode,
+        setMediaNumberDisplayMode,
+        mediaPlaylistContentId,
+        mediaPlaylistContentType,
+        setMediaPlaylistContentId,
+        setMediaPlaylistContentType,
+        mediaPlaylistPlayerSource,
+        setMediaPlaylistPlayerSource,
     };
 }
+
+export type ConfigMediaOptionsFeature = ReturnType<typeof createConfigMediaOptionsFeature>;

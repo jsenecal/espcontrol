@@ -1,41 +1,44 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import type { ConfigMediaOptionsFeature } from "../application/config_media_options";
 import {
     MEDIA_COVER_ART_OPTION,
     MEDIA_PLAYLIST_CONTENT_TYPE_OPTION,
     cardContractOptionSpec,
 } from "../application/config_option_core";
-export function registerMediaCardTypes(registry: CardRegistry): GlobalDescriptors {
+export function registerMediaCardTypes(
+    registry: CardRegistry,
+    mediaOptions: ConfigMediaOptionsFeature,
+): GlobalDescriptors {
+    const {
+        mediaBehaviorSpec,
+        mediaCoverArtCardsSupported,
+        mediaModeOptionValues,
+        mediaDefaultMode,
+        mediaEditorMode,
+        mediaEditorValidMode,
+        normalizeMediaOptions,
+        mediaCoverArtDetailsEnabled,
+        setMediaCoverArtDetailsEnabled,
+        mediaCoverArtSecondaryEntity,
+        setMediaCoverArtSecondaryEntity,
+        mediaVolumeMax,
+        setMediaVolumeMax,
+        mediaSpeakerGroupEntity,
+        setMediaSpeakerGroupEntity,
+        mediaLabelDisplayMode,
+        setMediaLabelDisplayMode,
+        mediaNumberDisplayMode,
+        setMediaNumberDisplayMode,
+        mediaPlaylistContentId,
+        mediaPlaylistContentType,
+        setMediaPlaylistContentId,
+        setMediaPlaylistContentType,
+        mediaPlaylistPlayerSource,
+        setMediaPlaylistPlayerSource,
+    } = mediaOptions;
     // Media player card: playback buttons, volume, track position, or now-playing details.
-    function mediaBehaviorSpec(this: any) {
-        var card: any = cardContractCard("media");
-        return card && card.behavior && card.behavior.media || {};
-    }
-    function mediaCoverArtCardsSupported(this: any) {
-        var disabled: any = CFG.disabledCardTypes || [];
-        return disabled.indexOf("media_cover_art") === -1;
-    }
-    function mediaModeOptionValues(this: any) {
-        var spec: any = cardContractOptionSpec("media", "media_mode");
-        var values: any = spec && spec.values ? spec.values.slice() :
-            ["control_modal", "cover_art", "speaker_group", "play_pause", "previous", "next", "volume", "position", "now_playing", "playlist"];
-        return mediaCoverArtCardsSupported() ? values : values.filter(function (this: any, value?: any) {
-            return value !== "cover_art";
-        });
-    }
-    function mediaDefaultMode(this: any) {
-        return mediaBehaviorSpec().defaultMode || "play_pause";
-    }
-    function mediaEditorMode(this: any, value?: any) {
-        value = String(value || "");
-        var legacy: any = mediaBehaviorSpec().legacyModes || {};
-        value = legacy[value] || value;
-        return mediaModeOptionValues().indexOf(value) >= 0 ? value : mediaDefaultMode();
-    }
-    function mediaEditorValidMode(this: any, value?: any) {
-        return mediaEditorMode(value);
-    }
     function mediaNowPlayingControls(this: any, b?: any) {
         if (!b || b.sensor !== "now_playing")
             return "";
