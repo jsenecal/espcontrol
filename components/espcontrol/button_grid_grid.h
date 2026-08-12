@@ -466,7 +466,7 @@ inline void subscribe_media_cover_art(MediaNowPlayingCtx *ctx,
         // Attribute subscriptions are independent. Ask the artwork coordinator
         // to obtain a matching remote/local pair instead of downloading from
         // this individual notification.
-        image_card_request_media_artwork(art);
+        image_card_schedule_media_artwork_refresh(art);
       })
   );
   ha_subscribe_attribute(
@@ -486,11 +486,11 @@ inline void subscribe_media_cover_art(MediaNowPlayingCtx *ctx,
         if (!image_card_context_current(art, entity_id, generation)) return;
         // See the remote callback above: one notification starts one paired
         // refresh, which prevents either attribute winning by arrival order.
-        image_card_request_media_artwork(art);
+        image_card_schedule_media_artwork_refresh(art);
       })
   );
   subscribe_image_card_access_token(art, entity_id);
-  image_card_request_media_artwork(art);
+  image_card_schedule_media_artwork_refresh(art);
 }
 
 inline void setup_card_visual(BtnSlot &s, const ParsedCfg &p,
@@ -2159,7 +2159,12 @@ inline void grid_phase2(
   // Phase 2 can finish after the API connection callbacks have already run
   // during boot. Refresh newly bound artwork contexts here so the current
   // track image loads without waiting for the next media metadata change.
-  if (ha_api_state_connected()) refresh_image_cards();
+  if (ha_api_state_connected()) {
+    // A runtime configuration save can add new entity subscriptions after
+    // Home Assistant completed its initial subscription handshake.
+    ha_reannounce_state_subscriptions();
+    refresh_image_cards();
+  }
   refresh_weather_forecast_cards();
   grid_log_memory("end");
   ESP_LOGI("sensors", "Phase 2: done (%lu ms)", esphome::millis());

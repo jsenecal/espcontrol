@@ -293,21 +293,13 @@ void EspControlApp::initialize_native_configuration() {
       ESP_LOGE(TAG, "Native configuration load failed (%u)",
                static_cast<unsigned>(loaded.status));
     }
-    configuration::ServiceLoadResult live_document = loaded;
-    if (panel_config_service->legacy_writes_enabled()) {
-      const configuration::ServiceLoadResult refreshed =
-          panel_config_service->refresh_legacy_shadow(
-              runtime.document_buffer, PANEL_CONFIG_STORAGE_SLOT_CAPACITY);
-      if (refreshed.status == configuration::ServiceStatus::SYNCED_LEGACY) {
-        ESP_LOGI(TAG, "Refreshed native configuration shadow to generation %" PRIu32,
-                 refreshed.generation);
-      } else if (!refreshed.ok() &&
-                 refreshed.status != configuration::ServiceStatus::EMPTY) {
-        ESP_LOGE(TAG, "Native configuration refresh failed (%u)",
-                 static_cast<unsigned>(refreshed.status));
-      }
-      if (refreshed.ok()) live_document = refreshed;
-    }
+    // Once a durable native document exists it is authoritative. Its legacy
+    // mirror is persisted asynchronously by ESPHome and can still contain the
+    // previous layout after a quick reboot. Re-importing that stale mirror here
+    // would silently undo a successful card move, resize, or backup restore.
+    // ConfigurationService::load() already imports legacy values when native
+    // storage is empty, so no second boot-time shadow refresh is required.
+    const configuration::ServiceLoadResult live_document = loaded;
     if (live_document.ok()) {
       // Publishing the restored values triggers the existing grid-refresh
       // automations. Run that only after every ESPHome component has completed

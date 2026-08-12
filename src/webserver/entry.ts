@@ -488,6 +488,7 @@ function composeApplicationContext(): ApplicationContext {
     backupFile,
     normalizeImportedPanelSettings,
     gridColsForImportedSettings,
+    nativePanelConfig,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),

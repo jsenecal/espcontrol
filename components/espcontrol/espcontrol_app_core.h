@@ -175,7 +175,7 @@ class EspControlAppCore {
   HomeAssistantCallbackOwnerService home_assistant_callback_owner_{};
   // The binding service is 200 bytes: coordinator metadata and vector handles
   // are fixed here, while pointed-to request data remains demand-allocated.
-  FixedRuntimeServiceSlot<200> home_assistant_binding_service_{};
+  FixedRuntimeServiceSlot<224> home_assistant_binding_service_{};
   // The concrete UI services assert their own sizes when they bind to these
   // slots. Keeping each bound small avoids reserving a generic 128-byte buffer
   // for every service in every firmware image.

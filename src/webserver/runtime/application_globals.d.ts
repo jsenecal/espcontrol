@@ -997,6 +997,8 @@ declare global {
   var resetPostQueueError: any;
   var resetStateForConnection: any;
   var resizeSlot: any;
+  var scheduleMainGridSave: any;
+  var cancelMainGridSave: any;
   var resolveIcon: any;
   var resolveInitialScreenRotationCheck: any;
   var resolveSpanPos: any;

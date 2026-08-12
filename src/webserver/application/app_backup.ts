@@ -5,6 +5,8 @@ import type { BackupExportController } from "../features/backup_export_controlle
 import type { BackupFileController } from "../features/backup_file_controller";
 import type { BackupRestoreController } from "../features/backup_restore_controller";
 import type { ApplicationLayoutState } from "./application_context";
+import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
+import type { PanelConfigDocument } from "../model";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -14,6 +16,7 @@ export interface AppBackupControllers {
     readonly backupFile: BackupFileController;
     readonly normalizeImportedPanelSettings: (settings: any) => any;
     readonly gridColsForImportedSettings: (settings: any) => number;
+    readonly nativePanelConfig?: NativePanelConfigController;
 }
 
 export interface AppBackupFeature {
@@ -148,18 +151,15 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                 var importedSettings: any = plannedImport.importedSettings;
                 var importedGridCols: any = plannedImport.importedGridCols;
                 var backupPlan: any = plannedImport.backupPlan;
-                postText(entityName("button_on_color"), backupPlan.config.button_on_color);
+                cancelMainGridSave();
                 for (var i: any = 0; i < controllers.layout.numSlots; i++) {
                     var b: any = backupPlan.buttons[i];
-                    var n: any = i + 1;
                     state.buttons[i] = backupNormalizeButtonConfig(b);
-                    saveButtonConfig(n);
                 }
                 state.subpages = {};
                 state.subpageRaw = {};
                 for (var subpageKey in backupPlan.subpages) {
                     state.subpages[subpageKey] = backupPlan.subpages[subpageKey];
-                    saveSubpageEntity(subpageKey);
                 }
                 var activeGridCols: any = controllers.layout.gridCols;
                 controllers.layout.gridCols = importedGridCols;
@@ -170,7 +170,43 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                 finally {
                     controllers.layout.gridCols = activeGridCols;
                 }
-                postText(entityName("button_order"), normalizedButtonOrder);
+                var nativeDocument: PanelConfigDocument = {
+                    deviceProfile: controllers.layout.deviceId,
+                    buttons: {},
+                    subpages: {},
+                    settings: {
+                        button_order: normalizedButtonOrder,
+                        button_on_color: backupPlan.config.button_on_color,
+                    },
+                };
+                for (var nativeButtonIndex: any = 0; nativeButtonIndex < controllers.layout.numSlots; nativeButtonIndex++) {
+                    var nativeButtonValue: any = serializeButtonConfig(state.buttons[nativeButtonIndex]);
+                    if (nativeButtonValue)
+                        nativeDocument.buttons[nativeButtonIndex + 1] = nativeButtonValue;
+                }
+                for (var nativeSubpageKey in state.subpages) {
+                    var nativeSubpageValue: any = serializeSubpageConfig(state.subpages[nativeSubpageKey]);
+                    if (nativeSubpageValue)
+                        nativeDocument.subpages[Number(nativeSubpageKey)] = nativeSubpageValue;
+                }
+                var nativeRestore: any = controllers.nativePanelConfig
+                    ? controllers.nativePanelConfig.writeDocument(nativeDocument)
+                    : null;
+                if (nativeRestore) {
+                    _postQueue = _postQueue.then(function () { return nativeRestore; }).then(function (result: any) {
+                        if (result !== "saved")
+                            _postQueueHadError = true;
+                        return result;
+                    });
+                }
+                else {
+                    postText(entityName("button_on_color"), backupPlan.config.button_on_color);
+                    for (var legacyButtonIndex: any = 0; legacyButtonIndex < controllers.layout.numSlots; legacyButtonIndex++)
+                        saveButtonConfig(legacyButtonIndex + 1);
+                    for (var legacySubpageKey in state.subpages)
+                        saveSubpageEntity(legacySubpageKey);
+                    postText(entityName("button_order"), normalizedButtonOrder);
+                }
                 state.onColor = backupPlan.config.button_on_color;
                 if (els.setOnColor && els.setOnColor._syncColor)
                     els.setOnColor._syncColor(state.onColor);

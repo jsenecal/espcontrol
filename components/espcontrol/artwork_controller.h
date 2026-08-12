@@ -22,6 +22,30 @@ constexpr uint8_t ARTWORK_SOURCE_REMOTE = 1u << 0;
 constexpr uint8_t ARTWORK_SOURCE_LOCAL = 1u << 1;
 constexpr uint8_t ARTWORK_SOURCE_BOTH = ARTWORK_SOURCE_REMOTE | ARTWORK_SOURCE_LOCAL;
 
+// Coalesces adjacent refresh triggers before a paired Home Assistant read.
+// A forced trigger must survive later ordinary triggers in the same window.
+struct RefreshTrigger {
+  bool pending{false};
+  bool forced{false};
+
+  void schedule(bool force_refresh) {
+    this->pending = true;
+    this->forced = this->forced || force_refresh;
+  }
+
+  bool consume() {
+    const bool force_refresh = this->forced;
+    this->pending = false;
+    this->forced = false;
+    return force_refresh;
+  }
+
+  void reset() {
+    this->pending = false;
+    this->forced = false;
+  }
+};
+
 constexpr uint8_t artwork_source_mask(bool local) {
   return local ? ARTWORK_SOURCE_LOCAL : ARTWORK_SOURCE_REMOTE;
 }
