@@ -6,6 +6,7 @@ import { createCardRegistry } from "../../src/webserver/application/card_registr
 import { installCore } from "../../src/webserver/application/core";
 import { createConfigWeatherOptionsFeature } from "../../src/webserver/application/config_weather_options";
 import { createConfigWebhookOptionsFeature } from "../../src/webserver/application/config_webhook_options";
+import { createConfigInternalRelayOptionsFeature } from "../../src/webserver/application/config_internal_relay_options";
 import type { DeviceConfig } from "../../src/webserver/state/types";
 import type { GlobalDescriptors } from "../../src/webserver/runtime/globals";
 
@@ -38,6 +39,7 @@ export function runApplicationContextTests(): void {
   const imageConfigurationOptions = {} as any;
   const weatherConfigurationOptions = {} as any;
   const webhookConfigurationOptions = {} as any;
+  const internalRelayConfigurationOptions = {} as any;
   const modalTabOptions = {} as any;
   const accessClimateAlarmOptions = {} as any;
   const confirmationOptions = {} as any;
@@ -79,6 +81,7 @@ export function runApplicationContextTests(): void {
     imageConfigurationOptions,
     weatherConfigurationOptions,
     webhookConfigurationOptions,
+    internalRelayConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
@@ -121,6 +124,7 @@ export function runApplicationContextTests(): void {
   equal(context.configuration.imageOptions, imageConfigurationOptions, "context retains typed image options");
   equal(context.configuration.weatherOptions, weatherConfigurationOptions, "context retains typed weather options");
   equal(context.configuration.webhookOptions, webhookConfigurationOptions, "context retains typed webhook options");
+  equal(context.configuration.internalRelayOptions, internalRelayConfigurationOptions, "context retains typed internal-relay options");
   equal(context.configuration.modalTabs, modalTabOptions, "context retains typed modal-tab options");
   equal(context.configuration.accessClimateAlarm, accessClimateAlarmOptions, "context retains typed access/climate/alarm options");
   equal(context.configuration.confirmationOptions, confirmationOptions, "context retains typed confirmation options");
@@ -164,6 +168,15 @@ export function runApplicationContextTests(): void {
   equal(webhook.icon_on, "Auto", "webhook normalization removes the active icon");
   equal(webhook.precision, "", "webhook normalization clears precision");
   equal(webhookOptions.webhookHeaders(webhook), "Content-Type: application/json", "webhook normalization preserves encoded headers");
+
+  const internalRelayOptions = createConfigInternalRelayOptionsFeature({
+    ...profile,
+    features: { internalRelays: [{ key: "relay_1", label: "Relay One" }] },
+  });
+  equal(internalRelayOptions.normalizeInternalRelayMode("push"), "push", "internal relay options preserve push mode");
+  equal(internalRelayOptions.normalizeInternalRelayMode("invalid"), "switch", "internal relay options reject unknown modes");
+  equal(internalRelayOptions.internalRelayLabelFor("relay_1"), "Relay One", "internal relay options use profile labels");
+  equal(internalRelayOptions.internalRelayLabelFor("porch_light"), "Porch Light", "internal relay options format unknown relay keys");
 
   cards.registerCompatibility({ example: { configurable: true, value: true } });
   equal(cards.compatibilityDefinitionCount, 1, "registry counts compatibility definitions");

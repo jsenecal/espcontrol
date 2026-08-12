@@ -39,6 +39,7 @@ import { createConfigMediaOptionsFeature } from "./application/config_media_opti
 import { createConfigImageOptionsFeature } from "./application/config_image_options";
 import { createConfigWeatherOptionsFeature } from "./application/config_weather_options";
 import { createConfigWebhookOptionsFeature } from "./application/config_webhook_options";
+import { createConfigInternalRelayOptionsFeature } from "./application/config_internal_relay_options";
 import { createConfigModalTabOptionsFeature } from "./application/config_modal_tab_options";
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
 import { createConfigConfirmationOptionsFeature } from "./application/config_confirmation_options";
@@ -299,7 +300,11 @@ function installCardCompatibility(context: ApplicationContext): void {
     registry,
     context.configuration.imageOptions,
   );
-  registry.registerCompatibility(registerInternalCardTypes(registry));
+  registerInternalCardTypes(
+    registry,
+    context.configuration.internalRelayOptions,
+    context.dom.document,
+  );
   registry.registerCompatibility(registerLawnMowerCardTypes(registry));
   registry.registerCompatibility(registerLightTemperatureCardTypes(registry, context.configuration.modalTabs));
   registry.registerCompatibility(registerLockCardTypes(registry));
@@ -330,6 +335,7 @@ function installTestCompatibility(context: ApplicationContext): void {
     context.configuration.imageOptions,
     context.configuration.weatherOptions,
     context.configuration.webhookOptions,
+    context.configuration.internalRelayOptions,
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
     context.configuration.confirmationOptions,
@@ -389,6 +395,7 @@ function composeApplicationContext(): ApplicationContext {
   });
   const weatherConfigurationOptions = createConfigWeatherOptionsFeature(layout.config);
   const webhookConfigurationOptions = createConfigWebhookOptionsFeature();
+  const internalRelayConfigurationOptions = createConfigInternalRelayOptionsFeature(layout.config);
   const modalTabOptions = createConfigModalTabOptionsFeature({
     document: dom.document,
     renderButtonSettings: () => renderButtonSettings(),
@@ -589,6 +596,7 @@ function composeApplicationContext(): ApplicationContext {
     imageConfigurationOptions,
     weatherConfigurationOptions,
     webhookConfigurationOptions,
+    internalRelayConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,

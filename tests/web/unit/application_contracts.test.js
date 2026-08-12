@@ -30,7 +30,6 @@ describe("browserless application contracts", () => {
       ["clock", "registerClockCardTypes"],
       ["door_window", "registerDoorWindowCardTypes"],
       ["image", "registerImageCardTypes"],
-      ["internal", "registerInternalCardTypes"],
       ["lawn_mower", "registerLawnMowerCardTypes"],
       ["presence", "registerPresenceCardTypes"],
       ["push", "registerPushCardTypes"],
@@ -138,6 +137,16 @@ describe("browserless application contracts", () => {
     assert.match(entry, /registerWebhookCardTypes\(registry, context\.configuration\.webhookOptions\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerWebhookCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:WEBHOOK_CARD_METADATA|WEBHOOK_HEADERS_OPTION|WEBHOOK_METHODS|normalizeWebhookConfig|setWebhookHeaders|webhookHeaders|webhookMethod):/);
+  });
+
+  test("registers the internal relay card with profile-owned options", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/internal.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|CFG)\b/);
+    assert.match(entry, /registerInternalCardTypes\(\s*registry,\s*context\.configuration\.internalRelayOptions,\s*context\.dom\.document,?\s*\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerInternalCardTypes/);
+    assert.doesNotMatch(globals, /\bvar (?:INTERNAL_CARD_METADATA|internalRelayDefaultIcon|internalRelayDefaultOnIcon|internalRelayLabelFor|internalRelayMode|internalRelayModeOptionValues|internalRelayOptions|internalRelaySpec|internalRelayUsesDefaultIcon|internalRelayUsesDefaultOnIcon|normalizeInternalRelayMode):/);
   });
 
   test("injects the card registry into editor and preview consumers", () => {

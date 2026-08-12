@@ -22,6 +22,7 @@ import type { ConfigMediaOptionsFeature } from "../application/config_media_opti
 import type { ConfigImageOptionsFeature } from "../application/config_image_options";
 import type { ConfigWeatherOptionsFeature } from "../application/config_weather_options";
 import type { ConfigWebhookOptionsFeature } from "../application/config_webhook_options";
+import type { ConfigInternalRelayOptionsFeature } from "../application/config_internal_relay_options";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
@@ -42,6 +43,7 @@ export function installAppTestHooksConfig(
     imageOptions: ConfigImageOptionsFeature,
     weatherOptions: ConfigWeatherOptionsFeature,
     webhookOptions: ConfigWebhookOptionsFeature,
+    internalRelayOptions: ConfigInternalRelayOptionsFeature,
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
@@ -101,6 +103,12 @@ export function installAppTestHooksConfig(
         webhookHeaders,
         webhookMethod,
     } = webhookOptions;
+    const {
+        internalRelayDefaultIcon,
+        internalRelayDefaultOnIcon,
+        internalRelayModeOptionValues,
+        normalizeInternalRelayMode,
+    } = internalRelayOptions;
     const {
         coverControlTabDefinitions,
         coverControlTabs,

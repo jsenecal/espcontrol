@@ -29,7 +29,6 @@ declare global {
   var GATE_MODE_OPTIONS: any;
   var GRID_COLS: any;
   var GRID_ROWS: any;
-  var INTERNAL_CARD_METADATA: any;
   var LAWN_MOWER_CARD_METADATA: any;
   var LAWN_MOWER_CARD_MODES: any;
   var LIGHT_CONTROL_TYPE_METADATA: any;
@@ -245,7 +244,6 @@ declare global {
   var effectiveTimezoneOptionForWeb: any;
   var emptyButtonConfig: any;
   var ensureEntityDropdown: any;
-  var ensureInternalRelaySelection: any;
   var ensurePublicFirmwareOtaUrl: any;
   var ensureSubpageRaw: any;
   var entityDef: any;
@@ -325,15 +323,6 @@ declare global {
   var inlineDisclosure: any;
   var installPublicFirmwareViaWebOta: any;
   var installedFirmwareMatchesPublicRelease: any;
-  var internalRelayDefaultIcon: any;
-  var internalRelayDefaultOnIcon: any;
-  var internalRelayLabelFor: any;
-  var internalRelayMode: any;
-  var internalRelayModeOptionValues: any;
-  var internalRelayOptions: any;
-  var internalRelaySpec: any;
-  var internalRelayUsesDefaultIcon: any;
-  var internalRelayUsesDefaultOnIcon: any;
   var isClockBarTemperatureItem: any;
   var isConfigLocked: any;
   var isHomeAssistantAutoTimezone: any;
@@ -406,7 +395,6 @@ declare global {
   var normalizeGarageMode: any;
   var normalizeGateMode: any;
   var normalizeGridSpansForLayout: any;
-  var normalizeInternalRelayMode: any;
   var normalizeLawnMowerConfig: any;
   var normalizeLawnMowerMode: any;
   var normalizeLightControlType: any;
@@ -551,7 +539,6 @@ declare global {
   var renderFanControlTypeField: any;
   var renderFirmwareUpdateStatus: any;
   var renderFirmwareVersion: any;
-  var renderInternalRelayField: any;
   var renderLightControlTabSettings: any;
   var renderLightControlTypeField: any;
   var renderPreview: any;
