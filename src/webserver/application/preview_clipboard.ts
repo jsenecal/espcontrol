@@ -5,6 +5,7 @@ import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { ApplicationLayoutState } from "./application_context";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
+import { ACTION_CARD_LOCAL_ACTION } from "./config_action_contract";
 export interface PreviewClipboardDependencies {
     readonly configPersistence: ConfigPersistenceFeature;
     readonly document: Document;

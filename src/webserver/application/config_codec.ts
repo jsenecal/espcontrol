@@ -38,6 +38,10 @@ import {
     normalizeSubpageOptions,
     subpageKind,
 } from "./config_subpage_options";
+import {
+    ACTION_CARD_LOCAL_ACTION,
+    ACTION_CARD_OPTION_SELECT_ACTION,
+} from "./config_action_contract";
 export function installConfigCodecModule(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,

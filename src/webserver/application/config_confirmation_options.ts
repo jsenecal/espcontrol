@@ -15,6 +15,12 @@ import {
     cardContractOptionSpec,
     copyLargeNumbersOption,
 } from "./config_option_core";
+import {
+    ACTION_CARD_LOCAL_ACTION,
+    ACTION_CARD_STATE_ENTITY_OPTION,
+    ACTION_CARD_STATE_PRECISION_OPTION,
+    ACTION_CARD_STATE_UNIT_OPTION,
+} from "./config_action_contract";
 export function installConfigConfirmationOptionsModule(): GlobalDescriptors {
     // ── Confirmation Card Options ─────────────────────────────────────
     function switchConfirmationModeStorage(this: any) {

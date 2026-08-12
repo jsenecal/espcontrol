@@ -5,6 +5,13 @@ import {
     SWITCH_CONFIRM_DEFAULT_NO,
     SWITCH_CONFIRM_DEFAULT_YES,
 } from "../application/config_option_core";
+import {
+    ACTION_CARD_LOCAL_ACTION,
+    ACTION_CARD_OPTION_SELECT_ACTION,
+    ACTION_CARD_STATE_ENTITY_OPTION,
+    ACTION_CARD_STATE_PRECISION_OPTION,
+    ACTION_CARD_STATE_UNIT_OPTION,
+} from "../application/config_action_contract";
 export function registerActionCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Action card: one-tap Home Assistant shortcuts for scenes, scripts, buttons, and helpers.
     var ACTION_CARD_ACTIONS: any = [
@@ -18,8 +25,6 @@ export function registerActionCardTypes(registry: CardRegistry): GlobalDescripto
         { value: "input_select.select_option", label: "Option Select", placeholder: "e.g. select.wled_preset", icon: "form-dropdown", domains: ["select", "input_select"] },
         { value: "local", label: "Local Action", placeholder: "e.g. zoom_mute", icon: "gesture-tap", domains: [] },
     ];
-    var ACTION_CARD_OPTION_SELECT_ACTION: any = "input_select.select_option";
-    var ACTION_CARD_LOCAL_ACTION: any = "local";
     function actionCardInfo(this: any, value?: any) {
         for (var i: any = 0; i < ACTION_CARD_ACTIONS.length; i++) {
             if (ACTION_CARD_ACTIONS[i].value === value)
@@ -69,9 +74,6 @@ export function registerActionCardTypes(registry: CardRegistry): GlobalDescripto
         normalizeSavedConfigActionFields(b);
         b.options = normalizeActionOptions(b.options, b.sensor);
     }
-    var ACTION_CARD_STATE_ENTITY_OPTION: any = "state_entity";
-    var ACTION_CARD_STATE_UNIT_OPTION: any = "state_unit";
-    var ACTION_CARD_STATE_PRECISION_OPTION: any = "state_precision";
     function actionCardStateEntity(this: any, b?: any) {
         return configOptionValue(b && b.options, ACTION_CARD_STATE_ENTITY_OPTION);
     }
@@ -594,16 +596,11 @@ export function registerActionCardTypes(registry: CardRegistry): GlobalDescripto
     }
     return {
         "ACTION_CARD_ACTIONS": liveGlobal(() => ACTION_CARD_ACTIONS, (value?: any) => { ACTION_CARD_ACTIONS = value; }),
-        "ACTION_CARD_OPTION_SELECT_ACTION": liveGlobal(() => ACTION_CARD_OPTION_SELECT_ACTION, (value?: any) => { ACTION_CARD_OPTION_SELECT_ACTION = value; }),
-        "ACTION_CARD_LOCAL_ACTION": liveGlobal(() => ACTION_CARD_LOCAL_ACTION, (value?: any) => { ACTION_CARD_LOCAL_ACTION = value; }),
         "actionCardInfo": staticGlobal(actionCardInfo),
         "actionCardIsOptionSelect": staticGlobal(actionCardIsOptionSelect),
         "actionCardIsLocal": staticGlobal(actionCardIsLocal),
         "normalizeSavedConfigActionFields": staticGlobal(normalizeSavedConfigActionFields),
         "normalizeActionCardConfig": staticGlobal(normalizeActionCardConfig),
-        "ACTION_CARD_STATE_ENTITY_OPTION": liveGlobal(() => ACTION_CARD_STATE_ENTITY_OPTION, (value?: any) => { ACTION_CARD_STATE_ENTITY_OPTION = value; }),
-        "ACTION_CARD_STATE_UNIT_OPTION": liveGlobal(() => ACTION_CARD_STATE_UNIT_OPTION, (value?: any) => { ACTION_CARD_STATE_UNIT_OPTION = value; }),
-        "ACTION_CARD_STATE_PRECISION_OPTION": liveGlobal(() => ACTION_CARD_STATE_PRECISION_OPTION, (value?: any) => { ACTION_CARD_STATE_PRECISION_OPTION = value; }),
         "actionCardStateEntity": staticGlobal(actionCardStateEntity),
         "actionCardStateUnit": staticGlobal(actionCardStateUnit),
         "actionCardStatePrecision": staticGlobal(actionCardStatePrecision),

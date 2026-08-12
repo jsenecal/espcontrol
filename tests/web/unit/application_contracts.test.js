@@ -111,6 +111,16 @@ describe("browserless application contracts", () => {
     assert.match(core, /export \{/);
   });
 
+  test("imports action-card option storage without mutable globals", () => {
+    const contract = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_action_contract.ts"), "utf8");
+    const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/action.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(contract, /export const ACTION_CARD_LOCAL_ACTION/);
+    assert.match(card, /from "\.\.\/application\/config_action_contract"/);
+    assert.doesNotMatch(card, /liveGlobal\(\(\) => ACTION_CARD_(?:LOCAL_ACTION|OPTION_SELECT_ACTION|STATE_)/);
+    assert.doesNotMatch(globals, /var ACTION_CARD_(?:LOCAL_ACTION|OPTION_SELECT_ACTION|STATE_)/);
+  });
+
   test("imports subpage option behavior without installing globals", () => {
     const options = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_subpage_options.ts"), "utf8");
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
