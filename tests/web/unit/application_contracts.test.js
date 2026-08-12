@@ -68,6 +68,14 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:GARAGE_CARD_METADATA|GARAGE_MODE_OPTIONS|GATE_CARD_METADATA|GATE_MODE_OPTIONS|coverLikeModeValues|normalizeCoverLikeMode|renderCoverLikeConfirmationSettings|garageCommandMode|garageModeDefaultIcon|garageModeDefaultLabel|garageModeOptionValues|garageUsesDefaultIcon|gateCommandMode|gateModeDefaultIcon|gateModeDefaultLabel|gateModeOptionValues|gateUsesDefaultIcon|normalizeGarageMode|normalizeGateMode):/);
   });
 
+  test("keeps the card registry independent from the compatibility bootstrap", () => {
+    const registry = fs.readFileSync(path.join(ROOT, "src/webserver/application/card_registry.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.doesNotMatch(registry, /GlobalDescriptors|installGlobals|registerCompatibility|compatibilityDefinitionCount/);
+    assert.match(registry, /export function createCardRegistry\(\)/);
+    assert.match(entry, /const cards = createCardRegistry\(\);/);
+  });
+
   test("registers static card families without compatibility descriptors", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");

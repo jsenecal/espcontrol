@@ -11,7 +11,6 @@ import { createConfigRobotCardOptionsFeature } from "../../src/webserver/applica
 import { createConfigLockOptionsFeature } from "../../src/webserver/application/config_lock_options";
 import { createConfigDateTimeOptionsFeature } from "../../src/webserver/application/config_date_time_options";
 import type { DeviceConfig } from "../../src/webserver/state/types";
-import type { GlobalDescriptors } from "../../src/webserver/runtime/globals";
 
 const profile: DeviceConfig = {
   slots: 12,
@@ -32,8 +31,7 @@ function equal<T>(actual: T, expected: T, message: string): void {
 }
 
 export function runApplicationContextTests(): void {
-  const installed: GlobalDescriptors[] = [];
-  const cards = createCardRegistry((descriptors) => installed.push(descriptors));
+  const cards = createCardRegistry();
   const api = { request() {} } as any;
   const nativeConfiguration = { begin() {} } as any;
   const configurationPersistence = { globals: {}, saveButtonConfig() {}, saveSubpageEntity() {} } as any;
@@ -217,9 +215,6 @@ export function runApplicationContextTests(): void {
   equal(dateTimeOptions.dateTimeCardTimeParts().value, "09:05", "date/time options format the shared current time");
   equal(dateTimeOptions.defaultTimezoneCardEntity(), "Europe/London (GMT+0)", "date/time options use the active timezone");
 
-  cards.registerCompatibility({ example: { configurable: true, value: true } });
-  equal(cards.compatibilityDefinitionCount, 1, "registry counts compatibility definitions");
-  equal(installed.length, 1, "registry delegates compatibility installation");
   const sensor = cards.register("sensor", { label: "Sensor", allowInSubpage: true });
   equal(cards.typedDefinitionCount, 1, "registry counts typed card definitions");
   equal(cards.definitions.sensor, sensor, "registry owns typed card definitions");

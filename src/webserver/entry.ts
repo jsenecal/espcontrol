@@ -387,7 +387,7 @@ function composeApplicationContext(): ApplicationContext {
     delay: (callback, milliseconds) => dom.schedule(callback, milliseconds),
   });
   const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime);
-  const cards = createCardRegistry(installGlobals);
+  const cards = createCardRegistry();
   const configurationOptions = createConfigSensorOptionsFeature(cards);
   const mediaConfigurationOptions = createConfigMediaOptionsFeature(layout.config);
   const imageConfigurationOptions = createConfigImageOptionsFeature({

@@ -1,5 +1,4 @@
 import { CARD_RUNTIME_SPECS } from "../generated/card_contract";
-import type { GlobalDescriptors } from "../runtime/globals";
 
 export type CardDefinitionValue<T> = T | (() => T);
 
@@ -29,9 +28,7 @@ export type CardDefinitions = Record<string, CardDefinition>;
 export interface CardRegistry {
   readonly definitions: CardDefinitions;
   readonly typedDefinitionCount: number;
-  readonly compatibilityDefinitionCount: number;
   register(key: string, definition: CardDefinition): CardDefinition;
-  registerCompatibility(descriptors: GlobalDescriptors): void;
 }
 
 const DEFAULT_DEFINITION: CardDefinition = {
@@ -52,12 +49,9 @@ const DEFAULT_DEFINITION: CardDefinition = {
   normalizeConfig: null,
 };
 
-export function createCardRegistry(
-  installCompatibility: (descriptors: GlobalDescriptors) => void,
-): CardRegistry {
+export function createCardRegistry(): CardRegistry {
   let definitions: CardDefinitions = {};
   let typedDefinitionCount = 0;
-  let compatibilityDefinitionCount = 0;
 
   const registerDefinition = (key: string, definition: CardDefinition): CardDefinition => {
     const registered = {
@@ -78,16 +72,9 @@ export function createCardRegistry(
     get typedDefinitionCount() {
       return typedDefinitionCount;
     },
-    get compatibilityDefinitionCount() {
-      return compatibilityDefinitionCount;
-    },
     register(key, definition) {
       typedDefinitionCount += 1;
       return registerDefinition(key, definition);
-    },
-    registerCompatibility(descriptors) {
-      compatibilityDefinitionCount += Object.keys(descriptors).length;
-      installCompatibility(descriptors);
     },
   };
 }
