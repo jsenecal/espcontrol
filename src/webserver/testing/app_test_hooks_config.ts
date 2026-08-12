@@ -4,6 +4,7 @@ import { infoOnlyCardVisible } from "../features/preview";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
+import { subpageKind } from "../application/config_subpage_options";
 export function installAppTestHooksConfig(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,

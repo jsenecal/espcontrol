@@ -109,6 +109,14 @@ describe("browserless application contracts", () => {
     assert.match(core, /export \{/);
   });
 
+  test("imports subpage option behavior without installing globals", () => {
+    const options = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_subpage_options.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.doesNotMatch(options, /\b(?:staticGlobal|liveGlobal|GlobalDescriptors)\b/);
+    assert.doesNotMatch(entry, /installConfigSubpageOptionsModule/);
+    assert.match(options, /from "\.\.\/model\/config_primitives"/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

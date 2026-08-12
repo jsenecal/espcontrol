@@ -1,11 +1,14 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import {
+    configOptionEnabled,
+    configOptionValue,
+    setConfigOptionValue,
+} from "../model/config_primitives";
 import {
     SENSOR_LARGE_NUMBERS_OPTION,
     SUBPAGE_KIND_OPTION,
     copyLargeNumbersOption,
     largeNumbersExplicitlyDisabled,
 } from "./config_option_core";
-export function installConfigSubpageOptionsModule(): GlobalDescriptors {
     // ── Subpage Card Options ───────────────────────────────────────────
     function normalizeSubpageKind(this: any, value?: any) {
         value = String(value || "").trim();
@@ -72,13 +75,12 @@ export function installConfigSubpageOptionsModule(): GlobalDescriptors {
         }
         return out;
     }
-    return {
-        "normalizeSubpageKind": staticGlobal(normalizeSubpageKind),
-        "subpageKind": staticGlobal(subpageKind),
-        "SUBPAGE_KIND_PRESET_DEFINITIONS": liveGlobal(() => SUBPAGE_KIND_PRESET_DEFINITIONS, (value?: any) => { SUBPAGE_KIND_PRESET_DEFINITIONS = value; }),
-        "subpageKindOptions": staticGlobal(subpageKindOptions),
-        "subpagePresetDefaults": staticGlobal(subpagePresetDefaults),
-        "applySubpagePresetConfig": staticGlobal(applySubpagePresetConfig),
-        "normalizeSubpageOptions": staticGlobal(normalizeSubpageOptions),
-    };
-}
+export {
+    normalizeSubpageKind,
+    subpageKind,
+    SUBPAGE_KIND_PRESET_DEFINITIONS,
+    subpageKindOptions,
+    subpagePresetDefaults,
+    applySubpagePresetConfig,
+    normalizeSubpageOptions,
+};

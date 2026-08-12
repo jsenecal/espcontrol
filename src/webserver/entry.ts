@@ -47,7 +47,6 @@ import { installPublicFirmwareInstallModule } from "./application/public_firmwar
 import { installConfigMediaOptionsModule } from "./application/config_media_options";
 import { installConfigImageOptionsModule } from "./application/config_image_options";
 import { installConfigModalTabOptionsModule } from "./application/config_modal_tab_options";
-import { installConfigSubpageOptionsModule } from "./application/config_subpage_options";
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
 import { installConfigConfirmationOptionsModule } from "./application/config_confirmation_options";
 import { installConfigAccessClimateAlarmOptionsModule } from "./application/config_access_climate_alarm_options";
@@ -183,7 +182,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installConfigMediaOptionsModule());
   installGlobals(installConfigImageOptionsModule(context.layout));
   installGlobals(installConfigModalTabOptionsModule());
-  installGlobals(installConfigSubpageOptionsModule());
   installGlobals(installConfigConfirmationOptionsModule());
   installGlobals(installConfigAccessClimateAlarmOptionsModule());
   installGlobals(installConfigCodecModule(context.cards, context.configuration.options));

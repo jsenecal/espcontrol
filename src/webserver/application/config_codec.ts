@@ -31,6 +31,11 @@ import {
     MEDIA_COVER_ART_OPTION,
     copyLargeNumbersOption,
 } from "./config_option_core";
+import {
+    applySubpagePresetConfig,
+    normalizeSubpageOptions,
+    subpageKind,
+} from "./config_subpage_options";
 export function installConfigCodecModule(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,

@@ -113,7 +113,6 @@ declare global {
   var SSE_ALIAS_GROUPS: any;
   var SUBPAGE_CARD_METADATA: any;
   var SUBPAGE_CHEVRON_UNAVAILABLE: any;
-  var SUBPAGE_KIND_PRESET_DEFINITIONS: any;
   var SUBPAGE_RAW_CHUNK_FIELDS: any;
   var SWITCH_CARD_METADATA: any;
   var TEMPERATURE_DEGREE_SYMBOL_UNAVAILABLE: any;
@@ -205,7 +204,6 @@ declare global {
   var addNativeConfigToBackup: any;
   var applySseHandlerAliases: any;
   var applySubpageConfigStateEvent: any;
-  var applySubpagePresetConfig: any;
   var applySubpageRaw: any;
   var attachEntitySuggestions: any;
   var backLabelFromOrder: any;
@@ -733,8 +731,6 @@ declare global {
   var normalizeScreenRotation: any;
   var normalizeScreensaverAction: any;
   var normalizeScreensaverDimmedBrightness: any;
-  var normalizeSubpageKind: any;
-  var normalizeSubpageOptions: any;
   var normalizeSwitchConfirmationOptions: any;
   var normalizeTabList: any;
   var brightnessModeOption: any;
@@ -1052,11 +1048,8 @@ declare global {
   var subpageConfigNeedsMigration: any;
   var subpageEntityKeys: any;
   var subpageFirstFreeSlot: any;
-  var subpageKind: any;
-  var subpageKindOptions: any;
   var subpageLegacyButtonFields: any;
   var subpageOrderForSerialize: any;
-  var subpagePresetDefaults: any;
   var subpageSerializedOrder: any;
   var subpageStateDisplayMode: any;
   var subpageStateEntities: any;
