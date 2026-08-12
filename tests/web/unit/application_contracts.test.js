@@ -58,7 +58,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /registry\.register\(/, `${relativePath} should use the typed card registry`);
       assert.doesNotMatch(source, /\bregisterButtonType\s*\(/, `${relativePath} should not read ambient registration state`);
       assert.match(entry, new RegExp(
-        `${registrationFunction}\\(\\s*registry(?:,\\s*context\\.configuration\\.(?:options|mediaOptions|imageOptions|modalTabs))?,?\\s*\\)`,
+        `${registrationFunction}\\(\\s*registry(?:,\\s*context\\.configuration\\.[A-Za-z]+)*,?\\s*\\)`,
       ));
     }
   });
@@ -68,8 +68,8 @@ describe("browserless application contracts", () => {
     const coverFactory = fs.readFileSync(path.join(ROOT, "src/webserver/cards/cover_like_card.ts"), "utf8");
     assert.match(coverFactory, /registry\.register\(config\.type/);
     assert.doesNotMatch(coverFactory, /\bregisterButtonType\s*\(/);
-    assert.match(entry, /registerGarageCardTypes\(coverLikeCards\.register\)/);
-    assert.match(entry, /registerGateCardTypes\(coverLikeCards\.register\)/);
+    assert.match(entry, /registerGarageCardTypes\(\s*coverLikeCards\.register,\s*context\.configuration\.accessClimateAlarm,?\s*\)/);
+    assert.match(entry, /registerGateCardTypes\(\s*coverLikeCards\.register,\s*context\.configuration\.accessClimateAlarm,?\s*\)/);
     assert.doesNotMatch(entry, /registerCoverLikeCardType/);
   });
 
@@ -167,6 +167,16 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /installConfigModalTabOptionsModule/);
     assert.match(entry, /modalTabOptions = createConfigModalTabOptionsFeature/);
     assert.match(options, /from "\.\.\/model\/config_primitives"/);
+  });
+
+  test("owns access, climate, and alarm options in the application context", () => {
+    const options = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_access_climate_alarm_options.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.match(options, /createConfigAccessClimateAlarmOptionsFeature/);
+    assert.doesNotMatch(options, /\b(?:staticGlobal|liveGlobal|GlobalDescriptors)\b/);
+    assert.doesNotMatch(entry, /installConfigAccessClimateAlarmOptionsModule/);
+    assert.match(entry, /accessClimateAlarmOptions = createConfigAccessClimateAlarmOptionsFeature/);
+    assert.match(options, /connectGarageConfirmationNormalizer/);
   });
 
   test("preserves settings normalization", () => {

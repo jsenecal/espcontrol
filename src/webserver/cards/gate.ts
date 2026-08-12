@@ -1,6 +1,15 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CoverLikeCardRegistration } from "./cover_like_card";
-export function registerGateCardTypes(registerCard: CoverLikeCardRegistration["register"]): GlobalDescriptors {
+import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
+export function registerGateCardTypes(
+    registerCard: CoverLikeCardRegistration["register"],
+    accessOptions: ConfigAccessClimateAlarmOptionsFeature,
+): GlobalDescriptors {
+    const {
+        normalizeGateOptions,
+        gateLabelDisplayMode,
+        setGateLabelDisplayMode,
+    } = accessOptions;
     // Gate card: cover toggle or one-tap open/close/stop commands.
     var GATE_MODE_OPTIONS: any = [
         ["", "Toggle"],

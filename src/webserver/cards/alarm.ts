@@ -1,6 +1,26 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
-export function registerAlarmCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
+export function registerAlarmCardTypes(
+    registry: CardRegistry,
+    accessOptions: ConfigAccessClimateAlarmOptionsFeature,
+): GlobalDescriptors {
+    const {
+        alarmBehaviorSpec,
+        alarmActionSpecs,
+        alarmMaxVisibleActions,
+        alarmActionIconIsGenerated,
+        alarmActionInfo,
+        alarmPinRequired,
+        setAlarmPinRequired,
+        alarmVisibleActions,
+        setAlarmVisibleActions,
+        alarmIconDisplayMode,
+        setAlarmIconDisplayMode,
+        alarmLabelDisplayMode,
+        setAlarmLabelDisplayMode,
+        normalizeAlarmOptions,
+    } = accessOptions;
     // Alarm cards: one-tap alarm_control_panel actions.
     var ALARM_CONTROL_PANEL_VALUE: any = "control_panel";
     function alarmControlPanelValue(this: any) {

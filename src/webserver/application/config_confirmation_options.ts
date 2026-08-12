@@ -21,7 +21,11 @@ import {
     ACTION_CARD_STATE_PRECISION_OPTION,
     ACTION_CARD_STATE_UNIT_OPTION,
 } from "./config_action_contract";
-export function installConfigConfirmationOptionsModule(): GlobalDescriptors {
+import type { ConfigAccessClimateAlarmOptionsFeature } from "./config_access_climate_alarm_options";
+export function installConfigConfirmationOptionsModule(
+    accessOptions: ConfigAccessClimateAlarmOptionsFeature,
+): GlobalDescriptors {
+    const { normalizeGarageOptions } = accessOptions;
     // ── Confirmation Card Options ─────────────────────────────────────
     function switchConfirmationModeStorage(this: any) {
         var spec: any = cardContractOptionSpec("", "confirmation_mode");
@@ -195,6 +199,9 @@ export function installConfigConfirmationOptionsModule(): GlobalDescriptors {
         }
         return out;
     }
+    accessOptions.connectGarageConfirmationNormalizer(
+        (out, options, requestedMode) => normalizeGarageConfirmationOptions(out, options, requestedMode),
+    );
     function setGarageConfirmationOptions(this: any, b?: any, mode?: any, message?: any, yesText?: any, noText?: any) {
         if (!b)
             return "";

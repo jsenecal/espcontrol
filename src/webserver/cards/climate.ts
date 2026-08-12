@@ -1,9 +1,11 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
+import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 export function registerClimateCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
+    accessOptions: ConfigAccessClimateAlarmOptionsFeature,
 ): GlobalDescriptors {
     const {
         climateControlTabDefinitions,
@@ -11,6 +13,17 @@ export function registerClimateCardTypes(
         setClimateControlTabs,
         renderModalTabSettings,
     } = modalTabs;
+    const {
+        normalizeClimateOptions,
+        climateLabelDisplayMode,
+        setClimateLabelDisplayMode,
+        climateNumberDisplayMode,
+        setClimateNumberDisplayMode,
+        climateTemperatureStep,
+        setClimateTemperatureStep,
+        parseClimatePrecisionConfig,
+        climatePrecisionConfig,
+    } = accessOptions;
     // Climate card: thermostat status plus full-screen climate controls.
     var CLIMATE_CARD_METADATA: any = {
         entity: {

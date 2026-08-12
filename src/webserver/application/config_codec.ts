@@ -29,6 +29,7 @@ import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
 import type { ConfigMediaOptionsFeature } from "./config_media_options";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
 import type { ConfigModalTabOptionsFeature } from "./config_modal_tab_options";
+import type { ConfigAccessClimateAlarmOptionsFeature } from "./config_access_climate_alarm_options";
 import {
     IMAGE_ICON_OPTION,
     MEDIA_COVER_ART_OPTION,
@@ -50,6 +51,7 @@ export function installConfigCodecModule(
     mediaOptions: ConfigMediaOptionsFeature,
     imageOptions: ConfigImageOptionsFeature,
     modalTabs: ConfigModalTabOptionsFeature,
+    accessOptions: ConfigAccessClimateAlarmOptionsFeature,
 ): GlobalDescriptors {
     const {
         cardLargeNumbersSupported,
@@ -77,6 +79,16 @@ export function installConfigCodecModule(
         normalizeCoverOptionsForMode,
         normalizeFanControlOptions,
     } = modalTabs;
+    const {
+        alarmActionSpecs,
+        alarmActionLegacyIcon,
+        normalizeGarageOptions,
+        normalizeGateOptions,
+        normalizeClimateOptions,
+        alarmActionInfo,
+        normalizeAlarmOptions,
+        normalizeClimatePrecisionConfig,
+    } = accessOptions;
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
         if (!b)

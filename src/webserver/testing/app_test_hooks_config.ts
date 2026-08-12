@@ -6,6 +6,7 @@ import type { ConfigSensorOptionsFeature } from "../application/config_sensor_op
 import type { ConfigMediaOptionsFeature } from "../application/config_media_options";
 import type { ConfigImageOptionsFeature } from "../application/config_image_options";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
+import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 import {
@@ -20,6 +21,7 @@ export function installAppTestHooksConfig(
     mediaOptions: ConfigMediaOptionsFeature,
     imageOptions: ConfigImageOptionsFeature,
     modalTabs: ConfigModalTabOptionsFeature,
+    accessOptions: ConfigAccessClimateAlarmOptionsFeature,
 ): GlobalDescriptors {
     const {
         cardLargeNumbersEnabled,
@@ -86,6 +88,32 @@ export function installAppTestHooksConfig(
         climateControlTabs,
         normalizeClimateControlTabs,
     } = modalTabs;
+    const {
+        normalizeGarageLabelDisplayMode,
+        garageLabelDisplayMode,
+        normalizeGateLabelDisplayMode,
+        gateLabelDisplayMode,
+        normalizeClimateLabelDisplayMode,
+        normalizeClimateNumberDisplayMode,
+        normalizeClimateTemperatureStep,
+        normalizeClimateOptions,
+        climateTemperatureStep,
+        setClimateTemperatureStep,
+        alarmActionValues,
+        alarmPinRequired,
+        alarmVisibleActions,
+        normalizeAlarmIconDisplayMode,
+        normalizeAlarmLabelDisplayMode,
+        alarmIconDisplayMode,
+        alarmLabelDisplayMode,
+        normalizeAlarmOptions,
+        parseClimatePrecisionConfig,
+        climatePrecisionValues,
+        climateDefaultLabelDisplayMode,
+        climateDefaultNumberDisplayMode,
+        climateDefaultTemperatureStep,
+        normalizeClimatePrecisionConfig,
+    } = accessOptions;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("config", {
             parseButtonConfig: parseButtonConfig,

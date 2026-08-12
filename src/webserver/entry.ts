@@ -49,7 +49,7 @@ import { createConfigImageOptionsFeature } from "./application/config_image_opti
 import { createConfigModalTabOptionsFeature } from "./application/config_modal_tab_options";
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
 import { installConfigConfirmationOptionsModule } from "./application/config_confirmation_options";
-import { installConfigAccessClimateAlarmOptionsModule } from "./application/config_access_climate_alarm_options";
+import { createConfigAccessClimateAlarmOptionsFeature } from "./application/config_access_climate_alarm_options";
 import { installConfigCodecModule } from "./application/config_codec";
 import { createNativePanelConfigMigrationController } from "./application/native_panel_config_migration";
 import { createConfigPersistenceFeature } from "./application/config_post_api";
@@ -179,14 +179,14 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
-  installGlobals(installConfigConfirmationOptionsModule());
-  installGlobals(installConfigAccessClimateAlarmOptionsModule(context.configuration.modalTabs));
+  installGlobals(installConfigConfirmationOptionsModule(context.configuration.accessClimateAlarm));
   installGlobals(installConfigCodecModule(
     context.cards,
     context.configuration.options,
     context.configuration.mediaOptions,
     context.configuration.imageOptions,
     context.configuration.modalTabs,
+    context.configuration.accessClimateAlarm,
   ));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
@@ -272,16 +272,26 @@ function installCardCompatibility(context: ApplicationContext): void {
   const registry = context.cards;
   const coverLikeCards = createCoverLikeCardRegistration(registry);
   registry.registerCompatibility(registerActionCardTypes(registry));
-  registry.registerCompatibility(registerAlarmCardTypes(registry));
+  registry.registerCompatibility(registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm));
   registry.registerCompatibility(registerCalendarCardTypes(registry));
-  registry.registerCompatibility(registerClimateCardTypes(registry, context.configuration.modalTabs));
+  registry.registerCompatibility(registerClimateCardTypes(
+    registry,
+    context.configuration.modalTabs,
+    context.configuration.accessClimateAlarm,
+  ));
   registry.registerCompatibility(registerClockCardTypes(registry));
   registry.registerCompatibility(coverLikeCards.descriptors);
   registry.registerCompatibility(registerDoorWindowCardTypes(registry, context.configuration.options));
   registry.registerCompatibility(registerEntityModeCardHelpers());
   registry.registerCompatibility(registerFanCardTypes(registry, context.configuration.modalTabs));
-  registry.registerCompatibility(registerGarageCardTypes(coverLikeCards.register));
-  registry.registerCompatibility(registerGateCardTypes(coverLikeCards.register));
+  registry.registerCompatibility(registerGarageCardTypes(
+    coverLikeCards.register,
+    context.configuration.accessClimateAlarm,
+  ));
+  registry.registerCompatibility(registerGateCardTypes(
+    coverLikeCards.register,
+    context.configuration.accessClimateAlarm,
+  ));
   registry.registerCompatibility(registerImageCardTypes(
     registry,
     context.configuration.imageOptions,
@@ -316,6 +326,7 @@ function installTestCompatibility(context: ApplicationContext): void {
     context.configuration.mediaOptions,
     context.configuration.imageOptions,
     context.configuration.modalTabs,
+    context.configuration.accessClimateAlarm,
   ));
   installGlobals(installAppTestHooksPreview(context.cards));
   installGlobals(installAppTestHooksBackup());
@@ -361,6 +372,7 @@ function composeApplicationContext(): ApplicationContext {
     document: dom.document,
     renderButtonSettings: () => renderButtonSettings(),
   });
+  const accessClimateAlarmOptions = createConfigAccessClimateAlarmOptionsFeature(modalTabOptions);
   const cardEditorDraft = createCardEditorDraftController({
     cloneCard: (button) => Model.cloneCardConfig(button),
     emptyCard: () => Model.emptyCardConfig(),
@@ -539,6 +551,7 @@ function composeApplicationContext(): ApplicationContext {
     mediaConfigurationOptions,
     imageConfigurationOptions,
     modalTabOptions,
+    accessClimateAlarmOptions,
     backupContract,
     backupExport,
     backupFile,
