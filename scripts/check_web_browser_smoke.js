@@ -1496,6 +1496,22 @@ async function assertSettingsPage(page, label, options = {}, posts = []) {
       .count()) === 1,
     `${label}: Home Assistant port field should hide browser stepper controls`,
   );
+  const artworkBaseUrlInput = homeAssistantSettingsCard.locator(
+    "#sp-set-ha-artwork-base-url",
+  );
+  const artworkBaseUrlSave = page.waitForRequest((request) => {
+    const url = new URL(request.url());
+    return url.pathname === "/text/home_assistant_artwork_base_url/set" &&
+      url.searchParams.get("value") === "https://ha.example.com/artwork";
+  });
+  await artworkBaseUrlInput.fill("https://ha.example.com/artwork/");
+  await artworkBaseUrlInput.press("Enter");
+  await artworkBaseUrlSave;
+  assert.strictEqual(
+    await artworkBaseUrlInput.inputValue(),
+    "https://ha.example.com/artwork",
+    `${label}: pressing Enter should normalize and save the artwork base URL`,
+  );
   const overflow = await page.evaluate(
     () => document.documentElement.scrollWidth > window.innerWidth + 1,
   );

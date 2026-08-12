@@ -323,10 +323,14 @@ export function installSettingsSystemSectionModule(
         haBaseUrlInput.type = "url";
         haBaseUrlInput.placeholder = "https://home.example.com";
         haBaseUrlInput.value = state.coverArtHomeAssistantBaseUrl;
-        haBaseUrlInput.addEventListener("change", function (this: any) {
+        haBaseUrlInput.addEventListener("blur", function (this: any) {
             state.coverArtHomeAssistantBaseUrl = normalizeHomeAssistantArtworkBaseUrl(this.value);
             this.value = state.coverArtHomeAssistantBaseUrl;
             postHomeAssistantArtworkBaseUrl(state.coverArtHomeAssistantBaseUrl);
+        });
+        haBaseUrlInput.addEventListener("keydown", function (this: any, event?: any) {
+            if (event.key === "Enter")
+                this.blur();
         });
         haBaseUrlField.appendChild(haBaseUrlInput);
         homeAssistantSettingsBody.appendChild(haBaseUrlField);
