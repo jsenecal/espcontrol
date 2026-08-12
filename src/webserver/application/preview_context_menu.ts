@@ -3,10 +3,12 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import { clampMenuPosition } from "../features/preview";
 import { resizeGridSlot } from "../features/preview_grid";
 import type { ApplicationLayoutState } from "./application_context";
+import type { CardRegistry } from "./card_registry";
 export interface PreviewContextMenuDependencies {
     readonly document: Document;
     readonly window: Window;
     readonly layout: ApplicationLayoutState;
+    readonly cards: CardRegistry;
 }
 export function installPreviewContextMenuModule(dependencies: PreviewContextMenuDependencies): GlobalDescriptors {
     const document = dependencies.document;
@@ -147,7 +149,7 @@ export function installPreviewContextMenuModule(dependencies: PreviewContextMenu
         var c: any = ctx();
         var b: any = c.buttons[slot - 1];
         addCtxItem("pencil", "Edit Card", function (this: any) { openCardSettings(slot); });
-        var ctxTypeDef: any = BUTTON_TYPES[(b && b.type) || ""];
+        var ctxTypeDef: any = dependencies.cards.definitions[(b && b.type) || ""];
         if (ctxTypeDef && ctxTypeDef.contextMenuItems &&
             (!c.isSub || buttonTypeRegistryValue(ctxTypeDef, "allowInSubpage", false))) {
             ctxTypeDef.contextMenuItems(slot, b, { addCtxItem: addCtxItem });

@@ -32,7 +32,6 @@ export interface CardRegistry {
   readonly compatibilityDefinitionCount: number;
   register(key: string, definition: CardDefinition): CardDefinition;
   registerCompatibility(descriptors: GlobalDescriptors): void;
-  replaceDefinitions(definitions: CardDefinitions): void;
 }
 
 const DEFAULT_DEFINITION: CardDefinition = {
@@ -89,9 +88,6 @@ export function createCardRegistry(
     registerCompatibility(descriptors) {
       compatibilityDefinitionCount += Object.keys(descriptors).length;
       installCompatibility(descriptors);
-    },
-    replaceDefinitions(nextDefinitions) {
-      definitions = nextDefinitions;
     },
   };
 }

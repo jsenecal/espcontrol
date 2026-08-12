@@ -22,9 +22,9 @@ export interface MenuPosition {
 export interface CardTypeDefinition {
   readonly key?: string;
   readonly label?: string | (() => string);
-  readonly pickerKey?: string | (() => string);
+  readonly pickerKey?: string | null | (() => string | null);
   readonly allowInSubpage?: boolean | (() => boolean);
-  readonly isAvailable?: (context: { isSub: boolean }) => boolean;
+  readonly isAvailable?: ((context: { isSub: boolean }) => boolean) | null;
 }
 
 export interface CardPickerOption {

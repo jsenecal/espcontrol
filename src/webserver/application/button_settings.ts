@@ -4,11 +4,13 @@ import type { CardEditorDraftController } from "../features/card_editor_draft_co
 import type { CardEditorValidationController } from "../features/card_editor_validation_controller";
 import type { CardEditorSaveController } from "../features/card_editor_save_controller";
 import type { ConfigPersistenceFeature } from "./config_post_api";
+import type { CardRegistry } from "./card_registry";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
     cardEditorSaveController: CardEditorSaveController,
     configPersistence: ConfigPersistenceFeature,
+    cardRegistry: CardRegistry,
 ): GlobalDescriptors {
     // ── Button settings panel (unified) ────────────────────────────────────
     function openCardSettings(this: any, slot?: any) {
@@ -280,7 +282,7 @@ export function installButtonSettingsModule(
                 if (saved.saveButton)
                 configPersistence.saveButtonConfig(slot);
             }
-            var savedTypeDef: any = BUTTON_TYPES[savedButton.type || ""];
+            var savedTypeDef: any = cardRegistry.definitions[savedButton.type || ""];
             if (savedTypeDef && savedTypeDef.afterSave) {
                 savedTypeDef.afterSave(savedButton, slot, { isSub: c.isSub });
             }
@@ -399,7 +401,7 @@ export function installButtonSettingsModule(
             if (state.settingsDraft && state.settingsDraft.key === draftKey) {
                 state.settingsDraft.typeSelected = true;
             }
-            var td: any = BUTTON_TYPES[newType];
+            var td: any = cardRegistry.definitions[newType];
             if (td && td.onSelect && !keepMediaEntity)
                 td.onSelect(b);
             if (pickerType === "media_control") {
@@ -555,7 +557,7 @@ export function installButtonSettingsModule(
             });
         }
         var isNewDraftWithoutType: any = isNewDraft && !state.settingsDraft?.typeSelected;
-        var rawTypeDef: any = isNewDraftWithoutType ? null : (BUTTON_TYPES[b.type || ""] || BUTTON_TYPES[""]);
+        var rawTypeDef: any = isNewDraftWithoutType ? null : (cardRegistry.definitions[b.type || ""] || cardRegistry.definitions[""]);
         var typeDef: any = rawTypeDef;
         {
             var selectedTypeKey: any = isNewDraftWithoutType

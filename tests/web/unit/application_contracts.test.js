@@ -71,6 +71,26 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /registerCoverLikeCardType/);
   });
 
+  test("injects the card registry into editor and preview consumers", () => {
+    const consumers = [
+      "src/webserver/application/button_settings.ts",
+      "src/webserver/application/config_codec.ts",
+      "src/webserver/application/config_sensor_options.ts",
+      "src/webserver/application/controls_fields.ts",
+      "src/webserver/application/preview_clipboard.ts",
+      "src/webserver/application/preview_context_menu.ts",
+      "src/webserver/application/preview_render.ts",
+      "src/webserver/testing/app_test_hooks_config.ts",
+      "src/webserver/testing/app_test_hooks_preview.ts",
+    ];
+    for (const relativePath of consumers) {
+      const source = fs.readFileSync(path.join(ROOT, relativePath), "utf8");
+      assert.doesNotMatch(source, /\bBUTTON_TYPES\b/, `${relativePath} should use the injected registry`);
+    }
+    const core = fs.readFileSync(path.join(ROOT, "src/webserver/application/core.ts"), "utf8");
+    assert.doesNotMatch(core, /["']BUTTON_TYPES["']/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

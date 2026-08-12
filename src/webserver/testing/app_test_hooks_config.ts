@@ -1,7 +1,8 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { infoOnlyCardVisible } from "../features/preview";
-export function installAppTestHooksConfig(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function installAppTestHooksConfig(cardRegistry: CardRegistry): GlobalDescriptors {
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("config", {
             parseButtonConfig: parseButtonConfig,
@@ -238,16 +239,18 @@ export function installAppTestHooksConfig(): GlobalDescriptors {
             defaultButtonTypeForPicker: defaultButtonTypeForPicker,
             buttonTypesMissingCardMetadata: function (this: any) {
                 var missing: any = [];
-                for (var key in BUTTON_TYPES) {
-                    if (!BUTTON_TYPES[key].cardMetadata)
+                for (var key in cardRegistry.definitions) {
+                    var definition: any = cardRegistry.definitions[key];
+                    if (!definition.cardMetadata)
                         missing.push(key);
                 }
                 return missing.sort();
             },
             buttonTypesMissingRuntimeSpec: function (this: any) {
                 var missing: any = [];
-                for (var key in BUTTON_TYPES) {
-                    if (!BUTTON_TYPES[key].runtimeSpec)
+                for (var key in cardRegistry.definitions) {
+                    var definition: any = cardRegistry.definitions[key];
+                    if (!definition.runtimeSpec)
                         missing.push(key);
                 }
                 return missing.sort();
@@ -256,20 +259,20 @@ export function installAppTestHooksConfig(): GlobalDescriptors {
                 return infoOnlyCardVisible(type || "", true);
             },
             buttonTypeGeneratedRuntimeSpec: function (this: any, type?: any) {
-                var typeDef: any = BUTTON_TYPES[type || ""];
+                var typeDef: any = cardRegistry.definitions[type || ""];
                 return typeDef && typeDef.runtimeSpec
                     ? JSON.parse(JSON.stringify(typeDef.runtimeSpec))
                     : null;
             },
             buttonTypeDefaultConfig: function (this: any, type?: any) {
-                var typeDef: any = BUTTON_TYPES[type || ""];
+                var typeDef: any = cardRegistry.definitions[type || ""];
                 var config: any = typeDef && typeDef.defaultConfig;
                 if (typeof config === "function")
                     config = config();
                 return config ? EspControlModel.cloneCardConfig(config) : null;
             },
             buttonTypeRuntimeSpec: function (this: any, type?: any) {
-                var typeDef: any = BUTTON_TYPES[type || ""];
+                var typeDef: any = cardRegistry.definitions[type || ""];
                 var metadata: any = typeDef && typeDef.cardMetadata;
                 var entity: any = metadata && metadata.entity;
                 return typeDef ? {

@@ -3,10 +3,12 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import { createClipboardEntry } from "../features/clipboard";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { ApplicationLayoutState } from "./application_context";
+import type { CardRegistry } from "./card_registry";
 export interface PreviewClipboardDependencies {
     readonly configPersistence: ConfigPersistenceFeature;
     readonly document: Document;
     readonly layout: ApplicationLayoutState;
+    readonly cards: CardRegistry;
 }
 export function installPreviewClipboardModule(
     dependencies: PreviewClipboardDependencies,
@@ -84,7 +86,7 @@ export function installPreviewClipboardModule(
     function validateCardTransferButton(button: any, inSubpage: any, warnings: any) {
         var normalized: any = normalizeButtonConfig(EspControlModel.cloneCardConfig(button));
         var type: any = normalized.type || "";
-        var typeDef: any = BUTTON_TYPES[type];
+        var typeDef: any = dependencies.cards.definitions[type];
         if (!typeDef) {
             throw cardTransferError("This controller does not support the " +
                 cardTransferTypeLabel(type) + " card type.");
@@ -357,7 +359,7 @@ export function installPreviewClipboardModule(
         var resized: any = 0;
         for (var i: any = 0; i < entries.length; i++) {
             var entry: any = entries[i];
-            var typeDef: any = BUTTON_TYPES[entry.type || ""];
+            var typeDef: any = dependencies.cards.definitions[entry.type || ""];
             if (entry.subpageConfig || entry.type === "subpage") {
                 return { error: "Subpage cards can only be pasted onto the home screen." };
             }

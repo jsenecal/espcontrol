@@ -149,7 +149,7 @@ const startupState = globalThis as typeof globalThis & {
 };
 
 function installApplicationCompatibility(context: ApplicationContext): void {
-  installGlobals(installCore(context.layout, context.cards));
+  installGlobals(installCore(context.layout));
   installGlobals(installFirmwareMetadataModule());
   installGlobals(installStylesModule());
   installGlobals(installStateModule());
@@ -186,10 +186,10 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installConfigImageOptionsModule());
   installGlobals(installConfigModalTabOptionsModule());
   installGlobals(installConfigSubpageOptionsModule());
-  installGlobals(installConfigSensorOptionsModule());
+  installGlobals(installConfigSensorOptionsModule(context.cards));
   installGlobals(installConfigConfirmationOptionsModule());
   installGlobals(installConfigAccessClimateAlarmOptionsModule());
-  installGlobals(installConfigCodecModule());
+  installGlobals(installConfigCodecModule(context.cards));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
   installGlobals(installStateLoaderApiModule());
@@ -213,16 +213,17 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsScheduleSectionModule());
   installGlobals(installSettingsCoverArtSectionModule());
   installGlobals(installSettingsPageModule());
-  installGlobals(installControlsFieldsModule());
+  installGlobals(installControlsFieldsModule(context.cards));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
     layout: context.layout,
+    cards: context.cards,
   }));
   installGlobals(installButtonSettingsSelectionModule());
   installGlobals(installButtonSettingsRenderQueueModule());
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
-    cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence,
+    cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence, context.cards,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,
@@ -232,11 +233,13 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     document: context.dom.document,
     window: context.dom.window,
     layout: context.layout,
+    cards: context.cards,
   }));
   installGlobals(installPreviewClipboardModule({
     configPersistence,
     document: context.dom.document,
     layout: context.layout,
+    cards: context.cards,
   }));
   installGlobals(installPreviewInteractionsModule({
     cardEditorDraft,
@@ -298,10 +301,10 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerWebhookCardTypes(registry));
 }
 
-function installTestCompatibility(): void {
+function installTestCompatibility(context: ApplicationContext): void {
   installGlobals(installAppTestHooks());
-  installGlobals(installAppTestHooksConfig());
-  installGlobals(installAppTestHooksPreview());
+  installGlobals(installAppTestHooksConfig(context.cards));
+  installGlobals(installAppTestHooksPreview(context.cards));
   installGlobals(installAppTestHooksBackup());
   installGlobals(installAppTestHooksSettings());
 }
@@ -557,7 +560,7 @@ function startEspControl(): void {
   installApplicationCompatibility(context);
   installCardCompatibility(context);
   if (__ESPCONTROL_TEST_HOOKS_ENABLED__) {
-    installTestCompatibility();
+    installTestCompatibility(context);
   }
   installGlobals(installAppStartModule());
 }

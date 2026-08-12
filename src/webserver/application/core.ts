@@ -1,8 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ApplicationLayoutState } from "./application_context";
-import type { CardRegistry } from "./card_registry";
-export function installCore(applicationLayout: ApplicationLayoutState, cardRegistry: CardRegistry): GlobalDescriptors {
+export function installCore(applicationLayout: ApplicationLayoutState): GlobalDescriptors {
     function isPortraitRotation(this: any, value?: any) {
         value = String(value == null ? "0" : value);
         return value === "90" || value === "270";
@@ -199,7 +198,6 @@ export function installCore(applicationLayout: ApplicationLayoutState, cardRegis
         "iconSlug": staticGlobal(iconSlug),
         "ICON_OPTIONS": liveGlobal(() => ICON_OPTIONS, (value?: any) => { ICON_OPTIONS = value; }),
         "DOMAIN_ICONS": liveGlobal(() => DOMAIN_ICONS, (value?: any) => { DOMAIN_ICONS = value; }),
-        "BUTTON_TYPES": liveGlobal(() => cardRegistry.definitions, (value?: any) => { cardRegistry.replaceDefinitions(value); }),
         "subpageStateDisplayMode": staticGlobal(subpageStateDisplayMode),
         "WEBSERVER_MOCK_NOW_ISO": liveGlobal(() => WEBSERVER_MOCK_NOW_ISO, (value?: any) => { WEBSERVER_MOCK_NOW_ISO = value; }),
         "webserverUseMockNowForTest": liveGlobal(() => webserverUseMockNowForTest, (value?: any) => { webserverUseMockNowForTest = value; }),

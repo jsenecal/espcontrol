@@ -24,7 +24,6 @@ declare global {
   var BACKUP_CONFIG_VERSION: any;
   var BACKUP_FORMAT: any;
   var BRIGHTNESS_TIME_UNAVAILABLE: any;
-  var BUTTON_TYPES: any;
   var CARD_CONFIG_FIELDS: any;
   var CARD_CONTRACT_BRIGHTNESS_SLIDER_TYPES: any;
   var CARD_CONTRACT_CARDS: any;

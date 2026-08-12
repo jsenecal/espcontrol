@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installAppTestHooksPreview(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function installAppTestHooksPreview(cardRegistry: CardRegistry): GlobalDescriptors {
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("preview", {
             clockBarVisibleInPreviewFor: function (this: any, clockBarOn?: any, screensaverAction?: any) {
@@ -33,7 +34,7 @@ export function installAppTestHooksPreview(): GlobalDescriptors {
                     state.clockFormat = options.clockFormat;
                 if (options.language != null)
                     state.language = normalizeLanguage(options.language);
-                var typeDef: any = BUTTON_TYPES[type || ""];
+                var typeDef: any = cardRegistry.definitions[type || ""];
                 var preview: any = typeDef && typeDef.renderPreview
                     ? typeDef.renderPreview(button || {}, { escHtml: escHtml, cardSize: options.cardSize || 1 })
                     : null;

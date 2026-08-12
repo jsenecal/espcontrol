@@ -24,14 +24,15 @@ import { normalizeSavedConfigLightControl } from "../generated/saved_config_ligh
 import { normalizeSavedConfigWebhook } from "../generated/saved_config_webhook";
 import { normalizeSavedConfigSubpage } from "../generated/saved_config_subpage";
 import { normalizeSavedConfigSwitch } from "../generated/saved_config_switch";
-export function installConfigCodecModule(): GlobalDescriptors {
+import type { CardRegistry } from "./card_registry";
+export function installConfigCodecModule(cardRegistry: CardRegistry): GlobalDescriptors {
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
-        if (!b || typeof BUTTON_TYPES === "undefined")
+        if (!b)
             return false;
         if (b.type === "action" || b.type === "lawn_mower")
             return false;
-        var typeDef: any = BUTTON_TYPES[b.type || ""];
+        var typeDef: any = cardRegistry.definitions[b.type || ""];
         if (!typeDef || typeof typeDef.normalizeConfig !== "function")
             return false;
         typeDef.normalizeConfig(b);

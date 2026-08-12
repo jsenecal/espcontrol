@@ -1,15 +1,14 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installConfigSensorOptionsModule(): GlobalDescriptors {
+import type { CardRegistry } from "./card_registry";
+export function installConfigSensorOptionsModule(cardRegistry: CardRegistry): GlobalDescriptors {
     // ── Sensor Card Options ────────────────────────────────────────────
     function cardLargeNumbersSupported(this: any, b?: any) {
         if (!b)
             return false;
-        if (typeof BUTTON_TYPES !== "undefined") {
-            var typeDef: any = BUTTON_TYPES[b.type || ""];
-            var large: any = typeDef && typeDef.cardMetadata && typeDef.cardMetadata.largeNumbers;
-            if (large) {
-                return typeof large.supported === "function" ? !!large.supported(b) : large.supported !== false;
-            }
+        var typeDef: any = cardRegistry.definitions[b.type || ""];
+        var large: any = typeDef && typeDef.cardMetadata && typeDef.cardMetadata.largeNumbers;
+        if (large) {
+            return typeof large.supported === "function" ? !!large.supported(b) : large.supported !== false;
         }
         return cardContractLargeNumbersSupported(b.type, b.precision);
     }

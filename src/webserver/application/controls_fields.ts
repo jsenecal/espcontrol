@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installControlsFieldsModule(): GlobalDescriptors {
+import type { CardRegistry } from "./card_registry";
+export function installControlsFieldsModule(cardRegistry: CardRegistry): GlobalDescriptors {
     // ── Settings helpers ───────────────────────────────────────────────────
     function makeCollapsibleCard(this: any, title?: any, bodyElement?: any, defaultCollapsed?: any, badgeElement?: any, actionElement?: any) {
         var card: any = document.createElement("div");
@@ -279,7 +280,7 @@ export function installControlsFieldsModule(): GlobalDescriptors {
         return cardSize === CARD_SIZE_LARGE;
     }
     function cardLargeNumbersMetadata(this: any, b?: any) {
-        var typeDef: any = BUTTON_TYPES[(b && b.type) || ""] || null;
+        var typeDef: any = cardRegistry.definitions[(b && b.type) || ""] || null;
         return typeDef && typeDef.cardMetadata ? typeDef.cardMetadata : {};
     }
     function cardLargeNumbersActiveForCardSize(this: any, b?: any, helpers?: any, metadata?: any) {
