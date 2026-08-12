@@ -2,7 +2,9 @@ import { state } from "../state/app_instance";
 import { normalizeBrightnessMode } from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
-export function installAppStatusPreviewModule(runtime: UiRuntimeState): GlobalDescriptors {
+import type { CoreFeature } from "./core";
+export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature): GlobalDescriptors {
+    const { now: webserverNow } = core;
     const els = runtime.els;
     // ── Clock (minute-aligned) ─────────────────────────────────────────────
     function getTzId(this: any, tz?: any) {

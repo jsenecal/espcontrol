@@ -23,6 +23,18 @@ describe("browserless application contracts", () => {
     runApplicationContextTests();
   });
 
+  test("imports the browser core service without ambient application names", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const compatibility = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts"), "utf8");
+    assert.match(entry, /layoutCompatibilityDescriptors\(context\.layout\)/);
+    assert.doesNotMatch(entry, /coreCompatibilityDescriptors/);
+    assert.doesNotMatch(compatibility, /CoreFeature|staticGlobal/);
+    for (const name of ["activeLayout", "isPortraitRotation", "normalizeGridSpansForLayout", "syncPreviewGridTop", "syncPreviewOrientation", "subpageStateDisplayMode", "webserverNow"]) {
+      assert.doesNotMatch(globals, new RegExp(`\\bvar ${name}:`));
+    }
+  });
+
   test("registers migrated card families through the typed registry", () => {
     const migratedCards = [
       ["sensor", "registerSensorCardTypes"],
@@ -450,7 +462,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /codec: context\.configuration\.codec/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core\)/);
   });
 
   test("injects the configuration codec into persistence and application services", () => {
@@ -561,7 +573,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime\)\)/);
   });
 

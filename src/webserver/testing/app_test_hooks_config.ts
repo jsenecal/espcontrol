@@ -30,6 +30,7 @@ import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/conf
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
 import type { ConfigCodecFeature } from "../application/config_codec";
 import type { LightCardRegistration } from "../cards/light_temperature";
+import type { CoreFeature } from "../application/core";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 import { pushDefaultIcon, pushDefaultIconOn } from "../cards/push";
@@ -54,7 +55,9 @@ export function installAppTestHooksConfig(
     confirmationOptions: ConfigConfirmationOptionsFeature,
     codec: ConfigCodecFeature,
     lightCards: LightCardRegistration,
+    core: Pick<CoreFeature, "subpageStateDisplayMode">,
 ): GlobalDescriptors {
+    const { subpageStateDisplayMode } = core;
     const {
         sensorCardIsLocal,
         cardLargeNumbersEnabled,

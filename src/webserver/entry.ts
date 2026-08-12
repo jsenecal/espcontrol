@@ -7,7 +7,7 @@ import { state } from "./state/app_instance";
 import { textSpan } from "./application/ui_primitives";
 import { installGlobals } from "./runtime/globals";
 import { createCoreFeature } from "./application/core";
-import { coreCompatibilityDescriptors } from "./runtime/core_compatibility";
+import { layoutCompatibilityDescriptors } from "./runtime/layout_compatibility";
 import {
   createApplicationContext,
   createApplicationLayoutState,
@@ -144,7 +144,7 @@ const startupState = globalThis as typeof globalThis & {
 };
 
 function installApplicationCompatibility(context: ApplicationContext): void {
-  installGlobals(coreCompatibilityDescriptors(context.layout, context.core));
+  installGlobals(layoutCompatibilityDescriptors(context.layout));
   installGlobals(installLanguageStateModule(context.runtime));
   const voiceServicesController = context.controllers.voiceServices;
   installGlobals(installEnvironmentStateModule(
@@ -162,7 +162,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installFirmwareVersionStateModule(context.runtime));
   installGlobals(installEntityStateModule(context.configuration.confirmationOptions));
   const clockBarController = context.controllers.clockBar;
-  installGlobals(installClockBarStateModule(clockBarController, context.runtime));
+  installGlobals(installClockBarStateModule(clockBarController, context.runtime, context.core));
   installGlobals(installFirmwareUpdateStateModule(context.runtime));
   installGlobals(installScreensaverTimeoutModule(context.runtime));
   installGlobals(installC6FirmwareUiModule(context.runtime));
@@ -200,7 +200,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   }));
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -258,10 +258,10 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     importBackup: backupUiFeature.importConfig,
   }, context.runtime));
   installGlobals(backupUiFeature.globals);
-  installGlobals(installAppStatusPreviewModule(context.runtime));
+  installGlobals(installAppStatusPreviewModule(context.runtime, context.core));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec));
   let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule(context.runtime, (factory) => {
+  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, (factory) => {
     sseHandlerFactory = factory;
   }));
   const reconnectController = context.controllers.reconnect;
@@ -272,6 +272,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installAppModule(
     context.controllers.pageTitle,
     createWebStyles(context.layout.config.dragAnimation),
+    context.core,
   ));
 }
 
@@ -343,8 +344,9 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.configuration.confirmationOptions,
     context.configuration.codec,
     lightCards,
+    context.core,
   ));
-  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime));
+  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core));
   installGlobals(installAppTestHooksBackup());
   installGlobals(installAppTestHooksSettings(
     () => defaultTimezoneOptionsForDevice(context.device.profile),
@@ -604,6 +606,7 @@ function composeApplicationContext(): ApplicationContext {
     nativePanelConfig,
     codec: configurationCodec,
     runtime,
+    core,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),

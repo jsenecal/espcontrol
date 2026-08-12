@@ -29,6 +29,7 @@ import type { NativePanelConfigController } from "../controllers/native_panel_co
 import type { PanelConfigDocument } from "../model";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
+import type { CoreFeature } from "./core";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -41,6 +42,7 @@ export interface AppBackupControllers {
     readonly nativePanelConfig?: NativePanelConfigController;
     readonly codec: ConfigCodecFeature;
     readonly runtime: UiRuntimeState;
+    readonly core: Pick<CoreFeature, "syncPreviewOrientation">;
 }
 
 export interface AppBackupFeature {
@@ -50,6 +52,7 @@ export interface AppBackupFeature {
 }
 
 export function createAppBackupFeature(controllers: AppBackupControllers): AppBackupFeature {
+    const { syncPreviewOrientation } = controllers.core;
     const { serializeButtonConfig, serializeSubpageConfig } = controllers.codec;
     const els = controllers.runtime.els;
     // ── Export / Import ────────────────────────────────────────────────────

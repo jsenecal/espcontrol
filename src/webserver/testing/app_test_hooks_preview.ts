@@ -6,11 +6,20 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigCodecFeature } from "../application/config_codec";
 import type { UiRuntimeState } from "../application/state";
+import type { CoreFeature } from "../application/core";
 export function installAppTestHooksPreview(
     cardRegistry: CardRegistry,
     codec: ConfigCodecFeature,
     runtime: UiRuntimeState,
+    core: Pick<CoreFeature, "mockNow" | "now" | "withMockNow" | "normalizeGridSpansForLayout" | "clockBarVisibleInPreview">,
 ): GlobalDescriptors {
+    const {
+        mockNow: webserverMockNow,
+        now: webserverNow,
+        withMockNow: withWebserverMockNow,
+        normalizeGridSpansForLayout,
+        clockBarVisibleInPreview,
+    } = core;
     const {
         buildSubpageGrid,
         buildSubpageGridAndNormalizeOrder,

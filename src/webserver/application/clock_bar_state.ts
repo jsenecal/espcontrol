@@ -3,11 +3,14 @@ import { normalizeTemperatureUnit } from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ClockBarController } from "../features/clock_bar_controller";
 import type { UiRuntimeState } from "./state";
+import type { CoreFeature } from "./core";
 
 export function installClockBarStateModule(
     clockBarController: ClockBarController,
     runtime: UiRuntimeState,
+    core: Pick<CoreFeature, "syncPreviewGridTop">,
 ): GlobalDescriptors {
+    const { syncPreviewGridTop } = core;
     const els = runtime.els;
     // ── Clock Bar State ───────────────────────────────────────────────────
     var clockBarControllerInstance: ClockBarController = clockBarController;

@@ -30,14 +30,17 @@ import {
 } from "../model/settings";
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
+import type { CoreFeature } from "./core";
 
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
 
 export function installAppStateEventHandlersModule(
     runtime: UiRuntimeState,
+    core: Pick<CoreFeature, "syncPreviewOrientation">,
     onCreateSseHandlers?: (factory: SseHandlerFactory) => void,
 ): GlobalDescriptors {
+    const { syncPreviewOrientation } = core;
     const els = runtime.els;
     // ── State Event Handlers ──────────────────────────────────────────
     const createSseHandlers: SseHandlerFactory = () => {

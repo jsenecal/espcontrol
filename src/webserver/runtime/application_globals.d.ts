@@ -37,7 +37,6 @@ declare global {
   var TEMPERATURE_DEGREE_SYMBOL_UNAVAILABLE: any;
   var TOTAL_SLOTS: any;
   var VOICE_SERVICES_UNAVAILABLE: any;
-  var WEBSERVER_MOCK_NOW_ISO: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
   var _backupFeature: any;
   var _postQueue: any;
@@ -45,7 +44,6 @@ declare global {
   var _renderPending: any;
   var _settingsDeferred: any;
   var _settingsUiFeature: any;
-  var activeLayout: any;
   var activeScreenRotationOptions: any;
   var addBackButtonMenuItems: any;
   var addBulkCardMenuItems: any;
@@ -263,7 +261,6 @@ declare global {
   var isClockBarTemperatureItem: any;
   var isConfigLocked: any;
   var isHomeAssistantAutoTimezone: any;
-  var isPortraitRotation: any;
   var isSelectionControlTarget: any;
   var languageLabel: any;
   var languageOptionsWithFallback: any;
@@ -271,7 +268,6 @@ declare global {
   var latestFirmwareInfoFromState: any;
   var latestFirmwareInstallAction: any;
   var latestFirmwareInstallAvailable: any;
-  var layoutSection: any;
   var legacyClockBarTemperatureEntities: any;
   var loadInitialState: any;
   var loadStateItems: any;
@@ -286,7 +282,6 @@ declare global {
   var normalizeBackupConfig: any;
   var normalizeClockBarTemperatureEntities: any;
   var normalizeClockBarTemperatureEntries: any;
-  var normalizeGridSpansForLayout: any;
   var normalizeNetworkTransport: any;
   var normalizeScreenRotation: any;
   var normalizeVacuumMode: any;
@@ -384,7 +379,6 @@ declare global {
   var postWithObjectId: any;
   var postWithObjectIds: any;
   var previewHtmlValue: any;
-  var previewLayoutScale: any;
   var previewValue: any;
   var primaryClockBarTemperatureEntity: any;
   var publicFirmwareInstallAvailable: any;
@@ -434,15 +428,12 @@ declare global {
   var saveClockBarTemperatureSettings: any;
   var saveSubpageEntity: any;
   var saveSubpageEntityLegacy: any;
-  var scaledCqw: any;
-  var scaledCqwText: any;
   var scheduleFirmwareWebOtaFallback: any;
   var scheduleMigration: any;
   var scheduleRender: any;
   var scheduleSliderSubpageMigration: any;
   var screenRotationSortValue: any;
   var screenRotationStartupRequired: any;
-  var screenWidthPercent: any;
   var screensaverTimeoutSupported: any;
   var segmentControl: any;
   var selectButton: any;
@@ -487,7 +478,6 @@ declare global {
   var stopFirmwareInstallRefreshIfComplete: any;
   var subpageChunkShouldPost: any;
   var subpageEntityKeys: any;
-  var subpageStateDisplayMode: any;
   var subpageStateEntities: any;
   var swapGridCell: any;
   var switchTab: any;
@@ -508,9 +498,6 @@ declare global {
   var syncMediaPlayerSleepPreventionUi: any;
   var syncNtpServerUi: any;
   var syncOptionalClockBrightness: any;
-  var syncPreviewGridTop: any;
-  var syncPreviewOrientation: any;
-  var syncPreviewStyleVars: any;
   var syncScreenRotationSelect: any;
   var syncScreenScheduleUi: any;
   var syncScreensaverTimeoutLimits: any;
@@ -546,9 +533,5 @@ declare global {
   var voiceServicesSupported: any;
   var waitForFirmwareRestart: any;
   var waitForReboot: any;
-  var webserverMockNow: any;
-  var webserverNow: any;
-  var webserverUseMockNowForTest: any;
-  var withWebserverMockNow: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
 }

@@ -4,7 +4,7 @@ import {
 } from "../../src/webserver/application/application_context";
 import { createCardRegistry } from "../../src/webserver/application/card_registry";
 import { createCoreFeature } from "../../src/webserver/application/core";
-import { coreCompatibilityDescriptors } from "../../src/webserver/runtime/core_compatibility";
+import { layoutCompatibilityDescriptors } from "../../src/webserver/runtime/layout_compatibility";
 import { createConfigWeatherOptionsFeature } from "../../src/webserver/application/config_weather_options";
 import { createConfigWebhookOptionsFeature } from "../../src/webserver/application/config_webhook_options";
 import { createConfigInternalRelayOptionsFeature } from "../../src/webserver/application/config_internal_relay_options";
@@ -236,7 +236,7 @@ export function runApplicationContextTests(): void {
   });
   Object.defineProperties(
     compatibilityGlobals,
-    coreCompatibilityDescriptors(context.layout, testedCore),
+    layoutCompatibilityDescriptors(context.layout),
   );
   compatibilityGlobals.GRID_COLS = 6;
   compatibilityGlobals.GRID_ROWS = 2;

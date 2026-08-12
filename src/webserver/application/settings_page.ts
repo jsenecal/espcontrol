@@ -10,8 +10,10 @@ import {
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
-export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState): GlobalDescriptors {
+import type { CoreFeature } from "./core";
+export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">): GlobalDescriptors {
     const { bindTextPost } = codec;
+    const { syncPreviewOrientation } = core;
     const els = runtime.els;
     // ── Settings Page ──────────────────────────────────────────────────────
     function buildSettingsPage(this: any, parent?: any) {

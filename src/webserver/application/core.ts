@@ -20,6 +20,7 @@ export interface CoreFeature {
     scaledCqw(value?: any, scale?: any): string;
     scaledCqwText(value?: any, scale?: any): string;
     syncPreviewGridTop(layout?: any, scale?: any): void;
+    clockBarVisibleInPreview(): boolean;
     syncPreviewStyleVars(layout?: any, scale?: any): void;
     normalizeGridSpansForLayout(grid?: any, sizes?: any, maxSlots?: any, gridCols?: any, onChanged?: any): any;
     syncPreviewOrientation(preservePendingGrid?: any): void;
@@ -210,6 +211,7 @@ export function createCoreFeature(
         scaledCqw,
         scaledCqwText,
         syncPreviewGridTop,
+        clockBarVisibleInPreview,
         syncPreviewStyleVars,
         normalizeGridSpansForLayout,
         syncPreviewOrientation,
