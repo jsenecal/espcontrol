@@ -9,7 +9,6 @@ export interface UiRuntimeState {
     previewDropIdx: any;
     dragRafPending: any;
     dragSrcEl: any;
-    dragIsSubpage: any;
     dragEnterCount: any;
     orderReceived: any;
     migrationTimer: any;
@@ -33,7 +32,6 @@ export function createUiRuntimeState(
         previewDropIdx: -1,
         dragRafPending: layout.config.dragAnimation ? false : null,
         dragSrcEl: null,
-        dragIsSubpage: false,
         dragEnterCount: 0,
         orderReceived: false,
         migrationTimer: null,
@@ -51,14 +49,6 @@ export function createUiRuntimeState(
     };
     runtime.globals = {
         "els": liveGlobal(() => runtime.els, (value) => { runtime.els = value; }),
-        "dragSrcPos": liveGlobal(() => runtime.dragSrcPos, (value) => { runtime.dragSrcPos = value; }),
-        "didDrag": liveGlobal(() => runtime.didDrag, (value) => { runtime.didDrag = value; }),
-        "previewPlaceholder": liveGlobal(() => runtime.previewPlaceholder, (value) => { runtime.previewPlaceholder = value; }),
-        "previewDropIdx": liveGlobal(() => runtime.previewDropIdx, (value) => { runtime.previewDropIdx = value; }),
-        "dragRafPending": liveGlobal(() => runtime.dragRafPending, (value) => { runtime.dragRafPending = value; }),
-        "dragSrcEl": liveGlobal(() => runtime.dragSrcEl, (value) => { runtime.dragSrcEl = value; }),
-        "dragIsSubpage": liveGlobal(() => runtime.dragIsSubpage, (value) => { runtime.dragIsSubpage = value; }),
-        "dragEnterCount": liveGlobal(() => runtime.dragEnterCount, (value) => { runtime.dragEnterCount = value; }),
         "orderReceived": liveGlobal(() => runtime.orderReceived, (value) => { runtime.orderReceived = value; }),
         "migrationTimer": liveGlobal(() => runtime.migrationTimer, (value) => { runtime.migrationTimer = value; }),
         "sliderMigrationTimer": liveGlobal(() => runtime.sliderMigrationTimer, (value) => { runtime.sliderMigrationTimer = value; }),

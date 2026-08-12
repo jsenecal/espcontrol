@@ -5,6 +5,7 @@ import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { ApplicationLayoutState } from "./application_context";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
 import type { ConfigCodecFeature } from "./config_codec";
+import type { UiRuntimeState } from "./state";
 export interface PreviewInteractionsDependencies {
     readonly cardEditorDraft: CardEditorDraftController;
     readonly configPersistence: ConfigPersistenceFeature;
@@ -12,6 +13,7 @@ export interface PreviewInteractionsDependencies {
     readonly window: Window;
     readonly imageOptions: ConfigImageOptionsFeature;
     readonly codec: ConfigCodecFeature;
+    readonly runtime: UiRuntimeState;
 }
 export function installPreviewInteractionsModule(
     dependencies: PreviewInteractionsDependencies,
@@ -19,6 +21,7 @@ export function installPreviewInteractionsModule(
     const cardEditorDraftController = dependencies.cardEditorDraft;
     const configPersistence = dependencies.configPersistence;
     const window = dependencies.window;
+    const runtime = dependencies.runtime;
     const {
         isImageCard,
         imageCardCountInSubpage,
@@ -38,9 +41,9 @@ export function installPreviewInteractionsModule(
     } = dependencies.codec;
     // ── Preview event delegation & drag ────────────────────────────────────
     function clearPlaceholder(this: any) {
-        if (previewPlaceholder) {
-            previewPlaceholder.classList.remove("sp-drop-placeholder");
-            previewPlaceholder = null;
+        if (runtime.previewPlaceholder) {
+            runtime.previewPlaceholder.classList.remove("sp-drop-placeholder");
+            runtime.previewPlaceholder = null;
         }
     }
     function clearTextSelection(this: any) {
@@ -132,8 +135,8 @@ export function installPreviewInteractionsModule(
                 handleBtnClick(e, slot, pos);
             }
             else if (slot === -2) {
-                if (didDrag) {
-                    didDrag = false;
+                if (runtime.didDrag) {
+                    runtime.didDrag = false;
                     return;
                 }
                 if (isBackExitTarget(e, target)) {
@@ -187,12 +190,11 @@ export function installPreviewInteractionsModule(
             if (!target)
                 return;
             var pos: any = parseInt(target.getAttribute("data-pos"), 10);
-            dragSrcPos = pos;
+            runtime.dragSrcPos = pos;
             if (dependencies.layout.config.dragAnimation)
-                dragSrcEl = target;
-            dragIsSubpage = !!state.editingSubpage;
-            didDrag = true;
-            dragEnterCount = 0;
+                runtime.dragSrcEl = target;
+            runtime.didDrag = true;
+            runtime.dragEnterCount = 0;
             container.classList.add("sp-drag-active");
             e.dataTransfer.effectAllowed = "move";
             e.dataTransfer.setData("text/plain", String(pos));
@@ -201,52 +203,51 @@ export function installPreviewInteractionsModule(
             }
         });
         container.addEventListener("dragend", function (this: any) {
-            dragSrcPos = -1;
-            previewDropIdx = -1;
-            dragIsSubpage = false;
-            dragEnterCount = 0;
+            runtime.dragSrcPos = -1;
+            runtime.previewDropIdx = -1;
+            runtime.dragEnterCount = 0;
             clearPlaceholder();
-            if (dragSrcEl) {
-                dragSrcEl.classList.remove("sp-dragging");
-                dragSrcEl = null;
+            if (runtime.dragSrcEl) {
+                runtime.dragSrcEl.classList.remove("sp-dragging");
+                runtime.dragSrcEl = null;
             }
             setTimeout(function (this: any) { container.classList.remove("sp-drag-active"); }, 50);
         });
         // Drop zone
         function updatePlaceholder(this: any, cellIdx?: any) {
-            if (cellIdx === previewDropIdx)
+            if (cellIdx === runtime.previewDropIdx)
                 return;
-            previewDropIdx = cellIdx;
+            runtime.previewDropIdx = cellIdx;
             clearPlaceholder();
             var target: any = container.querySelector('[data-pos="' + cellIdx + '"]');
             if (target) {
-                previewPlaceholder = target;
-                previewPlaceholder.classList.add("sp-drop-placeholder");
+                runtime.previewPlaceholder = target;
+                runtime.previewPlaceholder.classList.add("sp-drop-placeholder");
             }
         }
         container.addEventListener("dragenter", function (this: any, e?: any) {
             if (isConfigLocked())
                 return;
-            if (dragSrcPos < 0)
+            if (runtime.dragSrcPos < 0)
                 return;
             e.preventDefault();
-            dragEnterCount++;
+            runtime.dragEnterCount++;
         });
         container.addEventListener("dragover", function (this: any, e?: any) {
             if (isConfigLocked())
                 return;
-            if (dragSrcPos < 0)
+            if (runtime.dragSrcPos < 0)
                 return;
             e.preventDefault();
             e.dataTransfer.dropEffect = "move";
             if (dependencies.layout.config.dragAnimation) {
                 pendingCellIdx = getCellFromEvent(e, container);
-                if (dragRafPending)
+                if (runtime.dragRafPending)
                     return;
-                dragRafPending = true;
+                runtime.dragRafPending = true;
                 requestAnimationFrame(function (this: any) {
-                    dragRafPending = false;
-                    if (dragSrcPos < 0)
+                    runtime.dragRafPending = false;
+                    if (runtime.dragSrcPos < 0)
                         return;
                     updatePlaceholder(pendingCellIdx);
                 });
@@ -256,10 +257,10 @@ export function installPreviewInteractionsModule(
             }
         });
         container.addEventListener("dragleave", function (this: any) {
-            dragEnterCount--;
-            if (dragEnterCount <= 0) {
-                dragEnterCount = 0;
-                previewDropIdx = -1;
+            runtime.dragEnterCount--;
+            if (runtime.dragEnterCount <= 0) {
+                runtime.dragEnterCount = 0;
+                runtime.previewDropIdx = -1;
                 clearPlaceholder();
             }
         });
@@ -269,39 +270,36 @@ export function installPreviewInteractionsModule(
                 return;
             }
             e.preventDefault();
-            dragEnterCount = 0;
-            var toPos: any = previewDropIdx;
-            previewDropIdx = -1;
+            runtime.dragEnterCount = 0;
+            var toPos: any = runtime.previewDropIdx;
+            runtime.previewDropIdx = -1;
             clearPlaceholder();
-            if (dragSrcEl) {
-                dragSrcEl.classList.remove("sp-dragging");
-                dragSrcEl = null;
+            if (runtime.dragSrcEl) {
+                runtime.dragSrcEl.classList.remove("sp-dragging");
+                runtime.dragSrcEl = null;
             }
             var c: any = ctx();
-            if (dragSrcPos < 0 || toPos < 0 || toPos >= c.maxSlots) {
-                dragSrcPos = -1;
-                dragIsSubpage = false;
+            if (runtime.dragSrcPos < 0 || toPos < 0 || toPos >= c.maxSlots) {
+                runtime.dragSrcPos = -1;
                 return;
             }
-            if (dragSrcPos === toPos) {
-                dragSrcPos = -1;
-                dragIsSubpage = false;
+            if (runtime.dragSrcPos === toPos) {
+                runtime.dragSrcPos = -1;
                 return;
             }
-            if (!moveSelectedToCell(dragSrcPos, toPos))
-                moveToCell(dragSrcPos, toPos);
+            if (!moveSelectedToCell(runtime.dragSrcPos, toPos))
+                moveToCell(runtime.dragSrcPos, toPos);
             renderPreview();
             renderButtonSettings();
             c.save();
-            dragSrcPos = -1;
-            dragIsSubpage = false;
+            runtime.dragSrcPos = -1;
         });
     }
     function handleBtnClick(this: any, e?: any, slot?: any, pos?: any) {
         if (isConfigLocked())
             return;
-        if (didDrag) {
-            didDrag = false;
+        if (runtime.didDrag) {
+            runtime.didDrag = false;
             return;
         }
         state.clockBarSelectedItem = "";

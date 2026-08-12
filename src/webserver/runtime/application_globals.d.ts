@@ -333,16 +333,10 @@ declare global {
   var deleteSlot: any;
   var deviceConfig: any;
   var deviceId: any;
-  var didDrag: any;
   var disclosureSection: any;
   var displayC6FirmwareVersion: any;
   var displayFirmwareVersion: any;
   var displayScreenRotation: any;
-  var dragEnterCount: any;
-  var dragIsSubpage: any;
-  var dragRafPending: any;
-  var dragSrcEl: any;
-  var dragSrcPos: any;
   var duplicateButton: any;
   var duplicateSubpageButton: any;
   var effectiveTimezoneOptionForWeb: any;
@@ -679,10 +673,8 @@ declare global {
   var postVoiceServices: any;
   var postWithObjectId: any;
   var postWithObjectIds: any;
-  var previewDropIdx: any;
   var previewHtmlValue: any;
   var previewLayoutScale: any;
-  var previewPlaceholder: any;
   var previewValue: any;
   var primaryClockBarTemperatureEntity: any;
   var publicFirmwareAssetUrl: any;

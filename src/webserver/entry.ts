@@ -186,7 +186,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installScreenSchedulePostApiModule());
   installGlobals(installClockBarPostApiModule());
   installGlobals(installControlsModule());
-  installGlobals(installControlsShellModule());
+  installGlobals(installControlsShellModule(context.runtime));
   const settingsUiFeature = context.controllers.settingsUi;
   const alarmDelayAudioController = context.controllers.alarmDelayAudio;
   const screensaverController = context.controllers.screensaver;
@@ -247,6 +247,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     window: context.dom.window,
     imageOptions: context.configuration.imageOptions,
     codec: context.configuration.codec,
+    runtime: context.runtime,
   }));
   installGlobals(installBackupContractModule(context.backup.contract, context.configuration.codec));
   const backupUiFeature = context.backup.application;

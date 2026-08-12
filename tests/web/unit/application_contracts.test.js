@@ -271,6 +271,20 @@ describe("browserless application contracts", () => {
     assert.match(entry, /getActiveSource: \(\) => runtime\.eventSource/);
   });
 
+  test("injects preview drag state without ambient globals", () => {
+    const interactions = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_interactions.ts"), "utf8");
+    const shell = fs.readFileSync(path.join(ROOT, "src/webserver/application/controls_shell.ts"), "utf8");
+    const runtime = fs.readFileSync(path.join(ROOT, "src/webserver/application/state.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(interactions, /readonly runtime: UiRuntimeState/);
+    assert.match(shell, /installControlsShellModule\(runtime: UiRuntimeState\)/);
+    assert.match(entry, /installControlsShellModule\(context\.runtime\)/);
+    assert.match(entry, /runtime: context\.runtime/);
+    assert.doesNotMatch(runtime, /"(?:dragSrcPos|didDrag|previewPlaceholder|previewDropIdx|dragRafPending|dragSrcEl|dragIsSubpage|dragEnterCount)"/);
+    assert.doesNotMatch(globals, /\bvar (?:dragSrcPos|didDrag|previewPlaceholder|previewDropIdx|dragRafPending|dragSrcEl|dragIsSubpage|dragEnterCount):/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

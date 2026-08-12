@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installControlsShellModule(): GlobalDescriptors {
+import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { UiRuntimeState } from "./state";
+export function installControlsShellModule(runtime: UiRuntimeState): GlobalDescriptors {
     // ── Build UI ───────────────────────────────────────────────────────────
     function createMdiIcon(this: any, name?: any, className?: any) {
         var icon: any = document.createElement("span");
@@ -247,12 +248,12 @@ export function installControlsShellModule(): GlobalDescriptors {
             state.lastClickedSlot = -1;
             state.subpageSelectedSlots = [];
             state.subpageLastClicked = -1;
-            if (dragSrcEl) {
-                dragSrcEl.classList.remove("sp-dragging");
-                dragSrcEl = null;
+            if (runtime.dragSrcEl) {
+                runtime.dragSrcEl.classList.remove("sp-dragging");
+                runtime.dragSrcEl = null;
             }
-            dragSrcPos = -1;
-            previewDropIdx = -1;
+            runtime.dragSrcPos = -1;
+            runtime.previewDropIdx = -1;
             clearPlaceholder();
         }
         syncConfigLockUi();
