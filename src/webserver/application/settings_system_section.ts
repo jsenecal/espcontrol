@@ -1,16 +1,24 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installSettingsSystemSectionModule(): GlobalDescriptors {
+
+export interface SettingsSystemSectionActions {
+    exportBackup(): void;
+    importBackup(): void;
+}
+
+export function installSettingsSystemSectionModule(
+    actions: SettingsSystemSectionActions,
+): GlobalDescriptors {
     // ── Settings System Section ────────────────────────────────────────
     function buildSystemSettingsCards(this: any) {
         var backupBody: any = document.createElement("div");
         var backupRow: any = document.createElement("div");
         backupRow.className = "sp-backup-btns";
         var exportBtn: any = createActionButton("sp-backup-btn", "Export", "download");
-        exportBtn.addEventListener("click", exportConfig);
+        exportBtn.addEventListener("click", actions.exportBackup);
         backupRow.appendChild(exportBtn);
         var importBtn: any = createActionButton("sp-backup-btn", "Import", "upload");
-        importBtn.addEventListener("click", importConfig);
+        importBtn.addEventListener("click", actions.importBackup);
         backupRow.appendChild(importBtn);
         backupBody.appendChild(backupRow);
         var backupCard: any = makeCollapsibleCard("Backup", backupBody, true);

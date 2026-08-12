@@ -87,7 +87,7 @@ import { createBackupFileController } from "./features/backup_file_controller";
 import { createBackupRestoreController } from "./features/backup_restore_controller";
 import { createBackupFeature } from "./features/backup";
 import { installBackupContractModule } from "./application/backup_contract";
-import { installAppBackupModule } from "./application/app_backup";
+import { createAppBackupFeature } from "./application/app_backup";
 import { installAppStatusPreviewModule } from "./application/app_status_preview";
 import { installAppTitleModule } from "./application/app_title";
 import { installAppConfigEventsModule } from "./application/app_config_events";
@@ -238,7 +238,6 @@ function installApplicationCompatibility(): void {
   }));
   installGlobals(installSettingsScheduleSectionModule());
   installGlobals(installSettingsCoverArtSectionModule());
-  installGlobals(installSettingsSystemSectionModule());
   installGlobals(installSettingsPageModule());
   installGlobals(installControlsFieldsModule());
   installGlobals(installPreviewRenderModule());
@@ -355,14 +354,19 @@ function installApplicationCompatibility(): void {
     },
     showBanner,
   });
-  installGlobals(installAppBackupModule({
+  const backupUiFeature = createAppBackupFeature({
     backupExport: backupExportController,
     backupImport: backupImportController,
     backupRestore: backupRestoreController,
     backupFile: backupFileController,
     normalizeImportedPanelSettings,
     gridColsForImportedSettings,
+  });
+  installGlobals(installSettingsSystemSectionModule({
+    exportBackup: backupUiFeature.exportConfig,
+    importBackup: backupUiFeature.importConfig,
   }));
+  installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule());
   installGlobals(installAppTitleModule());
   installGlobals(installAppConfigEventsModule());
