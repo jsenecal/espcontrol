@@ -111,6 +111,15 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:SWITCH_CARD_METADATA|LIGHT_SWITCH_CARD_METADATA):/);
   });
 
+  test("registers the image card without compatibility helpers", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const source = fs.readFileSync(path.join(ROOT, "src/webserver/cards/image.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(source, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerImageCardTypes/);
+    assert.doesNotMatch(globals, /\bvar (?:IMAGE_CARD_METADATA|imageModalModeOptions|renderImageLabelSettings|renderImageModalSettings):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",

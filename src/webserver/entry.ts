@@ -293,10 +293,10 @@ function installCardCompatibility(context: ApplicationContext): void {
     coverLikeCards.register,
     context.configuration.accessClimateAlarm,
   ));
-  registry.registerCompatibility(registerImageCardTypes(
+  registerImageCardTypes(
     registry,
     context.configuration.imageOptions,
-  ));
+  );
   registry.registerCompatibility(registerInternalCardTypes(registry));
   registry.registerCompatibility(registerLawnMowerCardTypes(registry));
   registry.registerCompatibility(registerLightTemperatureCardTypes(registry, context.configuration.modalTabs));

@@ -29,7 +29,6 @@ declare global {
   var GATE_MODE_OPTIONS: any;
   var GRID_COLS: any;
   var GRID_ROWS: any;
-  var IMAGE_CARD_METADATA: any;
   var INTERNAL_CARD_METADATA: any;
   var LAWN_MOWER_CARD_METADATA: any;
   var LAWN_MOWER_CARD_MODES: any;
@@ -322,7 +321,6 @@ declare global {
   var hideContextMenu: any;
   var hideSettingsOverlay: any;
   var homeAssistantArtworkPortPostUrls: any;
-  var imageModalModeOptions: any;
   var importConfig: any;
   var infoOnlyCardVisible: any;
   var infoPanel: any;
@@ -560,8 +558,6 @@ declare global {
   var renderFanControlTypeField: any;
   var renderFirmwareUpdateStatus: any;
   var renderFirmwareVersion: any;
-  var renderImageLabelSettings: any;
-  var renderImageModalSettings: any;
   var renderInternalRelayField: any;
   var renderLightControlTabSettings: any;
   var renderLightControlTypeField: any;

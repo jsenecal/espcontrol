@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -15,7 +14,7 @@ import type { ConfigImageOptionsFeature } from "../application/config_image_opti
 export function registerImageCardTypes(
     registry: CardRegistry,
     imageOptions: ConfigImageOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
         imageModalMode,
         imageLabelEnabled,
@@ -26,7 +25,7 @@ export function registerImageCardTypes(
         setImageModalMode,
     } = imageOptions;
     // Read-only Home Assistant camera/image entity card.
-    var IMAGE_CARD_METADATA: any = {
+    const IMAGE_CARD_METADATA: any = {
         entity: {
             label: "Camera Entity",
             idSuffix: "entity",
@@ -165,10 +164,4 @@ export function registerImageCardTypes(
             };
         },
     });
-    return {
-        "IMAGE_CARD_METADATA": liveGlobal(() => IMAGE_CARD_METADATA, (value?: any) => { IMAGE_CARD_METADATA = value; }),
-        "imageModalModeOptions": staticGlobal(imageModalModeOptions),
-        "renderImageLabelSettings": staticGlobal(renderImageLabelSettings),
-        "renderImageModalSettings": staticGlobal(renderImageModalSettings),
-    };
 }
