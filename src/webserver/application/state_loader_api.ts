@@ -1,6 +1,14 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
+import {
+    FIRMWARE_VERSION_METADATA_PATH,
+    firmwareInfoFromPublicManifest,
+    firmwareInfosFromPublicVersions,
+    firmwareVersionFromMetadata,
+    publicFirmwareManifestUrl,
+    publicFirmwareVersionsUrl,
+} from "./firmware_metadata";
 export function installStateLoaderApiModule(runtime: UiRuntimeState): GlobalDescriptors {
     // ── State Loader API ──────────────────────────────────────────────────
     function eventStreamEnabled(this: any) {

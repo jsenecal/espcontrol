@@ -1,4 +1,10 @@
 import { state } from "../state/app_instance";
+import {
+    firmwareInfoFromPublicManifest,
+    firmwareInfosFromPublicVersions,
+    firmwareVersionFromMetadata,
+    firmwareVersionsSame,
+} from "../application/firmware_metadata";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 export function installAppTestHooksSettings(): GlobalDescriptors {
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {

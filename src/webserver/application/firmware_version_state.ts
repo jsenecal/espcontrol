@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { isSpecificFirmwareVersion } from "./firmware_metadata";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 export function installFirmwareVersionStateModule(runtime: UiRuntimeState): GlobalDescriptors {

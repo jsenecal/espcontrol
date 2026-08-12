@@ -1,6 +1,12 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
+import {
+    firmwareInfoFromPublicManifest,
+    firmwareInfosFromPublicVersions,
+    publicFirmwareManifestUrl,
+    publicFirmwareVersionsUrl,
+} from "./firmware_metadata";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;

@@ -21,7 +21,6 @@ import {
   type ApplicationDomServices,
 } from "./application/application_context";
 import { createCardRegistry } from "./application/card_registry";
-import { installFirmwareMetadataModule } from "./application/firmware_metadata";
 import { createWebStyles } from "./application/styles";
 import { createUiRuntimeState } from "./application/state";
 import { installLanguageStateModule } from "./application/language_state";
@@ -147,7 +146,6 @@ const startupState = globalThis as typeof globalThis & {
 
 function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installCore(context.layout, context.configuration.codec, context.runtime));
-  installGlobals(installFirmwareMetadataModule());
   installGlobals(installLanguageStateModule(context.runtime));
   const voiceServicesController = context.controllers.voiceServices;
   installGlobals(installEnvironmentStateModule(voiceServicesController));

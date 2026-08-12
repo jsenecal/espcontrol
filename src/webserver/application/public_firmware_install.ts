@@ -1,6 +1,14 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { DeviceApi } from "../api/device_api";
+import {
+    firmwareInfoFromPublicManifest,
+    firmwareInfosFromPublicVersions,
+    firmwareVersionsSame,
+    isSpecificFirmwareVersion,
+    publicFirmwareManifestUrl,
+    publicFirmwareVersionsUrl,
+} from "./firmware_metadata";
 
 export function installPublicFirmwareInstallModule(
     deviceApi: DeviceApi,

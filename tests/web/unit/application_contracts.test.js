@@ -408,6 +408,29 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar WEB_UI_COLORS:/);
   });
 
+  test("imports firmware metadata helpers directly", () => {
+    const metadata = fs.readFileSync(path.join(ROOT, "src/webserver/application/firmware_metadata.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const consumers = [
+      "application/firmware_update_state.ts",
+      "application/firmware_version_state.ts",
+      "application/public_firmware_install.ts",
+      "application/settings_system_section.ts",
+      "application/state_loader_api.ts",
+      "testing/app_test_hooks_settings.ts",
+    ];
+    assert.match(metadata, /export function firmwareInfoFromPublicManifest/);
+    assert.match(metadata, /import \{ deviceId \} from "\.\.\/device_config"/);
+    assert.doesNotMatch(metadata, /GlobalDescriptors|liveGlobal|staticGlobal/);
+    for (const consumer of consumers) {
+      const source = fs.readFileSync(path.join(ROOT, "src/webserver", consumer), "utf8");
+      assert.match(source, /from "(?:\.\.\/application\/|\.\/)firmware_metadata"/, `${consumer} should import firmware metadata`);
+    }
+    assert.doesNotMatch(entry, /installFirmwareMetadataModule/);
+    assert.doesNotMatch(globals, /\bvar (?:FIRMWARE_VERSION_METADATA_PATH|FIRMWARE_PUBLIC_MANIFEST_BASE|isSpecificFirmwareVersion|firmwareVersionFromMetadata|firmwareVersionsSame|publicFirmwareManifestUrl|publicFirmwareVersionsUrl|publicFirmwareAssetUrl|firmwareInfoFromPublicManifest|firmwareInfoFromPublicVersionEntry|firmwareInfosFromPublicVersions):/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });
