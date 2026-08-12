@@ -1,13 +1,9 @@
 import * as DeviceConfig from "./device_config";
 import * as Model from "./model";
 import { createDeviceApi } from "./api/device_api";
-import * as RequestFailure from "./api/request_failure";
 import * as AppState from "./state/app_state";
 import * as AppInstance from "./state/app_instance";
 import { state } from "./state/app_instance";
-import * as EventAliases from "./state/event_aliases";
-import * as EventState from "./state/event_state";
-import * as FirmwareEvents from "./state/firmware_events";
 import * as ConfigPrimitives from "./model/config_primitives";
 import * as CardContract from "./generated/card_contract";
 import { textSpan } from "./application/ui_primitives";
@@ -616,11 +612,7 @@ function startEspControl(): void {
     ...DeviceConfig,
     EspControlModel: Model,
     ...Model,
-    ...RequestFailure,
     ...AppState,
-    ...EventAliases,
-    ...EventState,
-    ...FirmwareEvents,
     ...ConfigPrimitives,
     ...CardContract,
     ENTITY_CATALOG,

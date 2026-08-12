@@ -2,6 +2,7 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
 import type { DeviceApi } from "../api/device_api";
+import { requestFailureInfo } from "../api/request_failure";
 
 export function installApiModule(
     nativePanelConfig: NativePanelConfigController,

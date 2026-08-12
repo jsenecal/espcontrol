@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { entityStateKeys } from "../state/event_state";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 export function installEntityStateModule(): GlobalDescriptors {
     // ── Entity State Helpers ───────────────────────────────────────────────

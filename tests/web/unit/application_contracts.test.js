@@ -431,6 +431,23 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:FIRMWARE_VERSION_METADATA_PATH|FIRMWARE_PUBLIC_MANIFEST_BASE|isSpecificFirmwareVersion|firmwareVersionFromMetadata|firmwareVersionsSame|publicFirmwareManifestUrl|publicFirmwareVersionsUrl|publicFirmwareAssetUrl|firmwareInfoFromPublicManifest|firmwareInfoFromPublicVersionEntry|firmwareInfosFromPublicVersions):/);
   });
 
+  test("imports request and event contracts directly", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const api = fs.readFileSync(path.join(ROOT, "src/webserver/application/api.ts"), "utf8");
+    const events = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_events.ts"), "utf8");
+    const handlers = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_state_event_handlers.ts"), "utf8");
+    const entities = fs.readFileSync(path.join(ROOT, "src/webserver/application/entity_state.ts"), "utf8");
+    assert.match(api, /import \{ requestFailureInfo \} from "\.\.\/api\/request_failure"/);
+    assert.match(events, /from "\.\.\/state\/event_aliases"/);
+    assert.match(events, /from "\.\.\/state\/event_state"/);
+    assert.match(events, /from "\.\.\/state\/firmware_events"/);
+    assert.match(handlers, /import \{ applyClockBarStateValue \} from "\.\.\/state\/event_state"/);
+    assert.match(entities, /import \{ entityStateKeys \} from "\.\.\/state\/event_state"/);
+    assert.doesNotMatch(entry, /\b(?:RequestFailure|EventAliases|EventState|FirmwareEvents)\b/);
+    assert.doesNotMatch(globals, /\bvar (?:SSE_ALIAS_GROUPS|requestFailureInfo|applySseHandlerAliases|entityStateKeys|applyClockBarStateValue|isRemovedLegacyStateEvent|resetStateForConnection|parseEntityEventData|isFirmwareVersionEvent|isFirmwareUpdateEvent|isFirmwareCheckButtonEvent|isFirmwareInstallButtonEvent|isC6FirmwareCurrentEvent|isC6FirmwareLatestEvent|isC6FirmwareUpdateAvailableEvent|isC6FirmwareAutoUpdateEvent|isC6FirmwareCheckButtonEvent|isC6FirmwareInstallButtonEvent):/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

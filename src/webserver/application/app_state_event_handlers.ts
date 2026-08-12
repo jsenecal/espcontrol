@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { applyClockBarStateValue } from "../state/event_state";
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 

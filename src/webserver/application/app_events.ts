@@ -1,4 +1,23 @@
 import { state } from "../state/app_instance";
+import { applySseHandlerAliases } from "../state/event_aliases";
+import {
+    entityStateKeys,
+    isRemovedLegacyStateEvent,
+    parseEntityEventData,
+    resetStateForConnection,
+} from "../state/event_state";
+import {
+    isC6FirmwareAutoUpdateEvent,
+    isC6FirmwareCheckButtonEvent,
+    isC6FirmwareCurrentEvent,
+    isC6FirmwareInstallButtonEvent,
+    isC6FirmwareLatestEvent,
+    isC6FirmwareUpdateAvailableEvent,
+    isFirmwareCheckButtonEvent,
+    isFirmwareInstallButtonEvent,
+    isFirmwareUpdateEvent,
+    isFirmwareVersionEvent,
+} from "../state/firmware_events";
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ReconnectController } from "../features/reconnect";
 import type { SseHandlerFactory } from "./app_state_event_handlers";
