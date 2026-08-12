@@ -277,7 +277,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   const registry = context.cards;
   const coverLikeCards = createCoverLikeCardRegistration(registry);
   registry.registerCompatibility(registerActionCardTypes(registry, context.configuration.confirmationOptions));
-  registry.registerCompatibility(registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm));
+  registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm);
   registerCalendarCardTypes(registry, context.configuration.dateTimeOptions);
   registerClimateCardTypes(
     registry,

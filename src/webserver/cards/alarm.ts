@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -14,7 +13,7 @@ import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/conf
 export function registerAlarmCardTypes(
     registry: CardRegistry,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
         alarmBehaviorSpec,
         alarmActionSpecs,
@@ -400,17 +399,4 @@ export function registerAlarmCardTypes(
             };
         },
     });
-    return {
-        "ALARM_CONTROL_PANEL_VALUE": liveGlobal(() => ALARM_CONTROL_PANEL_VALUE, (value?: any) => { ALARM_CONTROL_PANEL_VALUE = value; }),
-        "alarmControlPanelValue": staticGlobal(alarmControlPanelValue),
-        "alarmUsesDefaultIcon": staticGlobal(alarmUsesDefaultIcon),
-        "alarmCardTypeOptions": staticGlobal(alarmCardTypeOptions),
-        "alarmCardTypeOptionsForSettings": staticGlobal(alarmCardTypeOptionsForSettings),
-        "alarmLabelIsGenerated": staticGlobal(alarmLabelIsGenerated),
-        "alarmIconIsGenerated": staticGlobal(alarmIconIsGenerated),
-        "setAlarmCardType": staticGlobal(setAlarmCardType),
-        "ALARM_CARD_METADATA": liveGlobal(() => ALARM_CARD_METADATA, (value?: any) => { ALARM_CARD_METADATA = value; }),
-        "renderAlarmCardTypeField": staticGlobal(renderAlarmCardTypeField),
-        "renderAlarmVisibleActionsField": staticGlobal(renderAlarmVisibleActionsField),
-    };
 }

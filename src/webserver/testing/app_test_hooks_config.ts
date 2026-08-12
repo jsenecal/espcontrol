@@ -143,6 +143,8 @@ export function installAppTestHooksConfig(
         normalizeClimateControlTabs,
     } = modalTabs;
     const {
+        alarmBehaviorSpec,
+        alarmActionSpecs,
         normalizeGarageLabelDisplayMode,
         garageLabelDisplayMode,
         normalizeGateLabelDisplayMode,
@@ -168,6 +170,12 @@ export function installAppTestHooksConfig(
         climateDefaultTemperatureStep,
         normalizeClimatePrecisionConfig,
     } = accessOptions;
+    function alarmControlPanelValue(this: any) {
+        return alarmBehaviorSpec().controlPanelValue || "control_panel";
+    }
+    function alarmCardTypeOptionsForSettings(this: any, _isSub?: any) {
+        return [{ value: alarmControlPanelValue(), label: "All Controls" }].concat(alarmActionSpecs());
+    }
     const {
         switchConfirmationEnabled,
         switchConfirmationMode,

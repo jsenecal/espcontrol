@@ -3,8 +3,6 @@ export {};
 declare global {
   var ACTION_CARD_ACTIONS: any;
   var ACTION_CARD_METADATA: any;
-  var ALARM_CARD_METADATA: any;
-  var ALARM_CONTROL_PANEL_VALUE: any;
   var AUTOMATIC_BRIGHTNESS_UNAVAILABLE: any;
   var BRIGHTNESS_TIME_UNAVAILABLE: any;
   var CFG: any;
@@ -83,12 +81,6 @@ declare global {
   var addSubItem: any;
   var addSubpageSlot: any;
   var addSupportButton: any;
-  var alarmCardTypeOptions: any;
-  var alarmCardTypeOptionsForSettings: any;
-  var alarmControlPanelValue: any;
-  var alarmIconIsGenerated: any;
-  var alarmLabelIsGenerated: any;
-  var alarmUsesDefaultIcon: any;
   var allScreenRotationOptions: any;
   var appendEditSubpageButton: any;
   var appendLanguageOption: any;
@@ -480,8 +472,6 @@ declare global {
   var rememberEntityPostPath: any;
   var rememberedPostUrls: any;
   var renderActionCardLocalSettings: any;
-  var renderAlarmCardTypeField: any;
-  var renderAlarmVisibleActionsField: any;
   var renderBackButtonSettings: any;
   var renderBasicCardFields: any;
   var renderButtonSettings: any;
@@ -543,7 +533,6 @@ declare global {
   var serializeClockBarTemperatureEntities: any;
   var serializeGrid: any;
   var setActionCardStateOptions: any;
-  var setAlarmCardType: any;
   var setC6FirmwareCurrentVersion: any;
   var setC6FirmwareLatestVersion: any;
   var setC6FirmwareUpdateAvailable: any;

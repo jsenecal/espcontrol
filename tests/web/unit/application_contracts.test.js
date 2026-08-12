@@ -214,6 +214,18 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:FAN_CARD_METADATA|FAN_CONTROL_TYPE_OPTIONS|fanControlBadgeIcon|fanControlDefaultIcon|fanTypeFactory|normalizeFanControlType|renderFanControlTabSettings|renderFanControlTypeField|setFanControlType):/);
   });
 
+  test("registers alarm card families without compatibility descriptors", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/alarm.ts"), "utf8");
+    const hooks = fs.readFileSync(path.join(ROOT, "src/webserver/testing/app_test_hooks_config.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.match(entry, /registerAlarmCardTypes\(registry, context\.configuration\.accessClimateAlarm\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerAlarmCardTypes/);
+    assert.match(hooks, /alarmBehaviorSpec,[\s\S]*alarmActionSpecs,/);
+    assert.doesNotMatch(globals, /\bvar (?:ALARM_CARD_METADATA|ALARM_CONTROL_PANEL_VALUE|alarmCardTypeOptions|alarmCardTypeOptionsForSettings|alarmControlPanelValue|alarmIconIsGenerated|alarmLabelIsGenerated|alarmUsesDefaultIcon|renderAlarmCardTypeField|renderAlarmVisibleActionsField|setAlarmCardType):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",
