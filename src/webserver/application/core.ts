@@ -1,21 +1,16 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { CARD_RUNTIME_SPECS } from "../generated/card_contract";
-export function installCore(): GlobalDescriptors {
-    var DEVICE_ID: any = deviceId;
-    var CFG: any = deviceConfig;
-    var NUM_SLOTS: any = CFG.slots;
-    var TOTAL_SLOTS: any = NUM_SLOTS;
-    var GRID_COLS: any = CFG.cols;
-    var GRID_ROWS: any = CFG.rows;
+import type { ApplicationLayoutState } from "./application_context";
+export function installCore(applicationLayout: ApplicationLayoutState): GlobalDescriptors {
     function isPortraitRotation(this: any, value?: any) {
         value = String(value == null ? "0" : value);
         return value === "90" || value === "270";
     }
     function activeLayout(this: any) {
-        if (isPortraitRotation(state.screenRotation) && CFG.portrait)
-            return CFG.portrait;
-        return CFG;
+        if (isPortraitRotation(state.screenRotation) && applicationLayout.config.portrait)
+            return applicationLayout.config.portrait;
+        return applicationLayout.config;
     }
     function screenWidthPercent(this: any, screen?: any) {
         var width: any = screen && screen.width;
@@ -28,14 +23,14 @@ export function installCore(): GlobalDescriptors {
         return isFinite(pct) && pct > 0 ? pct : null;
     }
     function previewLayoutScale(this: any, layout?: any) {
-        var baseWidth: any = screenWidthPercent(CFG.screen);
-        var activeWidth: any = screenWidthPercent((layout && layout.screen) || CFG.screen);
+        var baseWidth: any = screenWidthPercent(applicationLayout.config.screen);
+        var activeWidth: any = screenWidthPercent((layout && layout.screen) || applicationLayout.config.screen);
         if (!baseWidth || !activeWidth)
             return 1;
         return baseWidth / activeWidth;
     }
     function layoutSection(this: any, layout?: any, key?: any) {
-        return (layout && layout[key]) || CFG[key] || {};
+        return (layout && layout[key]) || (applicationLayout.config as any)[key] || {};
     }
     function scaledCqw(this: any, value?: any, scale?: any) {
         value = parseFloat(value);
@@ -112,21 +107,21 @@ export function installCore(): GlobalDescriptors {
     }
     function syncPreviewOrientation(this: any, preservePendingGrid?: any) {
         var layout: any = activeLayout();
-        var screen: any = layout.screen || CFG.screen;
+        var screen: any = layout.screen || applicationLayout.config.screen;
         var scale: any = previewLayoutScale(layout);
-        GRID_COLS = layout.cols || CFG.cols;
-        GRID_ROWS = layout.rows || Math.ceil(NUM_SLOTS / GRID_COLS);
+        applicationLayout.gridCols = layout.cols || applicationLayout.config.cols;
+        applicationLayout.gridRows = layout.rows || Math.ceil(applicationLayout.numSlots / applicationLayout.gridCols);
         var r: any = document.documentElement.style;
-        r.setProperty("--screen-w", screen.width || CFG.screen.width);
-        r.setProperty("--screen-aspect", screen.aspect || CFG.screen.aspect);
-        r.setProperty("--grid-cols", "repeat(" + GRID_COLS + "," + CFG.grid.fr + ")");
-        r.setProperty("--grid-rows", "repeat(" + GRID_ROWS + "," + CFG.grid.fr + ")");
+        r.setProperty("--screen-w", screen.width || applicationLayout.config.screen.width);
+        r.setProperty("--screen-aspect", screen.aspect || applicationLayout.config.screen.aspect);
+        r.setProperty("--grid-cols", "repeat(" + applicationLayout.gridCols + "," + applicationLayout.config.grid!.fr + ")");
+        r.setProperty("--grid-rows", "repeat(" + applicationLayout.gridRows + "," + applicationLayout.config.grid!.fr + ")");
         syncPreviewStyleVars(layout, scale);
-        var largeSensorUnitOffsetPercent: any = typeof CFG.largeSensorUnitOffsetPercent === "number"
-            ? CFG.largeSensorUnitOffsetPercent : -10;
+        var largeSensorUnitOffsetPercent: any = typeof applicationLayout.config.largeSensorUnitOffsetPercent === "number"
+            ? applicationLayout.config.largeSensorUnitOffsetPercent : -10;
         r.setProperty("--large-sensor-unit-offset-y", "calc(var(--btn-icon) * 2.5 * " + (largeSensorUnitOffsetPercent / 100) + ")");
         if (!preservePendingGrid && state.grid && state.grid.length) {
-            normalizeGridSpansForLayout(state.grid, state.sizes, NUM_SLOTS, GRID_COLS, function (this: any, normalizedOrder?: any) {
+            normalizeGridSpansForLayout(state.grid, state.sizes, applicationLayout.numSlots, applicationLayout.gridCols, function (this: any, normalizedOrder?: any) {
                 if (orderReceived)
                     postText(entityName("button_order"), normalizedOrder);
             });
@@ -137,7 +132,7 @@ export function installCore(): GlobalDescriptors {
                 if (!sp || !sp.grid || !sp.grid.length)
                     continue;
                 var previousSubpageOrder: any = JSON.stringify(serializeSubpageGrid(sp));
-                normalizeGridSpansForLayout(sp.grid, sp.sizes, NUM_SLOTS, GRID_COLS);
+                normalizeGridSpansForLayout(sp.grid, sp.sizes, applicationLayout.numSlots, applicationLayout.gridCols);
                 sp.order = serializeSubpageGrid(sp);
                 if (JSON.stringify(sp.order) !== previousSubpageOrder) {
                     saveSubpageEntity(homeSlot);
@@ -206,12 +201,12 @@ export function installCore(): GlobalDescriptors {
         }
     }
     return {
-        "DEVICE_ID": liveGlobal(() => DEVICE_ID, (value?: any) => { DEVICE_ID = value; }),
-        "CFG": liveGlobal(() => CFG, (value?: any) => { CFG = value; }),
-        "NUM_SLOTS": liveGlobal(() => NUM_SLOTS, (value?: any) => { NUM_SLOTS = value; }),
-        "TOTAL_SLOTS": liveGlobal(() => TOTAL_SLOTS, (value?: any) => { TOTAL_SLOTS = value; }),
-        "GRID_COLS": liveGlobal(() => GRID_COLS, (value?: any) => { GRID_COLS = value; }),
-        "GRID_ROWS": liveGlobal(() => GRID_ROWS, (value?: any) => { GRID_ROWS = value; }),
+        "DEVICE_ID": liveGlobal(() => applicationLayout.deviceId, (value?: any) => { applicationLayout.deviceId = String(value || ""); }),
+        "CFG": liveGlobal(() => applicationLayout.config, (value?: any) => { applicationLayout.config = value; }),
+        "NUM_SLOTS": liveGlobal(() => applicationLayout.numSlots, (value?: any) => { applicationLayout.numSlots = value; }),
+        "TOTAL_SLOTS": liveGlobal(() => applicationLayout.totalSlots, (value?: any) => { applicationLayout.totalSlots = value; }),
+        "GRID_COLS": liveGlobal(() => applicationLayout.gridCols, (value?: any) => { applicationLayout.gridCols = value; }),
+        "GRID_ROWS": liveGlobal(() => applicationLayout.gridRows, (value?: any) => { applicationLayout.gridRows = value; }),
         "isPortraitRotation": staticGlobal(isPortraitRotation),
         "activeLayout": staticGlobal(activeLayout),
         "screenWidthPercent": staticGlobal(screenWidthPercent),

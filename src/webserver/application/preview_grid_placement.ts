@@ -10,18 +10,24 @@ import {
     placeSlotAt as placeSlotAtInGrid,
     resolveSpanPosition,
 } from "../features/preview_grid";
+import type { ApplicationLayoutState } from "./application_context";
+export interface PreviewGridPlacementDependencies {
+    readonly controller: PreviewPlacementController;
+    readonly layout: ApplicationLayoutState;
+}
 export function installPreviewGridPlacementModule(
-    previewPlacementController: PreviewPlacementController,
+    dependencies: PreviewGridPlacementDependencies,
 ): GlobalDescriptors {
+    const previewPlacementController = dependencies.controller;
     // ── Preview Grid Placement ────────────────────────────────────────
     function resolveSpanPos(this: any, pos?: any) {
         var c: any = ctx();
-        return resolveSpanPosition(c.grid, c.sizes, pos, c.maxSlots, GRID_COLS);
+        return resolveSpanPosition(c.grid, c.sizes, pos, c.maxSlots, dependencies.layout.gridCols);
     }
     function getCellFromEvent(this: any, e?: any, container?: any) {
-        if (CFG.dragMode === "swap") {
+        if (dependencies.layout.config.dragMode === "swap") {
             var rect: any = container.getBoundingClientRect();
-            return resolveSpanPos(swapGridCell({ x: e.clientX, y: e.clientY }, { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }, GRID_COLS, GRID_ROWS));
+            return resolveSpanPos(swapGridCell({ x: e.clientX, y: e.clientY }, { left: rect.left, top: rect.top, right: rect.right, bottom: rect.bottom }, dependencies.layout.gridCols, dependencies.layout.gridRows));
         }
         var children: any = container.children;
         var cells: any = [];
@@ -36,7 +42,7 @@ export function installPreviewGridPlacementModule(
     }
     function moveToCell(this: any, fromPos?: any, toPos?: any) {
         var c: any = ctx();
-        var result: any = previewPlacementController.moveSingle(c, fromPos, toPos, GRID_COLS);
+        var result: any = previewPlacementController.moveSingle(c, fromPos, toPos, dependencies.layout.gridCols);
         if (!result.accepted)
             return;
         if (c.isSub) {
@@ -50,23 +56,23 @@ export function installPreviewGridPlacementModule(
         }
     }
     function canPlaceSlotAt(this: any, grid?: any, pos?: any, size?: any, maxSlots?: any) {
-        return canPlaceSlotAtInGrid(grid, pos, size, maxSlots, GRID_COLS);
+        return canPlaceSlotAtInGrid(grid, pos, size, maxSlots, dependencies.layout.gridCols);
     }
     function findPlacementCell(this: any, grid?: any, start?: any, size?: any, maxSlots?: any) {
-        return findPlacementCellInGrid(grid, start, size, maxSlots, GRID_COLS);
+        return findPlacementCellInGrid(grid, start, size, maxSlots, dependencies.layout.gridCols);
     }
     function findDuplicatePlacement(this: any, grid?: any, start?: any, size?: any, maxSlots?: any) {
-        return findDuplicatePlacementInGrid(grid, start, size, maxSlots, GRID_COLS);
+        return findDuplicatePlacementInGrid(grid, start, size, maxSlots, dependencies.layout.gridCols);
     }
     function placeSlotAt(this: any, grid?: any, slot?: any, pos?: any, size?: any) {
-        placeSlotAtInGrid(grid, slot, pos, size, GRID_COLS);
+        placeSlotAtInGrid(grid, slot, pos, size, dependencies.layout.gridCols);
     }
     function placeOrderedGridEntries(this: any, entries?: any, sizes?: any, maxSlots?: any) {
-        return placeOrderedGridEntriesInGrid(entries, sizes, maxSlots, GRID_COLS);
+        return placeOrderedGridEntriesInGrid(entries, sizes, maxSlots, dependencies.layout.gridCols);
     }
     function moveSelectedToCell(this: any, fromPos?: any, toPos?: any) {
         var c: any = ctx();
-        var result: any = previewPlacementController.moveSelected(c, fromPos, toPos, GRID_COLS);
+        var result: any = previewPlacementController.moveSelected(c, fromPos, toPos, dependencies.layout.gridCols);
         if (!result.accepted)
             return false;
         if (c.isSub) {
