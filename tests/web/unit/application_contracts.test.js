@@ -41,7 +41,6 @@ describe("browserless application contracts", () => {
       ["climate", "registerClimateCardTypes"],
       ["fan", "registerFanCardTypes"],
       ["light_temperature", "registerLightTemperatureCardTypes"],
-      ["lock", "registerLockCardTypes"],
       ["media", "registerMediaCardTypes"],
       ["slider", "registerSliderCardTypes"],
       ["subpage", "registerSubpageCardTypes"],
@@ -173,6 +172,16 @@ describe("browserless application contracts", () => {
     assert.match(entry, /registerVacuumCardTypes\(registry, context\.configuration\.robotOptions\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(register(?:LawnMower|Vacuum)CardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:LAWN_MOWER_CARD_METADATA|LAWN_MOWER_CARD_MODES|VACUUM_CARD_METADATA|VACUUM_CARD_MODES|lawnMowerModeBadgeIcon|lawnMowerModeDefaultIcon|lawnMowerModeValues|lawnMowerUsesDefaultIcon|normalizeLawnMowerConfig|normalizeLawnMowerMode|normalizeVacuumConfig|vacuumModeBadgeIcon|vacuumModeDefaultIcon|vacuumModeNeedsArea|vacuumModeValues):/);
+  });
+
+  test("registers the lock card through explicit shared options", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/lock.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.match(entry, /registerLockCardTypes\(registry, context\.configuration\.lockOptions\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerLockCardTypes/);
+    assert.doesNotMatch(globals, /\bvar (?:LOCK_CARD_METADATA|lockCommandMode|lockModeDefaultIcon|lockModeDefaultLabel|lockModeOptionValues|lockUsesDefaultIcon|normalizeLockMode):/);
   });
 
   test("injects the card registry into editor and preview consumers", () => {

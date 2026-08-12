@@ -68,6 +68,7 @@ import { normalizeCoverMode } from "./config_cover_contract";
 import type { ConfigWeatherOptionsFeature } from "./config_weather_options";
 import type { ConfigWebhookOptionsFeature } from "./config_webhook_options";
 import type { ConfigRobotCardOptionsFeature } from "./config_robot_card_options";
+import type { ConfigLockOptionsFeature } from "./config_lock_options";
 export function createConfigCodecFeature(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
@@ -76,6 +77,7 @@ export function createConfigCodecFeature(
     weatherOptions: ConfigWeatherOptionsFeature,
     webhookOptions: ConfigWebhookOptionsFeature,
     robotOptions: ConfigRobotCardOptionsFeature,
+    lockOptions: ConfigLockOptionsFeature,
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
@@ -108,6 +110,7 @@ export function createConfigCodecFeature(
         vacuumModeDefaultIcon,
         vacuumModeNeedsArea,
     } = robotOptions;
+    const { normalizeLockMode } = lockOptions;
     imageOptions.connectSubpageParser((value) => parseSubpageConfig(value));
     const {
         normalizeLightControlOptions,

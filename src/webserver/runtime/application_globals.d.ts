@@ -33,7 +33,6 @@ declare global {
   var LIGHT_CONTROL_TYPE_OPTIONS: any;
   var LIGHT_FULL_CONTROL_CARD_METADATA: any;
   var LIGHT_TEMPERATURE_CARD_METADATA: any;
-  var LOCK_CARD_METADATA: any;
   var MAX_CLOCK_BAR_TEMPERATURES: any;
   var MEDIA_CARD_METADATA: any;
   var MEDIA_PLAYLIST_SOURCE_DEFINITIONS: any;
@@ -342,11 +341,6 @@ declare global {
   var lightTempStep: any;
   var loadInitialState: any;
   var loadStateItems: any;
-  var lockCommandMode: any;
-  var lockModeDefaultIcon: any;
-  var lockModeDefaultLabel: any;
-  var lockModeOptionValues: any;
-  var lockUsesDefaultIcon: any;
   var makeCollapsibleCard: any;
   var markCardPrimaryField: any;
   var mediaBehaviorSpec: any;
@@ -383,7 +377,6 @@ declare global {
   var normalizeGateMode: any;
   var normalizeGridSpansForLayout: any;
   var normalizeLightControlType: any;
-  var normalizeLockMode: any;
   var normalizeNetworkTransport: any;
   var normalizeScreenRotation: any;
   var normalizeVacuumMode: any;

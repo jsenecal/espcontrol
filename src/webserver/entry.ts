@@ -41,6 +41,7 @@ import { createConfigWeatherOptionsFeature } from "./application/config_weather_
 import { createConfigWebhookOptionsFeature } from "./application/config_webhook_options";
 import { createConfigInternalRelayOptionsFeature } from "./application/config_internal_relay_options";
 import { createConfigRobotCardOptionsFeature } from "./application/config_robot_card_options";
+import { createConfigLockOptionsFeature } from "./application/config_lock_options";
 import { createConfigModalTabOptionsFeature } from "./application/config_modal_tab_options";
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
 import { createConfigConfirmationOptionsFeature } from "./application/config_confirmation_options";
@@ -306,7 +307,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   );
   registerLawnMowerCardTypes(registry, context.configuration.robotOptions);
   registry.registerCompatibility(registerLightTemperatureCardTypes(registry, context.configuration.modalTabs));
-  registry.registerCompatibility(registerLockCardTypes(registry));
+  registerLockCardTypes(registry, context.configuration.lockOptions);
   registry.registerCompatibility(registerMediaCardTypes(
     registry,
     context.configuration.mediaOptions,
@@ -335,6 +336,7 @@ function installTestCompatibility(context: ApplicationContext): void {
     context.configuration.weatherOptions,
     context.configuration.webhookOptions,
     context.configuration.internalRelayOptions,
+    context.configuration.lockOptions,
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
     context.configuration.confirmationOptions,
@@ -396,6 +398,7 @@ function composeApplicationContext(): ApplicationContext {
   const webhookConfigurationOptions = createConfigWebhookOptionsFeature();
   const internalRelayConfigurationOptions = createConfigInternalRelayOptionsFeature(layout.config);
   const robotConfigurationOptions = createConfigRobotCardOptionsFeature();
+  const lockConfigurationOptions = createConfigLockOptionsFeature();
   const modalTabOptions = createConfigModalTabOptionsFeature({
     document: dom.document,
     renderButtonSettings: () => renderButtonSettings(),
@@ -410,6 +413,7 @@ function composeApplicationContext(): ApplicationContext {
     weatherConfigurationOptions,
     webhookConfigurationOptions,
     robotConfigurationOptions,
+    lockConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
@@ -599,6 +603,7 @@ function composeApplicationContext(): ApplicationContext {
     webhookConfigurationOptions,
     internalRelayConfigurationOptions,
     robotConfigurationOptions,
+    lockConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,

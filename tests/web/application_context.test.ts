@@ -8,6 +8,7 @@ import { createConfigWeatherOptionsFeature } from "../../src/webserver/applicati
 import { createConfigWebhookOptionsFeature } from "../../src/webserver/application/config_webhook_options";
 import { createConfigInternalRelayOptionsFeature } from "../../src/webserver/application/config_internal_relay_options";
 import { createConfigRobotCardOptionsFeature } from "../../src/webserver/application/config_robot_card_options";
+import { createConfigLockOptionsFeature } from "../../src/webserver/application/config_lock_options";
 import type { DeviceConfig } from "../../src/webserver/state/types";
 import type { GlobalDescriptors } from "../../src/webserver/runtime/globals";
 
@@ -42,6 +43,7 @@ export function runApplicationContextTests(): void {
   const webhookConfigurationOptions = {} as any;
   const internalRelayConfigurationOptions = {} as any;
   const robotConfigurationOptions = {} as any;
+  const lockConfigurationOptions = {} as any;
   const modalTabOptions = {} as any;
   const accessClimateAlarmOptions = {} as any;
   const confirmationOptions = {} as any;
@@ -85,6 +87,7 @@ export function runApplicationContextTests(): void {
     webhookConfigurationOptions,
     internalRelayConfigurationOptions,
     robotConfigurationOptions,
+    lockConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
@@ -129,6 +132,7 @@ export function runApplicationContextTests(): void {
   equal(context.configuration.webhookOptions, webhookConfigurationOptions, "context retains typed webhook options");
   equal(context.configuration.internalRelayOptions, internalRelayConfigurationOptions, "context retains typed internal-relay options");
   equal(context.configuration.robotOptions, robotConfigurationOptions, "context retains typed robot-card options");
+  equal(context.configuration.lockOptions, lockConfigurationOptions, "context retains typed lock options");
   equal(context.configuration.modalTabs, modalTabOptions, "context retains typed modal-tab options");
   equal(context.configuration.accessClimateAlarm, accessClimateAlarmOptions, "context retains typed access/climate/alarm options");
   equal(context.configuration.confirmationOptions, confirmationOptions, "context retains typed confirmation options");
@@ -187,6 +191,12 @@ export function runApplicationContextTests(): void {
   equal(robotOptions.normalizeLawnMowerMode("invalid"), "start_mowing", "robot options normalize invalid lawn-mower modes");
   equal(robotOptions.vacuumModeNeedsArea("clean_area"), true, "robot options retain area identifiers for clean-area mode");
   equal(robotOptions.vacuumModeDefaultIcon("dock"), "Robot Vacuum Variant", "robot options provide vacuum mode icons");
+
+  const lockOptions = createConfigLockOptionsFeature();
+  equal(lockOptions.normalizeLockMode("unlock"), "unlock", "lock options preserve command modes");
+  equal(lockOptions.normalizeLockMode("invalid"), "", "lock options normalize invalid modes to toggle");
+  equal(lockOptions.lockModeDefaultIcon("unlock"), "Lock Open", "lock options provide command icons");
+  equal(lockOptions.lockUsesDefaultIcon("Lock"), true, "lock options recognize historical default icons");
 
   cards.registerCompatibility({ example: { configurable: true, value: true } });
   equal(cards.compatibilityDefinitionCount, 1, "registry counts compatibility definitions");

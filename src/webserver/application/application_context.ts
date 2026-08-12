@@ -29,6 +29,7 @@ import type { ConfigWeatherOptionsFeature } from "./config_weather_options";
 import type { ConfigWebhookOptionsFeature } from "./config_webhook_options";
 import type { ConfigInternalRelayOptionsFeature } from "./config_internal_relay_options";
 import type { ConfigRobotCardOptionsFeature } from "./config_robot_card_options";
+import type { ConfigLockOptionsFeature } from "./config_lock_options";
 import type { ConfigModalTabOptionsFeature } from "./config_modal_tab_options";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "./config_access_climate_alarm_options";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
@@ -75,6 +76,7 @@ export interface ApplicationContext {
     readonly webhookOptions: ConfigWebhookOptionsFeature;
     readonly internalRelayOptions: ConfigInternalRelayOptionsFeature;
     readonly robotOptions: ConfigRobotCardOptionsFeature;
+    readonly lockOptions: ConfigLockOptionsFeature;
     readonly modalTabs: ConfigModalTabOptionsFeature;
     readonly accessClimateAlarm: ConfigAccessClimateAlarmOptionsFeature;
     readonly confirmationOptions: ConfigConfirmationOptionsFeature;
@@ -123,6 +125,7 @@ export interface ApplicationContextOptions {
   readonly webhookConfigurationOptions: ConfigWebhookOptionsFeature;
   readonly internalRelayConfigurationOptions: ConfigInternalRelayOptionsFeature;
   readonly robotConfigurationOptions: ConfigRobotCardOptionsFeature;
+  readonly lockConfigurationOptions: ConfigLockOptionsFeature;
   readonly modalTabOptions: ConfigModalTabOptionsFeature;
   readonly accessClimateAlarmOptions: ConfigAccessClimateAlarmOptionsFeature;
   readonly confirmationOptions: ConfigConfirmationOptionsFeature;
@@ -183,6 +186,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       webhookOptions: options.webhookConfigurationOptions,
       internalRelayOptions: options.internalRelayConfigurationOptions,
       robotOptions: options.robotConfigurationOptions,
+      lockOptions: options.lockConfigurationOptions,
       modalTabs: options.modalTabOptions,
       accessClimateAlarm: options.accessClimateAlarmOptions,
       confirmationOptions: options.confirmationOptions,

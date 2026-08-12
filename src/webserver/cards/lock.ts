@@ -1,4 +1,3 @@
-import { state } from "../state/app_instance";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -8,36 +7,22 @@ import {
     cardContractHidden,
     cardContractPickerKey,
 } from "../generated/card_contract";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
-import { cardContractOptionSpec } from "../application/config_option_core";
-export function registerLockCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { ConfigLockOptionsFeature } from "../application/config_lock_options";
+
+export function registerLockCardTypes(
+    registry: CardRegistry,
+    lockOptions: ConfigLockOptionsFeature,
+): void {
+    const {
+        lockCommandMode,
+        lockModeDefaultIcon,
+        lockModeDefaultLabel,
+        lockUsesDefaultIcon,
+        normalizeLockMode,
+    } = lockOptions;
     // Lock card: lock/unlock toggle with safe default-to-lock behavior and state display.
-    function lockCommandMode(this: any, mode?: any) {
-        return mode === "lock" || mode === "unlock";
-    }
-    function lockModeOptionValues(this: any) {
-        var spec: any = cardContractOptionSpec("lock", "lock_mode");
-        return spec && spec.values ? spec.values.slice() : [];
-    }
-    function normalizeLockMode(this: any, mode?: any) {
-        mode = String(mode || "");
-        return lockModeOptionValues().indexOf(mode) >= 0 ? mode : "";
-    }
-    function lockModeDefaultIcon(this: any, mode?: any) {
-        return mode === "unlock" ? "Lock Open" : "Lock";
-    }
-    function lockModeDefaultLabel(this: any, mode?: any) {
-        if (mode === "lock")
-            return "Lock";
-        if (mode === "unlock")
-            return "Unlock";
-        return "Lock";
-    }
-    function lockUsesDefaultIcon(this: any, icon?: any) {
-        return !icon || icon === "Auto" || icon === "Lock" || icon === "Lock Open";
-    }
-    var LOCK_CARD_METADATA: any = {
+    const LOCK_CARD_METADATA: any = {
         mode: {
             label: "Type",
             idSuffix: "lock-type",
@@ -173,13 +158,4 @@ export function registerLockCardTypes(registry: CardRegistry): GlobalDescriptors
             });
         },
     });
-    return {
-        "lockCommandMode": staticGlobal(lockCommandMode),
-        "lockModeOptionValues": staticGlobal(lockModeOptionValues),
-        "normalizeLockMode": staticGlobal(normalizeLockMode),
-        "lockModeDefaultIcon": staticGlobal(lockModeDefaultIcon),
-        "lockModeDefaultLabel": staticGlobal(lockModeDefaultLabel),
-        "lockUsesDefaultIcon": staticGlobal(lockUsesDefaultIcon),
-        "LOCK_CARD_METADATA": liveGlobal(() => LOCK_CARD_METADATA, (value?: any) => { LOCK_CARD_METADATA = value; }),
-    };
 }
