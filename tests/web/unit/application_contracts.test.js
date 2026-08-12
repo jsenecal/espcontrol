@@ -261,6 +261,16 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:iconSlug|mdiIcon|textSpan|escHtml|escAttr|uniqueOptions|setSelectValue|ICON_OPTIONS|DOMAIN_ICONS):/);
   });
 
+  test("owns mutable UI runtime state in the application context", () => {
+    const runtime = fs.readFileSync(path.join(ROOT, "src/webserver/application/state.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.match(runtime, /createUiRuntimeState/);
+    assert.doesNotMatch(entry, /installStateModule/);
+    assert.match(entry, /runtime = createUiRuntimeState\(layout, dom\.document\)/);
+    assert.match(entry, /installGlobals\(context\.runtime\.globals\)/);
+    assert.match(entry, /getActiveSource: \(\) => runtime\.eventSource/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

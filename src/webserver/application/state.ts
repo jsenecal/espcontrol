@@ -1,44 +1,74 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installStateModule(): GlobalDescriptors {
-    // ── State ──────────────────────────────────────────────────────────────
-    var els: any = {};
-    var dragSrcPos: any = -1;
-    var didDrag: any = false;
-    var previewPlaceholder: any = null;
-    var previewDropIdx: any = -1;
-    var dragRafPending: any = CFG.dragAnimation ? false : null;
-    var dragSrcEl: any = CFG.dragAnimation ? null : null;
-    var dragIsSubpage: any = false;
-    var dragEnterCount: any = 0;
-    var orderReceived: any = false;
-    var migrationTimer: any = null;
-    var sliderMigrationTimer: any = null;
-    var pendingSliderSubpageMigrations: any = {};
-    var _eventSource: any = null;
-    // ── Utilities ──────────────────────────────────────────────────────────
-    function isSettingsFocused(this: any) {
-        var ae: any = document.activeElement;
-        return ae && els.buttonSettings && els.buttonSettings.contains(ae);
-    }
-    function isSettingsOpen(this: any) {
-        return !!(els.settingsOverlay && els.settingsOverlay.classList.contains("sp-visible"));
-    }
-    return {
-        "els": liveGlobal(() => els, (value?: any) => { els = value; }),
-        "dragSrcPos": liveGlobal(() => dragSrcPos, (value?: any) => { dragSrcPos = value; }),
-        "didDrag": liveGlobal(() => didDrag, (value?: any) => { didDrag = value; }),
-        "previewPlaceholder": liveGlobal(() => previewPlaceholder, (value?: any) => { previewPlaceholder = value; }),
-        "previewDropIdx": liveGlobal(() => previewDropIdx, (value?: any) => { previewDropIdx = value; }),
-        "dragRafPending": liveGlobal(() => dragRafPending, (value?: any) => { dragRafPending = value; }),
-        "dragSrcEl": liveGlobal(() => dragSrcEl, (value?: any) => { dragSrcEl = value; }),
-        "dragIsSubpage": liveGlobal(() => dragIsSubpage, (value?: any) => { dragIsSubpage = value; }),
-        "dragEnterCount": liveGlobal(() => dragEnterCount, (value?: any) => { dragEnterCount = value; }),
-        "orderReceived": liveGlobal(() => orderReceived, (value?: any) => { orderReceived = value; }),
-        "migrationTimer": liveGlobal(() => migrationTimer, (value?: any) => { migrationTimer = value; }),
-        "sliderMigrationTimer": liveGlobal(() => sliderMigrationTimer, (value?: any) => { sliderMigrationTimer = value; }),
-        "pendingSliderSubpageMigrations": liveGlobal(() => pendingSliderSubpageMigrations, (value?: any) => { pendingSliderSubpageMigrations = value; }),
-        "_eventSource": liveGlobal(() => _eventSource, (value?: any) => { _eventSource = value; }),
-        "isSettingsFocused": staticGlobal(isSettingsFocused),
-        "isSettingsOpen": staticGlobal(isSettingsOpen),
+import type { ApplicationLayoutState } from "./application_context";
+
+export interface UiRuntimeState {
+    els: any;
+    dragSrcPos: any;
+    didDrag: any;
+    previewPlaceholder: any;
+    previewDropIdx: any;
+    dragRafPending: any;
+    dragSrcEl: any;
+    dragIsSubpage: any;
+    dragEnterCount: any;
+    orderReceived: any;
+    migrationTimer: any;
+    sliderMigrationTimer: any;
+    pendingSliderSubpageMigrations: any;
+    eventSource: any;
+    globals: GlobalDescriptors;
+    isSettingsFocused(): boolean;
+    isSettingsOpen(): boolean;
+}
+
+export function createUiRuntimeState(
+    layout: ApplicationLayoutState,
+    document: Document,
+): UiRuntimeState {
+    const runtime: UiRuntimeState = {
+        els: {},
+        dragSrcPos: -1,
+        didDrag: false,
+        previewPlaceholder: null,
+        previewDropIdx: -1,
+        dragRafPending: layout.config.dragAnimation ? false : null,
+        dragSrcEl: null,
+        dragIsSubpage: false,
+        dragEnterCount: 0,
+        orderReceived: false,
+        migrationTimer: null,
+        sliderMigrationTimer: null,
+        pendingSliderSubpageMigrations: {},
+        eventSource: null,
+        globals: {},
+        isSettingsFocused() {
+            const activeElement = document.activeElement;
+            return !!(activeElement && runtime.els.buttonSettings && runtime.els.buttonSettings.contains(activeElement));
+        },
+        isSettingsOpen() {
+            return !!(runtime.els.settingsOverlay && runtime.els.settingsOverlay.classList.contains("sp-visible"));
+        },
     };
+    runtime.globals = {
+        "els": liveGlobal(() => runtime.els, (value) => { runtime.els = value; }),
+        "dragSrcPos": liveGlobal(() => runtime.dragSrcPos, (value) => { runtime.dragSrcPos = value; }),
+        "didDrag": liveGlobal(() => runtime.didDrag, (value) => { runtime.didDrag = value; }),
+        "previewPlaceholder": liveGlobal(() => runtime.previewPlaceholder, (value) => { runtime.previewPlaceholder = value; }),
+        "previewDropIdx": liveGlobal(() => runtime.previewDropIdx, (value) => { runtime.previewDropIdx = value; }),
+        "dragRafPending": liveGlobal(() => runtime.dragRafPending, (value) => { runtime.dragRafPending = value; }),
+        "dragSrcEl": liveGlobal(() => runtime.dragSrcEl, (value) => { runtime.dragSrcEl = value; }),
+        "dragIsSubpage": liveGlobal(() => runtime.dragIsSubpage, (value) => { runtime.dragIsSubpage = value; }),
+        "dragEnterCount": liveGlobal(() => runtime.dragEnterCount, (value) => { runtime.dragEnterCount = value; }),
+        "orderReceived": liveGlobal(() => runtime.orderReceived, (value) => { runtime.orderReceived = value; }),
+        "migrationTimer": liveGlobal(() => runtime.migrationTimer, (value) => { runtime.migrationTimer = value; }),
+        "sliderMigrationTimer": liveGlobal(() => runtime.sliderMigrationTimer, (value) => { runtime.sliderMigrationTimer = value; }),
+        "pendingSliderSubpageMigrations": liveGlobal(
+            () => runtime.pendingSliderSubpageMigrations,
+            (value) => { runtime.pendingSliderSubpageMigrations = value; },
+        ),
+        "_eventSource": liveGlobal(() => runtime.eventSource, (value) => { runtime.eventSource = value; }),
+        "isSettingsFocused": staticGlobal(() => runtime.isSettingsFocused()),
+        "isSettingsOpen": staticGlobal(() => runtime.isSettingsOpen()),
+    };
+    return runtime;
 }

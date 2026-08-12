@@ -24,7 +24,7 @@ import {
 import { createCardRegistry } from "./application/card_registry";
 import { installFirmwareMetadataModule } from "./application/firmware_metadata";
 import { installStylesModule } from "./application/styles";
-import { installStateModule } from "./application/state";
+import { createUiRuntimeState } from "./application/state";
 import { installLanguageStateModule } from "./application/language_state";
 import { installEnvironmentStateModule } from "./application/environment_state";
 import { installScreenRotationStateModule } from "./application/screen_rotation_state";
@@ -150,7 +150,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installCore(context.layout, context.configuration.codec));
   installGlobals(installFirmwareMetadataModule());
   installGlobals(installStylesModule());
-  installGlobals(installStateModule());
+  installGlobals(context.runtime.globals);
   installGlobals(installLanguageStateModule());
   const voiceServicesController = context.controllers.voiceServices;
   installGlobals(installEnvironmentStateModule(voiceServicesController));
@@ -353,6 +353,7 @@ function composeApplicationContext(): ApplicationContext {
     DeviceConfig.deviceId,
     DeviceConfig.deviceConfig,
   );
+  const runtime = createUiRuntimeState(layout, dom.document);
   const nativePanelConfig = createNativePanelConfigMigrationController({
     deviceProfile: () => layout.deviceId,
     slotCount: () => layout.numSlots,
@@ -551,14 +552,15 @@ function composeApplicationContext(): ApplicationContext {
     loadInitialState: (handleState, markConnected) =>
       loadInitialState(handleState, markConnected),
     createEventSource: dom.createEventSource,
-    getActiveSource: () => _eventSource,
-    setActiveSource: (source) => { _eventSource = source; },
+    getActiveSource: () => runtime.eventSource,
+    setActiveSource: (source) => { runtime.eventSource = source; },
     schedule: (callback, delayMs) => dom.schedule(callback, delayMs),
   });
   return createApplicationContext({
     layout,
     model: Model,
     state: AppInstance.state,
+    runtime,
     api: deviceApi,
     nativeConfiguration: nativePanelConfig,
     configurationPersistence,

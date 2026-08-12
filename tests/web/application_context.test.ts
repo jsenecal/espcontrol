@@ -58,12 +58,14 @@ export function runApplicationContextTests(): void {
   const settingsUi = {} as any;
   const voiceServices = {} as any;
   const state = { grid: [] } as any;
+  const runtime = {} as any;
   const model = {} as any;
   const dom = {} as any;
   const context = createApplicationContext({
     layout: createApplicationLayoutState("guition-esp32-p4-jc8012p4a1", profile),
     model,
     state,
+    runtime,
     api,
     nativeConfiguration,
     configurationPersistence,
@@ -103,6 +105,7 @@ export function runApplicationContextTests(): void {
   equal(context.layout.gridCols, 4, "context initializes grid columns");
   equal(context.layout.gridRows, 3, "context initializes grid rows");
   equal(context.api, api, "context retains the API instance");
+  equal(context.runtime, runtime, "context retains mutable UI runtime state");
   equal(context.configuration.native, nativeConfiguration, "context retains native persistence");
   equal(context.configuration.persistence, configurationPersistence, "context retains save persistence");
   equal(context.configuration.options, configurationOptions, "context retains typed configuration options");

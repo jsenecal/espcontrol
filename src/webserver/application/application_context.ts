@@ -29,6 +29,7 @@ import type { ConfigModalTabOptionsFeature } from "./config_modal_tab_options";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "./config_access_climate_alarm_options";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
 import type { ConfigCodecFeature } from "./config_codec";
+import type { UiRuntimeState } from "./state";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -56,6 +57,7 @@ export interface ApplicationContext {
   };
   readonly model: typeof import("../model");
   readonly state: AppState;
+  readonly runtime: UiRuntimeState;
   readonly layout: ApplicationLayoutState;
   readonly api: DeviceApi;
   readonly configuration: {
@@ -100,6 +102,7 @@ export interface ApplicationContextOptions {
   readonly layout: ApplicationLayoutState;
   readonly model: typeof import("../model");
   readonly state: AppState;
+  readonly runtime: UiRuntimeState;
   readonly api: DeviceApi;
   readonly nativeConfiguration: NativePanelConfigController;
   readonly configurationPersistence: ConfigPersistenceFeature;
@@ -152,6 +155,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
     device: { id: options.layout.deviceId, profile: options.layout.config },
     model: options.model,
     state: options.state,
+    runtime: options.runtime,
     layout: options.layout,
     api: options.api,
     configuration: {
