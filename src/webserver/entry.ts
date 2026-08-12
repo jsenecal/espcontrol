@@ -48,7 +48,7 @@ import { createConfigMediaOptionsFeature } from "./application/config_media_opti
 import { createConfigImageOptionsFeature } from "./application/config_image_options";
 import { createConfigModalTabOptionsFeature } from "./application/config_modal_tab_options";
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
-import { installConfigConfirmationOptionsModule } from "./application/config_confirmation_options";
+import { createConfigConfirmationOptionsFeature } from "./application/config_confirmation_options";
 import { createConfigAccessClimateAlarmOptionsFeature } from "./application/config_access_climate_alarm_options";
 import { installConfigCodecModule } from "./application/config_codec";
 import { createNativePanelConfigMigrationController } from "./application/native_panel_config_migration";
@@ -179,7 +179,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
-  installGlobals(installConfigConfirmationOptionsModule(context.configuration.accessClimateAlarm));
   installGlobals(installConfigCodecModule(
     context.cards,
     context.configuration.options,
@@ -187,6 +186,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.configuration.imageOptions,
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
+    context.configuration.confirmationOptions,
   ));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
@@ -216,6 +216,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     document: context.dom.document,
     layout: context.layout,
     cards: context.cards,
+    confirmationOptions: context.configuration.confirmationOptions,
   }));
   installGlobals(installButtonSettingsSelectionModule());
   installGlobals(installButtonSettingsRenderQueueModule());
@@ -223,6 +224,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence, context.cards,
     context.configuration.imageOptions,
+    context.configuration.confirmationOptions,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,
@@ -271,7 +273,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
 function installCardCompatibility(context: ApplicationContext): void {
   const registry = context.cards;
   const coverLikeCards = createCoverLikeCardRegistration(registry);
-  registry.registerCompatibility(registerActionCardTypes(registry));
+  registry.registerCompatibility(registerActionCardTypes(registry, context.configuration.confirmationOptions));
   registry.registerCompatibility(registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm));
   registry.registerCompatibility(registerCalendarCardTypes(registry));
   registry.registerCompatibility(registerClimateCardTypes(
@@ -287,6 +289,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerGarageCardTypes(
     coverLikeCards.register,
     context.configuration.accessClimateAlarm,
+    context.configuration.confirmationOptions,
   ));
   registry.registerCompatibility(registerGateCardTypes(
     coverLikeCards.register,
@@ -310,7 +313,7 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerSensorCardTypes(registry, context.configuration.options));
   registry.registerCompatibility(registerSliderCardTypes(registry, context.configuration.modalTabs));
   registry.registerCompatibility(registerSubpageCardTypes(registry));
-  registry.registerCompatibility(registerSwitchCardTypes(registry));
+  registry.registerCompatibility(registerSwitchCardTypes(registry, context.configuration.confirmationOptions));
   registry.registerCompatibility(registerTimezoneCardTypes(registry));
   registry.registerCompatibility(registerVacuumCardTypes(registry));
   registry.registerCompatibility(registerWeatherCardTypes(registry));
@@ -327,6 +330,7 @@ function installTestCompatibility(context: ApplicationContext): void {
     context.configuration.imageOptions,
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
+    context.configuration.confirmationOptions,
   ));
   installGlobals(installAppTestHooksPreview(context.cards));
   installGlobals(installAppTestHooksBackup());
@@ -373,6 +377,7 @@ function composeApplicationContext(): ApplicationContext {
     renderButtonSettings: () => renderButtonSettings(),
   });
   const accessClimateAlarmOptions = createConfigAccessClimateAlarmOptionsFeature(modalTabOptions);
+  const confirmationOptions = createConfigConfirmationOptionsFeature(accessClimateAlarmOptions);
   const cardEditorDraft = createCardEditorDraftController({
     cloneCard: (button) => Model.cloneCardConfig(button),
     emptyCard: () => Model.emptyCardConfig(),
@@ -552,6 +557,7 @@ function composeApplicationContext(): ApplicationContext {
     imageConfigurationOptions,
     modalTabOptions,
     accessClimateAlarmOptions,
+    confirmationOptions,
     backupContract,
     backupExport,
     backupFile,

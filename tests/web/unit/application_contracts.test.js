@@ -68,7 +68,7 @@ describe("browserless application contracts", () => {
     const coverFactory = fs.readFileSync(path.join(ROOT, "src/webserver/cards/cover_like_card.ts"), "utf8");
     assert.match(coverFactory, /registry\.register\(config\.type/);
     assert.doesNotMatch(coverFactory, /\bregisterButtonType\s*\(/);
-    assert.match(entry, /registerGarageCardTypes\(\s*coverLikeCards\.register,\s*context\.configuration\.accessClimateAlarm,?\s*\)/);
+    assert.match(entry, /registerGarageCardTypes\(\s*coverLikeCards\.register,\s*context\.configuration\.accessClimateAlarm,\s*context\.configuration\.confirmationOptions,?\s*\)/);
     assert.match(entry, /registerGateCardTypes\(\s*coverLikeCards\.register,\s*context\.configuration\.accessClimateAlarm,?\s*\)/);
     assert.doesNotMatch(entry, /registerCoverLikeCardType/);
   });
@@ -177,6 +177,16 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /installConfigAccessClimateAlarmOptionsModule/);
     assert.match(entry, /accessClimateAlarmOptions = createConfigAccessClimateAlarmOptionsFeature/);
     assert.match(options, /connectGarageConfirmationNormalizer/);
+  });
+
+  test("owns confirmation options in the application context", () => {
+    const options = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_confirmation_options.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.match(options, /createConfigConfirmationOptionsFeature/);
+    assert.doesNotMatch(options, /\b(?:staticGlobal|liveGlobal|GlobalDescriptors)\b/);
+    assert.doesNotMatch(entry, /installConfigConfirmationOptionsModule/);
+    assert.match(entry, /confirmationOptions = createConfigConfirmationOptionsFeature/);
+    assert.match(options, /from "\.\.\/model\/config_primitives"/);
   });
 
   test("preserves settings normalization", () => {

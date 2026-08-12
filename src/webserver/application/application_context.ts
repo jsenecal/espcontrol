@@ -27,6 +27,7 @@ import type { ConfigMediaOptionsFeature } from "./config_media_options";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
 import type { ConfigModalTabOptionsFeature } from "./config_modal_tab_options";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "./config_access_climate_alarm_options";
+import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -64,6 +65,7 @@ export interface ApplicationContext {
     readonly imageOptions: ConfigImageOptionsFeature;
     readonly modalTabs: ConfigModalTabOptionsFeature;
     readonly accessClimateAlarm: ConfigAccessClimateAlarmOptionsFeature;
+    readonly confirmationOptions: ConfigConfirmationOptionsFeature;
   };
   readonly backup: {
     readonly contract: BackupFeature;
@@ -104,6 +106,7 @@ export interface ApplicationContextOptions {
   readonly imageConfigurationOptions: ConfigImageOptionsFeature;
   readonly modalTabOptions: ConfigModalTabOptionsFeature;
   readonly accessClimateAlarmOptions: ConfigAccessClimateAlarmOptionsFeature;
+  readonly confirmationOptions: ConfigConfirmationOptionsFeature;
   readonly backupContract: BackupFeature;
   readonly backupExport: BackupExportController;
   readonly backupFile: BackupFileController;
@@ -156,6 +159,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       imageOptions: options.imageConfigurationOptions,
       modalTabs: options.modalTabOptions,
       accessClimateAlarm: options.accessClimateAlarmOptions,
+      confirmationOptions: options.confirmationOptions,
     },
     backup: {
       contract: options.backupContract,

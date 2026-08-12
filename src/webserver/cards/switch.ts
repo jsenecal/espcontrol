@@ -1,11 +1,24 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
 import {
     SWITCH_CONFIRM_DEFAULT_MESSAGE,
     SWITCH_CONFIRM_DEFAULT_NO,
     SWITCH_CONFIRM_DEFAULT_YES,
 } from "../application/config_option_core";
-export function registerSwitchCardTypes(registry: CardRegistry): GlobalDescriptors {
+export function registerSwitchCardTypes(
+    registry: CardRegistry,
+    confirmationOptions: ConfigConfirmationOptionsFeature,
+): GlobalDescriptors {
+    const {
+        setSwitchConfirmationOptions,
+        switchConfirmationDefaultMessageForMode,
+        switchConfirmationEnabled,
+        switchConfirmationMessage,
+        switchConfirmationMode,
+        switchConfirmationNoText,
+        switchConfirmationYesText,
+    } = confirmationOptions;
     // Default button type: HA entity toggle (on/off switch)
     var SWITCH_CARD_METADATA: any = {
         entity: {

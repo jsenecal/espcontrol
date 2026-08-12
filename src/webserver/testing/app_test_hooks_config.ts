@@ -7,6 +7,7 @@ import type { ConfigMediaOptionsFeature } from "../application/config_media_opti
 import type { ConfigImageOptionsFeature } from "../application/config_image_options";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
+import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 import {
@@ -22,6 +23,7 @@ export function installAppTestHooksConfig(
     imageOptions: ConfigImageOptionsFeature,
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
+    confirmationOptions: ConfigConfirmationOptionsFeature,
 ): GlobalDescriptors {
     const {
         cardLargeNumbersEnabled,
@@ -114,6 +116,30 @@ export function installAppTestHooksConfig(
         climateDefaultTemperatureStep,
         normalizeClimatePrecisionConfig,
     } = accessOptions;
+    const {
+        switchConfirmationEnabled,
+        switchConfirmationMode,
+        switchConfirmationMessage,
+        switchConfirmationDefaultMessageForMode,
+        switchConfirmationYesText,
+        switchConfirmationNoText,
+        normalizeCardOnPattern,
+        cardOnPattern,
+        setCardOnPattern,
+        garageConfirmationEnabled,
+        garageConfirmationMode,
+        garageConfirmationMessage,
+        garageConfirmationDefaultMessageForMode,
+        garageConfirmationYesText,
+        garageConfirmationNoText,
+        setGarageConfirmationOptions,
+        actionScriptConfirmationEnabled,
+        actionScriptConfirmationMessage,
+        actionScriptConfirmationYesText,
+        actionScriptConfirmationNoText,
+        actionScriptFields,
+        setActionScriptFields,
+    } = confirmationOptions;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("config", {
             parseButtonConfig: parseButtonConfig,

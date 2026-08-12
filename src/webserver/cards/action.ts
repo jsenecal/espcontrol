@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
+import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
 import {
     SWITCH_CONFIRM_DEFAULT_NO,
     SWITCH_CONFIRM_DEFAULT_YES,
@@ -12,7 +13,22 @@ import {
     ACTION_CARD_STATE_PRECISION_OPTION,
     ACTION_CARD_STATE_UNIT_OPTION,
 } from "../application/config_action_contract";
-export function registerActionCardTypes(registry: CardRegistry): GlobalDescriptors {
+export function registerActionCardTypes(
+    registry: CardRegistry,
+    confirmationOptions: ConfigConfirmationOptionsFeature,
+): GlobalDescriptors {
+    const {
+        actionCardIsScript,
+        actionScriptConfirmationDefaultMessage,
+        actionScriptConfirmationEnabled,
+        actionScriptConfirmationMessage,
+        actionScriptConfirmationNoText,
+        actionScriptConfirmationYesText,
+        actionScriptFields,
+        normalizeActionOptions,
+        setActionScriptConfirmationOptions,
+        setActionScriptFields,
+    } = confirmationOptions;
     // Action card: one-tap Home Assistant shortcuts for scenes, scripts, buttons, and helpers.
     var ACTION_CARD_ACTIONS: any = [
         { value: "scene.turn_on", label: "Run Scene", placeholder: "e.g. scene.movie_mode", icon: "movie-open", domains: ["scene"] },

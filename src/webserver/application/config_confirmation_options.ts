@@ -1,4 +1,9 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import {
+    configOptionEnabled,
+    configOptionValue,
+    setConfigOption,
+    setConfigOptionValue,
+} from "../model/config_primitives";
 import {
     ACTION_SCRIPT_CONFIRM_DEFAULT_MESSAGE,
     ACTION_SCRIPT_FIELDS_OPTION,
@@ -22,9 +27,9 @@ import {
     ACTION_CARD_STATE_UNIT_OPTION,
 } from "./config_action_contract";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "./config_access_climate_alarm_options";
-export function installConfigConfirmationOptionsModule(
+export function createConfigConfirmationOptionsFeature(
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
-): GlobalDescriptors {
+) {
     const { normalizeGarageOptions } = accessOptions;
     // ── Confirmation Card Options ─────────────────────────────────────
     function switchConfirmationModeStorage(this: any) {
@@ -323,37 +328,41 @@ export function installConfigConfirmationOptionsModule(
         return b.options;
     }
     return {
-        "switchConfirmationModeStorage": staticGlobal(switchConfirmationModeStorage),
-        "normalizeCardOnPattern": staticGlobal(normalizeCardOnPattern),
-        "cardOnPattern": staticGlobal(cardOnPattern),
-        "setCardOnPattern": staticGlobal(setCardOnPattern),
-        "switchConfirmationEnabled": staticGlobal(switchConfirmationEnabled),
-        "switchConfirmationMode": staticGlobal(switchConfirmationMode),
-        "switchConfirmationDefaultMessageForMode": staticGlobal(switchConfirmationDefaultMessageForMode),
-        "switchConfirmationMessage": staticGlobal(switchConfirmationMessage),
-        "switchConfirmationYesText": staticGlobal(switchConfirmationYesText),
-        "switchConfirmationNoText": staticGlobal(switchConfirmationNoText),
-        "normalizeSwitchConfirmationOptions": staticGlobal(normalizeSwitchConfirmationOptions),
-        "setSwitchConfirmationOptions": staticGlobal(setSwitchConfirmationOptions),
-        "garageConfirmationModeStorage": staticGlobal(garageConfirmationModeStorage),
-        "garageConfirmationEnabled": staticGlobal(garageConfirmationEnabled),
-        "garageConfirmationMode": staticGlobal(garageConfirmationMode),
-        "garageConfirmationDefaultMessageForMode": staticGlobal(garageConfirmationDefaultMessageForMode),
-        "garageConfirmationMessage": staticGlobal(garageConfirmationMessage),
-        "garageConfirmationYesText": staticGlobal(garageConfirmationYesText),
-        "garageConfirmationNoText": staticGlobal(garageConfirmationNoText),
-        "normalizeGarageConfirmationOptions": staticGlobal(normalizeGarageConfirmationOptions),
-        "setGarageConfirmationOptions": staticGlobal(setGarageConfirmationOptions),
-        "actionCardIsScript": staticGlobal(actionCardIsScript),
-        "actionScriptConfirmationEnabled": staticGlobal(actionScriptConfirmationEnabled),
-        "actionScriptConfirmationDefaultMessage": staticGlobal(actionScriptConfirmationDefaultMessage),
-        "actionScriptConfirmationMessage": staticGlobal(actionScriptConfirmationMessage),
-        "actionScriptConfirmationYesText": staticGlobal(actionScriptConfirmationYesText),
-        "actionScriptConfirmationNoText": staticGlobal(actionScriptConfirmationNoText),
-        "actionScriptFields": staticGlobal(actionScriptFields),
-        "copyActionCardStateOptions": staticGlobal(copyActionCardStateOptions),
-        "normalizeActionOptions": staticGlobal(normalizeActionOptions),
-        "setActionScriptConfirmationOptions": staticGlobal(setActionScriptConfirmationOptions),
-        "setActionScriptFields": staticGlobal(setActionScriptFields),
+        switchConfirmationModeStorage,
+        normalizeCardOnPattern,
+        cardOnPattern,
+        setCardOnPattern,
+        switchConfirmationEnabled,
+        switchConfirmationMode,
+        switchConfirmationDefaultMessageForMode,
+        switchConfirmationMessage,
+        switchConfirmationYesText,
+        switchConfirmationNoText,
+        normalizeSwitchConfirmationOptions,
+        setSwitchConfirmationOptions,
+        garageConfirmationModeStorage,
+        garageConfirmationEnabled,
+        garageConfirmationMode,
+        garageConfirmationDefaultMessageForMode,
+        garageConfirmationMessage,
+        garageConfirmationYesText,
+        garageConfirmationNoText,
+        normalizeGarageConfirmationOptions,
+        setGarageConfirmationOptions,
+        actionCardIsScript,
+        actionScriptConfirmationEnabled,
+        actionScriptConfirmationDefaultMessage,
+        actionScriptConfirmationMessage,
+        actionScriptConfirmationYesText,
+        actionScriptConfirmationNoText,
+        actionScriptFields,
+        copyActionCardStateOptions,
+        normalizeActionOptions,
+        setActionScriptConfirmationOptions,
+        setActionScriptFields,
     };
 }
+
+export type ConfigConfirmationOptionsFeature = ReturnType<
+    typeof createConfigConfirmationOptionsFeature
+>;
