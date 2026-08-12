@@ -1,7 +1,8 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createSensorCardModeController } from "../features/sensor_card_mode_controller";
-export function registerSensorCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerSensorCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Read-only sensor card: displays either numeric data or a text state.
     var SENSOR_CARD_LOCAL_SENSOR: any = "local";
     function sensorCardModeController(this: any) {
@@ -68,7 +69,7 @@ export function registerSensorCardTypes(): GlobalDescriptors {
             textBadge: "format-text",
         },
     };
-    registerButtonType("sensor", {
+    registry.register("sensor", {
         label: function (this: any) { return cardContractCardLabel("sensor"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("sensor"); },
         pickerKey: function (this: any) { return cardContractPickerKey("sensor"); },

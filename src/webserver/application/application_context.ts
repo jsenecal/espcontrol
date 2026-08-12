@@ -21,7 +21,9 @@ import type { BackupRestoreController } from "../features/backup_restore_control
 import type { AppBackupFeature } from "./app_backup";
 import type { DeviceConfig, AppState } from "../state/types";
 import type { ConfigPersistenceFeature } from "./config_post_api";
-import type { GlobalDescriptors } from "../runtime/globals";
+import type { CardRegistry } from "./card_registry";
+
+export type { CardRegistry } from "./card_registry";
 
 export interface ApplicationLayoutState {
   deviceId: string;
@@ -38,31 +40,6 @@ export interface ApplicationDomServices {
   readonly fetch: typeof fetch;
   readonly createEventSource: () => EventSource;
   readonly schedule: typeof setTimeout;
-}
-
-/**
- * Temporary bridge for card modules that still return global descriptors.
- * Phase three replaces the descriptors with typed card definitions while the
- * registry instance and its place in ApplicationContext stay stable.
- */
-export interface CardRegistry {
-  readonly compatibilityDefinitionCount: number;
-  registerCompatibility(descriptors: GlobalDescriptors): void;
-}
-
-export function createCompatibilityCardRegistry(
-  install: (descriptors: GlobalDescriptors) => void,
-): CardRegistry {
-  let compatibilityDefinitionCount = 0;
-  return {
-    get compatibilityDefinitionCount() {
-      return compatibilityDefinitionCount;
-    },
-    registerCompatibility(descriptors) {
-      compatibilityDefinitionCount += Object.keys(descriptors).length;
-      install(descriptors);
-    },
-  };
 }
 
 export interface ApplicationContext {

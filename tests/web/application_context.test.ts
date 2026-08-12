@@ -1,8 +1,8 @@
 import {
   createApplicationContext,
   createApplicationLayoutState,
-  createCompatibilityCardRegistry,
 } from "../../src/webserver/application/application_context";
+import { createCardRegistry } from "../../src/webserver/application/card_registry";
 import { installCore } from "../../src/webserver/application/core";
 import type { DeviceConfig } from "../../src/webserver/state/types";
 import type { GlobalDescriptors } from "../../src/webserver/runtime/globals";
@@ -27,7 +27,7 @@ function equal<T>(actual: T, expected: T, message: string): void {
 
 export function runApplicationContextTests(): void {
   const installed: GlobalDescriptors[] = [];
-  const cards = createCompatibilityCardRegistry((descriptors) => installed.push(descriptors));
+  const cards = createCardRegistry((descriptors) => installed.push(descriptors));
   const api = { request() {} } as any;
   const nativeConfiguration = { begin() {} } as any;
   const configurationPersistence = { globals: {}, saveButtonConfig() {}, saveSubpageEntity() {} } as any;
@@ -114,6 +114,14 @@ export function runApplicationContextTests(): void {
   cards.registerCompatibility({ example: { configurable: true, value: true } });
   equal(cards.compatibilityDefinitionCount, 1, "registry counts compatibility definitions");
   equal(installed.length, 1, "registry delegates compatibility installation");
+  const sensor = cards.register("sensor", { label: "Sensor", allowInSubpage: true });
+  cards.registerLegacy("legacy", { label: "Legacy" });
+  equal(cards.typedDefinitionCount, 1, "registry counts typed card definitions");
+  equal(cards.legacyDefinitionCount, 1, "registry counts legacy card definitions separately");
+  equal(cards.definitions.sensor, sensor, "registry owns typed card definitions");
+  equal(sensor.key, "sensor", "registry assigns the card key");
+  equal(sensor.label, "Sensor", "registry preserves typed card metadata");
+  equal(sensor.runtimeSpec != null, true, "registry attaches the generated runtime contract");
 
   Object.assign(globalThis, {
     GENERATED_ICON_EXCEPTIONS: {},
@@ -121,7 +129,7 @@ export function runApplicationContextTests(): void {
     GENERATED_DOMAIN_ICONS: {},
   });
   const compatibilityGlobals: Record<string, unknown> = {};
-  Object.defineProperties(compatibilityGlobals, installCore(context.layout));
+  Object.defineProperties(compatibilityGlobals, installCore(context.layout, cards));
   compatibilityGlobals.GRID_COLS = 6;
   compatibilityGlobals.GRID_ROWS = 2;
   compatibilityGlobals.NUM_SLOTS = 10;

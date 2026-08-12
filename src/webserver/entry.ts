@@ -18,10 +18,10 @@ import { installCore } from "./application/core";
 import {
   createApplicationContext,
   createApplicationLayoutState,
-  createCompatibilityCardRegistry,
   type ApplicationContext,
   type ApplicationDomServices,
 } from "./application/application_context";
+import { createCardRegistry } from "./application/card_registry";
 import { installFirmwareMetadataModule } from "./application/firmware_metadata";
 import { installStylesModule } from "./application/styles";
 import { installStateModule } from "./application/state";
@@ -149,7 +149,7 @@ const startupState = globalThis as typeof globalThis & {
 };
 
 function installApplicationCompatibility(context: ApplicationContext): void {
-  installGlobals(installCore(context.layout));
+  installGlobals(installCore(context.layout, context.cards));
   installGlobals(installFirmwareMetadataModule());
   installGlobals(installStylesModule());
   installGlobals(installStateModule());
@@ -286,10 +286,10 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerPresenceCardTypes());
   registry.registerCompatibility(registerPushCardTypes());
   registry.registerCompatibility(registerScreenLockCardTypes());
-  registry.registerCompatibility(registerSensorCardTypes());
+  registry.registerCompatibility(registerSensorCardTypes(registry));
   registry.registerCompatibility(registerSliderCardTypes());
   registry.registerCompatibility(registerSubpageCardTypes());
-  registry.registerCompatibility(registerSwitchCardTypes());
+  registry.registerCompatibility(registerSwitchCardTypes(registry));
   registry.registerCompatibility(registerTimezoneCardTypes());
   registry.registerCompatibility(registerVacuumCardTypes());
   registry.registerCompatibility(registerWeatherCardTypes());
@@ -526,7 +526,7 @@ function composeApplicationContext(): ApplicationContext {
     settingsUi,
     voiceServices,
     dom,
-    cards: createCompatibilityCardRegistry(installGlobals),
+    cards: createCardRegistry(installGlobals),
   });
 }
 

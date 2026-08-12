@@ -329,7 +329,7 @@ def web_registration_map() -> dict[str, str]:
     out: dict[str, str] = {}
     for path in sorted((ROOT / "src/webserver/cards").glob("*.ts")):
         text = path.read_text()
-        for match in re.finditer(r"registerButtonType\(\s*([\"'])(.*?)\1", text):
+        for match in re.finditer(r"(?:registerButtonType|registry\.register)\(\s*([\"'])(.*?)\1", text):
             out[match.group(2)] = rel(path)
         for match in re.finditer(
             r"registerCoverLikeCardType\(\s*\{.*?\btype\s*:\s*([\"'])(.*?)\1",
@@ -440,7 +440,8 @@ def generated_card_map() -> str:
         "`product/v2/card_contract.json` and the public documentation mapping in that script.\n\n"
         + markdown_table(("Public card page", "Covered saved type"), public_rows),
         "## Generated Matrix\n\n"
-        "This table is generated from the card contract, `registerButtonType(...)` calls in "
+        "This table is generated from the card contract, typed `registry.register(...)` and legacy "
+        "`registerButtonType(...)` calls in "
         "`src/webserver/cards/`, and matching firmware header references under "
         "`components/espcontrol/`.\n\n"
         + markdown_table((

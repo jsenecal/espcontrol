@@ -1,8 +1,8 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { CARD_RUNTIME_SPECS } from "../generated/card_contract";
 import type { ApplicationLayoutState } from "./application_context";
-export function installCore(applicationLayout: ApplicationLayoutState): GlobalDescriptors {
+import type { CardRegistry } from "./card_registry";
+export function installCore(applicationLayout: ApplicationLayoutState, cardRegistry: CardRegistry): GlobalDescriptors {
     function isPortraitRotation(this: any, value?: any) {
         value = String(value == null ? "0" : value);
         return value === "90" || value === "270";
@@ -151,29 +151,8 @@ export function installCore(applicationLayout: ApplicationLayoutState): GlobalDe
     var ICON_OPTIONS: any = ["Auto"].concat(ICON_NAMES).sort();
     var DOMAIN_ICONS: any = GENERATED_DOMAIN_ICONS;
     // ── Button type plugin registry ──────────────────────────────────────
-    var BUTTON_TYPES: any = {};
     function registerButtonType(this: any, key?: any, def?: any) {
-        // New button types should define cardMetadata for shared settings and preview plumbing.
-        BUTTON_TYPES[key] = Object.assign({
-            key: key,
-            label: key || "Toggle",
-            allowInSubpage: false,
-            hideLabel: false,
-            labelPlaceholder: null,
-            pickerKey: null,
-            isAvailable: null,
-            onSelect: null,
-            renderSettingsBeforeLabel: null,
-            renderSettings: null,
-            renderPreview: null,
-            contextMenuItems: null,
-            cardMetadata: null,
-            runtimeSpec: null,
-            defaultConfig: null,
-            normalizeConfig: null,
-        }, def, {
-            runtimeSpec: CARD_RUNTIME_SPECS[key] || null,
-        });
+        cardRegistry.registerLegacy(key, def);
     }
     function subpageStateDisplayMode(this: any, b?: any) {
         if (!b || !b.sensor)
@@ -223,7 +202,7 @@ export function installCore(applicationLayout: ApplicationLayoutState): GlobalDe
         "iconSlug": staticGlobal(iconSlug),
         "ICON_OPTIONS": liveGlobal(() => ICON_OPTIONS, (value?: any) => { ICON_OPTIONS = value; }),
         "DOMAIN_ICONS": liveGlobal(() => DOMAIN_ICONS, (value?: any) => { DOMAIN_ICONS = value; }),
-        "BUTTON_TYPES": liveGlobal(() => BUTTON_TYPES, (value?: any) => { BUTTON_TYPES = value; }),
+        "BUTTON_TYPES": liveGlobal(() => cardRegistry.definitions, (value?: any) => { cardRegistry.replaceDefinitions(value); }),
         "registerButtonType": staticGlobal(registerButtonType),
         "subpageStateDisplayMode": staticGlobal(subpageStateDisplayMode),
         "WEBSERVER_MOCK_NOW_ISO": liveGlobal(() => WEBSERVER_MOCK_NOW_ISO, (value?: any) => { WEBSERVER_MOCK_NOW_ISO = value; }),

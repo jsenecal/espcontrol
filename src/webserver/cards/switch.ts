@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerSwitchCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerSwitchCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Default button type: HA entity toggle (on/off switch)
     var SWITCH_CARD_METADATA: any = {
         entity: {
@@ -121,7 +122,7 @@ export function registerSwitchCardTypes(): GlobalDescriptors {
             badge: "lightbulb",
         },
     };
-    registerButtonType("", {
+    registry.register("", {
         label: function (this: any) { return cardContractCardLabel(""); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage(""); },
         pickerKey: function (this: any) { return cardContractPickerKey(""); },
@@ -268,7 +269,7 @@ export function registerSwitchCardTypes(): GlobalDescriptors {
             return preview;
         },
     });
-    registerButtonType("light_switch", {
+    registry.register("light_switch", {
         label: function (this: any) { return cardContractCardLabel("light_switch"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("light_switch"); },
         hideLabel: true,
