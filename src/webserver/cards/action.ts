@@ -1,25 +1,28 @@
 import { state } from "../state/app_instance";
-import { configOptionValue, setConfigOptionValue } from "../model/config_primitives";
 import { iconSlug } from "../application/ui_primitives";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
 import {
     SWITCH_CONFIRM_DEFAULT_NO,
     SWITCH_CONFIRM_DEFAULT_YES,
 } from "../application/config_option_core";
-import {
-    ACTION_CARD_LOCAL_ACTION,
-    ACTION_CARD_OPTION_SELECT_ACTION,
-    ACTION_CARD_STATE_ENTITY_OPTION,
-    ACTION_CARD_STATE_PRECISION_OPTION,
-    ACTION_CARD_STATE_UNIT_OPTION,
-} from "../application/config_action_contract";
 export function registerActionCardTypes(
     registry: CardRegistry,
     confirmationOptions: ConfigConfirmationOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
+        actionCardActions: ACTION_CARD_ACTIONS,
+        actionCardInfo,
+        actionCardIsOptionSelect,
+        actionCardIsLocal,
+        normalizeSavedConfigActionFields,
+        normalizeActionCardConfig,
+        actionCardStateEntity,
+        actionCardStateUnit,
+        actionCardStatePrecision,
+        actionCardStateDisplayMode,
+        setActionCardStateOptions,
+        actionCardNeedsExtraValue,
         actionCardIsScript,
         actionScriptConfirmationDefaultMessage,
         actionScriptConfirmationEnabled,
@@ -31,123 +34,6 @@ export function registerActionCardTypes(
         setActionScriptConfirmationOptions,
         setActionScriptFields,
     } = confirmationOptions;
-    // Action card: one-tap Home Assistant shortcuts for scenes, scripts, buttons, and helpers.
-    var ACTION_CARD_ACTIONS: any = [
-        { value: "scene.turn_on", label: "Run Scene", placeholder: "e.g. scene.movie_mode", icon: "movie-open", domains: ["scene"] },
-        { value: "script.turn_on", label: "Run Script", placeholder: "e.g. script.goodnight", icon: "script-text-play", domains: ["script"] },
-        { value: "automation.trigger", label: "Trigger Automation", placeholder: "e.g. automation.goodnight", icon: "home-automation", domains: ["automation"] },
-        { value: "button.press", label: "Press Button", placeholder: "e.g. button.restart_router", icon: "gesture-tap-button", domains: ["button"] },
-        { value: "input_button.press", label: "Press Input Button", placeholder: "e.g. input_button.doorbell", icon: "gesture-tap-button", domains: ["input_button"] },
-        { value: "input_boolean.toggle", label: "Toggle Helper", placeholder: "e.g. input_boolean.guest_mode", icon: "toggle-switch-variant", domains: ["input_boolean"] },
-        { value: "input_number.set_value", label: "Set Number Helper", placeholder: "e.g. input_number.target_level", icon: "counter", domains: ["input_number"] },
-        { value: "input_select.select_option", label: "Option Select", placeholder: "e.g. select.wled_preset", icon: "form-dropdown", domains: ["select", "input_select"] },
-        { value: "local", label: "Local Action", placeholder: "e.g. zoom_mute", icon: "gesture-tap", domains: [] },
-    ];
-    function actionCardInfo(this: any, value?: any) {
-        for (var i: any = 0; i < ACTION_CARD_ACTIONS.length; i++) {
-            if (ACTION_CARD_ACTIONS[i].value === value)
-                return ACTION_CARD_ACTIONS[i];
-        }
-        return null;
-    }
-    function actionCardIsOptionSelect(this: any, b?: any) {
-        var value: any = typeof b === "string" ? b : b && b.sensor;
-        return value === ACTION_CARD_OPTION_SELECT_ACTION || value === "select.select_option";
-    }
-    function actionCardIsLocal(this: any, b?: any) {
-        if (typeof b === "string")
-            return b === ACTION_CARD_LOCAL_ACTION;
-        return !!(b && (b.type === "action" || b.type === "local") && b.sensor === ACTION_CARD_LOCAL_ACTION);
-    }
-    function normalizeSavedConfigActionFields(this: any, b?: any) {
-        if (!b)
-            return;
-        if (b && b.sensor === "select.select_option")
-            b.sensor = ACTION_CARD_OPTION_SELECT_ACTION;
-        if (!b.sensor)
-            b.sensor = "scene.turn_on";
-        if (!actionCardInfo(b.sensor))
-            b.sensor = "scene.turn_on";
-        b.precision = "";
-        if (actionCardStateDisplayMode(b) !== "icon")
-            b.icon_on = "Auto";
-        if (actionCardIsOptionSelect(b)) {
-            b.unit = "";
-            b.options = "";
-            if (!b.icon || b.icon === "Auto" || b.icon === "Chevron Down")
-                b.icon = "Flash";
-        }
-        else if (actionCardIsLocal(b)) {
-            b.unit = "";
-            b.precision = "";
-            b.options = "";
-            b.icon_on = "Auto";
-            if (!b.icon || b.icon === "Auto" || b.icon === "Flash")
-                b.icon = "Gesture Tap";
-        }
-    }
-    function normalizeActionCardConfig(this: any, b?: any) {
-        if (!b)
-            return;
-        normalizeSavedConfigActionFields(b);
-        b.options = normalizeActionOptions(b.options, b.sensor);
-    }
-    function actionCardStateEntity(this: any, b?: any) {
-        return configOptionValue(b && b.options, ACTION_CARD_STATE_ENTITY_OPTION);
-    }
-    function actionCardStateUnit(this: any, b?: any) {
-        return configOptionValue(b && b.options, ACTION_CARD_STATE_UNIT_OPTION);
-    }
-    function actionCardStatePrecision(this: any, b?: any) {
-        var value: any = configOptionValue(b && b.options, ACTION_CARD_STATE_PRECISION_OPTION);
-        if (value === "icon")
-            return "icon";
-        if (value === "text")
-            return "text";
-        return value === "1" || value === "2" ? value : "0";
-    }
-    function actionCardStateDisplayMode(this: any, b?: any) {
-        var rawPrecision: any = configOptionValue(b && b.options, ACTION_CARD_STATE_PRECISION_OPTION);
-        if (rawPrecision === "icon")
-            return "icon";
-        if (rawPrecision === "text")
-            return "text";
-        if (rawPrecision === "0" || rawPrecision === "1" || rawPrecision === "2" || actionCardStateUnit(b)) {
-            return "numeric";
-        }
-        return actionCardStateEntity(b) ? "text" : "numeric";
-    }
-    function setActionCardStateOptions(this: any, b?: any, entity?: any, mode?: any, unit?: any, precision?: any) {
-        if (!b)
-            return "";
-        var options: any = b.options;
-        entity = String(entity || "").trim();
-        if (!entity) {
-            options = setConfigOptionValue(options, ACTION_CARD_STATE_ENTITY_OPTION, "");
-            options = setConfigOptionValue(options, ACTION_CARD_STATE_UNIT_OPTION, "");
-            options = setConfigOptionValue(options, ACTION_CARD_STATE_PRECISION_OPTION, "");
-            b.options = options;
-            return b.options;
-        }
-        options = setConfigOptionValue(options, ACTION_CARD_STATE_ENTITY_OPTION, entity);
-        if (mode === "icon") {
-            options = setConfigOptionValue(options, ACTION_CARD_STATE_UNIT_OPTION, "");
-            options = setConfigOptionValue(options, ACTION_CARD_STATE_PRECISION_OPTION, "icon");
-        }
-        else if (mode === "text") {
-            options = setConfigOptionValue(options, ACTION_CARD_STATE_UNIT_OPTION, "");
-            options = setConfigOptionValue(options, ACTION_CARD_STATE_PRECISION_OPTION, "text");
-        }
-        else {
-            options = setConfigOptionValue(options, ACTION_CARD_STATE_UNIT_OPTION, unit || "");
-            options = setConfigOptionValue(options, ACTION_CARD_STATE_PRECISION_OPTION, precision || "0");
-        }
-        b.options = options;
-        return b.options;
-    }
-    function actionCardNeedsExtraValue(this: any, value?: any) {
-        return value === "input_number.set_value";
-    }
     var ACTION_CARD_METADATA: any = {
         mode: {
             label: "Type",
@@ -612,20 +498,4 @@ export function registerActionCardTypes(
             buildFallback();
         });
     }
-    return {
-        "ACTION_CARD_ACTIONS": liveGlobal(() => ACTION_CARD_ACTIONS, (value?: any) => { ACTION_CARD_ACTIONS = value; }),
-        "actionCardInfo": staticGlobal(actionCardInfo),
-        "actionCardIsOptionSelect": staticGlobal(actionCardIsOptionSelect),
-        "actionCardIsLocal": staticGlobal(actionCardIsLocal),
-        "normalizeSavedConfigActionFields": staticGlobal(normalizeSavedConfigActionFields),
-        "normalizeActionCardConfig": staticGlobal(normalizeActionCardConfig),
-        "actionCardStateEntity": staticGlobal(actionCardStateEntity),
-        "actionCardStateUnit": staticGlobal(actionCardStateUnit),
-        "actionCardStatePrecision": staticGlobal(actionCardStatePrecision),
-        "actionCardStateDisplayMode": staticGlobal(actionCardStateDisplayMode),
-        "setActionCardStateOptions": staticGlobal(setActionCardStateOptions),
-        "actionCardNeedsExtraValue": staticGlobal(actionCardNeedsExtraValue),
-        "ACTION_CARD_METADATA": liveGlobal(() => ACTION_CARD_METADATA, (value?: any) => { ACTION_CARD_METADATA = value; }),
-        "renderActionCardLocalSettings": staticGlobal(renderActionCardLocalSettings),
-    };
 }

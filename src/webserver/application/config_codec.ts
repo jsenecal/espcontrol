@@ -137,6 +137,8 @@ export function createConfigCodecFeature(
         normalizeClimatePrecisionConfig,
     } = accessOptions;
     const {
+        actionCardIsOptionSelect,
+        normalizeSavedConfigActionFields,
         normalizeActionOptions,
         normalizeSwitchConfirmationOptions,
     } = confirmationOptions;

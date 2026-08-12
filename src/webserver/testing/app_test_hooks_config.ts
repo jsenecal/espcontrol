@@ -192,6 +192,11 @@ export function installAppTestHooksConfig(
         return [{ value: alarmControlPanelValue(), label: "All Controls" }].concat(alarmActionSpecs());
     }
     const {
+        actionCardIsLocal,
+        actionCardStateEntity,
+        actionCardStateUnit,
+        actionCardStatePrecision,
+        actionCardStateDisplayMode,
         switchConfirmationEnabled,
         switchConfirmationMode,
         switchConfirmationMessage,

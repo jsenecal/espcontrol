@@ -1,8 +1,6 @@
 export {};
 
 declare global {
-  var ACTION_CARD_ACTIONS: any;
-  var ACTION_CARD_METADATA: any;
   var AUTOMATIC_BRIGHTNESS_UNAVAILABLE: any;
   var BRIGHTNESS_TIME_UNAVAILABLE: any;
   var CFG: any;
@@ -51,14 +49,6 @@ declare global {
   var _renderPending: any;
   var _settingsDeferred: any;
   var _settingsUiFeature: any;
-  var actionCardInfo: any;
-  var actionCardIsLocal: any;
-  var actionCardIsOptionSelect: any;
-  var actionCardNeedsExtraValue: any;
-  var actionCardStateDisplayMode: any;
-  var actionCardStateEntity: any;
-  var actionCardStatePrecision: any;
-  var actionCardStateUnit: any;
   var activeLayout: any;
   var activeScreenRotationOptions: any;
   var addBackButtonMenuItems: any;
@@ -308,8 +298,6 @@ declare global {
   var moveToCell: any;
   var networkPreviewIconSlug: any;
   var newCardDraftKey: any;
-  var normalizeActionCardConfig: any;
-  var normalizeSavedConfigActionFields: any;
   var normalizeBackupConfig: any;
   var normalizeClockBarTemperatureEntities: any;
   var normalizeClockBarTemperatureEntries: any;
@@ -429,7 +417,6 @@ declare global {
   var rememberEntityName: any;
   var rememberEntityPostPath: any;
   var rememberedPostUrls: any;
-  var renderActionCardLocalSettings: any;
   var renderBackButtonSettings: any;
   var renderBasicCardFields: any;
   var renderButtonSettings: any;
@@ -486,7 +473,6 @@ declare global {
   var syncPreviousFirmwareUi: any;
   var serializeClockBarTemperatureEntities: any;
   var serializeGrid: any;
-  var setActionCardStateOptions: any;
   var setC6FirmwareCurrentVersion: any;
   var setC6FirmwareLatestVersion: any;
   var setC6FirmwareUpdateAvailable: any;

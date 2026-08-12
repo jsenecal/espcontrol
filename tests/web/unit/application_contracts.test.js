@@ -264,6 +264,19 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:SUBPAGE_CARD_METADATA|appendEditSubpageButton|subpageBadgeLabelHtml):/);
   });
 
+  test("registers action cards through context-owned action options", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/action.ts"), "utf8");
+    const options = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_confirmation_options.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.match(options, /const actionCardActions/);
+    assert.match(entry, /registerActionCardTypes\(registry, context\.configuration\.confirmationOptions\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerActionCardTypes/);
+    assert.match(entry, /installEntityStateModule\(context\.configuration\.confirmationOptions\)/);
+    assert.doesNotMatch(globals, /\bvar (?:ACTION_CARD_ACTIONS|ACTION_CARD_METADATA|actionCardInfo|actionCardIsLocal|actionCardIsOptionSelect|actionCardNeedsExtraValue|actionCardStateDisplayMode|actionCardStateEntity|actionCardStatePrecision|actionCardStateUnit|normalizeActionCardConfig|normalizeSavedConfigActionFields|renderActionCardLocalSettings|setActionCardStateOptions):/);
+  });
+
   test("injects the card registry into editor and preview consumers", () => {
     const consumers = [
       "src/webserver/application/button_settings.ts",
@@ -305,9 +318,11 @@ describe("browserless application contracts", () => {
   test("imports action-card option storage without mutable globals", () => {
     const contract = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_action_contract.ts"), "utf8");
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/action.ts"), "utf8");
+    const options = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_confirmation_options.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.match(contract, /export const ACTION_CARD_LOCAL_ACTION/);
-    assert.match(card, /from "\.\.\/application\/config_action_contract"/);
+    assert.match(card, /from "\.\.\/application\/config_confirmation_options"/);
+    assert.match(options, /from "\.\/config_action_contract"/);
     assert.doesNotMatch(card, /liveGlobal\(\(\) => ACTION_CARD_(?:LOCAL_ACTION|OPTION_SELECT_ACTION|STATE_)/);
     assert.doesNotMatch(globals, /var ACTION_CARD_(?:LOCAL_ACTION|OPTION_SELECT_ACTION|STATE_)/);
   });

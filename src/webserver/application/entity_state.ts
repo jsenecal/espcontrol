@@ -2,6 +2,7 @@ import { state } from "../state/app_instance";
 import { ENTITY_CATALOG } from "../generated/entity_catalog";
 import { entityStateKeys } from "../state/event_state";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
 
 type EntityDefinition = {
     readonly domain?: string;
@@ -12,7 +13,10 @@ type EntityDefinition = {
 
 const entityDefinitions = ENTITY_CATALOG.entities as unknown as Readonly<Record<string, EntityDefinition>>;
 
-export function installEntityStateModule(): GlobalDescriptors {
+export function installEntityStateModule(
+    confirmationOptions: ConfigConfirmationOptionsFeature,
+): GlobalDescriptors {
+    const { actionCardStateEntity } = confirmationOptions;
     // ── Entity State Helpers ───────────────────────────────────────────────
     function uniquePush(this: any, list?: any, value?: any) {
         if (value && list.indexOf(value) === -1)

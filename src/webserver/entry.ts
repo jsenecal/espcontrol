@@ -159,7 +159,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installArtworkStateModule());
   installGlobals(installScreensaverStateModule());
   installGlobals(installFirmwareVersionStateModule(context.runtime));
-  installGlobals(installEntityStateModule());
+  installGlobals(installEntityStateModule(context.configuration.confirmationOptions));
   const clockBarController = context.controllers.clockBar;
   installGlobals(installClockBarStateModule(clockBarController, context.runtime));
   installGlobals(installFirmwareUpdateStateModule(context.runtime));
@@ -277,7 +277,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
 function installCardCompatibility(context: ApplicationContext): void {
   const registry = context.cards;
   const coverLikeCards = createCoverLikeCardRegistration(registry);
-  registry.registerCompatibility(registerActionCardTypes(registry, context.configuration.confirmationOptions));
+  registerActionCardTypes(registry, context.configuration.confirmationOptions);
   registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm);
   registerCalendarCardTypes(registry, context.configuration.dateTimeOptions);
   registerClimateCardTypes(
