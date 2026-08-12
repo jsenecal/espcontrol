@@ -503,7 +503,6 @@ declare global {
   var renderCardTextField: any;
   var renderClockBarLayout: any;
   var renderClockBarSelectionBar: any;
-  var renderCoverControlTabSettings: any;
   var renderCoverLikeConfirmationSettings: any;
   var renderFanControlTabSettings: any;
   var renderFanControlTypeField: any;
@@ -579,8 +578,6 @@ declare global {
   var showPasteCardCode: any;
   var showSelectionMenu: any;
   var sizeClass: any;
-  var sliderCardMetadata: any;
-  var sliderTypeFactory: any;
   var sortScreenRotationOptions: any;
   var startFirmwareInstallRefresh: any;
   var startInitialScreenRotationCheck: any;

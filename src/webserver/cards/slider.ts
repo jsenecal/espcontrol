@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     cardContractAllowInSubpage,
     cardContractCard,
@@ -20,7 +19,7 @@ import type { ConfigModalTabOptionsFeature } from "../application/config_modal_t
 export function registerSliderCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
-): GlobalDescriptors {
+): void {
     const {
         coverControlTabDefinitions,
         coverControlTabs,
@@ -415,9 +414,4 @@ export function registerSliderCardTypes(
         interactionMode: true,
         coverControlTabs: true,
     }));
-    return {
-        "renderCoverControlTabSettings": staticGlobal(renderCoverControlTabSettings),
-        "sliderCardMetadata": staticGlobal(sliderCardMetadata),
-        "sliderTypeFactory": staticGlobal(sliderTypeFactory),
-    };
 }

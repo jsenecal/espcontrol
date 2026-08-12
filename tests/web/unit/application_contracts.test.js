@@ -39,7 +39,6 @@ describe("browserless application contracts", () => {
       ["fan", "registerFanCardTypes"],
       ["light_temperature", "registerLightTemperatureCardTypes"],
       ["media", "registerMediaCardTypes"],
-      ["slider", "registerSliderCardTypes"],
       ["subpage", "registerSubpageCardTypes"],
       ["vacuum", "registerVacuumCardTypes"],
     ];
@@ -193,6 +192,16 @@ describe("browserless application contracts", () => {
     assert.match(entry, /registerTimezoneCardTypes\(registry, context\.configuration\.dateTimeOptions, context\.dom\.document\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerCalendarCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:DATE_TIME_CARD_METADATA|dateTimeCardMode|dateTimeCardTimeParts|dateTimeLargeNumbersLabel|dateTimeModeOptionValues|defaultTimezoneCardEntity|normalizeDateTimeCardMode|setDateTimeCardMode):/);
+  });
+
+  test("registers slider card families without compatibility descriptors", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/slider.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
+    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs\);/);
+    assert.doesNotMatch(entry, /registerCompatibility\(registerSliderCardTypes/);
+    assert.doesNotMatch(globals, /\bvar (?:renderCoverControlTabSettings|sliderCardMetadata|sliderTypeFactory):/);
   });
 
   test("injects the card registry into editor and preview consumers", () => {
