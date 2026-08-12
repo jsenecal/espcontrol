@@ -61,7 +61,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /registry\.register\(/, `${relativePath} should use the typed card registry`);
       assert.doesNotMatch(source, /\bregisterButtonType\s*\(/, `${relativePath} should not read ambient registration state`);
       assert.match(entry, new RegExp(
-        `${registrationFunction}\\(\\s*registry(?:,\\s*(?:context\\.(?:configuration\\.[A-Za-z]+|core)|lightCards))*[,]?\\s*\\)`,
+        `${registrationFunction}\\(\\s*registry(?:,\\s*(?:context\\.(?:configuration\\.[A-Za-z]+|core|device\\.id)|lightCards))*[,]?\\s*\\)`,
       ));
     }
   });
@@ -269,7 +269,9 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.match(options, /mediaPlaylistSourceDefinitions/);
-    assert.match(entry, /registerMediaCardTypes\(registry, context\.configuration\.mediaOptions\);/);
+    assert.match(entry, /registerMediaCardTypes\(registry, context\.configuration\.mediaOptions, context\.device\.id\);/);
+    assert.match(card, /deviceId: string/);
+    assert.doesNotMatch(card, /\bDEVICE_ID\b/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerMediaCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:MEDIA_CARD_METADATA|MEDIA_PLAYLIST_SOURCE_DEFINITIONS|mediaBehaviorSpec|mediaDefaultMode|mediaEditorMode|mediaEditorValidMode|mediaLabelIsGenerated|mediaModeOptionValues|mediaNowPlayingControlValues|mediaNowPlayingControls|mediaNowPlayingPlayPauseEnabled|mediaNowPlayingProgressEnabled|mediaPlaylistContentIdPlaceholder|mediaPlaylistContentTypeKnown|mediaPlaylistContentTypeOptions|mediaPlaylistSourceDefinition|mediaPlaylistSourceOptions|mediaStateDisplayModeSupported|parseMediaPlaylistContentId|buildMediaPlaylistContentId):/);
   });

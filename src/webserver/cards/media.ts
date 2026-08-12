@@ -20,6 +20,7 @@ import {
 export function registerMediaCardTypes(
     registry: CardRegistry,
     mediaOptions: ConfigMediaOptionsFeature,
+    deviceId: string,
 ): void {
     const {
         mediaBehaviorSpec,
@@ -835,7 +836,7 @@ export function registerMediaCardTypes(
             if (mode === "cover_art") {
                 var coverArtColor: any = WEB_UI_COLORS.tertiary;
                 if (mediaCoverArtDetailsEnabled(b)) {
-                    var controlFontClass: any = DEVICE_ID === "guition-esp32-p4-jc4880p443"
+                    var controlFontClass: any = deviceId === "guition-esp32-p4-jc4880p443"
                         ? " sp-media-cover-control-fonts"
                         : "";
                     return {

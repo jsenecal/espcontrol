@@ -311,7 +311,7 @@ function registerCards(context: ApplicationContext) {
   registerLawnMowerCardTypes(registry, context.configuration.robotOptions);
   const lightCards = registerLightTemperatureCardTypes(registry, context.configuration.modalTabs);
   registerLockCardTypes(registry, context.configuration.lockOptions);
-  registerMediaCardTypes(registry, context.configuration.mediaOptions);
+  registerMediaCardTypes(registry, context.configuration.mediaOptions, context.device.id);
   registerPresenceCardTypes(registry, context.configuration.options);
   registerPushCardTypes(registry);
   registerScreenLockCardTypes(registry);
