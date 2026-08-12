@@ -4,12 +4,14 @@ import { infoOnlyCardVisible } from "../features/preview";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
 import type { ConfigMediaOptionsFeature } from "../application/config_media_options";
+import type { ConfigImageOptionsFeature } from "../application/config_image_options";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 export function installAppTestHooksConfig(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
     mediaOptions: ConfigMediaOptionsFeature,
+    imageOptions: ConfigImageOptionsFeature,
 ): GlobalDescriptors {
     const {
         cardLargeNumbersEnabled,
@@ -46,6 +48,16 @@ export function installAppTestHooksConfig(
         setMediaPlaylistContentType,
         setMediaPlaylistPlayerSource,
     } = mediaOptions;
+    const {
+        imageModalModeValues,
+        imageSlotCapacity,
+        imageSlotCapacityMessage,
+        imageCardCountWithCandidate,
+        imageModalMode,
+        imageLabelEnabled,
+        imageIconEnabled,
+        normalizeImageOptions,
+    } = imageOptions;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("config", {
             parseButtonConfig: parseButtonConfig,

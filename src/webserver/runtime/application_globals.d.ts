@@ -151,7 +151,6 @@ declare global {
   var actionScriptConfirmationNoText: any;
   var actionScriptConfirmationYesText: any;
   var actionScriptFields: any;
-  var activeGridSlots: any;
   var activeLayout: any;
   var activeScreenRotationOptions: any;
   var addBackButtonMenuItems: any;
@@ -248,7 +247,6 @@ declare global {
   var buttonTypeVisibleInPicker: any;
   var c6FirmwareUpdateKnownAvailable: any;
   var c6FirmwareVersionLooksKnown: any;
-  var canAddImageCards: any;
   var canPlaceSlotAt: any;
   var cardBadgeLabelHtml: any;
   var cardBadgePreview: any;
@@ -525,18 +523,7 @@ declare global {
   var hideSettingsOverlay: any;
   var homeAssistantArtworkPortPostUrls: any;
   var iconSlug: any;
-  var imageCardCountInButtons: any;
-  var imageCardCountInClipboardEntries: any;
-  var imageCardCountInClipboardEntry: any;
-  var imageCardCountInSubpage: any;
-  var imageCardCountWithCandidate: any;
-  var imageSlotCapacity: any;
-  var imageSlotCapacityMessage: any;
-  var imageIconEnabled: any;
-  var imageLabelEnabled: any;
-  var imageModalMode: any;
   var imageModalModeOptions: any;
-  var imageModalModeValues: any;
   var importConfig: any;
   var infoOnlyCardVisible: any;
   var infoPanel: any;
@@ -572,7 +559,6 @@ declare global {
   var isFirmwareUpdateEvent: any;
   var isFirmwareVersionEvent: any;
   var isHomeAssistantAutoTimezone: any;
-  var isImageCard: any;
   var isOptionSelectType: any;
   var isPortraitRotation: any;
   var isRemovedLegacyStateEvent: any;
@@ -691,8 +677,6 @@ declare global {
   var normalizeHomeAssistantArtworkProtocol: any;
   var normalizeGridSpansForLayout: any;
   var normalizeHour: any;
-  var normalizeImageModalMode: any;
-  var normalizeImageOptions: any;
   var normalizeInternalRelayMode: any;
   var normalizeLanguage: any;
   var normalizeLawnMowerConfig: any;
@@ -978,9 +962,6 @@ declare global {
   var setGarageConfirmationOptions: any;
   var setGarageLabelDisplayMode: any;
   var setGateLabelDisplayMode: any;
-  var setImageIconEnabled: any;
-  var setImageLabelEnabled: any;
-  var setImageModalMode: any;
   var setLightControlTabs: any;
   var setLightControlType: any;
   var setPostThrottle: any;
@@ -998,7 +979,6 @@ declare global {
   var showClockBarContextMenu: any;
   var showContextMenu: any;
   var showEmptySlotMenu: any;
-  var showImageCardLimitBanner: any;
   var showCopyCardCode: any;
   var showPasteCardCode: any;
   var showSelectionMenu: any;

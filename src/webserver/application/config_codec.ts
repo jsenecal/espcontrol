@@ -27,6 +27,7 @@ import { normalizeSavedConfigSwitch } from "../generated/saved_config_switch";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
 import type { ConfigMediaOptionsFeature } from "./config_media_options";
+import type { ConfigImageOptionsFeature } from "./config_image_options";
 import {
     IMAGE_ICON_OPTION,
     MEDIA_COVER_ART_OPTION,
@@ -41,6 +42,7 @@ export function installConfigCodecModule(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
     mediaOptions: ConfigMediaOptionsFeature,
+    imageOptions: ConfigImageOptionsFeature,
 ): GlobalDescriptors {
     const {
         cardLargeNumbersSupported,
@@ -57,6 +59,12 @@ export function installConfigCodecModule(
         mediaEditorMode,
         normalizeMediaOptions,
     } = mediaOptions;
+    const {
+        imageLabelEnabled,
+        imageIconEnabled,
+        normalizeImageOptions,
+    } = imageOptions;
+    imageOptions.connectSubpageParser((value) => parseSubpageConfig(value));
     // ── Subpage helpers ────────────────────────────────────────────────────
     function normalizeWithRegisteredCardType(this: any, b?: any) {
         if (!b)

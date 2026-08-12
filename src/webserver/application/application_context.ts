@@ -24,6 +24,7 @@ import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
 import type { ConfigMediaOptionsFeature } from "./config_media_options";
+import type { ConfigImageOptionsFeature } from "./config_image_options";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -58,6 +59,7 @@ export interface ApplicationContext {
     readonly persistence: ConfigPersistenceFeature;
     readonly options: ConfigSensorOptionsFeature;
     readonly mediaOptions: ConfigMediaOptionsFeature;
+    readonly imageOptions: ConfigImageOptionsFeature;
   };
   readonly backup: {
     readonly contract: BackupFeature;
@@ -95,6 +97,7 @@ export interface ApplicationContextOptions {
   readonly configurationPersistence: ConfigPersistenceFeature;
   readonly configurationOptions: ConfigSensorOptionsFeature;
   readonly mediaConfigurationOptions: ConfigMediaOptionsFeature;
+  readonly imageConfigurationOptions: ConfigImageOptionsFeature;
   readonly backupContract: BackupFeature;
   readonly backupExport: BackupExportController;
   readonly backupFile: BackupFileController;
@@ -144,6 +147,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       persistence: options.configurationPersistence,
       options: options.configurationOptions,
       mediaOptions: options.mediaConfigurationOptions,
+      imageOptions: options.imageConfigurationOptions,
     },
     backup: {
       contract: options.backupContract,

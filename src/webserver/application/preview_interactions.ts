@@ -3,11 +3,13 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { CardEditorDraftController } from "../features/card_editor_draft_controller";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { ApplicationLayoutState } from "./application_context";
+import type { ConfigImageOptionsFeature } from "./config_image_options";
 export interface PreviewInteractionsDependencies {
     readonly cardEditorDraft: CardEditorDraftController;
     readonly configPersistence: ConfigPersistenceFeature;
     readonly layout: ApplicationLayoutState;
     readonly window: Window;
+    readonly imageOptions: ConfigImageOptionsFeature;
 }
 export function installPreviewInteractionsModule(
     dependencies: PreviewInteractionsDependencies,
@@ -15,6 +17,12 @@ export function installPreviewInteractionsModule(
     const cardEditorDraftController = dependencies.cardEditorDraft;
     const configPersistence = dependencies.configPersistence;
     const window = dependencies.window;
+    const {
+        isImageCard,
+        imageCardCountInSubpage,
+        canAddImageCards,
+        showImageCardLimitBanner,
+    } = dependencies.imageOptions;
     // ── Preview event delegation & drag ────────────────────────────────────
     function clearPlaceholder(this: any) {
         if (previewPlaceholder) {

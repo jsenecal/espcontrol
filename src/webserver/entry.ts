@@ -45,7 +45,7 @@ import { installApiModule } from "./application/api";
 import { installFirmwareUpdatePostApiModule } from "./application/firmware_update_post_api";
 import { installPublicFirmwareInstallModule } from "./application/public_firmware_install";
 import { createConfigMediaOptionsFeature } from "./application/config_media_options";
-import { installConfigImageOptionsModule } from "./application/config_image_options";
+import { createConfigImageOptionsFeature } from "./application/config_image_options";
 import { installConfigModalTabOptionsModule } from "./application/config_modal_tab_options";
 import { createConfigSensorOptionsFeature } from "./application/config_sensor_options";
 import { installConfigConfirmationOptionsModule } from "./application/config_confirmation_options";
@@ -179,7 +179,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
-  installGlobals(installConfigImageOptionsModule(context.layout));
   installGlobals(installConfigModalTabOptionsModule());
   installGlobals(installConfigConfirmationOptionsModule());
   installGlobals(installConfigAccessClimateAlarmOptionsModule());
@@ -187,6 +186,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.cards,
     context.configuration.options,
     context.configuration.mediaOptions,
+    context.configuration.imageOptions,
   ));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
@@ -222,6 +222,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence, context.cards,
+    context.configuration.imageOptions,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,
@@ -238,12 +239,14 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     document: context.dom.document,
     layout: context.layout,
     cards: context.cards,
+    imageOptions: context.configuration.imageOptions,
   }));
   installGlobals(installPreviewInteractionsModule({
     cardEditorDraft,
     configPersistence,
     layout: context.layout,
     window: context.dom.window,
+    imageOptions: context.configuration.imageOptions,
   }));
   installGlobals(installBackupContractModule(context.backup.contract));
   const backupUiFeature = context.backup.application;
@@ -279,7 +282,10 @@ function installCardCompatibility(context: ApplicationContext): void {
   registry.registerCompatibility(registerFanCardTypes(registry));
   registry.registerCompatibility(registerGarageCardTypes(coverLikeCards.register));
   registry.registerCompatibility(registerGateCardTypes(coverLikeCards.register));
-  registry.registerCompatibility(registerImageCardTypes(registry));
+  registry.registerCompatibility(registerImageCardTypes(
+    registry,
+    context.configuration.imageOptions,
+  ));
   registry.registerCompatibility(registerInternalCardTypes(registry));
   registry.registerCompatibility(registerLawnMowerCardTypes(registry));
   registry.registerCompatibility(registerLightTemperatureCardTypes(registry));
@@ -308,6 +314,7 @@ function installTestCompatibility(context: ApplicationContext): void {
     context.cards,
     context.configuration.options,
     context.configuration.mediaOptions,
+    context.configuration.imageOptions,
   ));
   installGlobals(installAppTestHooksPreview(context.cards));
   installGlobals(installAppTestHooksBackup());
@@ -344,6 +351,11 @@ function composeApplicationContext(): ApplicationContext {
   const cards = createCardRegistry(installGlobals);
   const configurationOptions = createConfigSensorOptionsFeature(cards);
   const mediaConfigurationOptions = createConfigMediaOptionsFeature(layout.config);
+  const imageConfigurationOptions = createConfigImageOptionsFeature({
+    layout,
+    mediaOptions: mediaConfigurationOptions,
+    showBanner: (message, kind) => showBanner(message, kind),
+  });
   const cardEditorDraft = createCardEditorDraftController({
     cloneCard: (button) => Model.cloneCardConfig(button),
     emptyCard: () => Model.emptyCardConfig(),
@@ -520,6 +532,7 @@ function composeApplicationContext(): ApplicationContext {
     configurationPersistence,
     configurationOptions,
     mediaConfigurationOptions,
+    imageConfigurationOptions,
     backupContract,
     backupExport,
     backupFile,

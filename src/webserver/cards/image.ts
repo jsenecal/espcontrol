@@ -1,6 +1,19 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
-export function registerImageCardTypes(registry: CardRegistry): GlobalDescriptors {
+import type { ConfigImageOptionsFeature } from "../application/config_image_options";
+export function registerImageCardTypes(
+    registry: CardRegistry,
+    imageOptions: ConfigImageOptionsFeature,
+): GlobalDescriptors {
+    const {
+        imageModalMode,
+        imageLabelEnabled,
+        imageIconEnabled,
+        normalizeImageOptions,
+        setImageLabelEnabled,
+        setImageIconEnabled,
+        setImageModalMode,
+    } = imageOptions;
     // Read-only Home Assistant camera/image entity card.
     var IMAGE_CARD_METADATA: any = {
         entity: {

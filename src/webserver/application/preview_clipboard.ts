@@ -4,17 +4,25 @@ import { createClipboardEntry } from "../features/clipboard";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { ApplicationLayoutState } from "./application_context";
 import type { CardRegistry } from "./card_registry";
+import type { ConfigImageOptionsFeature } from "./config_image_options";
 export interface PreviewClipboardDependencies {
     readonly configPersistence: ConfigPersistenceFeature;
     readonly document: Document;
     readonly layout: ApplicationLayoutState;
     readonly cards: CardRegistry;
+    readonly imageOptions: ConfigImageOptionsFeature;
 }
 export function installPreviewClipboardModule(
     dependencies: PreviewClipboardDependencies,
 ): GlobalDescriptors {
     const configPersistence = dependencies.configPersistence;
     const document = dependencies.document;
+    const {
+        imageSlotCapacityMessage,
+        imageCardCountInClipboardEntries,
+        canAddImageCards,
+        showImageCardLimitBanner,
+    } = dependencies.imageOptions;
     // ── Preview Clipboard ─────────────────────────────────────────────
     // ── Cut / Paste ────────────────────────────────────────────────────────
     function buildClipboardEntry(this: any, slot?: any) {
