@@ -338,14 +338,11 @@ declare global {
   var coverArtHideExternalInputPostUrls: any;
   var coverArtTrackOverlayDurationPostUrls: any;
   var coverArtTrackOverlayDurationSupported: any;
-  var coverCommandMode: any;
   var coverControlDefaultTabs: any;
   var coverControlTabDefinitions: any;
   var coverControlTabs: any;
   var coverControlTabsAreDefault: any;
   var coverLikeModeValues: any;
-  var coverModeOptionValues: any;
-  var coverModeOptionsForSettings: any;
   var coveredCells: any;
   var createActionButton: any;
   var createBackupConfig: any;
@@ -650,10 +647,8 @@ declare global {
   var normalizeClockBrightness: any;
   var normalizeCoverControlTabs: any;
   var normalizeCoverLikeMode: any;
-  var normalizeCoverMode: any;
   var normalizeCoverOptions: any;
   var normalizeCoverOptionsForMode: any;
-  var normalizeCoverPosition: any;
   var normalizeDateTimeCardMode: any;
   var normalizeEntityMode: any;
   var normalizeEntityModeCardConfig: any;

@@ -8,6 +8,7 @@ import {
     cardContractOptionDefaultValue,
     cardContractOptionSpec,
 } from "./config_option_core";
+import { normalizeCoverMode } from "./config_cover_contract";
 export function installConfigModalTabOptionsModule(): GlobalDescriptors {
     // ── Modal Tab Options ──────────────────────────────────────────────
     function lightControlTabDefinitions(this: any) {

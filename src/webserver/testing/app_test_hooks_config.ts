@@ -7,6 +7,12 @@ import type { ConfigMediaOptionsFeature } from "../application/config_media_opti
 import type { ConfigImageOptionsFeature } from "../application/config_image_options";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
+import {
+    coverModeOptionValues,
+    coverModeOptionsForSettings,
+    normalizeCoverMode,
+    normalizeCoverPosition,
+} from "../application/config_cover_contract";
 export function installAppTestHooksConfig(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,

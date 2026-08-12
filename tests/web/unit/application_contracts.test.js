@@ -121,6 +121,16 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /var ACTION_CARD_(?:LOCAL_ACTION|OPTION_SELECT_ACTION|STATE_)/);
   });
 
+  test("imports cover mode and position rules without card globals", () => {
+    const contract = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_cover_contract.ts"), "utf8");
+    const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/slider.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(contract, /export function normalizeCoverMode/);
+    assert.match(card, /from "\.\.\/application\/config_cover_contract"/);
+    assert.doesNotMatch(card, /staticGlobal\((?:coverCommandMode|coverModeOptionValues|normalizeCoverMode|coverModeOptionsForSettings|normalizeCoverPosition)\)/);
+    assert.doesNotMatch(globals, /var (?:coverCommandMode|coverModeOptionValues|normalizeCoverMode|coverModeOptionsForSettings|normalizeCoverPosition)/);
+  });
+
   test("imports subpage option behavior without installing globals", () => {
     const options = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_subpage_options.ts"), "utf8");
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");

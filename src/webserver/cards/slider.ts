@@ -1,53 +1,16 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";
-import { cardContractOptionSpec } from "../application/config_option_core";
+import {
+    coverCommandMode,
+    coverModeOptionsForSettings,
+    normalizeCoverMode,
+    normalizeCoverPosition,
+} from "../application/config_cover_contract";
 export function registerSliderCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Slider and cover button types: draggable brightness/position control.
     // Factory creates both "slider" (light.turn_on w/ brightness) and "cover"
     // variants. Slider cards are always vertical. For covers, b.sensor stores
     // "modal", "", "tilt", "toggle", or a one-tap cover command.
-    function coverCommandMode(this: any, mode?: any) {
-        return mode === "open" || mode === "close" || mode === "stop" || mode === "set_position";
-    }
-    function coverModeOptionValues(this: any, allowCommands?: any) {
-        var spec: any = cardContractOptionSpec("cover", "cover_mode");
-        var values: any = spec && spec.values ? spec.values : ["modal", "", "tilt", "toggle", "open", "close", "stop", "set_position"];
-        return values.filter(function (this: any, value?: any) {
-            return allowCommands || !coverCommandMode(value);
-        });
-    }
-    function normalizeCoverMode(this: any, mode?: any, allowCommands?: any) {
-        mode = String(mode || "");
-        return coverModeOptionValues(allowCommands).indexOf(mode) >= 0 ? mode : "";
-    }
-    function coverModeOptionsForSettings(this: any, currentMode?: any) {
-        return [
-            ["modal", "All Controls"],
-            ["", "Slider: Position"],
-            ["tilt", "Slider: Tilt"],
-            ["toggle", "Toggle"],
-            ["open", "Open"],
-            ["close", "Close"],
-            ["stop", "Stop"],
-            ["set_position", "Set Position"],
-        ];
-    }
-    function normalizeCoverPosition(this: any, value?: any) {
-        var n: any = parseInt(value, 10);
-        var spec: any = cardContractOptionSpec("cover", "cover_position") || {};
-        var fallback: any = parseInt(spec.defaultValue, 10);
-        var min: any = typeof spec.min === "number" ? spec.min : 0;
-        var max: any = typeof spec.max === "number" ? spec.max : 100;
-        if (!isFinite(fallback))
-            fallback = 50;
-        if (!isFinite(n))
-            n = fallback;
-        if (n < min)
-            n = min;
-        if (n > max)
-            n = max;
-        return String(n);
-    }
     function renderCoverControlTabSettings(this: any, panel?: any, b?: any, helpers?: any) {
         renderModalTabSettings(panel, b, helpers, {
             definitions: coverControlTabDefinitions,
@@ -432,11 +395,6 @@ export function registerSliderCardTypes(registry: CardRegistry): GlobalDescripto
         coverControlTabs: true,
     }));
     return {
-        "coverCommandMode": staticGlobal(coverCommandMode),
-        "coverModeOptionValues": staticGlobal(coverModeOptionValues),
-        "normalizeCoverMode": staticGlobal(normalizeCoverMode),
-        "coverModeOptionsForSettings": staticGlobal(coverModeOptionsForSettings),
-        "normalizeCoverPosition": staticGlobal(normalizeCoverPosition),
         "renderCoverControlTabSettings": staticGlobal(renderCoverControlTabSettings),
         "sliderCardMetadata": staticGlobal(sliderCardMetadata),
         "sliderTypeFactory": staticGlobal(sliderTypeFactory),
