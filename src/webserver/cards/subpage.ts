@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerSubpageCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerSubpageCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Navigation folder: tap opens a nested grid screen with its own button layout
     var SUBPAGE_CARD_METADATA: any = {
         kind: {
@@ -94,7 +95,7 @@ export function registerSubpageCardTypes(): GlobalDescriptors {
             badge: "chevron-right",
         },
     };
-    registerButtonType("subpage", {
+    registry.register("subpage", {
         label: "Subpage",
         allowInSubpage: false,
         hideLabel: true,

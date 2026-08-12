@@ -266,33 +266,33 @@ function installApplicationCompatibility(context: ApplicationContext): void {
 
 function installCardCompatibility(context: ApplicationContext): void {
   const registry = context.cards;
-  registry.registerCompatibility(registerActionCardTypes());
-  registry.registerCompatibility(registerAlarmCardTypes());
-  registry.registerCompatibility(registerCalendarCardTypes());
-  registry.registerCompatibility(registerClimateCardTypes());
+  registry.registerCompatibility(registerActionCardTypes(registry));
+  registry.registerCompatibility(registerAlarmCardTypes(registry));
+  registry.registerCompatibility(registerCalendarCardTypes(registry));
+  registry.registerCompatibility(registerClimateCardTypes(registry));
   registry.registerCompatibility(registerClockCardTypes(registry));
   registry.registerCompatibility(registerCoverLikeCardHelpers());
   registry.registerCompatibility(registerDoorWindowCardTypes(registry));
   registry.registerCompatibility(registerEntityModeCardHelpers());
-  registry.registerCompatibility(registerFanCardTypes());
+  registry.registerCompatibility(registerFanCardTypes(registry));
   registry.registerCompatibility(registerGarageCardTypes());
   registry.registerCompatibility(registerGateCardTypes());
   registry.registerCompatibility(registerImageCardTypes(registry));
   registry.registerCompatibility(registerInternalCardTypes(registry));
   registry.registerCompatibility(registerLawnMowerCardTypes(registry));
-  registry.registerCompatibility(registerLightTemperatureCardTypes());
-  registry.registerCompatibility(registerLockCardTypes());
-  registry.registerCompatibility(registerMediaCardTypes());
+  registry.registerCompatibility(registerLightTemperatureCardTypes(registry));
+  registry.registerCompatibility(registerLockCardTypes(registry));
+  registry.registerCompatibility(registerMediaCardTypes(registry));
   registry.registerCompatibility(registerPresenceCardTypes(registry));
   registry.registerCompatibility(registerPushCardTypes(registry));
   registry.registerCompatibility(registerScreenLockCardTypes(registry));
   registry.registerCompatibility(registerSensorCardTypes(registry));
-  registry.registerCompatibility(registerSliderCardTypes());
-  registry.registerCompatibility(registerSubpageCardTypes());
+  registry.registerCompatibility(registerSliderCardTypes(registry));
+  registry.registerCompatibility(registerSubpageCardTypes(registry));
   registry.registerCompatibility(registerSwitchCardTypes(registry));
   registry.registerCompatibility(registerTimezoneCardTypes(registry));
-  registry.registerCompatibility(registerVacuumCardTypes());
-  registry.registerCompatibility(registerWeatherCardTypes());
+  registry.registerCompatibility(registerVacuumCardTypes(registry));
+  registry.registerCompatibility(registerWeatherCardTypes(registry));
   registry.registerCompatibility(registerWeatherForecastCardTypes(registry));
   registry.registerCompatibility(registerWebhookCardTypes(registry));
 }

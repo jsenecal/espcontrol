@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerWeatherCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerWeatherCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Read-only weather card: displays either current conditions or high / low temperatures.
     var WEATHER_CARD_METADATA: any = {
         mode: {
@@ -72,7 +73,7 @@ export function registerWeatherCardTypes(): GlobalDescriptors {
             !!b &&
             cardContractOptionSupportedFor("weather", "large_numbers", { precision: b.precision });
     }
-    registerButtonType("weather", {
+    registry.register("weather", {
         label: function (this: any) { return cardContractCardLabel("weather"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("weather"); },
         pickerKey: function (this: any) { return cardContractPickerKey("weather"); },

@@ -38,6 +38,18 @@ describe("browserless application contracts", () => {
       ["timezone", "registerTimezoneCardTypes"],
       ["weather_forecast", "registerWeatherForecastCardTypes"],
       ["webhook", "registerWebhookCardTypes"],
+      ["action", "registerActionCardTypes"],
+      ["alarm", "registerAlarmCardTypes"],
+      ["calendar", "registerCalendarCardTypes"],
+      ["climate", "registerClimateCardTypes"],
+      ["fan", "registerFanCardTypes"],
+      ["light_temperature", "registerLightTemperatureCardTypes"],
+      ["lock", "registerLockCardTypes"],
+      ["media", "registerMediaCardTypes"],
+      ["slider", "registerSliderCardTypes"],
+      ["subpage", "registerSubpageCardTypes"],
+      ["vacuum", "registerVacuumCardTypes"],
+      ["weather", "registerWeatherCardTypes"],
     ];
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     for (const [fileName, registrationFunction] of migratedCards) {

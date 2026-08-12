@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerClimateCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerClimateCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Climate card: thermostat status plus full-screen climate controls.
     var CLIMATE_CARD_METADATA: any = {
         entity: {
@@ -46,7 +47,7 @@ export function registerClimateCardTypes(): GlobalDescriptors {
             badge: "thermostat",
         },
     };
-    registerButtonType("climate", {
+    registry.register("climate", {
         label: function (this: any) { return cardContractCardLabel("climate"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("climate"); },
         pickerKey: function (this: any) { return cardContractPickerKey("climate"); },
@@ -226,7 +227,7 @@ export function registerClimateCardTypes(): GlobalDescriptors {
             };
         },
     });
-    registerButtonType("climate_control", Object.assign({}, BUTTON_TYPES.climate, {
+    registry.register("climate_control", Object.assign({}, registry.definitions.climate, {
         label: function (this: any) { return cardContractCardLabel("climate_control"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("climate_control"); },
         pickerKey: function (this: any) { return cardContractPickerKey("climate_control"); },

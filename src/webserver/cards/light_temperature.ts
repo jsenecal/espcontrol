@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerLightTemperatureCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerLightTemperatureCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Light temperature slider card: controls color_temp_kelvin on a light entity.
     // Slider bottom = min kelvin (warm), top = max kelvin (cool).
     // Config fields: unit="min-max" (kelvin range),
@@ -147,7 +148,7 @@ export function registerLightTemperatureCardTypes(): GlobalDescriptors {
         if (b.type === nextType)
             return;
         b.type = nextType;
-        var td: any = BUTTON_TYPES[nextType];
+        var td: any = registry.definitions[nextType];
         if (td && td.onSelect)
             td.onSelect(b);
         helpers.saveField("type", nextType);
@@ -174,7 +175,7 @@ export function registerLightTemperatureCardTypes(): GlobalDescriptors {
         });
         panel.appendChild(modalSettingsDisclosure.panel);
     }
-    registerButtonType("light_temperature", {
+    registry.register("light_temperature", {
         label: function (this: any) { return cardContractCardLabel("light_temperature"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("light_temperature"); },
         hideLabel: true,
@@ -262,7 +263,7 @@ export function registerLightTemperatureCardTypes(): GlobalDescriptors {
             });
         },
     });
-    registerButtonType("light_control", {
+    registry.register("light_control", {
         label: function (this: any) { return cardContractCardLabel("light_control"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("light_control"); },
         hideLabel: true,

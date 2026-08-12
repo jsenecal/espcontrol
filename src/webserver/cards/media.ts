@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerMediaCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerMediaCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Media player card: playback buttons, volume, track position, or now-playing details.
     function mediaBehaviorSpec(this: any) {
         var card: any = cardContractCard("media");
@@ -243,7 +244,7 @@ export function registerMediaCardTypes(): GlobalDescriptors {
             ["__custom", "Custom"],
         ];
     }
-    registerButtonType("media", {
+    registry.register("media", {
         label: function (this: any) { return cardContractCardLabel("media"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("media"); },
         pickerKey: function (this: any) { return cardContractPickerKey("media"); },
@@ -963,7 +964,7 @@ export function registerMediaCardTypes(): GlobalDescriptors {
             };
         },
     });
-    registerButtonType("media_cover_art", {
+    registry.register("media_cover_art", {
         label: "Cover Art",
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("media"); },
         // Retain the old registration only to normalize any saved alias. Cover Art is

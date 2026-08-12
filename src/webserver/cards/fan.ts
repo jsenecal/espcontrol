@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerFanCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerFanCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Fan cards: grouped controls for Home Assistant fan entities.
     var FAN_CONTROL_TYPE_OPTIONS: any = [
         ["fan_control", "All Controls"],
@@ -76,7 +77,7 @@ export function registerFanCardTypes(): GlobalDescriptors {
         if (b.type === nextType)
             return;
         b.type = nextType;
-        var td: any = BUTTON_TYPES[nextType];
+        var td: any = registry.definitions[nextType];
         if (td && td.onSelect)
             td.onSelect(b);
         helpers.saveField("type", nextType);
@@ -228,12 +229,12 @@ export function registerFanCardTypes(): GlobalDescriptors {
             },
         };
     }
-    registerButtonType("fan_control", fanTypeFactory({ type: "fan_control", pickerKey: "fan_speed", hidden: true }));
-    registerButtonType("fan_speed", fanTypeFactory({ type: "fan_speed" }));
-    registerButtonType("fan_switch", fanTypeFactory({ type: "fan_switch", pickerKey: "fan_speed", hidden: true }));
-    registerButtonType("fan_oscillate", fanTypeFactory({ type: "fan_oscillate", pickerKey: "fan_speed", hidden: true }));
-    registerButtonType("fan_direction", fanTypeFactory({ type: "fan_direction", pickerKey: "fan_speed", hidden: true }));
-    registerButtonType("fan_preset", fanTypeFactory({ type: "fan_preset", pickerKey: "fan_speed", hidden: true }));
+    registry.register("fan_control", fanTypeFactory({ type: "fan_control", pickerKey: "fan_speed", hidden: true }));
+    registry.register("fan_speed", fanTypeFactory({ type: "fan_speed" }));
+    registry.register("fan_switch", fanTypeFactory({ type: "fan_switch", pickerKey: "fan_speed", hidden: true }));
+    registry.register("fan_oscillate", fanTypeFactory({ type: "fan_oscillate", pickerKey: "fan_speed", hidden: true }));
+    registry.register("fan_direction", fanTypeFactory({ type: "fan_direction", pickerKey: "fan_speed", hidden: true }));
+    registry.register("fan_preset", fanTypeFactory({ type: "fan_preset", pickerKey: "fan_speed", hidden: true }));
     return {
         "FAN_CONTROL_TYPE_OPTIONS": liveGlobal(() => FAN_CONTROL_TYPE_OPTIONS, (value?: any) => { FAN_CONTROL_TYPE_OPTIONS = value; }),
         "normalizeFanControlType": staticGlobal(normalizeFanControlType),

@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerLockCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerLockCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Lock card: lock/unlock toggle with safe default-to-lock behavior and state display.
     function lockCommandMode(this: any, mode?: any) {
         return mode === "lock" || mode === "unlock";
@@ -58,7 +59,7 @@ export function registerLockCardTypes(): GlobalDescriptors {
             badge: "lock",
         },
     };
-    registerButtonType("lock", {
+    registry.register("lock", {
         label: function (this: any) { return cardContractCardLabel("lock"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("lock"); },
         pickerKey: function (this: any) { return cardContractPickerKey("lock"); },

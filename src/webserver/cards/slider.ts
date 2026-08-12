@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerSliderCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerSliderCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Slider and cover button types: draggable brightness/position control.
     // Factory creates both "slider" (light.turn_on w/ brightness) and "cover"
     // variants. Slider cards are always vertical. For covers, b.sensor stores
@@ -382,7 +383,7 @@ export function registerSliderCardTypes(): GlobalDescriptors {
             },
         };
     }
-    registerButtonType("light_brightness", sliderTypeFactory({
+    registry.register("light_brightness", sliderTypeFactory({
         type: "light_brightness",
         placeholder: "e.g. Living Room",
         entityPlaceholder: "e.g. light.living_room",
@@ -400,7 +401,7 @@ export function registerSliderCardTypes(): GlobalDescriptors {
         labelAfterEntity: true,
         lightControlType: true,
     }));
-    registerButtonType("slider", sliderTypeFactory({
+    registry.register("slider", sliderTypeFactory({
         type: "slider",
         placeholder: "e.g. Living Room",
         entityPlaceholder: "e.g. light.living_room",
@@ -414,7 +415,7 @@ export function registerSliderCardTypes(): GlobalDescriptors {
         iconOffFieldLabel: "Off Icon",
         iconOnFieldLabel: "On Icon",
     }));
-    registerButtonType("cover", sliderTypeFactory({
+    registry.register("cover", sliderTypeFactory({
         type: "cover",
         placeholder: "e.g. Office Blind",
         entityPlaceholder: "e.g. cover.office_blind",

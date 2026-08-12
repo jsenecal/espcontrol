@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerCalendarCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerCalendarCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Read-only date card: displays either the day/month or local time/date.
     var DATE_TIME_CARD_METADATA: any = {
         mode: {
@@ -142,7 +143,7 @@ export function registerCalendarCardTypes(): GlobalDescriptors {
             unit: "",
         };
     }
-    registerButtonType("calendar", {
+    registry.register("calendar", {
         label: function (this: any) { return cardContractCardLabel("calendar"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("calendar"); },
         pickerKey: function (this: any) { return cardContractPickerKey("calendar"); },

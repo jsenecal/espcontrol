@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerAlarmCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerAlarmCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Alarm cards: one-tap alarm_control_panel actions.
     var ALARM_CONTROL_PANEL_VALUE: any = "control_panel";
     function alarmControlPanelValue(this: any) {
@@ -178,7 +179,7 @@ export function registerAlarmCardTypes(): GlobalDescriptors {
         panel.appendChild(field);
         return field;
     }
-    registerButtonType("alarm", {
+    registry.register("alarm", {
         label: function (this: any) { return cardContractCardLabel("alarm"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("alarm"); },
         pickerKey: function (this: any) { return cardContractPickerKey("alarm"); },
@@ -306,7 +307,7 @@ export function registerAlarmCardTypes(): GlobalDescriptors {
             };
         },
     });
-    registerButtonType("alarm_action", {
+    registry.register("alarm_action", {
         label: function (this: any) { return cardContractCardLabel("alarm_action"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("alarm_action"); },
         labelPlaceholder: "e.g. Arm Away",

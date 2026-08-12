@@ -5,7 +5,8 @@ import {
     normalizeSavedConfigVacuumPrecision,
     normalizeSavedConfigVacuumSensor,
 } from "../generated/saved_config_vacuum";
-export function registerVacuumCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerVacuumCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Vacuum card: touchscreen-friendly controls for Home Assistant vacuum entities.
     var VACUUM_CARD_MODES: any = [
         ["status", "Status"],
@@ -99,7 +100,7 @@ export function registerVacuumCardTypes(): GlobalDescriptors {
             rerender: true,
         },
     };
-    registerButtonType("vacuum", {
+    registry.register("vacuum", {
         label: function (this: any) { return cardContractCardLabel("vacuum"); },
         allowInSubpage: function (this: any) { return cardContractAllowInSubpage("vacuum"); },
         pickerKey: function (this: any) { return cardContractPickerKey("vacuum"); },

@@ -1,6 +1,7 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function registerActionCardTypes(): GlobalDescriptors {
+import type { CardRegistry } from "../application/card_registry";
+export function registerActionCardTypes(registry: CardRegistry): GlobalDescriptors {
     // Action card: one-tap Home Assistant shortcuts for scenes, scripts, buttons, and helpers.
     var ACTION_CARD_ACTIONS: any = [
         { value: "scene.turn_on", label: "Run Scene", placeholder: "e.g. scene.movie_mode", icon: "movie-open", domains: ["scene"] },
@@ -196,7 +197,7 @@ export function registerActionCardTypes(): GlobalDescriptors {
             actionBadge: "flash",
         },
     };
-    registerButtonType("action", {
+    registry.register("action", {
         label: "Action",
         allowInSubpage: true,
         labelPlaceholder: "e.g. Movie Mode",
