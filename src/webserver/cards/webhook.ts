@@ -1,4 +1,5 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { configOptionValue, setConfigOptionValue } from "../model/config_primitives";
 import {
     cardContractAllowInSubpage,
     cardContractCard,

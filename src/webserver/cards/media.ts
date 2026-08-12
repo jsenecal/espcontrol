@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { configOptionEnabled, configOptionValue } from "../model/config_primitives";
 import {
     cardContractAllowInSubpage,
     cardContractCard,

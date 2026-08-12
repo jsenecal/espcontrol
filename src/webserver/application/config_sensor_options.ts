@@ -1,4 +1,10 @@
 import type { CardRegistry } from "./card_registry";
+import {
+    configOptionEnabled,
+    configOptionValue,
+    setConfigOption,
+    setConfigOptionValue,
+} from "../model/config_primitives";
 import { cardContractLargeNumbersSupported } from "../generated/card_contract";
 import {
     SENSOR_ACTIVE_COLOR_OPTION,

@@ -1,4 +1,5 @@
 import { state } from "../state/app_instance";
+import { configOptionValue, setConfigOptionValue } from "../model/config_primitives";
 import { iconSlug } from "../application/ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardRegistry } from "../application/card_registry";

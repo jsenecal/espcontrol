@@ -4,7 +4,6 @@ import { createDeviceApi } from "./api/device_api";
 import { NTP_SERVER_DEFAULTS, defaultTimezoneOptionsForDevice } from "./state/app_state";
 import * as AppInstance from "./state/app_instance";
 import { state } from "./state/app_instance";
-import * as ConfigPrimitives from "./model/config_primitives";
 import { textSpan } from "./application/ui_primitives";
 import { ENTITY_CATALOG } from "./generated/entity_catalog";
 import { installGlobals, installStaticGlobals } from "./runtime/globals";
@@ -610,7 +609,6 @@ function startEspControl(): void {
   installStaticGlobals({
     EspControlModel: Model,
     ...Model,
-    ...ConfigPrimitives,
     ENTITY_CATALOG,
     defaultTimezoneOptions: () =>
       defaultTimezoneOptionsForDevice(DeviceConfig.deviceConfig),

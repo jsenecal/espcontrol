@@ -227,8 +227,6 @@ declare global {
   var colorField: any;
   var condField: any;
   var configEventPatterns: any;
-  var configOptionEnabled: any;
-  var configOptionValue: any;
   var connectEvents: any;
   var copyButtons: any;
   var copyCardConfig: any;
@@ -698,8 +696,6 @@ declare global {
   var setC6FirmwareUpdateAvailable: any;
   var setClockBarItemVisible: any;
   var setConfigLocked: any;
-  var setConfigOption: any;
-  var setConfigOptionValue: any;
   var setDateTimeCardMode: any;
   var setFanControlType: any;
   var setFavicon: any;

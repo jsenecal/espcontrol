@@ -1,4 +1,5 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { setConfigOption, setConfigOptionValue } from "../model/config_primitives";
 import { escHtml, iconSlug } from "./ui_primitives";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigSensorOptionsFeature } from "./config_sensor_options";

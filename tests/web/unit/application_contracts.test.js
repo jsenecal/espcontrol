@@ -494,6 +494,22 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:deviceId|deviceConfig):/);
   });
 
+  test("imports configuration primitives directly", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const roots = ["application", "cards"];
+    for (const directory of roots) {
+      const root = path.join(ROOT, "src/webserver", directory);
+      for (const name of fs.readdirSync(root).filter((file) => file.endsWith(".ts"))) {
+        const source = fs.readFileSync(path.join(root, name), "utf8");
+        if (!/\b(?:configOptionEnabled|configOptionValue|setConfigOption|setConfigOptionValue)\b/.test(source)) continue;
+        assert.match(source, /from "\.\.\/model\/config_primitives"/, `${directory}/${name} should import configuration primitives`);
+      }
+    }
+    assert.doesNotMatch(entry, /\bConfigPrimitives\b/);
+    assert.doesNotMatch(globals, /\bvar (?:configOptionEnabled|configOptionValue|setConfigOption|setConfigOptionValue):/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });
