@@ -278,7 +278,6 @@ function installApplicationCompatibility(): void {
       ntpServer3: state.ntpServer3,
       coverArtHomeAssistantProtocol: state.homeAssistantArtworkProtocol,
       coverArtHomeAssistantPort: state.coverArtHomeAssistantPort,
-      coverArtHomeAssistantBaseUrl: state.coverArtHomeAssistantBaseUrl,
       autoUpdate: state.autoUpdate,
       updateFrequency: state.updateFrequency,
       updateFrequencyOptions: state.updateFreqOptions,

@@ -157,26 +157,6 @@ button:
             global_preferences->sync();
             App.safe_reboot();
 
-text:
-  - platform: template
-    name: "${entity_home_assistant_artwork_base_url}"
-    internal: true
-    id: cover_art_home_assistant_artwork_base_url_override
-    entity_category: config
-    icon: "mdi:web"
-    optimistic: true
-    restore_value: true
-    initial_value: ""
-    min_length: 0
-    max_length: 255
-    mode: text
-    update_interval: never
-    web_server:
-      sorting_group_id: sg_connectivity
-    on_value:
-      then:
-        - script.execute: cover_art_resolve_home_assistant_base_url
-
 select:
   - platform: template
     name: "${entity_home_assistant_artwork_protocol}"
