@@ -9,6 +9,7 @@ import type { CardRegistry } from "./card_registry";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
 import type { ConfigCodecFeature } from "./config_codec";
+import type { UiRuntimeState } from "./state";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
@@ -18,6 +19,7 @@ export function installButtonSettingsModule(
     imageOptions: ConfigImageOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
     codec: ConfigCodecFeature,
+    runtime: UiRuntimeState,
 ): GlobalDescriptors {
     const {
         imageSlotCapacity,
@@ -104,7 +106,7 @@ export function installButtonSettingsModule(
             hideSettingsOverlay();
             return;
         }
-        if (!forceOpen && !isSettingsOpen()) {
+        if (!forceOpen && !runtime.isSettingsOpen()) {
             hideSettingsOverlay();
             return;
         }

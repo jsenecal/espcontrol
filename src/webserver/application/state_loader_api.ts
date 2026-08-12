@@ -170,9 +170,9 @@ export function installStateLoaderApiModule(runtime: UiRuntimeState): GlobalDesc
         });
     }
     function waitForReboot(this: any) {
-        if (_eventSource) {
-            _eventSource.close();
-            _eventSource = null;
+        if (runtime.eventSource) {
+            runtime.eventSource.close();
+            runtime.eventSource = null;
         }
         setConfigLocked(true, "Restarting device\u2026");
         showBanner("Restarting device\u2026", "offline");

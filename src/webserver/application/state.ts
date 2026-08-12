@@ -1,4 +1,4 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { liveGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ApplicationLayoutState } from "./application_context";
 
 export interface UiRuntimeState {
@@ -49,9 +49,6 @@ export function createUiRuntimeState(
     };
     runtime.globals = {
         "els": liveGlobal(() => runtime.els, (value) => { runtime.els = value; }),
-        "_eventSource": liveGlobal(() => runtime.eventSource, (value) => { runtime.eventSource = value; }),
-        "isSettingsFocused": staticGlobal(() => runtime.isSettingsFocused()),
-        "isSettingsOpen": staticGlobal(() => runtime.isSettingsOpen()),
     };
     return runtime;
 }

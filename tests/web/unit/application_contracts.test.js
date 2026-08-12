@@ -297,6 +297,19 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:orderReceived|migrationTimer|sliderMigrationTimer|pendingSliderSubpageMigrations):/);
   });
 
+  test("removes runtime helper globals", () => {
+    const runtime = fs.readFileSync(path.join(ROOT, "src/webserver/application/state.ts"), "utf8");
+    const loader = fs.readFileSync(path.join(ROOT, "src/webserver/application/state_loader_api.ts"), "utf8");
+    const settings = fs.readFileSync(path.join(ROOT, "src/webserver/application/button_settings_render_queue.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(loader, /runtime\.eventSource\.close\(\)/);
+    assert.match(settings, /runtime\.isSettingsOpen\(\)/);
+    assert.match(entry, /installButtonSettingsRenderQueueModule\(context\.runtime\)/);
+    assert.doesNotMatch(runtime, /"(?:_eventSource|isSettingsFocused|isSettingsOpen)"/);
+    assert.doesNotMatch(globals, /\bvar (?:_eventSource|isSettingsFocused|isSettingsOpen):/);
+  });
+
   test("preserves settings normalization", () => {
     runSettingsFeatureTests();
   });

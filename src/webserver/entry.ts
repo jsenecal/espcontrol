@@ -212,13 +212,14 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     codec: context.configuration.codec,
   }));
   installGlobals(installButtonSettingsSelectionModule());
-  installGlobals(installButtonSettingsRenderQueueModule());
+  installGlobals(installButtonSettingsRenderQueueModule(context.runtime));
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence, context.cards,
     context.configuration.imageOptions,
     context.configuration.confirmationOptions,
     context.configuration.codec,
+    context.runtime,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,

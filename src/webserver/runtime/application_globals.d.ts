@@ -118,7 +118,6 @@ declare global {
   var WEB_UI_COLORS: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
   var _backupFeature: any;
-  var _eventSource: any;
   var _postQueue: any;
   var _postQueueHadError: any;
   var _renderPending: any;
@@ -459,8 +458,6 @@ declare global {
   var isPortraitRotation: any;
   var isRemovedLegacyStateEvent: any;
   var isSelectionControlTarget: any;
-  var isSettingsFocused: any;
-  var isSettingsOpen: any;
   var isSpecificFirmwareVersion: any;
   var languageLabel: any;
   var languageOptionsWithFallback: any;

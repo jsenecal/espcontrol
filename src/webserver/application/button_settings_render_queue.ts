@@ -1,5 +1,6 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installButtonSettingsRenderQueueModule(): GlobalDescriptors {
+import type { UiRuntimeState } from "./state";
+export function installButtonSettingsRenderQueueModule(runtime: UiRuntimeState): GlobalDescriptors {
     // ── Button Settings Render Queue ──────────────────────────────────
     // ── Render debouncing ──────────────────────────────────────────────────
     var _renderPending: any = false;
@@ -10,7 +11,7 @@ export function installButtonSettingsRenderQueueModule(): GlobalDescriptors {
         requestAnimationFrame(function (this: any) {
             _renderPending = false;
             renderPreview();
-            if (isSettingsOpen() || isSettingsFocused()) {
+            if (runtime.isSettingsOpen() || runtime.isSettingsFocused()) {
                 _settingsDeferred = true;
             }
             else {
@@ -22,20 +23,20 @@ export function installButtonSettingsRenderQueueModule(): GlobalDescriptors {
     document.addEventListener("focusout", function (this: any, e?: any) {
         if (!_settingsDeferred)
             return;
-        if (e.relatedTarget && els.buttonSettings && els.buttonSettings.contains(e.relatedTarget))
+        if (e.relatedTarget && runtime.els.buttonSettings && runtime.els.buttonSettings.contains(e.relatedTarget))
             return;
         requestAnimationFrame(function (this: any) {
-            if (isSettingsOpen())
+            if (runtime.isSettingsOpen())
                 return;
-            if (!isSettingsFocused()) {
+            if (!runtime.isSettingsFocused()) {
                 _settingsDeferred = false;
                 renderButtonSettings();
             }
         });
     });
     document.addEventListener("keydown", function (this: any, e?: any) {
-        if (e.key === "Escape" && els.settingsOverlay &&
-            els.settingsOverlay.classList.contains("sp-visible")) {
+        if (e.key === "Escape" && runtime.els.settingsOverlay &&
+            runtime.els.settingsOverlay.classList.contains("sp-visible")) {
             closeSettings();
         }
     });
