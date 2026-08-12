@@ -1,12 +1,18 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installApiModule(): GlobalDescriptors {
+import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
+import type { DeviceApi } from "../api/device_api";
+
+export function installApiModule(
+    nativePanelConfig: NativePanelConfigController,
+    deviceApi: DeviceApi,
+): GlobalDescriptors {
     // ── POST queue ─────────────────────────────────────────────────────────
-    var _deviceApi: any = createDeviceApi(function (this: any, url?: any, init?: any) { return fetch(url, init); });
+    var deviceApiClient: DeviceApi = deviceApi;
     var _postQueue: any = Promise.resolve(null);
     var _postQueueHadError: any = false;
     function setPostThrottle(this: any, ms?: any) {
-        _deviceApi.setPostThrottle(ms);
+        deviceApiClient.setPostThrottle(ms);
     }
     function postQueueIdle(this: any) {
         return _postQueue;
@@ -18,7 +24,7 @@ export function installApiModule(): GlobalDescriptors {
         return _postQueueHadError;
     }
     function postQuiet(this: any, url?: any) {
-        return _deviceApi.postQuiet(url).then(function (this: any, result?: any) {
+        return deviceApiClient.postQuiet(url).then(function (this: any, result?: any) {
             return result.ok || result.kind === "http-error" ? result.value : null;
         });
     }
@@ -30,7 +36,7 @@ export function installApiModule(): GlobalDescriptors {
         return _postQueue;
     }
     function enqueuePost(this: any, urls?: any, errorMessage?: any) {
-        return _deviceApi.enqueuePost(urls).then(function (this: any, result?: any) {
+        return deviceApiClient.enqueuePost(urls).then(function (this: any, result?: any) {
             var failure: any = requestFailureInfo(result, errorMessage);
             if (failure && failure.reconnect) {
                 _postQueueHadError = true;
@@ -52,7 +58,7 @@ export function installApiModule(): GlobalDescriptors {
     }
     function postOptional(this: any, url?: any) {
         var urls: any = Array.isArray(url) ? url.slice() : [url];
-        _postQueue = _deviceApi.enqueuePost(urls).then(function (this: any, result?: any) {
+        _postQueue = deviceApiClient.enqueuePost(urls).then(function (this: any, result?: any) {
             var failure: any = requestFailureInfo(result);
             if (failure && failure.reconnect) {
                 _postQueueHadError = true;
@@ -66,14 +72,16 @@ export function installApiModule(): GlobalDescriptors {
         return _postQueue;
     }
     function postFirstAvailable(this: any, urls?: any) {
-        return _deviceApi.postFirstAvailable(urls).then(function (this: any, result?: any) {
+        return deviceApiClient.postFirstAvailable(urls).then(function (this: any, result?: any) {
             if (result.kind === "network-error")
                 throw result.error;
             return result.value;
         });
     }
     function postText(this: any, name?: any, value?: any) {
-        var nativeSave: any = nativePanelConfigTextWrite(name, value);
+        var nativeSave: any = nativePanelConfig
+            ? nativePanelConfig.writeText(String(name || ""), String(value || ""))
+            : null;
         if (nativeSave) {
             _postQueue = _postQueue.then(function () { return nativeSave; }).then(function (result: any) {
                 if (result === "legacy-fallback")
@@ -163,7 +171,7 @@ export function installApiModule(): GlobalDescriptors {
         postWithObjectIds("switch", name, objectIds, on ? "turn_on" : "turn_off", errorMessage);
     }
     function getJsonQuietly(this: any, path?: any, callback?: any) {
-        return _deviceApi.getJson(path).then(function (this: any, result?: any) {
+        return deviceApiClient.getJson(path).then(function (this: any, result?: any) {
             var data: any = result.ok ? result.value : null;
             if (data && callback)
                 callback(data);
@@ -172,7 +180,7 @@ export function installApiModule(): GlobalDescriptors {
     }
     function getJsonFirst(this: any, paths?: any, callback?: any) {
         var index: any = 0;
-        function tryNext(this: any) {
+        function tryNext(this: any): Promise<any> {
             if (index >= paths.length)
                 return Promise.resolve(null);
             return getJsonQuietly(paths[index++]).then(function (this: any, data?: any) {
@@ -197,7 +205,6 @@ export function installApiModule(): GlobalDescriptors {
         return domain === "select" ? "state" : "all";
     }
     return {
-        "_deviceApi": liveGlobal(() => _deviceApi, (value?: any) => { _deviceApi = value; }),
         "_postQueue": liveGlobal(() => _postQueue, (value?: any) => { _postQueue = value; }),
         "_postQueueHadError": liveGlobal(() => _postQueueHadError, (value?: any) => { _postQueueHadError = value; }),
         "setPostThrottle": staticGlobal(setPostThrottle),

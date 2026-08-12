@@ -1,18 +1,12 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { createScreenScheduleController } from "../features/screen_schedule_controller";
-export function installScreenScheduleStateModule(): GlobalDescriptors {
+import type { ScreenScheduleController } from "../features/screen_schedule_controller";
+
+export function installScreenScheduleStateModule(
+    screenScheduleController: ScreenScheduleController,
+): GlobalDescriptors {
     // ── Screen Schedule State ──────────────────────────────────────────────
-    var _screenScheduleController: any = createScreenScheduleController({
-        trigger: normalizeScheduleTrigger,
-        sensorActivation: normalizeScheduleSensorActivation,
-        hour: normalizeHour,
-        mode: normalizeScheduleMode,
-        wakeTimeout: normalizeScheduleWakeTimeout,
-        wakeBrightness: normalizeScheduleWakeBrightness,
-        dimmedBrightness: normalizeScheduleDimmedBrightness,
-        clockBrightness: normalizeScheduleClockBrightness,
-    });
+    var screenScheduleControllerInstance: ScreenScheduleController = screenScheduleController;
     function screenScheduleControllerState(this: any) {
         return {
             trigger: state.scheduleTrigger,
@@ -57,8 +51,8 @@ export function installScreenScheduleStateModule(): GlobalDescriptors {
         return h + ":00 " + suffix;
     }
     function syncScreenScheduleUi(this: any) {
-        applyScreenScheduleControllerState(_screenScheduleController.normalize(screenScheduleControllerState()));
-        var uiState: any = _screenScheduleController.uiState(screenScheduleControllerState());
+        applyScreenScheduleControllerState(screenScheduleControllerInstance.normalize(screenScheduleControllerState()));
+        var uiState: any = screenScheduleControllerInstance.uiState(screenScheduleControllerState());
         state.brightnessMode = normalizeBrightnessMode(state.brightnessMode);
         state.brightnessDawnTime = normalizeTimeOfDay(state.brightnessDawnTime, "06:00");
         state.brightnessDuskTime = normalizeTimeOfDay(state.brightnessDuskTime, "18:00");
@@ -146,7 +140,10 @@ export function installScreenScheduleStateModule(): GlobalDescriptors {
         }
     }
     return {
-        "_screenScheduleController": liveGlobal(() => _screenScheduleController, (value?: any) => { _screenScheduleController = value; }),
+        "_screenScheduleController": liveGlobal(
+            () => screenScheduleControllerInstance,
+            (value?: any) => { screenScheduleControllerInstance = value as ScreenScheduleController; },
+        ),
         "screenScheduleControllerState": staticGlobal(screenScheduleControllerState),
         "applyScreenScheduleControllerState": staticGlobal(applyScreenScheduleControllerState),
         "formatDuration": staticGlobal(formatDuration),

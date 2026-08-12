@@ -1,8 +1,14 @@
 import { state } from "../state/app_instance";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installAppStateEventHandlersModule(): GlobalDescriptors {
+import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+
+export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
+export type SseHandlerFactory = () => Record<string, SseStateHandler>;
+
+export function installAppStateEventHandlersModule(
+    onCreateSseHandlers?: (factory: SseHandlerFactory) => void,
+): GlobalDescriptors {
     // ── State Event Handlers ──────────────────────────────────────────
-    function createSseHandlers(this: any) {
+    const createSseHandlers: SseHandlerFactory = () => {
         return {
             "text-button_order": function (this: any, val?: any) {
                 if (gridPreviewBlockedByRotationStartup() || state.screenRotationInitialFallbackActive) {
@@ -487,7 +493,8 @@ export function installAppStateEventHandlersModule(): GlobalDescriptors {
                 syncC6FirmwareUi();
             },
         };
-    }
+    };
+    onCreateSseHandlers?.(createSseHandlers);
     return {
         "createSseHandlers": staticGlobal(createSseHandlers),
     };

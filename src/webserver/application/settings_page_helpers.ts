@@ -1,35 +1,29 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { createSettingsUiFeature, timedSettingLabel } from "../features/settings";
-import { createAlarmDelayAudioController } from "../features/alarm_delay_audio_controller";
-import { createScreensaverController } from "../features/screensaver_controller";
-import { createCoverArtScreensaverController } from "../features/cover_art_screensaver_controller";
-import { createMediaPlaybackController } from "../features/media_playback_controller";
-export function installSettingsPageHelpersModule(): GlobalDescriptors {
+import { timedSettingLabel, type SettingsUiFeature } from "../features/settings";
+import type { AlarmDelayAudioController } from "../features/alarm_delay_audio_controller";
+import type { ScreensaverController } from "../features/screensaver_controller";
+import type { CoverArtScreensaverController } from "../features/cover_art_screensaver_controller";
+import type { MediaPlaybackController } from "../features/media_playback_controller";
+
+export interface SettingsPageHelpersControllers {
+    readonly settingsUiFeature: SettingsUiFeature;
+    readonly alarmDelayAudio: AlarmDelayAudioController;
+    readonly screensaver: ScreensaverController;
+    readonly coverArtScreensaver: CoverArtScreensaverController;
+    readonly mediaPlayback: MediaPlaybackController;
+}
+
+export function installSettingsPageHelpersModule(
+    controllers: SettingsPageHelpersControllers,
+): GlobalDescriptors {
     // ── Settings Page Helpers ──────────────────────────────────────────
     // ── Settings UI helpers ─────────────────────────────────────────────
-    var _settingsUiFeature: any = createSettingsUiFeature({
-        document: document,
-        textSpan: textSpan,
-        createDisclosureChevron: createDisclosureChevron,
-    });
-    var _alarmDelayAudioController: any = createAlarmDelayAudioController({
-        announcement: normalizeAlarmDelayAnnouncement,
-        beepVolume: normalizeAlarmDelayBeepVolume,
-        finalCountdown: normalizeAlarmDelayFinalCountdown,
-    });
-    var _screensaverController: any = createScreensaverController({
-        action: normalizeScreensaverAction,
-        dimBrightness: normalizeScreensaverDimmedBrightness,
-        clockBrightness: normalizeClockBrightness,
-    });
-    var _coverArtScreensaverController: any = createCoverArtScreensaverController({
-        delay: normalizeCoverArtDelay,
-        trackOverlayDuration: function (this: any, value?: any) {
-            return parseFloat(value) || 0;
-        },
-    });
-    var _mediaPlaybackController: any = createMediaPlaybackController();
+    var _settingsUiFeature: SettingsUiFeature = controllers.settingsUiFeature;
+    var _alarmDelayAudioController: AlarmDelayAudioController = controllers.alarmDelayAudio;
+    var _screensaverController: ScreensaverController = controllers.screensaver;
+    var _coverArtScreensaverController: CoverArtScreensaverController = controllers.coverArtScreensaver;
+    var _mediaPlaybackController: MediaPlaybackController = controllers.mediaPlayback;
     function alarmDelayAudioState(this: any) {
         return {
             audioEnabled: !!state.alarmDelayAudioOn,
@@ -159,7 +153,15 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
 
         var ttsOptions: any = condField();
         els.alarmDelayTtsOptions = ttsOptions;
-        function announcementInput(label: any, id: any, value: any, fallback: any, stateKey: "alarmDelayEntryAnnouncement" | "alarmDelayExitAnnouncement", postValue: any) {
+        function announcementInput(
+            label: any,
+            id: any,
+            value: any,
+            fallback: any,
+            stateKey: "alarmDelayEntryAnnouncement" | "alarmDelayExitAnnouncement",
+            controllerField: "entryAnnouncement" | "exitAnnouncement",
+            postValue: any,
+        ) {
             var field: any = document.createElement("div");
             field.className = "sp-field";
             field.appendChild(fieldLabel(label, id));
@@ -170,7 +172,9 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
             input.maxLength = 120;
             input.value = value;
             input.addEventListener("change", function (this: any) {
-                var normalized: any = _alarmDelayAudioController.setAnnouncement(alarmDelayAudioState(), stateKey, this.value, fallback)[stateKey];
+                var normalized: any = _alarmDelayAudioController.setAnnouncement(
+                    alarmDelayAudioState(), controllerField, this.value, fallback,
+                )[controllerField];
                 this.value = normalized;
                 state[stateKey] = normalized;
                 postValue(normalized);
@@ -183,11 +187,13 @@ export function installSettingsPageHelpersModule(): GlobalDescriptors {
             "Entry Announcement", "sp-set-alarm-delay-entry-announcement",
             state.alarmDelayEntryAnnouncement, DEFAULT_ALARM_DELAY_ENTRY_ANNOUNCEMENT,
             "alarmDelayEntryAnnouncement",
+            "entryAnnouncement",
             postAlarmDelayEntryAnnouncement);
         els.setAlarmDelayExitAnnouncement = announcementInput(
             "Exit Announcement", "sp-set-alarm-delay-exit-announcement",
             state.alarmDelayExitAnnouncement, DEFAULT_ALARM_DELAY_EXIT_ANNOUNCEMENT,
             "alarmDelayExitAnnouncement",
+            "exitAnnouncement",
             postAlarmDelayExitAnnouncement);
         options.appendChild(ttsOptions);
 

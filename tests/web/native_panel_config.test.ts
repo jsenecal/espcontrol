@@ -4,7 +4,7 @@ import {
   type NativePanelConfigRequest,
   type NativePanelConfigResponse,
 } from "../../src/webserver/features/native_panel_config";
-import { installNativePanelConfigMigrationModule } from "../../src/webserver/application/native_panel_config_migration";
+import { createNativePanelConfigMigrationController } from "../../src/webserver/application/native_panel_config_migration";
 import { decodePanelConfig, encodePanelConfig, type PanelConfigDocument } from "../../src/webserver/model";
 
 interface MigrationFixture {
@@ -174,24 +174,20 @@ export async function runNativePanelConfigTests(migrationFixture?: MigrationFixt
     setGlobal("DEVICE_ID", "panel-a");
     setGlobal("entityName", (name: string) => name);
     setGlobal("showBanner", () => undefined);
-    const descriptors = installNativePanelConfigMigrationModule();
-    for (const name of Object.keys(descriptors)) saveDescriptor(name);
-    Object.defineProperties(globalThis, descriptors);
-    const migrationGlobals = globalThis as unknown as {
-      nativePanelConfigTextWrite: (name: string, value: string) => unknown;
-      NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES: number;
-      _nativePanelConfigClient: ReturnType<typeof createNativePanelConfigClient>;
-    };
+    setGlobal("NUM_SLOTS", 2);
+    setGlobal("entityNameForSlot", (name: string, slot: number) => `${name}_${slot}`);
+    setGlobal("normalizeHexColor", (value: string) => value);
+    const controller = createNativePanelConfigMigrationController();
     await Promise.resolve();
     await Promise.resolve();
-    equal(await migrationGlobals.nativePanelConfigTextWrite("button_order", "1,2"), "saved",
+    equal(await controller.writeText("button_order", "1,2"), "saved",
       "an edit waits for deferred native setup instead of writing a stale legacy shadow");
     equal(capabilityRequests, 2,
       "a deferred edit retries capability discovery after the temporary 404");
     equal(nativeSaves, 1,
       "a deferred edit is written once the native configuration endpoint is ready");
 
-    migrationGlobals.NATIVE_PANEL_CONFIG_MAX_DISCOVERY_RETRIES = 0;
+    controller.maxDiscoveryRetries = 0;
     let permanentlyMissingCapabilityRequests = 0;
     const permanentlyMissingClient = createNativePanelConfigClient(async (path) => {
       if (path === "/api/v1/capabilities") {
@@ -201,10 +197,10 @@ export async function runNativePanelConfigTests(migrationFixture?: MigrationFixt
       return response(500);
     });
     await permanentlyMissingClient.discover();
-    migrationGlobals._nativePanelConfigClient = permanentlyMissingClient;
-    equal(await migrationGlobals.nativePanelConfigTextWrite("button_order", "2,1"), "legacy-fallback",
+    controller.client = permanentlyMissingClient;
+    equal(await controller.writeText("button_order", "2,1"), "legacy-fallback",
       "a permanently absent capabilities endpoint releases the pending edit to the legacy route");
-    equal(await migrationGlobals.nativePanelConfigTextWrite("button_order", "1,2"), "legacy-fallback",
+    equal(await controller.writeText("button_order", "1,2"), "legacy-fallback",
       "later queued edits reuse the older-firmware fallback");
     equal(permanentlyMissingCapabilityRequests, 2,
       "the capped older-firmware fallback avoids rediscovering native configuration for each save");

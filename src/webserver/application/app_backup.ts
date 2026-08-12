@@ -1,15 +1,22 @@
 import { state } from "../state/app_instance";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { createBackupImportController } from "../features/backup_import_controller";
-import { createBackupExportController } from "../features/backup_export_controller";
-import { createBackupFileController } from "../features/backup_file_controller";
-import { createBackupRestoreController } from "../features/backup_restore_controller";
-export function installAppBackupModule(): GlobalDescriptors {
+import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { BackupImportController } from "../features/backup_import_controller";
+import type { BackupExportController } from "../features/backup_export_controller";
+import type { BackupFileController } from "../features/backup_file_controller";
+import type { BackupRestoreController } from "../features/backup_restore_controller";
+
+export interface AppBackupControllers {
+    readonly backupExport: BackupExportController;
+    readonly backupImport: BackupImportController<any, any, any>;
+    readonly backupRestore: BackupRestoreController<any, any>;
+    readonly backupFile: BackupFileController;
+    readonly normalizeImportedPanelSettings: (settings: any) => any;
+    readonly gridColsForImportedSettings: (settings: any) => number;
+}
+
+export function installAppBackupModule(controllers: AppBackupControllers): GlobalDescriptors {
     // ── Export / Import ────────────────────────────────────────────────────
-    var backupExportController: any = createBackupExportController({
-        "serializeButtonConfig": function (button: any) { return serializeButtonConfig(button); },
-        "serializeSubpageConfig": function (subpage: any) { return serializeSubpageConfig(subpage); },
-    });
+    var backupExportController: BackupExportController = controllers.backupExport;
     function backupExportScreenSizeSlug(this: any, value?: any) {
         return backupExportController.screenSizeSlug(value);
     }
@@ -20,93 +27,14 @@ export function installAppBackupModule(): GlobalDescriptors {
         return backupExportController.fileName(CFG.screenSize, value);
     }
     function normalizeImportedPanelSettings(this: any, settings?: any) {
-        if (!settings)
-            return null;
-        return EspControlModel.normalizeBackupPanelSettings(settings, {
-            timezone: state.timezone,
-            language: state.language,
-            clockFormat: state.clockFormat,
-            clockFormatOptions: state.clockFormatOptions,
-            ntpDefaults: NTP_SERVER_DEFAULTS,
-            ntpServer1: state.ntpServer1,
-            ntpServer2: state.ntpServer2,
-            ntpServer3: state.ntpServer3,
-            coverArtHomeAssistantProtocol: state.homeAssistantArtworkProtocol,
-            coverArtHomeAssistantPort: state.coverArtHomeAssistantPort,
-            coverArtHomeAssistantBaseUrl: state.coverArtHomeAssistantBaseUrl,
-            autoUpdate: state.autoUpdate,
-            updateFrequency: state.updateFrequency,
-            updateFrequencyOptions: state.updateFreqOptions,
-            screenRotationOptions: allScreenRotationOptions(),
-        });
+        return controllers.normalizeImportedPanelSettings(settings);
     }
     function gridColsForImportedSettings(this: any, importedSettings?: any) {
-        var rotation: any = importedSettings ? importedSettings.screenRotation : state.screenRotation;
-        var layout: any = isPortraitRotation(rotation) && CFG.portrait ? CFG.portrait : CFG;
-        return layout.cols || CFG.cols;
+        return controllers.gridColsForImportedSettings(importedSettings);
     }
-    var backupImportController: any = createBackupImportController({
-        "normalizeBackup": function (data: any) { return normalizeBackupConfig(data); },
-        "normalizeSettings": function (settings: any) { return normalizeImportedPanelSettings(settings); },
-        "gridColsForSettings": function (settings: any) { return gridColsForImportedSettings(settings); },
-        "getGridCols": function () { return GRID_COLS; },
-        "setGridCols": function (gridCols: any) { GRID_COLS = gridCols; },
-        "planBackupImport": function (data: any, target: any) { return planBackupImport(data, target); },
-    });
-    var backupRestoreController: any = createBackupRestoreController({
-        "plan": function (backup: any, target: any) { return backupImportController.plan(backup, target); },
-        "warnings": function (plannedImport: any) { return plannedImport.backupPlan.warnings; },
-        "showBanner": showBanner,
-        "setPostThrottle": setPostThrottle,
-        "resetPostQueueError": resetPostQueueError,
-        "postQueueIdle": postQueueIdle,
-        "postQueueHadError": postQueueHadError,
-    });
-    var backupFileController = createBackupFileController({
-        "transport": {
-            "download": function (content: string, filename: string) {
-                var blob: any = new Blob([content], { type: "application/json" });
-                var url: any = URL.createObjectURL(blob);
-                var a: any = document.createElement("a");
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-            },
-            "chooseJsonFile": function (onText: any, onError: any) {
-                var input: any = document.createElement("input");
-                input.type = "file";
-                input.accept = ".json";
-                input.style.display = "none";
-                function cleanupInput() {
-                    if (input.parentNode)
-                        input.parentNode.removeChild(input);
-                }
-                input.addEventListener("cancel", cleanupInput);
-                input.addEventListener("change", function () {
-                    if (!input.files || !input.files[0]) {
-                        cleanupInput();
-                        return;
-                    }
-                    var reader: any = new FileReader();
-                    reader.onerror = function () {
-                        cleanupInput();
-                        onError();
-                    };
-                    reader.onload = function () {
-                        cleanupInput();
-                        onText(String(reader.result || ""));
-                    };
-                    reader.readAsText(input.files[0]);
-                });
-                document.body.appendChild(input);
-                input.click();
-            },
-        },
-        "showBanner": showBanner,
-    });
+    var backupImportController: BackupImportController<any, any, any> = controllers.backupImport;
+    var backupRestoreController: BackupRestoreController<any, any> = controllers.backupRestore;
+    var backupFileController: BackupFileController = controllers.backupFile;
     function downloadBackupConfig(this: any, data?: any) {
         backupFileController.download(data, backupExportFileName());
     }

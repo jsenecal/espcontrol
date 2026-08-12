@@ -1,19 +1,9 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { createBackupFeature } from "../features/backup";
-export function installBackupContractModule(): GlobalDescriptors {
+import type { BackupFeature } from "../features/backup";
+
+export function installBackupContractModule(backupFeature: BackupFeature): GlobalDescriptors {
     // ── Backup contract compatibility bridge ──────────────────────────────
-    var _backupFeature: any = createBackupFeature({
-        deviceId: DEVICE_ID,
-        gridCols: GRID_COLS,
-        numSlots: NUM_SLOTS,
-        normalizeButtonConfig: normalizeButtonConfig,
-        parseSubpageConfig: parseSubpageConfig,
-        serializeSubpageConfig: serializeSubpageConfig,
-        buildSubpageGrid: function (subpage: any) {
-            buildSubpageGridAndNormalizeOrder(subpage);
-            return subpage.grid;
-        },
-    });
+    var _backupFeature: BackupFeature = backupFeature;
     var BACKUP_CONFIG_VERSION: any = _backupFeature.BACKUP_CONFIG_VERSION;
     var BACKUP_FORMAT: any = _backupFeature.BACKUP_FORMAT;
     function backupEmptyButtonConfig(this: any) {

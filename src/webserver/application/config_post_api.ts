@@ -1,6 +1,10 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installConfigPostApiModule(): GlobalDescriptors {
+import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
+
+export function installConfigPostApiModule(
+    nativePanelConfig: NativePanelConfigController | null = null,
+): GlobalDescriptors {
     // ── Config Post API ───────────────────────────────────────────────────
     function saveButtonConfig(this: any, slot?: any) {
         var b: any = state.buttons[slot - 1];
@@ -54,7 +58,9 @@ export function installConfigPostApiModule(): GlobalDescriptors {
             showBanner("Subpage is too large to save. Shorten labels or entity IDs.", "error");
             return;
         }
-        var nativeSave: any = nativePanelConfigSubpageWrite(slot, full);
+        var nativeSave: any = nativePanelConfig
+            ? nativePanelConfig.writeSubpage(Number.parseInt(String(slot), 10), full)
+            : null;
         if (nativeSave) {
             state.subpageSavePending[slot] = full;
             _postQueue = _postQueue.then(function () { return nativeSave; }).then(function (result: any) {

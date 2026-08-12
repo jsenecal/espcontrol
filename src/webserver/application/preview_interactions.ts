@@ -1,11 +1,9 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { createCardEditorDraftController } from "../features/card_editor_draft_controller";
-export function installPreviewInteractionsModule(): GlobalDescriptors {
-    var cardEditorDraftController: any = createCardEditorDraftController({
-        "cloneCard": function (button: any) { return EspControlModel.cloneCardConfig(button); },
-        "emptyCard": function () { return EspControlModel.emptyCardConfig(); },
-    });
+import type { CardEditorDraftController } from "../features/card_editor_draft_controller";
+export function installPreviewInteractionsModule(
+    cardEditorDraftController: CardEditorDraftController,
+): GlobalDescriptors {
     // ── Preview event delegation & drag ────────────────────────────────────
     function clearPlaceholder(this: any) {
         if (previewPlaceholder) {

@@ -1,9 +1,12 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { createVoiceServicesController } from "../features/voice_services_controller";
-export function installEnvironmentStateModule(): GlobalDescriptors {
+import type { VoiceServicesController } from "../features/voice_services_controller";
+
+export function installEnvironmentStateModule(
+    voiceServicesController: VoiceServicesController,
+): GlobalDescriptors {
     // ── Environment State ──────────────────────────────────────────────────
-    var _voiceServicesController: any = createVoiceServicesController();
+    var voiceServicesControllerInstance: VoiceServicesController = voiceServicesController;
     function voiceServicesSupported(this: any) {
         return !!(CFG.features && CFG.features.voiceServices);
     }
@@ -17,7 +20,7 @@ export function installEnvironmentStateModule(): GlobalDescriptors {
         state.voiceServicesOn = next.enabled;
     }
     function voiceServicesUiState(this: any) {
-        return _voiceServicesController.uiState(voiceServicesState());
+        return voiceServicesControllerInstance.uiState(voiceServicesState());
     }
     function isHomeAssistantAutoTimezone(this: any, value?: any) {
         return String(value || "") === AUTO_TIMEZONE_OPTION;
@@ -51,7 +54,10 @@ export function installEnvironmentStateModule(): GlobalDescriptors {
         }
     }
     return {
-        "_voiceServicesController": liveGlobal(() => _voiceServicesController, (value?: any) => { _voiceServicesController = value; }),
+        "_voiceServicesController": liveGlobal(
+            () => voiceServicesControllerInstance,
+            (value?: any) => { voiceServicesControllerInstance = value as VoiceServicesController; },
+        ),
         "voiceServicesSupported": staticGlobal(voiceServicesSupported),
         "voiceServicesState": staticGlobal(voiceServicesState),
         "applyVoiceServicesState": staticGlobal(applyVoiceServicesState),

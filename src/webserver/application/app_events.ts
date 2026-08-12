@@ -1,15 +1,12 @@
 import { state } from "../state/app_instance";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-import { createReconnectController } from "../features/reconnect";
-export function installAppEventsModule(): GlobalDescriptors {
-    var reconnectController: any = createReconnectController({
-        "eventStreamEnabled": function () { return eventStreamEnabled(); },
-        "loadInitialState": function (handleState: any, markConnected: any) { loadInitialState(handleState, markConnected); },
-        "createEventSource": function () { return new EventSource("/events"); },
-        "getActiveSource": function () { return _eventSource; },
-        "setActiveSource": function (source: any) { _eventSource = source; },
-        "schedule": function (callback: any, delayMs: any) { return setTimeout(callback, delayMs); },
-    });
+import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { ReconnectController } from "../features/reconnect";
+import type { SseHandlerFactory } from "./app_state_event_handlers";
+
+export function installAppEventsModule(
+    reconnectController: ReconnectController<unknown>,
+    createSseHandlers: SseHandlerFactory,
+): GlobalDescriptors {
     // ── SSE ────────────────────────────────────────────────────────────────
     function connectEvents(this: any) {
         function markConnected(this: any) {

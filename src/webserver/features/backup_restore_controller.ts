@@ -8,10 +8,14 @@ export interface BackupRestoreControllerOptions<Plan, Target> {
   readonly postQueueHadError: () => boolean;
 }
 
+export interface BackupRestoreController<Plan, Target> {
+  restore(data: unknown, target: Target, apply: (plan: Plan) => void): boolean;
+}
+
 /** Coordinates a restore so all entity posts use the same safe queue lifecycle. */
 export function createBackupRestoreController<Plan, Target>(
   options: BackupRestoreControllerOptions<Plan, Target>,
-) {
+): BackupRestoreController<Plan, Target> {
   return {
     restore(data: unknown, target: Target, apply: (plan: Plan) => void): boolean {
       let backupPlan: Plan;
