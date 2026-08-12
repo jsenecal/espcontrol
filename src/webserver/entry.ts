@@ -147,7 +147,7 @@ const startupState = globalThis as typeof globalThis & {
 };
 
 function installApplicationCompatibility(context: ApplicationContext): void {
-  installGlobals(installCore(context.layout));
+  installGlobals(installCore(context.layout, context.configuration.codec));
   installGlobals(installFirmwareMetadataModule());
   installGlobals(installStylesModule());
   installGlobals(installStateModule());
@@ -169,7 +169,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installFirmwareUpdateStateModule());
   installGlobals(installScreensaverTimeoutModule());
   installGlobals(installC6FirmwareUiModule());
-  installGlobals(installGridModule());
+  installGlobals(installGridModule(context.configuration.codec));
   const deviceApi = context.api;
   const nativePanelConfig = context.configuration.native;
   const configPersistence = context.configuration.persistence;
@@ -179,7 +179,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
-  installGlobals(context.configuration.codec.globals);
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
   installGlobals(installStateLoaderApiModule());
@@ -199,10 +198,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     screensaver: screensaverController,
     coverArtScreensaver: coverArtScreensaverController,
     mediaPlayback: mediaPlaybackController,
+    codec: context.configuration.codec,
   }));
-  installGlobals(installSettingsScheduleSectionModule());
-  installGlobals(installSettingsCoverArtSectionModule());
-  installGlobals(installSettingsPageModule());
+  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec));
+  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec));
+  installGlobals(installSettingsPageModule(context.configuration.codec));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -248,7 +248,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     imageOptions: context.configuration.imageOptions,
     codec: context.configuration.codec,
   }));
-  installGlobals(installBackupContractModule(context.backup.contract));
+  installGlobals(installBackupContractModule(context.backup.contract, context.configuration.codec));
   const backupUiFeature = context.backup.application;
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
@@ -257,7 +257,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule());
   installGlobals(installAppTitleModule());
-  installGlobals(installAppConfigEventsModule(configPersistence));
+  installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec));
   let sseHandlerFactory: SseHandlerFactory | undefined;
   installGlobals(installAppStateEventHandlersModule((factory) => {
     sseHandlerFactory = factory;
@@ -386,6 +386,7 @@ function composeApplicationContext(): ApplicationContext {
     accessClimateAlarmOptions,
     confirmationOptions,
   );
+  configurationPersistence.connectCodec(configurationCodec);
   const cardEditorDraft = createCardEditorDraftController({
     cloneCard: (button) => Model.cloneCardConfig(button),
     emptyCard: () => Model.emptyCardConfig(),
@@ -543,6 +544,7 @@ function composeApplicationContext(): ApplicationContext {
     normalizeImportedPanelSettings,
     gridColsForImportedSettings,
     nativePanelConfig,
+    codec: configurationCodec,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),

@@ -148,7 +148,9 @@ export function runApplicationContextTests(): void {
     GENERATED_DOMAIN_ICONS: {},
   });
   const compatibilityGlobals: Record<string, unknown> = {};
-  Object.defineProperties(compatibilityGlobals, installCore(context.layout));
+  Object.defineProperties(compatibilityGlobals, installCore(context.layout, {
+    serializeSubpageGrid() { return ""; },
+  } as any));
   compatibilityGlobals.GRID_COLS = 6;
   compatibilityGlobals.GRID_ROWS = 2;
   compatibilityGlobals.NUM_SLOTS = 10;

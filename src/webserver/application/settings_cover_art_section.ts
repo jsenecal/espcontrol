@@ -1,6 +1,8 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installSettingsCoverArtSectionModule(): GlobalDescriptors {
+import type { ConfigCodecFeature } from "./config_codec";
+export function installSettingsCoverArtSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">): GlobalDescriptors {
+    const { bindTextPost } = codec;
     // ── Settings Cover Art Section ─────────────────────────────────────
     function buildCoverArtSettingsCard(this: any) {
         var coverArtBody: any = document.createElement("div");

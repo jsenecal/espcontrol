@@ -1,7 +1,12 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ApplicationLayoutState } from "./application_context";
-export function installCore(applicationLayout: ApplicationLayoutState): GlobalDescriptors {
+import type { ConfigCodecFeature } from "./config_codec";
+export function installCore(
+    applicationLayout: ApplicationLayoutState,
+    codec: ConfigCodecFeature,
+): GlobalDescriptors {
+    const { serializeSubpageGrid } = codec;
     function isPortraitRotation(this: any, value?: any) {
         value = String(value == null ? "0" : value);
         return value === "90" || value === "270";

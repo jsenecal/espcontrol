@@ -195,7 +195,7 @@ describe("browserless application contracts", () => {
     assert.match(codec, /createConfigCodecFeature/);
     assert.doesNotMatch(entry, /installConfigCodecModule/);
     assert.match(entry, /configurationCodec = createConfigCodecFeature/);
-    assert.match(entry, /installGlobals\(context\.configuration\.codec\.globals\)/);
+    assert.doesNotMatch(entry, /configuration\.codec\.globals/);
     assert.match(entry, /configurationCodec\.normalizeButtonConfig/);
     assert.match(entry, /configurationCodec\.serializeSubpageConfig/);
   });
@@ -219,6 +219,31 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /codec: context\.configuration\.codec/);
     assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec\)/);
+  });
+
+  test("injects the configuration codec into persistence and application services", () => {
+    const consumers = [
+      "src/webserver/application/config_post_api.ts",
+      "src/webserver/application/app_config_events.ts",
+      "src/webserver/application/backup_contract.ts",
+      "src/webserver/application/app_backup.ts",
+      "src/webserver/application/core.ts",
+      "src/webserver/application/grid.ts",
+      "src/webserver/application/settings_page.ts",
+      "src/webserver/application/settings_page_helpers.ts",
+      "src/webserver/application/settings_schedule_section.ts",
+      "src/webserver/application/settings_cover_art_section.ts",
+    ];
+    for (const relativePath of consumers) {
+      const source = fs.readFileSync(path.join(ROOT, relativePath), "utf8");
+      assert.match(source, /ConfigCodecFeature/, `${relativePath} should declare its codec dependency`);
+    }
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.match(entry, /configurationPersistence\.connectCodec\(configurationCodec\)/);
+    assert.match(entry, /installAppConfigEventsModule\(configPersistence, context\.configuration\.codec\)/);
+    assert.doesNotMatch(entry, /configuration\.codec\.globals/);
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(globals, /\bvar (?:normalizeButtonConfig|serializeButtonConfig|parseSubpageConfig|serializeSubpageConfig|getSubpage|bindTextPost):/);
   });
 
   test("preserves settings normalization", () => {

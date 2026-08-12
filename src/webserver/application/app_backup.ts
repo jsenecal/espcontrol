@@ -7,6 +7,7 @@ import type { BackupRestoreController } from "../features/backup_restore_control
 import type { ApplicationLayoutState } from "./application_context";
 import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
 import type { PanelConfigDocument } from "../model";
+import type { ConfigCodecFeature } from "./config_codec";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -17,6 +18,7 @@ export interface AppBackupControllers {
     readonly normalizeImportedPanelSettings: (settings: any) => any;
     readonly gridColsForImportedSettings: (settings: any) => number;
     readonly nativePanelConfig?: NativePanelConfigController;
+    readonly codec: ConfigCodecFeature;
 }
 
 export interface AppBackupFeature {
@@ -26,6 +28,7 @@ export interface AppBackupFeature {
 }
 
 export function createAppBackupFeature(controllers: AppBackupControllers): AppBackupFeature {
+    const { serializeButtonConfig, serializeSubpageConfig } = controllers.codec;
     // ── Export / Import ────────────────────────────────────────────────────
     var backupExportController: BackupExportController = controllers.backupExport;
     function backupExportScreenSizeSlug(this: any, value?: any) {

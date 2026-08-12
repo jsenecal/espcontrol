@@ -1,5 +1,4 @@
 import { state } from "../state/app_instance";
-import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     migrateSavedConfigVacuumLegacy,
     normalizeSavedConfigVacuumIconOn,
@@ -997,11 +996,7 @@ export function createConfigCodecFeature(
         subpageFirstFreeSlot,
         bindTextPost,
     };
-    const globals: GlobalDescriptors = {};
-    for (const name of Object.keys(feature) as Array<keyof typeof feature>) {
-        globals[name] = staticGlobal(feature[name]);
-    }
-    return { ...feature, globals };
+    return feature;
 }
 
 export type ConfigCodecFeature = ReturnType<typeof createConfigCodecFeature>;

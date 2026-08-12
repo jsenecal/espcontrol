@@ -1,7 +1,12 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { BackupFeature } from "../features/backup";
+import type { ConfigCodecFeature } from "./config_codec";
 
-export function installBackupContractModule(backupFeature: BackupFeature): GlobalDescriptors {
+export function installBackupContractModule(
+    backupFeature: BackupFeature,
+    codec: ConfigCodecFeature,
+): GlobalDescriptors {
+    const { parseSubpageConfig } = codec;
     // ── Backup contract compatibility bridge ──────────────────────────────
     var _backupFeature: BackupFeature = backupFeature;
     var BACKUP_CONFIG_VERSION: any = _backupFeature.BACKUP_CONFIG_VERSION;

@@ -1,9 +1,11 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
+import type { ConfigCodecFeature } from "./config_codec";
 
 export interface ConfigPersistenceFeature {
     readonly globals: GlobalDescriptors;
+    connectCodec(codec: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig">): void;
     saveButtonConfig(slot: number): void;
     saveSubpageEntity(slot: number): unknown;
 }
@@ -11,6 +13,20 @@ export interface ConfigPersistenceFeature {
 export function createConfigPersistenceFeature(
     nativePanelConfig: NativePanelConfigController | null = null,
 ): ConfigPersistenceFeature {
+    let codec: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig"> | undefined;
+    function connectCodec(value: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig">) {
+        codec = value;
+    }
+    function serializeButtonConfig(button: any) {
+        if (!codec)
+            throw new Error("Configuration persistence used before the codec was connected");
+        return codec.serializeButtonConfig(button);
+    }
+    function serializeSubpageConfig(subpage: any) {
+        if (!codec)
+            throw new Error("Configuration persistence used before the codec was connected");
+        return codec.serializeSubpageConfig(subpage);
+    }
     // ── Config Post API ───────────────────────────────────────────────────
     function saveButtonConfig(this: any, slot?: any) {
         var b: any = state.buttons[slot - 1];
@@ -93,6 +109,7 @@ export function createConfigPersistenceFeature(
         }, 5000);
     }
     return {
+        connectCodec,
         globals: {
             "saveButtonConfig": staticGlobal(saveButtonConfig),
             "subpageEntityKeys": staticGlobal(subpageEntityKeys),

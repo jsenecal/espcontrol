@@ -1,6 +1,8 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installSettingsPageModule(): GlobalDescriptors {
+import type { ConfigCodecFeature } from "./config_codec";
+export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">): GlobalDescriptors {
+    const { bindTextPost } = codec;
     // ── Settings Page ──────────────────────────────────────────────────────
     function buildSettingsPage(this: any, parent?: any) {
         var page: any = document.createElement("div");

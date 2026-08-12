@@ -1,9 +1,12 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigPersistenceFeature } from "./config_post_api";
+import type { ConfigCodecFeature } from "./config_codec";
 export function installAppConfigEventsModule(
     configPersistence: ConfigPersistenceFeature,
+    codec: ConfigCodecFeature,
 ): GlobalDescriptors {
+    const { parseButtonConfig, buttonConfigNeedsMigration, applySubpageRaw } = codec;
     // ── Config Event Handlers ─────────────────────────────────────────────
     function ensureSubpageRaw(this: any, slot?: any) {
         if (!state.subpageRaw[slot]) {

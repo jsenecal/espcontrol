@@ -1,6 +1,8 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installGridModule(): GlobalDescriptors {
+import type { ConfigCodecFeature } from "./config_codec";
+export function installGridModule(codec: ConfigCodecFeature): GlobalDescriptors {
+    const { getSubpage, saveSubpageConfig } = codec;
     // ── Context abstraction ────────────────────────────────────────────────
     var mainGridSaveTimer: any = null;
     function scheduleMainGridSave(this: any) {
