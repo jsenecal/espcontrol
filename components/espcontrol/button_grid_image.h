@@ -2130,11 +2130,26 @@ inline void image_card_process_media_artwork(ImageCardCtx *ctx,
     image_card_log_diagnostics(ctx, "media-artwork-waiting-for-companion");
     return;
   }
+  if (response_window_expired) {
+    ctx->media_artwork_retry_mask = espcontrol::artwork::artwork_timeout_retry_mask(
+      ctx->media_artwork_retry_mask,
+      ctx->media_artwork_refresh.missing_mask(),
+      ctx->media_artwork_trigger.pending);
+    if (ctx->media_artwork_trigger.pending) ctx->next_picture_retry_ms = 0;
+  }
   ctx->media_artwork_refresh.finish();
   ctx->media_artwork_remote_refresh_pending = false;
+  if (ctx->media_artwork_retry_mask != 0) {
+    image_card_schedule_picture_retry(
+      ctx,
+      ha_api_connected() ? IMAGE_CARD_API_RETRY_INTERVAL_MS : IMAGE_CARD_RETRY_INTERVAL_MS);
+    if (!ctx->image_ready) image_card_set_loading_state(ctx, "Loading", true);
+  }
   if (chosen.empty()) {
     if (espcontrol::artwork::artwork_empty_selection_preserves_pending_refresh(
-          true, ctx->media_artwork_trigger.pending)) {
+          true, ctx->media_artwork_trigger.pending) ||
+        espcontrol::artwork::artwork_empty_selection_preserves_retry(
+          true, ctx->media_artwork_retry_mask)) {
       image_card_log_diagnostics(ctx, "media-artwork-pending-refresh-preserved");
       return;
     }

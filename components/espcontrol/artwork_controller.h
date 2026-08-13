@@ -84,6 +84,10 @@ struct RefreshBatch {
            (this->received_mask & this->expected_mask) == this->expected_mask;
   }
 
+  uint8_t missing_mask() const {
+    return this->expected_mask & static_cast<uint8_t>(~this->received_mask);
+  }
+
   bool active() const { return this->expected_mask != 0; }
 
   bool finish() {
@@ -162,6 +166,19 @@ constexpr bool artwork_batch_waits_for_companion(bool batch_complete,
 constexpr bool artwork_empty_selection_preserves_pending_refresh(
     bool selection_empty, bool refresh_pending) {
   return selection_empty && refresh_pending;
+}
+
+constexpr bool artwork_empty_selection_preserves_retry(
+    bool selection_empty, uint8_t retry_mask) {
+  return selection_empty && retry_mask != 0;
+}
+
+constexpr uint8_t artwork_timeout_retry_mask(uint8_t current_retry_mask,
+                                             uint8_t missing_mask,
+                                             bool refresh_pending) {
+  return refresh_pending
+           ? 0
+           : static_cast<uint8_t>(current_retry_mask | missing_mask);
 }
 
 // Every active attribute-read batch needs a bounded deadline, including a
