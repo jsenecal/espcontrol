@@ -10,12 +10,15 @@ import {
     publicFirmwareVersionsUrl,
 } from "./firmware_metadata";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
+import type { ControlsShellFeature } from "./controls_shell";
 
 export function installPublicFirmwareInstallModule(
     deviceApi: DeviceApi,
     deviceId: string,
     firmwareUpdate: FirmwareUpdateFeature,
+    shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">,
 ): GlobalDescriptors {
+    const { setConfigLocked, showBanner } = shell;
     const {
         selectedInfo: selectedFirmwareInfo,
         setPublicVersions: setPublicFirmwareVersions,

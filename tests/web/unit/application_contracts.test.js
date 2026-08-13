@@ -76,7 +76,7 @@ describe("browserless application contracts", () => {
       const source = fs.readFileSync(path.join(ROOT, "src/webserver/application", fileName), "utf8");
       assert.match(source, /Pick<EntityStateFeature,/i, `${fileName} should declare its entity dependency`);
     }
-    assert.match(entry, /installApiModule\(nativePanelConfig, deviceApi, context\.controllers\.entityState, screensaverTimeout\)/);
+    assert.match(entry, /installApiModule\(nativePanelConfig, deviceApi, context\.controllers\.entityState, screensaverTimeout, context\.controllers\.shell\)/);
     assert.match(entry, /installFirmwareUpdatePostApiModule\(context\.controllers\.entityState\)/);
     assert.match(entry, /installArtworkPostApiModule\(context\.controllers\.entityState\)/);
     assert.match(entry, /installScreenSchedulePostApiModule\(context\.controllers\.entityState\)/);
@@ -107,7 +107,7 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar DEVICE_ID:/);
     assert.doesNotMatch(migration, /\bDEVICE_ID\b|\bNUM_SLOTS\b|dependencies\?/);
     assert.match(entry, /createFirmwareUpdateFeature\(runtime, layout\.deviceId, firmwareVersion/);
-    assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id, firmwareUpdate\)/);
+    assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id, firmwareUpdate, context\.controllers\.shell\)/);
   });
 
   test("owns all slot and grid geometry without layout globals", () => {
@@ -675,6 +675,17 @@ describe("browserless application contracts", () => {
     assert.match(entry, /showBanner: shell\.showBanner/);
     assert.match(entry, /createDisclosureChevron: shell\.createDisclosureChevron/);
     assert.match(entry, /controlsShellCompatibilityGlobals\(context\.controllers\.shell\)/);
+  });
+
+  test("injects the UI shell into API and reconnect modules", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    for (const file of ["api.ts", "app_events.ts", "state_loader_api.ts", "public_firmware_install.ts"]) {
+      const source = fs.readFileSync(path.join(ROOT, "src/webserver/application", file), "utf8");
+      assert.match(source, /Pick<ControlsShellFeature, "setConfigLocked" \| "showBanner">/);
+      assert.match(source, /const \{ setConfigLocked, showBanner \} = shell/);
+    }
+    assert.match(entry, /installApiModule\([\s\S]*context\.controllers\.shell\)/);
+    assert.match(entry, /installAppEventsModule\([\s\S]*context\.controllers\.shell/);
   });
 
   test("injects preview drag state without ambient globals", () => {

@@ -153,12 +153,12 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const cardEditorDraft = context.controllers.cardEditorDraft;
   const cardEditorValidation = context.controllers.cardEditorValidation;
   const previewPlacementController = context.controllers.previewPlacement;
-  installGlobals(installApiModule(nativePanelConfig, deviceApi, context.controllers.entityState, screensaverTimeout));
+  installGlobals(installApiModule(nativePanelConfig, deviceApi, context.controllers.entityState, screensaverTimeout, context.controllers.shell));
   installGlobals(installFirmwareUpdatePostApiModule(context.controllers.entityState));
-  installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate));
+  installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState));
+  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState, context.controllers.shell));
   installGlobals(installArtworkPostApiModule(context.controllers.entityState));
   installGlobals(installScreenSchedulePostApiModule(context.controllers.entityState));
   installGlobals(installClockBarPostApiModule(context.controllers.entityState));
@@ -255,7 +255,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const reconnectController = context.controllers.reconnect;
   if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
   installGlobals(installAppEventsModule(
-    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState,
+    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState, context.controllers.shell,
   ));
   installGlobals(installAppModule(
     context.controllers.pageTitle,

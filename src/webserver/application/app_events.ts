@@ -27,6 +27,7 @@ import type { FirmwareVersionFeature } from "./firmware_version_state";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { EntityStateFeature } from "./entity_state";
+import type { ControlsShellFeature } from "./controls_shell";
 
 export function installAppEventsModule(
     reconnectController: ReconnectController<unknown>,
@@ -37,8 +38,10 @@ export function installAppEventsModule(
     firmwareUpdate: FirmwareUpdateFeature,
     c6Firmware: C6FirmwareFeature,
     entityState: Pick<EntityStateFeature, "rememberEntityPostPath">,
+    shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">,
 ): GlobalDescriptors {
     const { rememberEntityPostPath } = entityState;
+    const { setConfigLocked, showBanner } = shell;
     const els = runtime.els;
     const { set: setFirmwareVersion } = firmwareVersion;
     const { setInfo: setFirmwareUpdateInfo, renderStatus: renderFirmwareUpdateStatus } = firmwareUpdate;

@@ -6,15 +6,18 @@ import { requestFailureInfo } from "../api/request_failure";
 import { screensaverActionOption } from "../model/settings";
 import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
 import type { EntityStateFeature } from "./entity_state";
+import type { ControlsShellFeature } from "./controls_shell";
 
 export function installApiModule(
     nativePanelConfig: NativePanelConfigController,
     deviceApi: DeviceApi,
     entityState: Pick<EntityStateFeature, "entityPostUrls" | "entityName" | "entityObjectIds">,
     screensaverTimeout: ScreensaverTimeoutFeature,
+    shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">,
 ): GlobalDescriptors {
     const { entityPostUrls, entityName, entityObjectIds } = entityState;
     const { supported: screensaverTimeoutSupported, syncUi: syncScreensaverTimeoutUi } = screensaverTimeout;
+    const { setConfigLocked, showBanner } = shell;
     // ── POST queue ─────────────────────────────────────────────────────────
     var deviceApiClient: DeviceApi = deviceApi;
     var _postQueue: any = Promise.resolve(null);
