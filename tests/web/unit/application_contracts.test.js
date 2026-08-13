@@ -209,7 +209,15 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /installGridModule/);
     assert.match(entry, /createAppConfigEventsFeature\(configurationPersistence, configurationCodec, layout\)/);
     assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview, context\.controllers\.grid\)/);
-    for (const source of [buttonSettings, backup, stateHandlers, previewHooks]) {
+    const previewGridConsumers = [
+      "preview_render.ts",
+      "preview_grid_placement.ts",
+      "preview_context_menu.ts",
+      "preview_clipboard.ts",
+      "preview_interactions.ts",
+      "button_settings_selection.ts",
+    ].map((file) => fs.readFileSync(path.join(ROOT, "src/webserver/application", file), "utf8"));
+    for (const source of [buttonSettings, backup, stateHandlers, previewHooks, ...previewGridConsumers]) {
       assert.match(source, /GridFeature/);
     }
     assert.match(entry, /renderSelectionBar: \(\) => renderSelectionBar\(grid\.ctx\(\)\)/);
@@ -803,7 +811,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /ControlsShellFeature/, `${file} should declare its shell dependency`);
     }
     assert.match(entry, /installControlsFieldsModule\(context\.cards, context\.configuration\.options, context\.controllers\.shell, context\.controllers\.requestApi\)/);
-    assert.match(entry, /installButtonSettingsSelectionModule\(context\.runtime, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.statusPreview\)/);
+    assert.match(entry, /installButtonSettingsSelectionModule\(context\.runtime, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.statusPreview, context\.controllers\.grid\)/);
   });
 
   test("injects the UI shell into preview, persistence, backup, and startup modules", () => {

@@ -5,11 +5,13 @@ import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
-export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityInput">, shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton">, statusPreview: Pick<AppStatusPreviewFeature, "clockBarItemActive" | "clockBarItemLabel" | "clockBarItems" | "isClockBarTemperatureItem" | "updateClockBarItemUi">): GlobalDescriptors {
+import type { GridFeature } from "./grid";
+export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityInput">, shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton">, statusPreview: Pick<AppStatusPreviewFeature, "clockBarItemActive" | "clockBarItemLabel" | "clockBarItems" | "isClockBarTemperatureItem" | "updateClockBarItemUi">, grid: Pick<GridFeature, "ctx">): GlobalDescriptors {
     const { entityInput } = entityState;
     const { isConfigLocked, createActionButton } = shell;
     const els = runtime.els;
     const { clockBarItemActive, clockBarItemLabel, clockBarItems, isClockBarTemperatureItem, updateClockBarItemUi } = statusPreview;
+    const { ctx } = grid;
     const {
         primaryTemperatureEntity: primaryClockBarTemperatureEntity,
         saveTemperatureSettings: saveClockBarTemperatureSettings,

@@ -13,6 +13,7 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
+import type { GridFeature } from "./grid";
 export interface PreviewClipboardDependencies {
     readonly configPersistence: ConfigPersistenceFeature;
     readonly document: Document;
@@ -24,6 +25,7 @@ export interface PreviewClipboardDependencies {
     readonly entityState: Pick<EntityStateFeature, "entityName">;
     readonly shell: Pick<ControlsShellFeature, "isConfigLocked" | "showBanner" | "createActionButton">;
     readonly requestApi: Pick<ApplicationApiFeature, "postText">;
+    readonly grid: Pick<GridFeature, "ctx" | "serializeGrid">;
 }
 export function installPreviewClipboardModule(
     dependencies: PreviewClipboardDependencies,
@@ -32,6 +34,7 @@ export function installPreviewClipboardModule(
     const document = dependencies.document;
     const { entityName } = dependencies.entityState;
     const { isConfigLocked, showBanner, createActionButton } = dependencies.shell;
+    const { ctx, serializeGrid } = dependencies.grid;
     const {
         imageSlotCapacityMessage,
         imageCardCountInClipboardEntries,

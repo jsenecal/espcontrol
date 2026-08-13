@@ -17,6 +17,7 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ScreenRotationFeature } from "./screen_rotation_state";
 import type { ControlsShellFeature } from "./controls_shell";
+import type { GridFeature } from "./grid";
 export interface PreviewRenderDependencies {
     readonly document: Document;
     readonly layout: ApplicationLayoutState;
@@ -26,6 +27,7 @@ export interface PreviewRenderDependencies {
     readonly runtime: UiRuntimeState;
     readonly screenRotation: ScreenRotationFeature;
     readonly shell: Pick<ControlsShellFeature, "isConfigLocked">;
+    readonly grid: Pick<GridFeature, "ctx" | "resolveIcon" | "sizeClass">;
 }
 export function installPreviewRenderModule(dependencies: PreviewRenderDependencies): GlobalDescriptors {
     const document = dependencies.document;
@@ -34,6 +36,7 @@ export function installPreviewRenderModule(dependencies: PreviewRenderDependenci
     const { getSubpage } = dependencies.codec;
     const { gridPreviewBlocked: gridPreviewBlockedByRotationStartup } = dependencies.screenRotation;
     const { isConfigLocked } = dependencies.shell;
+    const { ctx, resolveIcon, sizeClass } = dependencies.grid;
     // ── Preview rendering (unified) ────────────────────────────────────────
     function previewHtmlValue(this: any, typePreview?: any, key?: any, fallback?: any) {
         return previewValue(typePreview, key, fallback);

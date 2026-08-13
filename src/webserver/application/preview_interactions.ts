@@ -11,6 +11,7 @@ import type { UiRuntimeState } from "./state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
+import type { GridFeature } from "./grid";
 export interface PreviewInteractionsDependencies {
     readonly cardEditorDraft: CardEditorDraftController;
     readonly configPersistence: ConfigPersistenceFeature;
@@ -22,6 +23,7 @@ export interface PreviewInteractionsDependencies {
     readonly entityState: Pick<EntityStateFeature, "entityName">;
     readonly shell: Pick<ControlsShellFeature, "isConfigLocked">;
     readonly requestApi: Pick<ApplicationApiFeature, "postText">;
+    readonly grid: Pick<GridFeature, "ctx" | "serializeGrid">;
 }
 export function installPreviewInteractionsModule(
     dependencies: PreviewInteractionsDependencies,
@@ -32,6 +34,7 @@ export function installPreviewInteractionsModule(
     const runtime = dependencies.runtime;
     const { entityName } = dependencies.entityState;
     const { isConfigLocked } = dependencies.shell;
+    const { ctx, serializeGrid } = dependencies.grid;
     const els = runtime.els;
     const {
         isImageCard,

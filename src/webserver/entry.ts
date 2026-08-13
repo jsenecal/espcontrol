@@ -197,8 +197,9 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     runtime: context.runtime,
     screenRotation,
     shell: context.controllers.shell,
+    grid: context.controllers.grid,
   }));
-  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.statusPreview));
+  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.statusPreview, context.controllers.grid));
   installGlobals(installButtonSettingsRenderQueueModule(context.runtime));
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
@@ -217,6 +218,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     controller: previewPlacementController,
     layout: context.layout,
     codec: context.configuration.codec,
+    grid: context.controllers.grid,
   }));
   installGlobals(installPreviewContextMenuModule({
     document: context.dom.document,
@@ -227,6 +229,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     clockBar: clockBarState,
     shell: context.controllers.shell,
     statusPreview: context.controllers.statusPreview,
+    grid: context.controllers.grid,
   }));
   installGlobals(installPreviewClipboardModule({
     configPersistence,
@@ -239,6 +242,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     entityState: context.controllers.entityState,
     shell: context.controllers.shell,
     requestApi: context.controllers.requestApi,
+    grid: context.controllers.grid,
   }));
   installGlobals(installPreviewInteractionsModule({
     cardEditorDraft,
@@ -251,6 +255,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     entityState: context.controllers.entityState,
     shell: context.controllers.shell,
     requestApi: context.controllers.requestApi,
+    grid: context.controllers.grid,
   }));
   installGlobals(installBackupContractModule(context.backup.contract, context.configuration.codec));
   const backupUiFeature = context.backup.application;

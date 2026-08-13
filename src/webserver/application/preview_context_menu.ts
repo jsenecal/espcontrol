@@ -22,6 +22,7 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
+import type { GridFeature } from "./grid";
 export interface PreviewContextMenuDependencies {
     readonly document: Document;
     readonly window: Window;
@@ -31,6 +32,7 @@ export interface PreviewContextMenuDependencies {
     readonly clockBar: Pick<ClockBarFeature, "setItemVisible">;
     readonly shell: Pick<ControlsShellFeature, "isConfigLocked">;
     readonly statusPreview: Pick<AppStatusPreviewFeature, "clockBarItemActive" | "clockBarItemLabel" | "clockBarItems" | "isClockBarTemperatureItem" | "updateClockBarItemUi">;
+    readonly grid: Pick<GridFeature, "ctx" | "scheduleMainGridSave">;
 }
 export function installPreviewContextMenuModule(dependencies: PreviewContextMenuDependencies): GlobalDescriptors {
     const document = dependencies.document;
@@ -38,6 +40,7 @@ export function installPreviewContextMenuModule(dependencies: PreviewContextMenu
     const { isConfigLocked } = dependencies.shell;
     const { setItemVisible: setClockBarItemVisible } = dependencies.clockBar;
     const { clockBarItemActive, clockBarItemLabel, clockBarItems, isClockBarTemperatureItem, updateClockBarItemUi } = dependencies.statusPreview;
+    const { ctx, scheduleMainGridSave } = dependencies.grid;
     const {
         cardRequiresSquareSize,
         cardSupportsMaxSize,
