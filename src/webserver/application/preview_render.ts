@@ -16,6 +16,7 @@ import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_opt
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ScreenRotationFeature } from "./screen_rotation_state";
+import type { ControlsShellFeature } from "./controls_shell";
 export interface PreviewRenderDependencies {
     readonly document: Document;
     readonly layout: ApplicationLayoutState;
@@ -24,6 +25,7 @@ export interface PreviewRenderDependencies {
     readonly codec: ConfigCodecFeature;
     readonly runtime: UiRuntimeState;
     readonly screenRotation: ScreenRotationFeature;
+    readonly shell: Pick<ControlsShellFeature, "isConfigLocked">;
 }
 export function installPreviewRenderModule(dependencies: PreviewRenderDependencies): GlobalDescriptors {
     const document = dependencies.document;
@@ -31,6 +33,7 @@ export function installPreviewRenderModule(dependencies: PreviewRenderDependenci
     const { cardOnPattern } = dependencies.confirmationOptions;
     const { getSubpage } = dependencies.codec;
     const { gridPreviewBlocked: gridPreviewBlockedByRotationStartup } = dependencies.screenRotation;
+    const { isConfigLocked } = dependencies.shell;
     // ── Preview rendering (unified) ────────────────────────────────────────
     function previewHtmlValue(this: any, typePreview?: any, key?: any, fallback?: any) {
         return previewValue(typePreview, key, fallback);

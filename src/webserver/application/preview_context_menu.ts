@@ -20,6 +20,7 @@ import type { ApplicationLayoutState } from "./application_context";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { ClockBarFeature } from "./clock_bar_state";
+import type { ControlsShellFeature } from "./controls_shell";
 export interface PreviewContextMenuDependencies {
     readonly document: Document;
     readonly window: Window;
@@ -27,10 +28,12 @@ export interface PreviewContextMenuDependencies {
     readonly cards: CardRegistry;
     readonly codec: ConfigCodecFeature;
     readonly clockBar: Pick<ClockBarFeature, "setItemVisible">;
+    readonly shell: Pick<ControlsShellFeature, "isConfigLocked">;
 }
 export function installPreviewContextMenuModule(dependencies: PreviewContextMenuDependencies): GlobalDescriptors {
     const document = dependencies.document;
     const window = dependencies.window;
+    const { isConfigLocked } = dependencies.shell;
     const { setItemVisible: setClockBarItemVisible } = dependencies.clockBar;
     const {
         cardRequiresSquareSize,

@@ -11,6 +11,7 @@ import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
 import { ACTION_CARD_LOCAL_ACTION } from "./config_action_contract";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { EntityStateFeature } from "./entity_state";
+import type { ControlsShellFeature } from "./controls_shell";
 export interface PreviewClipboardDependencies {
     readonly configPersistence: ConfigPersistenceFeature;
     readonly document: Document;
@@ -20,6 +21,7 @@ export interface PreviewClipboardDependencies {
     readonly sensorOptions: ConfigSensorOptionsFeature;
     readonly codec: ConfigCodecFeature;
     readonly entityState: Pick<EntityStateFeature, "entityName">;
+    readonly shell: Pick<ControlsShellFeature, "isConfigLocked" | "showBanner" | "createActionButton">;
 }
 export function installPreviewClipboardModule(
     dependencies: PreviewClipboardDependencies,
@@ -27,6 +29,7 @@ export function installPreviewClipboardModule(
     const configPersistence = dependencies.configPersistence;
     const document = dependencies.document;
     const { entityName } = dependencies.entityState;
+    const { isConfigLocked, showBanner, createActionButton } = dependencies.shell;
     const {
         imageSlotCapacityMessage,
         imageCardCountInClipboardEntries,

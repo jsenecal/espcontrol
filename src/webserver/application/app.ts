@@ -3,10 +3,12 @@ import type { AppTitleFeature } from "./app_title";
 import type { CoreFeature } from "./core";
 import type { ScreenRotationFeature } from "./screen_rotation_state";
 import type { ClockBarFeature } from "./clock_bar_state";
+import type { ControlsShellFeature } from "./controls_shell";
 
 declare const __ESPCONTROL_EMBEDDED_MDI_STYLES__: string;
 
-export function installAppModule(pageTitle: AppTitleFeature, webStyles: string, core: Pick<CoreFeature, "syncPreviewOrientation">, screenRotation: ScreenRotationFeature, clockBar: ClockBarFeature): GlobalDescriptors {
+export function installAppModule(pageTitle: AppTitleFeature, webStyles: string, core: Pick<CoreFeature, "syncPreviewOrientation">, screenRotation: ScreenRotationFeature, clockBar: ClockBarFeature, shell: Pick<ControlsShellFeature, "buildUI" | "syncTabChrome">): GlobalDescriptors {
+    const { buildUI, syncTabChrome } = shell;
     const { syncPreviewOrientation } = core;
     const { startInitialCheck: startInitialScreenRotationCheck } = screenRotation;
     const { syncUi: syncClockBarUi } = clockBar;

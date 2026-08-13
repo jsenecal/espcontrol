@@ -194,6 +194,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     codec: context.configuration.codec,
     runtime: context.runtime,
     screenRotation,
+    shell: context.controllers.shell,
   }));
   installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState, context.controllers.shell));
   installGlobals(installButtonSettingsRenderQueueModule(context.runtime));
@@ -220,6 +221,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     cards: context.cards,
     codec: context.configuration.codec,
     clockBar: clockBarState,
+    shell: context.controllers.shell,
   }));
   installGlobals(installPreviewClipboardModule({
     configPersistence,
@@ -230,6 +232,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     sensorOptions: context.configuration.options,
     codec: context.configuration.codec,
     entityState: context.controllers.entityState,
+    shell: context.controllers.shell,
   }));
   installGlobals(installPreviewInteractionsModule({
     cardEditorDraft,
@@ -240,6 +243,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     codec: context.configuration.codec,
     runtime: context.runtime,
     entityState: context.controllers.entityState,
+    shell: context.controllers.shell,
   }));
   installGlobals(installBackupContractModule(context.backup.contract, context.configuration.codec));
   const backupUiFeature = context.backup.application;
@@ -265,6 +269,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.core,
     screenRotation,
     clockBarState,
+    context.controllers.shell,
   ));
 }
 
@@ -441,7 +446,7 @@ function composeApplicationContext(): ApplicationContext {
     showBanner: shell.showBanner,
     delay: (callback, milliseconds) => dom.schedule(callback, milliseconds),
   });
-  const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime, layout, entityState);
+  const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime, layout, entityState, shell);
   const cards = createCardRegistry();
   const configurationOptions = createConfigSensorOptionsFeature(cards);
   const mediaConfigurationOptions = createConfigMediaOptionsFeature(layout.config);
@@ -691,6 +696,7 @@ function composeApplicationContext(): ApplicationContext {
     firmwareUpdate,
     clockBar: clockBarState,
     entityState,
+    shell,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),

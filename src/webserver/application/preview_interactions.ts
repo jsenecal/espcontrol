@@ -9,6 +9,7 @@ import type { ConfigImageOptionsFeature } from "./config_image_options";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { EntityStateFeature } from "./entity_state";
+import type { ControlsShellFeature } from "./controls_shell";
 export interface PreviewInteractionsDependencies {
     readonly cardEditorDraft: CardEditorDraftController;
     readonly configPersistence: ConfigPersistenceFeature;
@@ -18,6 +19,7 @@ export interface PreviewInteractionsDependencies {
     readonly codec: ConfigCodecFeature;
     readonly runtime: UiRuntimeState;
     readonly entityState: Pick<EntityStateFeature, "entityName">;
+    readonly shell: Pick<ControlsShellFeature, "isConfigLocked">;
 }
 export function installPreviewInteractionsModule(
     dependencies: PreviewInteractionsDependencies,
@@ -27,6 +29,7 @@ export function installPreviewInteractionsModule(
     const window = dependencies.window;
     const runtime = dependencies.runtime;
     const { entityName } = dependencies.entityState;
+    const { isConfigLocked } = dependencies.shell;
     const els = runtime.els;
     const {
         isImageCard,

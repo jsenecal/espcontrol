@@ -7,6 +7,7 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ApplicationLayoutState } from "./application_context";
 import type { EntityStateFeature } from "./entity_state";
+import type { ControlsShellFeature } from "./controls_shell";
 
 export interface ConfigPersistenceFeature {
     readonly globals: GlobalDescriptors;
@@ -20,8 +21,10 @@ export function createConfigPersistenceFeature(
     runtime: UiRuntimeState,
     layout: ApplicationLayoutState,
     entityState: Pick<EntityStateFeature, "entityNameForSlot" | "hasRememberedPostPath">,
+    shell: Pick<ControlsShellFeature, "showBanner">,
 ): ConfigPersistenceFeature {
     const { entityNameForSlot, hasRememberedPostPath } = entityState;
+    const { showBanner } = shell;
     let codec: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig"> | undefined;
     function connectCodec(value: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig">) {
         codec = value;

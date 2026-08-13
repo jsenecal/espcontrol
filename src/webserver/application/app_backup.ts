@@ -39,6 +39,7 @@ import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
+import type { ControlsShellFeature } from "./controls_shell";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -57,6 +58,7 @@ export interface AppBackupControllers {
     readonly firmwareUpdate: FirmwareUpdateFeature;
     readonly clockBar: ClockBarFeature;
     readonly entityState: Pick<EntityStateFeature, "entityName">;
+    readonly shell: Pick<ControlsShellFeature, "switchTab">;
 }
 
 export interface AppBackupFeature {
@@ -67,6 +69,7 @@ export interface AppBackupFeature {
 
 export function createAppBackupFeature(controllers: AppBackupControllers): AppBackupFeature {
     const { entityName } = controllers.entityState;
+    const { switchTab } = controllers.shell;
     const { syncPreviewOrientation } = controllers.core;
     const { serializeButtonConfig, serializeSubpageConfig } = controllers.codec;
     const els = controllers.runtime.els;
