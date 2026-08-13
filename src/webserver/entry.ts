@@ -19,7 +19,7 @@ import { createUiRuntimeState } from "./application/state";
 import { createEnvironmentStateFeature } from "./application/environment_state";
 import { createScreenRotationFeature } from "./application/screen_rotation_state";
 import { createScreenScheduleStateFeature } from "./application/screen_schedule_state";
-import { installAppearanceStateModule } from "./application/appearance_state";
+import { createAppearanceFeature } from "./application/appearance_state";
 import { installFirmwareVersionStateModule } from "./application/firmware_version_state";
 import { installEntityStateModule } from "./application/entity_state";
 import { installClockBarStateModule } from "./application/clock_bar_state";
@@ -141,7 +141,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const screenRotation = context.controllers.screenRotation;
   const screenScheduleState = context.controllers.screenScheduleState;
   const screensaverTimeout = context.controllers.screensaverTimeout;
-  installGlobals(installAppearanceStateModule(context.runtime));
+  const appearance = context.controllers.appearance;
   installGlobals(installFirmwareVersionStateModule(context.runtime));
   installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout));
   const clockBarController = context.controllers.clockBar;
@@ -184,7 +184,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   }));
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -246,7 +246,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, (factory) => {
+  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, (factory) => {
     sseHandlerFactory = factory;
   }));
   const reconnectController = context.controllers.reconnect;
@@ -373,6 +373,10 @@ function composeApplicationContext(): ApplicationContext {
     applyButtonOrder: (value, skipSpanNormalization) => applyButtonOrderValue(value, skipSpanNormalization),
     postNormalizedOrder: (value) => postText(entityName("button_order"), value),
     renderPreview: () => renderPreview(),
+  });
+  const appearance = createAppearanceFeature(runtime, {
+    renderPreview: () => renderPreview(),
+    postOnColor: (value) => postText(entityName("button_on_color"), value),
   });
   const voiceServices = createVoiceServicesController();
   const environment = createEnvironmentStateFeature(
@@ -656,6 +660,7 @@ function composeApplicationContext(): ApplicationContext {
     backupImport,
     backupRestore,
     backupApplication,
+    appearance,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,

@@ -36,7 +36,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
   });
 
@@ -658,7 +658,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime\)\)/);
   });
 
@@ -676,6 +676,18 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /createScreenScheduleStateFeature\(/);
     assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime, context\.device\.id\)/);
+  });
+
+  test("owns appearance behavior without application globals", () => {
+    const appearance = fs.readFileSync(path.join(ROOT, "src/webserver/application/appearance_state.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(appearance, /export interface AppearanceFeature/);
+    assert.match(appearance, /createAppearanceFeature/);
+    assert.doesNotMatch(appearance, /GlobalDescriptors|staticGlobal/);
+    assert.match(entry, /appearance = createAppearanceFeature/);
+    assert.doesNotMatch(entry, /installAppearanceStateModule/);
+    assert.doesNotMatch(globals, /\bvar (?:syncColorUi|resetAppearanceColors):/);
   });
 
   test("removes the ambient DOM registry", () => {

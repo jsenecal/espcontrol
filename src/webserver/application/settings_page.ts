@@ -20,7 +20,8 @@ import type { EnvironmentStateFeature } from "./environment_state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
 import type { ScreenRotationFeature } from "./screen_rotation_state";
-export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, screenRotation: ScreenRotationFeature): GlobalDescriptors {
+import type { AppearanceFeature } from "./appearance_state";
+export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, screenRotation: ScreenRotationFeature, appearance: AppearanceFeature): GlobalDescriptors {
     const { bindTextPost } = codec;
     const { syncPreviewOrientation } = core;
     const els = runtime.els;
@@ -28,6 +29,7 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
     const { syncUi: syncScreenScheduleUi } = schedule;
     const { syncUi: syncScreensaverTimeoutUi } = screensaverTimeout;
     const { normalize: normalizeScreenRotation, activeOptions: activeScreenRotationOptions, appendOption: appendScreenRotationOption } = screenRotation;
+    const { resetColors: resetAppearanceColors } = appearance;
     // ── Settings Page ──────────────────────────────────────────────────────
     function buildSettingsPage(this: any, parent?: any) {
         var page: any = document.createElement("div");

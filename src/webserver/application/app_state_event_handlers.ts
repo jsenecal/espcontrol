@@ -39,6 +39,7 @@ import type { EnvironmentStateFeature } from "./environment_state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
 import type { ScreenRotationFeature } from "./screen_rotation_state";
+import type { AppearanceFeature } from "./appearance_state";
 
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
@@ -50,6 +51,7 @@ export function installAppStateEventHandlersModule(
     schedule: ScreenScheduleStateFeature,
     screensaverTimeout: ScreensaverTimeoutFeature,
     screenRotation: ScreenRotationFeature,
+    appearance: AppearanceFeature,
     onCreateSseHandlers?: (factory: SseHandlerFactory) => void,
 ): GlobalDescriptors {
     const { syncPreviewOrientation } = core;
@@ -63,6 +65,7 @@ export function installAppStateEventHandlersModule(
         syncSelect: syncScreenRotationSelect,
         resolveInitialCheck: resolveInitialScreenRotationCheck,
     } = screenRotation;
+    const { syncColorUi } = appearance;
     // ── State Event Handlers ──────────────────────────────────────────
     const createSseHandlers: SseHandlerFactory = () => {
         return {

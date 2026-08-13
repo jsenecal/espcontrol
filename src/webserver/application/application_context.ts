@@ -42,6 +42,7 @@ import type { EnvironmentStateFeature } from "./environment_state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
 import type { ScreenRotationFeature } from "./screen_rotation_state";
+import type { AppearanceFeature } from "./appearance_state";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -99,6 +100,7 @@ export interface ApplicationContext {
     readonly application: AppBackupFeature;
   };
   readonly controllers: {
+    readonly appearance: AppearanceFeature;
     readonly alarmDelayAudio: AlarmDelayAudioController;
     readonly cardEditorDraft: CardEditorDraftController;
     readonly cardEditorSave: CardEditorSaveController;
@@ -150,6 +152,7 @@ export interface ApplicationContextOptions {
   readonly backupImport: BackupImportController<any, any, any>;
   readonly backupRestore: BackupRestoreController<any, any>;
   readonly backupApplication: AppBackupFeature;
+  readonly appearance: AppearanceFeature;
   readonly alarmDelayAudio: AlarmDelayAudioController;
   readonly cardEditorDraft: CardEditorDraftController;
   readonly cardEditorSave: CardEditorSaveController;
@@ -221,6 +224,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       application: options.backupApplication,
     },
     controllers: {
+      appearance: options.appearance,
       alarmDelayAudio: options.alarmDelayAudio,
       cardEditorDraft: options.cardEditorDraft,
       cardEditorSave: options.cardEditorSave,

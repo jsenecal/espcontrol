@@ -379,7 +379,6 @@ declare global {
   var renderFirmwareVersion: any;
   var renderPreview: any;
   var renderSelectionBar: any;
-  var resetAppearanceColors: any;
   var resetPostQueueError: any;
   var resizeSlot: any;
   var scheduleMainGridSave: any;
@@ -444,7 +443,6 @@ declare global {
   var syncClockBarItemElement: any;
   var syncClockBarUi: any;
   var syncClockScreensaverControls: any;
-  var syncColorUi: any;
   var syncConfigLockUi: any;
   var syncCoverArtScreensaverUi: any;
   var syncFirmwareUpdateUi: any;
