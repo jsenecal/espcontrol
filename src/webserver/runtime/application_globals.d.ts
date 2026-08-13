@@ -14,7 +14,6 @@ declare global {
   var MAX_CLOCK_BAR_TEMPERATURES: any;
   var NETWORK_STATUS_ICON_UNAVAILABLE: any;
   var SCREENSAVER_ACTION_UNAVAILABLE: any;
-  var SCREENSAVER_TIMEOUT_OPTIONS: any;
   var SCREEN_ROTATION_STARTUP_FALLBACK_MS: any;
   var SCREEN_SCHEDULE_CLOCK_BRIGHTNESS_UNAVAILABLE: any;
   var SCREEN_SCHEDULE_DIMMED_BRIGHTNESS_UNAVAILABLE: any;
@@ -57,7 +56,6 @@ declare global {
   var applyCardMetadataFields: any;
   var applyClockBarTemperatureEntities: any;
   var applyImportedButtonOrder: any;
-  var applyScreensaverTimeoutState: any;
   var addNativeConfigToBackup: any;
   var applySubpageConfigStateEvent: any;
   var attachEntitySuggestions: any;
@@ -361,7 +359,6 @@ declare global {
   var publicFirmwareInstallAvailable: any;
   var publicFirmwareOtaFilename: any;
   var publicFirmwareReleaseKnown: any;
-  var readNumberMeta: any;
   var refreshEntityDatalist: any;
   var refreshFirmwareVersion: any;
   var refreshScreensaverTimeout: any;
@@ -410,7 +407,6 @@ declare global {
   var scheduleSliderSubpageMigration: any;
   var screenRotationSortValue: any;
   var screenRotationStartupRequired: any;
-  var screensaverTimeoutSupported: any;
   var segmentControl: any;
   var selectButton: any;
   var selectClockBarItem: any;
@@ -472,8 +468,6 @@ declare global {
   var syncMediaPlayerSleepPreventionUi: any;
   var syncOptionalClockBrightness: any;
   var syncScreenRotationSelect: any;
-  var syncScreensaverTimeoutLimits: any;
-  var syncScreensaverTimeoutUi: any;
   var syncTabChrome: any;
   var syncTemperatureUi: any;
   var temperatureUnitSymbol: any;

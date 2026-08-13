@@ -4,11 +4,14 @@ import type { NativePanelConfigController } from "../controllers/native_panel_co
 import type { DeviceApi } from "../api/device_api";
 import { requestFailureInfo } from "../api/request_failure";
 import { screensaverActionOption } from "../model/settings";
+import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
 
 export function installApiModule(
     nativePanelConfig: NativePanelConfigController,
     deviceApi: DeviceApi,
+    screensaverTimeout: ScreensaverTimeoutFeature,
 ): GlobalDescriptors {
+    const { supported: screensaverTimeoutSupported, syncUi: syncScreensaverTimeoutUi } = screensaverTimeout;
     // ── POST queue ─────────────────────────────────────────────────────────
     var deviceApiClient: DeviceApi = deviceApi;
     var _postQueue: any = Promise.resolve(null);

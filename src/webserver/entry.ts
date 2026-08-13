@@ -24,7 +24,7 @@ import { installFirmwareVersionStateModule } from "./application/firmware_versio
 import { installEntityStateModule } from "./application/entity_state";
 import { installClockBarStateModule } from "./application/clock_bar_state";
 import { installFirmwareUpdateStateModule } from "./application/firmware_update_state";
-import { installScreensaverTimeoutModule } from "./application/screensaver_timeout";
+import { createScreensaverTimeoutFeature } from "./application/screensaver_timeout";
 import { installC6FirmwareUiModule } from "./application/c6_firmware_ui";
 import { installGridModule } from "./application/grid";
 import { installApiModule } from "./application/api";
@@ -140,13 +140,13 @@ const startupState = globalThis as typeof globalThis & {
 function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installScreenRotationStateModule(context.runtime, context.layout));
   const screenScheduleState = context.controllers.screenScheduleState;
+  const screensaverTimeout = context.controllers.screensaverTimeout;
   installGlobals(installAppearanceStateModule(context.runtime));
   installGlobals(installFirmwareVersionStateModule(context.runtime));
   installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout));
   const clockBarController = context.controllers.clockBar;
   installGlobals(installClockBarStateModule(clockBarController, context.runtime, context.core, context.controllers.environment));
   installGlobals(installFirmwareUpdateStateModule(context.runtime, context.device.id));
-  installGlobals(installScreensaverTimeoutModule(context.runtime, screenScheduleState));
   installGlobals(installC6FirmwareUiModule(context.runtime));
   installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout));
   const deviceApi = context.api;
@@ -155,12 +155,12 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const cardEditorDraft = context.controllers.cardEditorDraft;
   const cardEditorValidation = context.controllers.cardEditorValidation;
   const previewPlacementController = context.controllers.previewPlacement;
-  installGlobals(installApiModule(nativePanelConfig, deviceApi));
+  installGlobals(installApiModule(nativePanelConfig, deviceApi, screensaverTimeout));
   installGlobals(installFirmwareUpdatePostApiModule());
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installStateLoaderApiModule(context.runtime, context.layout));
+  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout));
   installGlobals(installArtworkPostApiModule());
   installGlobals(installScreenSchedulePostApiModule());
   installGlobals(installClockBarPostApiModule());
@@ -184,7 +184,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   }));
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -245,7 +245,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, (factory) => {
+  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, (factory) => {
     sseHandlerFactory = factory;
   }));
   const reconnectController = context.controllers.reconnect;
@@ -336,6 +336,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
   installGlobals(installAppTestHooksSettings(
     () => defaultTimezoneOptionsForDevice(context.device.profile),
     context.controllers.environment,
+    context.controllers.screensaverTimeout,
   ));
 }
 
@@ -471,6 +472,7 @@ function composeApplicationContext(): ApplicationContext {
       updateSunInfo: () => updateSunInfo(),
     },
   );
+  const screensaverTimeout = createScreensaverTimeoutFeature(runtime, screenScheduleState);
   const clockBar = createClockBarController();
   const settingsUi = createSettingsUiFeature({
     document: dom.document,
@@ -608,6 +610,7 @@ function composeApplicationContext(): ApplicationContext {
     runtime,
     core,
     screenScheduleState,
+    screensaverTimeout,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),
@@ -658,6 +661,7 @@ function composeApplicationContext(): ApplicationContext {
     reconnect,
     screenSchedule,
     screenScheduleState,
+    screensaverTimeout,
     screensaver,
     settingsUi,
     voiceServices,

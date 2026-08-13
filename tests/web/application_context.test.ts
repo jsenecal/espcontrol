@@ -66,6 +66,7 @@ export function runApplicationContextTests(): void {
   const screenSchedule = {} as any;
   const screenScheduleState = {} as any;
   const screensaver = {} as any;
+  const screensaverTimeout = {} as any;
   const settingsUi = {} as any;
   const voiceServices = {} as any;
   const environment = {} as any;
@@ -115,6 +116,7 @@ export function runApplicationContextTests(): void {
     screenSchedule,
     screenScheduleState,
     screensaver,
+    screensaverTimeout,
     settingsUi,
     voiceServices,
     environment,
@@ -154,6 +156,7 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.cardEditorDraft, cardEditorDraft, "context retains editor draft ownership");
   equal(context.controllers.environment, environment, "context retains environment state ownership");
   equal(context.controllers.screenScheduleState, screenScheduleState, "context retains screen schedule state ownership");
+  equal(context.controllers.screensaverTimeout, screensaverTimeout, "context retains screensaver timeout ownership");
   equal(context.controllers.alarmDelayAudio, alarmDelayAudio, "context retains alarm settings ownership");
   equal(context.controllers.cardEditorSave, cardEditorSave, "context retains editor save ownership");
   equal(context.controllers.cardEditorValidation, cardEditorValidation, "context retains editor validation ownership");

@@ -11,7 +11,9 @@ import {
     publicFirmwareManifestUrl,
     publicFirmwareVersionsUrl,
 } from "./firmware_metadata";
-export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState): GlobalDescriptors {
+import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
+export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature): GlobalDescriptors {
+    const { applyState: applyScreensaverTimeoutState } = screensaverTimeout;
     // ── State Loader API ──────────────────────────────────────────────────
     function eventStreamEnabled(this: any) {
         try {

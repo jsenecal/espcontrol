@@ -40,6 +40,7 @@ import type { AppTitleFeature } from "./app_title";
 import type { CoreFeature } from "./core";
 import type { EnvironmentStateFeature } from "./environment_state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
+import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -110,6 +111,7 @@ export interface ApplicationContext {
     readonly screenSchedule: ScreenScheduleController;
     readonly screenScheduleState: ScreenScheduleStateFeature;
     readonly screensaver: ScreensaverController;
+    readonly screensaverTimeout: ScreensaverTimeoutFeature;
     readonly settingsUi: SettingsUiFeature;
     readonly voiceServices: VoiceServicesController;
     readonly environment: EnvironmentStateFeature;
@@ -159,6 +161,7 @@ export interface ApplicationContextOptions {
   readonly screenSchedule: ScreenScheduleController;
   readonly screenScheduleState: ScreenScheduleStateFeature;
   readonly screensaver: ScreensaverController;
+  readonly screensaverTimeout: ScreensaverTimeoutFeature;
   readonly settingsUi: SettingsUiFeature;
   readonly voiceServices: VoiceServicesController;
   readonly environment: EnvironmentStateFeature;
@@ -228,6 +231,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       screenSchedule: options.screenSchedule,
       screenScheduleState: options.screenScheduleState,
       screensaver: options.screensaver,
+      screensaverTimeout: options.screensaverTimeout,
       settingsUi: options.settingsUi,
       voiceServices: options.voiceServices,
       environment: options.environment,

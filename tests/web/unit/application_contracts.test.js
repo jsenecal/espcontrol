@@ -36,7 +36,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
   });
 
@@ -94,6 +94,17 @@ describe("browserless application contracts", () => {
     assert.match(schedule, /export interface ScreenScheduleStateFeature/);
     assert.doesNotMatch(schedule, /GlobalDescriptors|liveGlobal|staticGlobal/);
     assert.doesNotMatch(globals, /\bvar (?:_screenScheduleController|screenScheduleControllerState|applyScreenScheduleControllerState|formatDuration|formatHour|syncScreenScheduleUi):/);
+  });
+
+  test("owns screensaver-timeout state without application globals", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const timeout = fs.readFileSync(path.join(ROOT, "src/webserver/application/screensaver_timeout.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(entry, /createScreensaverTimeoutFeature\(/);
+    assert.doesNotMatch(entry, /installScreensaverTimeoutModule/);
+    assert.match(timeout, /export interface ScreensaverTimeoutFeature/);
+    assert.doesNotMatch(timeout, /GlobalDescriptors|liveGlobal|staticGlobal/);
+    assert.doesNotMatch(globals, /\bvar (?:SCREENSAVER_TIMEOUT_OPTIONS|readNumberMeta|syncScreensaverTimeoutLimits|screensaverTimeoutSupported|syncScreensaverTimeoutUi|applyScreensaverTimeoutState):/);
   });
 
   test("registers migrated card families through the typed registry", () => {
@@ -636,7 +647,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime\)\)/);
   });
 

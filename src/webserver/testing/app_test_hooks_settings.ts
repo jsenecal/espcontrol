@@ -15,8 +15,10 @@ import {
 } from "../application/firmware_metadata";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { EnvironmentStateFeature } from "../application/environment_state";
-export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature): GlobalDescriptors {
+import type { ScreensaverTimeoutFeature } from "../application/screensaver_timeout";
+export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature): GlobalDescriptors {
     const { timezoneOptionsWithFallback, effectiveTimezoneOptionForWeb } = environment;
+    const { supported: screensaverTimeoutSupported } = screensaverTimeout;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("settings", {
             normalizeTemperatureUnit: normalizeTemperatureUnit,
