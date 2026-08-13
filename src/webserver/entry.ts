@@ -159,10 +159,10 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const previewPlacementController = context.controllers.previewPlacement;
   installGlobals(applicationApiCompatibilityGlobals(context.controllers.requestApi));
   installGlobals(installFirmwareUpdatePostApiModule(context.controllers.entityState, context.controllers.requestApi));
-  installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell));
+  installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell, context.controllers.requestApi));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState, context.controllers.shell));
+  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi));
   installGlobals(installArtworkPostApiModule(context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installScreenSchedulePostApiModule(context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installClockBarPostApiModule(context.controllers.entityState, context.controllers.requestApi));
@@ -714,6 +714,7 @@ function composeApplicationContext(): ApplicationContext {
     clockBar: clockBarState,
     entityState,
     shell,
+    requestApi,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),

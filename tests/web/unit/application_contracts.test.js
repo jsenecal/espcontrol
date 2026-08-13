@@ -109,7 +109,7 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar DEVICE_ID:/);
     assert.doesNotMatch(migration, /\bDEVICE_ID\b|\bNUM_SLOTS\b|dependencies\?/);
     assert.match(entry, /createFirmwareUpdateFeature\(runtime, layout\.deviceId, firmwareVersion/);
-    assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id, firmwareUpdate, context\.controllers\.shell\)/);
+    assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id, firmwareUpdate, context\.controllers\.shell, context\.controllers\.requestApi\)/);
   });
 
   test("owns all slot and grid geometry without layout globals", () => {

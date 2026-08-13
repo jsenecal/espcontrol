@@ -40,6 +40,7 @@ import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
+import type { ApplicationApiFeature } from "./api";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -59,6 +60,7 @@ export interface AppBackupControllers {
     readonly clockBar: ClockBarFeature;
     readonly entityState: Pick<EntityStateFeature, "entityName">;
     readonly shell: Pick<ControlsShellFeature, "switchTab">;
+    readonly requestApi: ApplicationApiFeature;
 }
 
 export interface AppBackupFeature {
@@ -70,6 +72,22 @@ export interface AppBackupFeature {
 export function createAppBackupFeature(controllers: AppBackupControllers): AppBackupFeature {
     const { entityName } = controllers.entityState;
     const { switchTab } = controllers.shell;
+    const requestApi = controllers.requestApi;
+    const {
+        postText,
+        postSwitch,
+        postSelect,
+        postScreensaverMode,
+        postFirmwareAutoUpdate,
+        postFirmwareUpdateFrequency,
+        postScreensaverAction,
+        postScreensaverDimmedBrightness,
+        postScreensaverDimmedBrightnessDay,
+        postScreensaverDimmedBrightnessNight,
+        postScreensaverTimeout,
+        postHomeScreenTimeout,
+        postNumber,
+    } = requestApi;
     const { syncPreviewOrientation } = controllers.core;
     const { serializeButtonConfig, serializeSubpageConfig } = controllers.codec;
     const els = controllers.runtime.els;
@@ -258,12 +276,12 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                     ? controllers.nativePanelConfig.writeDocument(nativeDocument)
                     : null;
                 if (nativeRestore) {
-                    _postQueue = _postQueue.then(function () { return nativeRestore; }).then(function (result: any) {
+                    requestApi.postQueue = requestApi.postQueue.then(function () { return nativeRestore; }).then(function (result: any) {
                         if (result === "legacy-fallback") {
                             queueLegacyLayoutRestore();
                         }
                         else if (result !== "saved") {
-                            _postQueueHadError = true;
+                            requestApi.postQueueError = true;
                         }
                         return result;
                     });

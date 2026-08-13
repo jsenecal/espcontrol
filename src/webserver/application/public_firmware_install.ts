@@ -11,12 +11,14 @@ import {
 } from "./firmware_metadata";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { ControlsShellFeature } from "./controls_shell";
+import type { ApplicationApiFeature } from "./api";
 
 export function installPublicFirmwareInstallModule(
     deviceApi: DeviceApi,
     deviceId: string,
     firmwareUpdate: FirmwareUpdateFeature,
     shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">,
+    requestApi: Pick<ApplicationApiFeature, "getJsonQuietly">,
 ): GlobalDescriptors {
     const { setConfigLocked, showBanner } = shell;
     const {
@@ -37,13 +39,13 @@ export function installPublicFirmwareInstallModule(
             return Promise.resolve(info.ota_url);
         if (!isSpecificFirmwareVersion(requestedVersion) && state.firmwareOtaUrl)
             return Promise.resolve(state.firmwareOtaUrl);
-        return getJsonQuietly(publicFirmwareVersionsUrl(), function (this: any, d?: any) {
+        return requestApi.getJsonQuietly(publicFirmwareVersionsUrl(), function (this: any, d?: any) {
             setPublicFirmwareVersions(firmwareInfosFromPublicVersions(d));
         }).then(function (this: any) {
             info = firmwareInfoForVersion(requestedVersion);
             if (info && info.ota_url)
                 return info.ota_url;
-            return getJsonQuietly(publicFirmwareManifestUrl(), function (this: any, d?: any) {
+            return requestApi.getJsonQuietly(publicFirmwareManifestUrl(), function (this: any, d?: any) {
                 setPublicFirmwareInfo(firmwareInfoFromPublicManifest(d));
             }).then(function (this: any) {
                 info = firmwareInfoForVersion(requestedVersion);
@@ -59,7 +61,7 @@ export function installPublicFirmwareInstallModule(
         info = info || selectedFirmwareInfo();
         var installingLatest: any = !info ||
             firmwareVersionsSame(info.latest_version, state.firmwareLatestVersion);
-        return getJsonQuietly(publicFirmwareManifestUrl(), function (this: any, d?: any) {
+        return requestApi.getJsonQuietly(publicFirmwareManifestUrl(), function (this: any, d?: any) {
             if (installingLatest)
                 setPublicFirmwareInfo(firmwareInfoFromPublicManifest(d));
         }).then(function (this: any) {

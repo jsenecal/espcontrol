@@ -17,9 +17,11 @@ import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
-export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, c6Firmware: C6FirmwareFeature, entityState: Pick<EntityStateFeature, "entityStateItems" | "entityStateItemsForSlots" | "entityLookupNames" | "rememberEntityPostPath" | "entityName" | "entityObjectIds">, shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">): GlobalDescriptors {
+import type { ApplicationApiFeature } from "./api";
+export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, c6Firmware: C6FirmwareFeature, entityState: Pick<EntityStateFeature, "entityStateItems" | "entityStateItemsForSlots" | "entityLookupNames" | "rememberEntityPostPath" | "entityName" | "entityObjectIds">, shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">, requestApi: Pick<ApplicationApiFeature, "getJsonQuietly" | "getJsonFirst" | "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">): GlobalDescriptors {
     const { entityStateItems, entityStateItemsForSlots, entityLookupNames, rememberEntityPostPath, entityName, entityObjectIds } = entityState;
     const { setConfigLocked, showBanner } = shell;
+    const { getJsonQuietly, getJsonFirst, entityDetailPath, entityDetailPaths, entityInitialDetail } = requestApi;
     const { applyState: applyScreensaverTimeoutState } = screensaverTimeout;
     const { render: renderFirmwareVersion, set: setFirmwareVersion } = firmwareVersion;
     const {
