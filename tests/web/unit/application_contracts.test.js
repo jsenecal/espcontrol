@@ -8,6 +8,13 @@ const { loadTypescriptTest } = require("./helpers/load_typescript_test");
 
 const ROOT = path.resolve(__dirname, "../../..");
 
+function sourceFiles(directory) {
+  return fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
+    const entryPath = path.join(directory, entry.name);
+    return entry.isDirectory() ? sourceFiles(entryPath) : [entryPath];
+  });
+}
+
 describe("browserless application contracts", () => {
   const { runClipboardFeatureTests } = loadTypescriptTest("tests/web/clipboard_feature.test.ts");
   const { runApplicationContextTests } = loadTypescriptTest("tests/web/application_context.test.ts");
@@ -1387,6 +1394,41 @@ describe("browserless application contracts", () => {
     const ambientNames = [...globals.matchAll(/\bvar\s+([A-Za-z_$][\w$]*):/g)].map((match) => match[1]);
     assert.deepEqual(ambientNames, ["__ESPCONTROL_TEST_HOOKS__"]);
     assert.match(entry, /if \(__ESPCONTROL_TEST_HOOKS_ENABLED__\) \{[\s\S]*installTestHooks\(context, lightCards\)/);
+
+    const browserSources = [
+      ...sourceFiles(path.join(ROOT, "src/webserver")).filter((file) => file.endsWith(".ts")),
+      path.join(ROOT, "scripts/build_web_bundle.js"),
+    ];
+    const integrationNames = new Set();
+    const globalAliasFiles = [];
+    for (const file of browserSources) {
+      const source = fs.readFileSync(file, "utf8");
+      for (const match of source.matchAll(/__ESPCONTROL_[A-Z0-9_]+__/g)) {
+        integrationNames.add(match[0]);
+      }
+      if (/globalThis\s+as\s+/.test(source)) {
+        globalAliasFiles.push(path.relative(ROOT, file));
+      }
+    }
+    assert.deepEqual([...integrationNames].sort(), [
+      "__ESPCONTROL_DEFAULT_DEVICE_ID__",
+      "__ESPCONTROL_DEVICE_PROFILES__",
+      "__ESPCONTROL_DEVICE_PROFILE__",
+      "__ESPCONTROL_EMBEDDED_MDI_STYLES__",
+      "__ESPCONTROL_RELOAD_EMBEDDED__",
+      "__ESPCONTROL_START_EMBEDDED__",
+      "__ESPCONTROL_TEST_HOOKS_ENABLED__",
+      "__ESPCONTROL_TEST_HOOKS__",
+      "__ESPCONTROL_TIMEZONE_OPTIONS__",
+      "__ESPCONTROL_UI_STARTED__",
+      "__ESPCONTROL_UI_STARTING__",
+      "__ESPCONTROL_USING_EMBEDDED__",
+    ]);
+    assert.deepEqual(globalAliasFiles.sort(), [
+      "src/webserver/application/app_start.ts",
+      "src/webserver/device_config.ts",
+      "src/webserver/entry.ts",
+    ]);
   });
 
   test("preserves settings normalization", () => {
