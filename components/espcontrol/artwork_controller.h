@@ -186,6 +186,11 @@ constexpr bool artwork_pending_refresh_needs_reschedule(
   return refresh_pending && !timer_scheduled;
 }
 
+constexpr bool artwork_timeout_retry_allowed(uint8_t attempts,
+                                             uint8_t max_attempts) {
+  return attempts < max_attempts;
+}
+
 // Every active attribute-read batch needs a bounded deadline, including a
 // retry generation whose provider never invokes the queued callback.
 constexpr bool artwork_batch_needs_response_timer(bool batch_active,

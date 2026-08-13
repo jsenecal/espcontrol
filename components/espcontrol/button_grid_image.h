@@ -25,6 +25,7 @@ constexpr uint32_t IMAGE_CARD_MODAL_CLEANUP_DELAY_MS = 100;
 constexpr uint32_t IMAGE_CARD_MODAL_CLOSE_GUARD_MS = 350;
 constexpr uint32_t IMAGE_CARD_MEDIA_ARTWORK_TRIGGER_DEBOUNCE_MS = 75;
 constexpr uint32_t IMAGE_CARD_MEDIA_ARTWORK_RESPONSE_DEBOUNCE_MS = 300;
+constexpr uint8_t IMAGE_CARD_MEDIA_ARTWORK_MAX_TIMEOUT_RETRIES = 3;
 constexpr uint8_t IMAGE_CARD_STARTUP_DOWNLOAD_RETRIES = 10;
 constexpr int IMAGE_CARD_MAX_CONTEXTS = 6;
 constexpr int IMAGE_CARD_MODAL_MAX_TARGET_SIDE_PX = 800;
@@ -82,6 +83,7 @@ struct ImageCardCtx {
   espcontrol::artwork::RefreshBatch media_artwork_refresh;
   espcontrol::artwork::RefreshTrigger media_artwork_trigger;
   uint8_t media_artwork_retry_mask = 0;
+  uint8_t media_artwork_timeout_retries = 0;
   lv_timer_t *media_artwork_trigger_timer = nullptr;
   lv_timer_t *media_artwork_timer = nullptr;
   lv_timer_t *modal_cleanup_timer = nullptr;
@@ -527,6 +529,7 @@ inline void image_card_clear_media_artwork(ImageCardCtx *ctx) {
   ctx->media_artwork_refresh.reset();
   ctx->media_artwork_trigger.reset();
   ctx->media_artwork_retry_mask = 0;
+  ctx->media_artwork_timeout_retries = 0;
   ctx->media_artwork_refresh_forced = false;
   ctx->media_artwork_remote_refresh_pending = false;
   if (ctx->media_artwork_trigger_timer) {
@@ -885,6 +888,7 @@ inline void reset_image_card_pool(const GridConfig &cfg) {
     contexts[i].media_artwork_refresh.reset();
     contexts[i].media_artwork_trigger.reset();
     contexts[i].media_artwork_retry_mask = 0;
+    contexts[i].media_artwork_timeout_retries = 0;
     if (contexts[i].media_artwork_trigger_timer) {
       lv_timer_del(contexts[i].media_artwork_trigger_timer);
       contexts[i].media_artwork_trigger_timer = nullptr;
@@ -1491,6 +1495,7 @@ inline void image_card_refresh_current_picture(ImageCardCtx *ctx) {
   if (!ctx) return;
   if (ctx->media_artwork) {
     ctx->media_artwork_retry_mask = 0;
+    ctx->media_artwork_timeout_retries = 0;
     ctx->pending_fallback_picture.clear();
     // Explicit recovery refreshes (notably after reconnect) supersede an
     // incomplete batch whose callbacks may have been lost with the old API
@@ -2125,21 +2130,34 @@ inline void image_card_process_media_artwork(ImageCardCtx *ctx,
   const espcontrol::artwork::SourceSelection selection =
       ctx->media_artwork_sources.select(ctx->source_url, prefer_refreshed_remote);
   const std::string &chosen = selection.primary;
+  bool timeout_retry_exhausted = false;
   if (espcontrol::artwork::artwork_batch_waits_for_companion(
           batch_complete, chosen.empty(), response_window_expired)) {
     image_card_log_diagnostics(ctx, "media-artwork-waiting-for-companion");
     return;
   }
   if (response_window_expired) {
+    const uint8_t missing_mask = ctx->media_artwork_refresh.missing_mask();
     const bool replacement_refresh_scheduled =
       ctx->media_artwork_trigger.pending &&
       ctx->media_artwork_trigger_timer != nullptr;
-    ctx->media_artwork_retry_mask = espcontrol::artwork::artwork_timeout_retry_mask(
-      ctx->media_artwork_retry_mask,
-      ctx->media_artwork_refresh.missing_mask(),
-      replacement_refresh_scheduled);
+    if (replacement_refresh_scheduled) {
+      ctx->media_artwork_retry_mask = 0;
+    } else if (missing_mask != 0 &&
+               espcontrol::artwork::artwork_timeout_retry_allowed(
+                 ctx->media_artwork_timeout_retries,
+                 IMAGE_CARD_MEDIA_ARTWORK_MAX_TIMEOUT_RETRIES)) {
+      ctx->media_artwork_retry_mask = espcontrol::artwork::artwork_timeout_retry_mask(
+        ctx->media_artwork_retry_mask, missing_mask, false);
+      ++ctx->media_artwork_timeout_retries;
+    } else if (missing_mask != 0) {
+      ctx->media_artwork_retry_mask = 0;
+      ctx->next_picture_retry_ms = 0;
+      timeout_retry_exhausted = true;
+    }
     if (replacement_refresh_scheduled) ctx->next_picture_retry_ms = 0;
   }
+  if (batch_complete) ctx->media_artwork_timeout_retries = 0;
   ctx->media_artwork_refresh.finish();
   ctx->media_artwork_remote_refresh_pending = false;
   if (espcontrol::artwork::artwork_pending_refresh_needs_reschedule(
@@ -2162,7 +2180,7 @@ inline void image_card_process_media_artwork(ImageCardCtx *ctx,
     if (espcontrol::artwork::artwork_empty_selection_preserves_pending_refresh(
           true, ctx->media_artwork_trigger.pending) ||
         espcontrol::artwork::artwork_empty_selection_preserves_retry(
-          true, ctx->media_artwork_retry_mask)) {
+          true, ctx->media_artwork_retry_mask) || timeout_retry_exhausted) {
       image_card_log_diagnostics(ctx, "media-artwork-pending-refresh-preserved");
       return;
     }
@@ -2246,6 +2264,8 @@ inline void image_card_request_media_artwork(ImageCardCtx *ctx, bool force_refre
   const uint32_t generation = ha_subscription_generation();
   uint8_t request_mask = espcontrol::artwork::artwork_source_request_mask(
     ctx->media_artwork_retry_mask);
+  const bool retry_request = ctx->media_artwork_retry_mask != 0;
+  if (!retry_request) ctx->media_artwork_timeout_retries = 0;
   const bool refresh_forced = espcontrol::artwork::artwork_refresh_forced(
     ctx->media_artwork_refresh.forced,
     ctx->media_artwork_refresh_forced,
@@ -2428,6 +2448,7 @@ inline bool image_card_bind_runtime(BtnSlot &s, const ParsedCfg &p,
   ctx->media_overlay = nullptr;
   ctx->pending_fallback_picture.clear();
   ctx->media_artwork_retry_mask = 0;
+  ctx->media_artwork_timeout_retries = 0;
   ctx->diagnostics_enabled = cfg.image_card_diagnostics;
   ctx->retry_deadline_ms = esphome::millis() + IMAGE_CARD_STARTUP_RETRY_MS;
   ctx->width_compensation_percent = cfg.width_compensation_percent;
