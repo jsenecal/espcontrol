@@ -5,7 +5,9 @@ import type { UiRuntimeState } from "./state";
 import type { EntityStateFeature } from "./entity_state";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { ArtworkPostApiFeature } from "./artwork_post_api";
-export function installSettingsCoverArtSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, statusPreview: Pick<AppStatusPreviewFeature, "syncInput">, artworkPostApi: ArtworkPostApiFeature): GlobalDescriptors {
+import type { ControlsFieldsFeature } from "./controls_fields";
+export function installSettingsCoverArtSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, statusPreview: Pick<AppStatusPreviewFeature, "syncInput">, artworkPostApi: ArtworkPostApiFeature, fields: Pick<ControlsFieldsFeature, "condField" | "fieldLabel" | "makeCollapsibleCard" | "toggleRow">): GlobalDescriptors {
+    const { condField, fieldLabel, makeCollapsibleCard, toggleRow } = fields;
     const { entityName, entityInput } = entityState;
     const { bindTextPost } = codec;
     const { syncInput } = statusPreview;

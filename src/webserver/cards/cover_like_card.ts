@@ -9,6 +9,7 @@ import {
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
 import type { ButtonSettingsRenderQueueFeature } from "../application/button_settings_render_queue";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 import {
     SWITCH_CONFIRM_DEFAULT_NO,
     SWITCH_CONFIRM_DEFAULT_YES,
@@ -19,7 +20,8 @@ export interface CoverLikeCardRegistration {
     register(config: any): void;
 }
 
-export function createCoverLikeCardRegistration(registry: CardRegistry, renderQueue: ButtonSettingsRenderQueueFeature): CoverLikeCardRegistration {
+export function createCoverLikeCardRegistration(registry: CardRegistry, renderQueue: ButtonSettingsRenderQueueFeature, fields: ControlsFieldsFeature): CoverLikeCardRegistration {
+    const { cardBadgePreview, condField } = fields;
     function coverLikeModeValues(this: any, cardType?: any, optionName?: any, fallbackModes?: any) {
         var spec: any = cardContractOptionSpec(cardType, optionName);
         return spec && spec.values ? spec.values.slice() : fallbackModes.map(function (this: any, entry?: any) { return entry[0]; });

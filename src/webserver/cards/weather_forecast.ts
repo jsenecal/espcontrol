@@ -1,12 +1,15 @@
 import type { CardRegistry } from "../application/card_registry";
 import type { WeatherCardRegistration } from "./weather";
 import type { ClockBarFeature } from "../application/clock_bar_state";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 
 export function registerWeatherForecastCardTypes(
     registry: CardRegistry,
     weather: WeatherCardRegistration,
     clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardBadgeLabelHtml, cardSensorPreviewHtml } = fields;
     const { temperatureUnitSymbol } = clockBar;
     // Legacy read-only forecast card: displays tomorrow's high / low temperature.
     const WEATHER_FORECAST_CARD_METADATA: any = {

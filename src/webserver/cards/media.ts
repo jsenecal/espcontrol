@@ -13,6 +13,7 @@ import { WEB_UI_COLORS } from "../state/ui_tokens";
 import { escHtml, iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigMediaOptionsFeature } from "../application/config_media_options";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 import {
     MEDIA_COVER_ART_OPTION,
     MEDIA_PLAYLIST_CONTENT_TYPE_OPTION,
@@ -21,7 +22,9 @@ export function registerMediaCardTypes(
     registry: CardRegistry,
     mediaOptions: ConfigMediaOptionsFeature,
     deviceId: string,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardBadgeLabelHtml, cardLargeNumbersActiveForCardSize, cardSensorPreviewHtml } = fields;
     const {
         mediaBehaviorSpec,
         mediaCoverArtCardsSupported,

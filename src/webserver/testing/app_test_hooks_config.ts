@@ -36,6 +36,7 @@ import type { ConfigPersistenceFeature } from "../application/config_post_api";
 import type { PreviewRenderFeature } from "../application/preview_render";
 import type { PreviewClipboardFeature } from "../application/preview_clipboard";
 import type { PreviewContextMenuFeature } from "../application/preview_context_menu";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 import { pushDefaultIcon, pushDefaultIconOn } from "../cards/push";
@@ -66,11 +67,13 @@ export function installAppTestHooksConfig(
     preview: Pick<PreviewRenderFeature, "defaultTypeForPicker" | "pickerKeys" | "pickerOptions" | "registryValue" | "typeVisibleInPicker">,
     clipboard: Pick<PreviewClipboardFeature, "entriesFromTransfer">,
     contextMenu: Pick<PreviewContextMenuFeature, "cardSizeOptions">,
+    fields: Pick<ControlsFieldsFeature, "cardMetadataValue">,
 ): GlobalDescriptors {
     const { subpageEntityKeys, subpageChunkShouldPost } = configPersistence;
     const { defaultTypeForPicker: defaultButtonTypeForPicker, pickerKeys: buttonTypePickerKeys, pickerOptions: buttonTypePickerOptionList, registryValue: buttonTypeRegistryValue, typeVisibleInPicker: buttonTypeVisibleInPicker } = preview;
     const { entriesFromTransfer: clipboardEntriesFromCardTransfer } = clipboard;
     const { cardSizeOptions: cardSizeMenuOptions } = contextMenu;
+    const { cardMetadataValue } = fields;
     const { subpageStateDisplayMode } = core;
     const {
         sensorCardIsLocal,

@@ -9,6 +9,7 @@ import {
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 export interface LightCardRegistration {
     readonly controlTypeMetadata: any;
     readonly renderControlTypeField: (panel?: any, button?: any, helpers?: any) => any;
@@ -22,7 +23,9 @@ export interface LightCardRegistration {
 export function registerLightTemperatureCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
+    fields: ControlsFieldsFeature,
 ): LightCardRegistration {
+    const { cardBadgePreview } = fields;
     const {
         lightControlTabDefinitions,
         lightControlTabs,

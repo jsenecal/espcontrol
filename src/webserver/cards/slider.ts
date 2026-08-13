@@ -17,11 +17,14 @@ import {
 } from "../application/config_cover_contract";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 import type { LightCardRegistration } from "./light_temperature";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 export function registerSliderCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
     lightCards: LightCardRegistration,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardBadgeLabelHtml } = fields;
     const { renderControlTypeField: renderLightControlTypeField } = lightCards;
     const {
         coverControlTabDefinitions,

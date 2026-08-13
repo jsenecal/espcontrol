@@ -10,6 +10,7 @@ import {
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
 import type { LightCardRegistration } from "./light_temperature";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 import {
     SWITCH_CONFIRM_DEFAULT_MESSAGE,
     SWITCH_CONFIRM_DEFAULT_NO,
@@ -19,7 +20,9 @@ export function registerSwitchCardTypes(
     registry: CardRegistry,
     confirmationOptions: ConfigConfirmationOptionsFeature,
     lightCards: LightCardRegistration,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardBadgeLabelHtml, cardLargeNumbersActiveForCardSize, cardSensorPreviewHtml, condField } = fields;
     const {
         controlTypeMetadata: LIGHT_CONTROL_TYPE_METADATA,
         renderControlTypeField: renderLightControlTypeField,

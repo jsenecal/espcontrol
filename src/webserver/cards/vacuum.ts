@@ -13,11 +13,14 @@ import {
     applyEntityModeCardModeChange,
 } from "./entity_mode_card";
 import type { ConfigRobotCardOptionsFeature } from "../application/config_robot_card_options";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 
 export function registerVacuumCardTypes(
     registry: CardRegistry,
     robotOptions: ConfigRobotCardOptionsFeature,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardBadgeLabelHtml } = fields;
     const {
         vacuumModes,
         normalizeVacuumConfig,

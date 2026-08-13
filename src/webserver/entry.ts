@@ -59,7 +59,7 @@ import { installSettingsScheduleSectionModule } from "./application/settings_sch
 import { installSettingsCoverArtSectionModule } from "./application/settings_cover_art_section";
 import { installSettingsSystemSectionModule } from "./application/settings_system_section";
 import { installSettingsPageModule } from "./application/settings_page";
-import { createControlsFieldsFeature } from "./application/controls_fields";
+import { createControlsFieldsFeature, type ControlsFieldsFeature } from "./application/controls_fields";
 import { createPreviewRenderFeature, type PreviewRenderFeature } from "./application/preview_render";
 import { createButtonSettingsSelectionFeature, type ButtonSettingsSelectionFeature } from "./application/button_settings_selection";
 import { createButtonSettingsRenderQueueFeature } from "./application/button_settings_render_queue";
@@ -177,11 +177,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     requestApi: context.controllers.requestApi,
     statusPreview: context.controllers.statusPreview,
     clockBarPostApi: context.controllers.clockBarPostApi,
+    fields: context.controllers.fields,
   }));
-  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState, context.controllers.entityState, context.controllers.requestApi, context.controllers.schedulePostApi));
-  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState, context.controllers.statusPreview, context.controllers.artworkPostApi));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi, context.controllers.statusPreview, context.controllers.artworkPostApi, context.controllers.schedulePostApi, context.controllers.clockBarPostApi));
-  installGlobals(context.controllers.fields.globals);
+  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState, context.controllers.entityState, context.controllers.requestApi, context.controllers.schedulePostApi, context.controllers.fields));
+  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState, context.controllers.statusPreview, context.controllers.artworkPostApi, context.controllers.fields));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi, context.controllers.statusPreview, context.controllers.artworkPostApi, context.controllers.schedulePostApi, context.controllers.clockBarPostApi, context.controllers.fields));
   installGlobals(context.controllers.preview.globals);
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence, context.cards,
@@ -198,12 +198,13 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.controllers.selection,
     context.controllers.preview,
     context.controllers.interactions,
+    context.controllers.fields,
   ));
   const backupUiFeature = context.backup.application;
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
-  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader, context.controllers.firmwarePostApi, context.controllers.artworkPostApi, context.controllers.publicFirmwareInstall));
+  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader, context.controllers.firmwarePostApi, context.controllers.artworkPostApi, context.controllers.publicFirmwareInstall, context.controllers.fields));
   installGlobals(installAppModule(
     context.controllers.pageTitle,
     createWebStyles(context.layout.config.dragAnimation),
@@ -221,20 +222,22 @@ function installApplicationCompatibility(context: ApplicationContext): void {
 
 function registerCards(context: ApplicationContext) {
   const registry = context.cards;
-  const coverLikeCards = createCoverLikeCardRegistration(registry, context.controllers.renderQueue);
-  registerActionCardTypes(registry, context.configuration.confirmationOptions, context.controllers.entityState);
-  registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm, context.controllers.renderQueue);
-  registerCalendarCardTypes(registry, context.configuration.dateTimeOptions);
+  const fields = context.controllers.fields;
+  const coverLikeCards = createCoverLikeCardRegistration(registry, context.controllers.renderQueue, fields);
+  registerActionCardTypes(registry, context.configuration.confirmationOptions, context.controllers.entityState, fields);
+  registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm, context.controllers.renderQueue, fields);
+  registerCalendarCardTypes(registry, context.configuration.dateTimeOptions, fields);
   registerClimateCardTypes(
     registry,
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
     context.controllers.clockBarState,
     context.controllers.renderQueue,
+    fields,
   );
-  registerClockCardTypes(registry, context.configuration.dateTimeOptions);
-  registerDoorWindowCardTypes(registry, context.configuration.options);
-  registerFanCardTypes(registry, context.configuration.modalTabs);
+  registerClockCardTypes(registry, context.configuration.dateTimeOptions, fields);
+  registerDoorWindowCardTypes(registry, context.configuration.options, fields);
+  registerFanCardTypes(registry, context.configuration.modalTabs, fields);
   registerGarageCardTypes(
     coverLikeCards.register,
     context.configuration.accessClimateAlarm,
@@ -247,28 +250,30 @@ function registerCards(context: ApplicationContext) {
   registerImageCardTypes(
     registry,
     context.configuration.imageOptions,
+    fields,
   );
   registerInternalCardTypes(
     registry,
     context.configuration.internalRelayOptions,
     context.dom.document,
+    fields,
   );
-  registerLawnMowerCardTypes(registry, context.configuration.robotOptions);
-  const lightCards = registerLightTemperatureCardTypes(registry, context.configuration.modalTabs);
-  registerLockCardTypes(registry, context.configuration.lockOptions);
-  registerMediaCardTypes(registry, context.configuration.mediaOptions, context.device.id);
-  registerPresenceCardTypes(registry, context.configuration.options);
-  registerPushCardTypes(registry);
-  registerScreenLockCardTypes(registry);
-  registerSensorCardTypes(registry, context.configuration.options);
-  registerSliderCardTypes(registry, context.configuration.modalTabs, lightCards);
-  registerSubpageCardTypes(registry, context.configuration.codec, context.core, context.controllers.selection);
-  registerSwitchCardTypes(registry, context.configuration.confirmationOptions, lightCards);
-  registerTimezoneCardTypes(registry, context.configuration.dateTimeOptions, context.dom.document);
-  registerVacuumCardTypes(registry, context.configuration.robotOptions);
-  const weatherCards = registerWeatherCardTypes(registry, context.configuration.weatherOptions, context.controllers.clockBarState);
-  registerWeatherForecastCardTypes(registry, weatherCards, context.controllers.clockBarState);
-  registerWebhookCardTypes(registry, context.configuration.webhookOptions);
+  registerLawnMowerCardTypes(registry, context.configuration.robotOptions, fields);
+  const lightCards = registerLightTemperatureCardTypes(registry, context.configuration.modalTabs, fields);
+  registerLockCardTypes(registry, context.configuration.lockOptions, fields);
+  registerMediaCardTypes(registry, context.configuration.mediaOptions, context.device.id, fields);
+  registerPresenceCardTypes(registry, context.configuration.options, fields);
+  registerPushCardTypes(registry, fields);
+  registerScreenLockCardTypes(registry, fields);
+  registerSensorCardTypes(registry, context.configuration.options, fields);
+  registerSliderCardTypes(registry, context.configuration.modalTabs, lightCards, fields);
+  registerSubpageCardTypes(registry, context.configuration.codec, context.core, context.controllers.selection, fields);
+  registerSwitchCardTypes(registry, context.configuration.confirmationOptions, lightCards, fields);
+  registerTimezoneCardTypes(registry, context.configuration.dateTimeOptions, context.dom.document, fields);
+  registerVacuumCardTypes(registry, context.configuration.robotOptions, fields);
+  const weatherCards = registerWeatherCardTypes(registry, context.configuration.weatherOptions, context.controllers.clockBarState, fields);
+  registerWeatherForecastCardTypes(registry, weatherCards, context.controllers.clockBarState, fields);
+  registerWebhookCardTypes(registry, context.configuration.webhookOptions, fields);
   return lightCards;
 }
 
@@ -295,6 +300,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.controllers.preview,
     context.controllers.clipboard,
     context.controllers.contextMenu,
+    context.controllers.fields,
   ));
   installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion, context.controllers.statusPreview, context.controllers.grid));
   installGlobals(installAppTestHooksBackup(context.layout, context.backup.contract, context.backup.application));
@@ -348,6 +354,7 @@ function composeApplicationContext(): ApplicationContext {
   let preview: PreviewRenderFeature;
   let contextMenu: PreviewContextMenuFeature;
   let interactions: PreviewInteractionsFeature;
+  let fields: ControlsFieldsFeature;
   const shell = createControlsShellFeature(runtime, {
     document: dom.document,
     state: AppInstance.state,
@@ -370,7 +377,7 @@ function composeApplicationContext(): ApplicationContext {
     actionCardStateEntity: (button) => confirmationOptions.actionCardStateEntity(button),
     totalSlots: () => layout.totalSlots,
     clockBarTemperatureEntities: () => clockBarState.temperatureEntities(),
-    textInput: (id, value, placeholder) => textInput(id, value, placeholder),
+    textInput: (id, value, placeholder) => fields.textInput(id, value, placeholder),
   });
   const screenRotation = createScreenRotationFeature(runtime, layout, {
     applyButtonOrder: (value, skipSpanNormalization) => grid.applyButtonOrderValue(value, skipSpanNormalization),
@@ -527,7 +534,7 @@ function composeApplicationContext(): ApplicationContext {
   configurationPersistence.connectRequestApi(requestApi);
   configurationCodec.connectRequestApi(requestApi);
   const grid = createGridFeature(configurationCodec, runtime, layout, entityState, requestApi, renderQueue);
-  const fields = createControlsFieldsFeature(cards, configurationOptions, shell, requestApi);
+  fields = createControlsFieldsFeature(cards, configurationOptions, shell, requestApi);
   const placement = createPreviewGridPlacementFeature({
     controller: previewPlacement,
     layout,

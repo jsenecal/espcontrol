@@ -5,6 +5,7 @@ import type { CardRegistry } from "../application/card_registry";
 import type { ConfigCodecFeature } from "../application/config_codec";
 import type { CoreFeature } from "../application/core";
 import type { ButtonSettingsSelectionFeature } from "../application/button_settings_selection";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 import { SUBPAGE_KIND_OPTION } from "../application/config_option_core";
 import {
     applySubpagePresetConfig,
@@ -19,7 +20,9 @@ export function registerSubpageCardTypes(
     codec: ConfigCodecFeature,
     core: Pick<CoreFeature, "subpageStateDisplayMode">,
     selection: Pick<ButtonSettingsSelectionFeature, "closeSettings">,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardSensorPreviewHtml, condField } = fields;
     const { enterSubpage } = codec;
     const { subpageStateDisplayMode } = core;
     // Navigation folder: tap opens a nested grid screen with its own button layout

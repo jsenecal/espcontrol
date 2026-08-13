@@ -9,11 +9,14 @@ import {
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigWebhookOptionsFeature } from "../application/config_webhook_options";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 
 export function registerWebhookCardTypes(
     registry: CardRegistry,
     webhookOptions: ConfigWebhookOptionsFeature,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardBadgePreview } = fields;
     const {
         methods,
         normalizeWebhookConfig,

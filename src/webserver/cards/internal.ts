@@ -9,12 +9,15 @@ import {
 import { iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigInternalRelayOptionsFeature } from "../application/config_internal_relay_options";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 
 export function registerInternalCardTypes(
     registry: CardRegistry,
     internalRelayOptionsFeature: ConfigInternalRelayOptionsFeature,
     documentService: Document,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardBadgeLabelHtml, condField } = fields;
     const {
         internalRelayDefaultIcon,
         internalRelayDefaultOnIcon,

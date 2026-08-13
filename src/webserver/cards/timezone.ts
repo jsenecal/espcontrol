@@ -9,12 +9,15 @@ import {
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigDateTimeOptionsFeature } from "../application/config_date_time_options";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 
 export function registerTimezoneCardTypes(
     registry: CardRegistry,
     dateTimeOptions: ConfigDateTimeOptionsFeature,
     documentService: Document,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardBadgeLabelHtml, cardLargeNumbersHidePreviewLabel, cardSensorPreviewHtml } = fields;
     const {
         appendTimezoneOption,
         defaultTimezoneCardEntity,

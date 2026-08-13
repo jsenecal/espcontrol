@@ -9,10 +9,13 @@ import {
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 export function registerPresenceCardTypes(
     registry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardBadgePreview } = fields;
     const {
         presenceActiveColorEnabled,
         normalizePresenceOptions,

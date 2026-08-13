@@ -11,11 +11,14 @@ import { escHtml, iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 import type { ButtonSettingsRenderQueueFeature } from "../application/button_settings_render_queue";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 export function registerAlarmCardTypes(
     registry: CardRegistry,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     renderQueue: ButtonSettingsRenderQueueFeature,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { condField } = fields;
     const {
         alarmBehaviorSpec,
         alarmActionSpecs,

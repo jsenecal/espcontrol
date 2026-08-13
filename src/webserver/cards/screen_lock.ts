@@ -8,13 +8,15 @@ import {
     cardContractPickerKey,
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 const SCREEN_LOCK_CARD_METADATA: any = {
     preview: {
         badge: "lock",
     },
 };
 
-export function registerScreenLockCardTypes(registry: CardRegistry): void {
+export function registerScreenLockCardTypes(registry: CardRegistry, fields: ControlsFieldsFeature): void {
+    const { cardBadgePreview } = fields;
     // Local display card: toggles screen lock on the device without Home Assistant.
     registry.register("screen_lock", {
         label: function (this: any) { return cardContractCardLabel("screen_lock"); },

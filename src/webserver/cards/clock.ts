@@ -9,11 +9,14 @@ import {
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigDateTimeOptionsFeature } from "../application/config_date_time_options";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 
 export function registerClockCardTypes(
     registry: CardRegistry,
     dateTimeOptions: ConfigDateTimeOptionsFeature,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardLargeNumbersHidePreviewLabel, cardSensorPreviewHtml } = fields;
     const { dateTimeCardTimeParts, metadata } = dateTimeOptions;
     // Read-only local clock card: displays the panel's local time only.
     registry.register("clock", {

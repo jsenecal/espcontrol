@@ -3,6 +3,7 @@ import { iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
 import type { EntityStateFeature } from "../application/entity_state";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 import {
     SWITCH_CONFIRM_DEFAULT_NO,
     SWITCH_CONFIRM_DEFAULT_YES,
@@ -11,7 +12,9 @@ export function registerActionCardTypes(
     registry: CardRegistry,
     confirmationOptions: ConfigConfirmationOptionsFeature,
     entityState: Pick<EntityStateFeature, "refreshEntityDatalist">,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardBadgeLabelHtml, cardLargeNumbersActiveForCardSize, cardSensorPreviewHtml, condField } = fields;
     const { refreshEntityDatalist } = entityState;
     const {
         actionCardActions: ACTION_CARD_ACTIONS,

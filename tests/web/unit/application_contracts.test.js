@@ -194,7 +194,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview, context\.controllers\.artworkPostApi, context\.controllers\.schedulePostApi, context\.controllers\.clockBarPostApi\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview, context\.controllers\.artworkPostApi, context\.controllers\.schedulePostApi, context\.controllers\.clockBarPostApi, context\.controllers\.fields\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout, entityState, shell\)/);
   });
 
@@ -331,7 +331,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /registry\.register\(/, `${relativePath} should use the typed card registry`);
       assert.doesNotMatch(source, /\bregisterButtonType\s*\(/, `${relativePath} should not read ambient registration state`);
       assert.match(entry, new RegExp(
-        `${registrationFunction}\\(\\s*registry(?:,\\s*(?:context\\.(?:configuration\\.[A-Za-z]+|controllers\\.[A-Za-z]+|core|device\\.id)|lightCards))*[,]?\\s*\\)`,
+        `${registrationFunction}\\(\\s*registry(?:,\\s*(?:context\\.(?:configuration\\.[A-Za-z]+|controllers\\.[A-Za-z]+|core|device\\.id)|lightCards|fields))*[,]?\\s*\\)`,
       ));
     }
   });
@@ -367,7 +367,7 @@ describe("browserless application contracts", () => {
       assert.doesNotMatch(source, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     }
     for (const registration of ["registerPushCardTypes", "registerScreenLockCardTypes"]) {
-      assert.match(entry, new RegExp(`^  ${registration}\\(registry\\);`, "m"));
+      assert.match(entry, new RegExp(`^  ${registration}\\(registry, fields\\);`, "m"));
       assert.doesNotMatch(entry, new RegExp(`registerCompatibility\\(${registration}`));
     }
     assert.doesNotMatch(globals, /\bvar (?:PUSH_CARD_METADATA|SCREEN_LOCK_CARD_METADATA|pushActionSpec|pushDefaultIcon|pushDefaultIconOn):/);
@@ -391,7 +391,7 @@ describe("browserless application contracts", () => {
     const source = fs.readFileSync(path.join(ROOT, "src/webserver/cards/switch.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(source, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /^  registerSwitchCardTypes\(registry, context\.configuration\.confirmationOptions, lightCards\);/m);
+    assert.match(entry, /^  registerSwitchCardTypes\(registry, context\.configuration\.confirmationOptions, lightCards, fields\);/m);
     assert.doesNotMatch(entry, /registerCompatibility\(registerSwitchCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:SWITCH_CARD_METADATA|LIGHT_SWITCH_CARD_METADATA):/);
   });
@@ -412,8 +412,8 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(weather, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|CFG)\b/);
     assert.doesNotMatch(forecast, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|WEATHER_CARD_METADATA)\b/);
-    assert.match(entry, /const weatherCards = registerWeatherCardTypes\(registry, context\.configuration\.weatherOptions, context\.controllers\.clockBarState\);/);
-    assert.match(entry, /registerWeatherForecastCardTypes\(registry, weatherCards, context\.controllers\.clockBarState\);/);
+    assert.match(entry, /const weatherCards = registerWeatherCardTypes\(registry, context\.configuration\.weatherOptions, context\.controllers\.clockBarState, fields\);/);
+    assert.match(entry, /registerWeatherForecastCardTypes\(registry, weatherCards, context\.controllers\.clockBarState, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerWeather/);
     assert.doesNotMatch(globals, /\bvar (?:WEATHER_CARD_METADATA|WEATHER_FORECAST_CARD_METADATA|normalizeWeatherCardMode|weatherCardDefaultForecastLabel|weatherCardIsForecastMode|weatherForecastCardsSupported|weatherModeOptionValues|weatherModeOptions):/);
   });
@@ -423,7 +423,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/webhook.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerWebhookCardTypes\(registry, context\.configuration\.webhookOptions\);/);
+    assert.match(entry, /registerWebhookCardTypes\(registry, context\.configuration\.webhookOptions, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerWebhookCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:WEBHOOK_CARD_METADATA|WEBHOOK_HEADERS_OPTION|WEBHOOK_METHODS|normalizeWebhookConfig|setWebhookHeaders|webhookHeaders|webhookMethod):/);
   });
@@ -433,7 +433,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/internal.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|CFG)\b/);
-    assert.match(entry, /registerInternalCardTypes\(\s*registry,\s*context\.configuration\.internalRelayOptions,\s*context\.dom\.document,?\s*\);/);
+    assert.match(entry, /registerInternalCardTypes\(\s*registry,\s*context\.configuration\.internalRelayOptions,\s*context\.dom\.document,\s*fields,?\s*\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerInternalCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:INTERNAL_CARD_METADATA|internalRelayDefaultIcon|internalRelayDefaultOnIcon|internalRelayLabelFor|internalRelayMode|internalRelayModeOptionValues|internalRelayOptions|internalRelaySpec|internalRelayUsesDefaultIcon|internalRelayUsesDefaultOnIcon|normalizeInternalRelayMode):/);
   });
@@ -458,8 +458,8 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(mower, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.doesNotMatch(vacuum, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerLawnMowerCardTypes\(registry, context\.configuration\.robotOptions\);/);
-    assert.match(entry, /registerVacuumCardTypes\(registry, context\.configuration\.robotOptions\);/);
+    assert.match(entry, /registerLawnMowerCardTypes\(registry, context\.configuration\.robotOptions, fields\);/);
+    assert.match(entry, /registerVacuumCardTypes\(registry, context\.configuration\.robotOptions, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(register(?:LawnMower|Vacuum)CardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:LAWN_MOWER_CARD_METADATA|LAWN_MOWER_CARD_MODES|VACUUM_CARD_METADATA|VACUUM_CARD_MODES|lawnMowerModeBadgeIcon|lawnMowerModeDefaultIcon|lawnMowerModeValues|lawnMowerUsesDefaultIcon|normalizeLawnMowerConfig|normalizeLawnMowerMode|normalizeVacuumConfig|vacuumModeBadgeIcon|vacuumModeDefaultIcon|vacuumModeNeedsArea|vacuumModeValues):/);
   });
@@ -469,7 +469,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/lock.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerLockCardTypes\(registry, context\.configuration\.lockOptions\);/);
+    assert.match(entry, /registerLockCardTypes\(registry, context\.configuration\.lockOptions, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerLockCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:LOCK_CARD_METADATA|lockCommandMode|lockModeDefaultIcon|lockModeDefaultLabel|lockModeOptionValues|lockUsesDefaultIcon|normalizeLockMode):/);
   });
@@ -481,9 +481,9 @@ describe("browserless application contracts", () => {
       const source = fs.readFileSync(path.join(ROOT, `src/webserver/cards/${card}.ts`), "utf8");
       assert.doesNotMatch(source, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|DATE_TIME_CARD_METADATA)\b/);
     }
-    assert.match(entry, /registerCalendarCardTypes\(registry, context\.configuration\.dateTimeOptions\);/);
-    assert.match(entry, /registerClockCardTypes\(registry, context\.configuration\.dateTimeOptions\);/);
-    assert.match(entry, /registerTimezoneCardTypes\(registry, context\.configuration\.dateTimeOptions, context\.dom\.document\);/);
+    assert.match(entry, /registerCalendarCardTypes\(registry, context\.configuration\.dateTimeOptions, fields\);/);
+    assert.match(entry, /registerClockCardTypes\(registry, context\.configuration\.dateTimeOptions, fields\);/);
+    assert.match(entry, /registerTimezoneCardTypes\(registry, context\.configuration\.dateTimeOptions, context\.dom\.document, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerCalendarCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:DATE_TIME_CARD_METADATA|dateTimeCardMode|dateTimeCardTimeParts|dateTimeLargeNumbersLabel|dateTimeModeOptionValues|defaultTimezoneCardEntity|normalizeDateTimeCardMode|setDateTimeCardMode):/);
   });
@@ -493,7 +493,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/slider.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs, lightCards\);/);
+    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs, lightCards, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerSliderCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:renderCoverControlTabSettings|sliderCardMetadata|sliderTypeFactory):/);
   });
@@ -503,7 +503,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/fan.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerFanCardTypes\(registry, context\.configuration\.modalTabs\);/);
+    assert.match(entry, /registerFanCardTypes\(registry, context\.configuration\.modalTabs, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerFanCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:FAN_CARD_METADATA|FAN_CONTROL_TYPE_OPTIONS|fanControlBadgeIcon|fanControlDefaultIcon|fanTypeFactory|normalizeFanControlType|renderFanControlTabSettings|renderFanControlTypeField|setFanControlType):/);
   });
@@ -514,7 +514,7 @@ describe("browserless application contracts", () => {
     const hooks = fs.readFileSync(path.join(ROOT, "src/webserver/testing/app_test_hooks_config.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerAlarmCardTypes\(registry, context\.configuration\.accessClimateAlarm, context\.controllers\.renderQueue\);/);
+    assert.match(entry, /registerAlarmCardTypes\(registry, context\.configuration\.accessClimateAlarm, context\.controllers\.renderQueue, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerAlarmCardTypes/);
     assert.match(hooks, /alarmBehaviorSpec,[\s\S]*alarmActionSpecs,/);
     assert.doesNotMatch(globals, /\bvar (?:ALARM_CARD_METADATA|ALARM_CONTROL_PANEL_VALUE|alarmCardTypeOptions|alarmCardTypeOptionsForSettings|alarmControlPanelValue|alarmIconIsGenerated|alarmLabelIsGenerated|alarmUsesDefaultIcon|renderAlarmCardTypeField|renderAlarmVisibleActionsField|setAlarmCardType):/);
@@ -527,7 +527,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.match(options, /sensorCardLocalSource = LOCAL_SENSOR_SOURCE/);
-    assert.match(entry, /registerSensorCardTypes\(registry, context\.configuration\.options\);/);
+    assert.match(entry, /registerSensorCardTypes\(registry, context\.configuration\.options, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerSensorCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:SENSOR_CARD_LOCAL_SENSOR|SENSOR_CARD_METADATA|renderSensorLocalSettings|sensorCardIsLocal|sensorLocalPreview):/);
   });
@@ -539,7 +539,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.match(options, /mediaPlaylistSourceDefinitions/);
-    assert.match(entry, /registerMediaCardTypes\(registry, context\.configuration\.mediaOptions, context\.device\.id\);/);
+    assert.match(entry, /registerMediaCardTypes\(registry, context\.configuration\.mediaOptions, context\.device\.id, fields\);/);
     assert.match(card, /deviceId: string/);
     assert.doesNotMatch(card, /\bDEVICE_ID\b/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerMediaCardTypes/);
@@ -551,7 +551,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/subpage.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerSubpageCardTypes\(registry, context\.configuration\.codec, context\.core, context\.controllers\.selection\);/);
+    assert.match(entry, /registerSubpageCardTypes\(registry, context\.configuration\.codec, context\.core, context\.controllers\.selection, fields\);/);
     assert.match(card, /core: Pick<CoreFeature, "subpageStateDisplayMode">/);
     assert.match(card, /const \{ subpageStateDisplayMode \} = core;/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerSubpageCardTypes/);
@@ -565,7 +565,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.match(options, /const actionCardActions/);
-    assert.match(entry, /registerActionCardTypes\(registry, context\.configuration\.confirmationOptions, context\.controllers\.entityState\);/);
+    assert.match(entry, /registerActionCardTypes\(registry, context\.configuration\.confirmationOptions, context\.controllers\.entityState, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerActionCardTypes/);
     assert.match(entry, /actionCardStateEntity: \(button\) => confirmationOptions\.actionCardStateEntity\(button\)/);
     assert.doesNotMatch(globals, /\bvar (?:ACTION_CARD_ACTIONS|ACTION_CARD_METADATA|actionCardInfo|actionCardIsLocal|actionCardIsOptionSelect|actionCardNeedsExtraValue|actionCardStateDisplayMode|actionCardStateEntity|actionCardStatePrecision|actionCardStateUnit|normalizeActionCardConfig|normalizeSavedConfigActionFields|renderActionCardLocalSettings|setActionCardStateOptions):/);
@@ -578,9 +578,9 @@ describe("browserless application contracts", () => {
     const switchCard = fs.readFileSync(path.join(ROOT, "src/webserver/cards/switch.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(light, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /const lightCards = registerLightTemperatureCardTypes\(registry, context\.configuration\.modalTabs\);/);
-    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs, lightCards\);/);
-    assert.match(entry, /registerSwitchCardTypes\(registry, context\.configuration\.confirmationOptions, lightCards\);/);
+    assert.match(entry, /const lightCards = registerLightTemperatureCardTypes\(registry, context\.configuration\.modalTabs, fields\);/);
+    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs, lightCards, fields\);/);
+    assert.match(entry, /registerSwitchCardTypes\(registry, context\.configuration\.confirmationOptions, lightCards, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerLightTemperatureCardTypes/);
     assert.match(slider, /lightCards: LightCardRegistration/);
     assert.match(switchCard, /lightCards: LightCardRegistration/);
@@ -898,6 +898,22 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /installButtonSettingsSelectionModule/);
   });
 
+  test("composes shared fields without compatibility globals", () => {
+    const fields = fs.readFileSync(path.join(ROOT, "src/webserver/application/controls_fields.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(fields, /export interface ControlsFieldsFeature/);
+    assert.match(fields, /export function createControlsFieldsFeature/);
+    assert.doesNotMatch(fields, /GlobalDescriptors|staticGlobal|liveGlobal|readonly globals/);
+    assert.match(entry, /fields = createControlsFieldsFeature\(cards, configurationOptions, shell, requestApi\)/);
+    assert.doesNotMatch(entry, /fields\.globals|installControlsFieldsModule/);
+    assert.doesNotMatch(globals, /\bvar (?:makeCollapsibleCard|fieldLabel|textInput|fieldWithControl|selectField|segmentControl|colorField|toggleRow|applyCardMetadataFields|renderBasicCardFields|cardSensorPreviewHtml|cardBadgeLabelHtml|cardBadgePreview|condField|createRangeSlider):/);
+    for (const file of ["action.ts", "calendar.ts", "sensor.ts", "switch.ts", "weather.ts"]) {
+      const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards", file), "utf8");
+      assert.match(card, /ControlsFieldsFeature/, `${file} should receive the shared-fields service`);
+    }
+  });
+
   test("composes card selection without compatibility globals", () => {
     const selection = fs.readFileSync(path.join(ROOT, "src/webserver/application/button_settings_selection.ts"), "utf8");
     const context = fs.readFileSync(path.join(ROOT, "src/webserver/application/application_context.ts"), "utf8");
@@ -1052,9 +1068,9 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview, context\.controllers\.artworkPostApi, context\.controllers\.schedulePostApi, context\.controllers\.clockBarPostApi\)/);
-    assert.match(entry, /installSettingsScheduleSectionModule\(context\.configuration\.codec, context\.runtime, screenScheduleState, context\.controllers\.entityState, context\.controllers\.requestApi, context\.controllers\.schedulePostApi\)/);
-    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.stateLoader, context\.controllers\.firmwarePostApi, context\.controllers\.artworkPostApi, context\.controllers\.publicFirmwareInstall\)\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview, context\.controllers\.artworkPostApi, context\.controllers\.schedulePostApi, context\.controllers\.clockBarPostApi, context\.controllers\.fields\)/);
+    assert.match(entry, /installSettingsScheduleSectionModule\(context\.configuration\.codec, context\.runtime, screenScheduleState, context\.controllers\.entityState, context\.controllers\.requestApi, context\.controllers\.schedulePostApi, context\.controllers\.fields\)/);
+    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.stateLoader, context\.controllers\.firmwarePostApi, context\.controllers\.artworkPostApi, context\.controllers\.publicFirmwareInstall, context\.controllers\.fields\)\)/);
   });
 
   test("injects display-state DOM references", () => {

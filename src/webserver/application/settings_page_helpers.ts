@@ -25,6 +25,7 @@ import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { ClockBarPostApiFeature } from "./clock_bar_post_api";
+import type { ControlsFieldsFeature } from "./controls_fields";
 
 export interface SettingsPageHelpersControllers {
     readonly settingsUiFeature: SettingsUiFeature;
@@ -42,6 +43,7 @@ export interface SettingsPageHelpersControllers {
     readonly requestApi: Pick<ApplicationApiFeature, "postScreensaverAction" | "postScreensaverDimmedBrightness" | "postScreensaverDimmedBrightnessDay" | "postScreensaverDimmedBrightnessNight" | "postSwitch">;
     readonly statusPreview: Pick<AppStatusPreviewFeature, "syncInput">;
     readonly clockBarPostApi: Pick<ClockBarPostApiFeature, "postClockBrightnessDay" | "postClockBrightnessNight" | "postClockScreensaver" | "postAlarmDelayAudio" | "postAlarmDelayTts" | "postAlarmDelayEntryAnnouncement" | "postAlarmDelayExitAnnouncement" | "postAlarmDelayBeepVolume" | "postAlarmDelayFinalCountdown">;
+    readonly fields: Pick<ControlsFieldsFeature, "condField" | "createRangeSlider" | "fieldLabel" | "makeCollapsibleCard" | "toggleRow">;
 }
 
 export function installSettingsPageHelpersModule(
@@ -51,6 +53,7 @@ export function installSettingsPageHelpersModule(
     const { isConfigLocked, switchTab } = controllers.shell;
     const { bindTextPost } = controllers.codec;
     const { syncInput } = controllers.statusPreview;
+    const { condField, createRangeSlider, fieldLabel, makeCollapsibleCard, toggleRow } = controllers.fields;
     const {
         postClockBrightnessDay,
         postClockBrightnessNight,

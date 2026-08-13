@@ -21,6 +21,7 @@ import type { ButtonSettingsIconPickerFeature } from "./button_settings_icon_pic
 import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
 import type { PreviewRenderFeature } from "./preview_render";
 import type { PreviewInteractionsFeature } from "./preview_interactions";
+import type { ControlsFieldsFeature } from "./controls_fields";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
@@ -40,6 +41,7 @@ export function installButtonSettingsModule(
     selection: Pick<ButtonSettingsSelectionFeature, "closeSettings" | "hideSettingsOverlay">,
     preview: Pick<PreviewRenderFeature, "defaultTypeForPicker" | "pickerOptions" | "registryValue">,
     interactions: Pick<PreviewInteractionsFeature, "deleteSlot" | "emptyButtonConfig">,
+    fields: ControlsFieldsFeature,
 ): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
     const { isConfigLocked, createActionButton, showBanner } = shell;
@@ -48,6 +50,15 @@ export function installButtonSettingsModule(
     const { closeSettings, hideSettingsOverlay } = selection;
     const { defaultTypeForPicker: defaultButtonTypeForPicker, pickerOptions: buttonTypePickerOptionList, registryValue: buttonTypeRegistryValue } = preview;
     const { deleteSlot, emptyButtonConfig } = interactions;
+    const {
+        applyCardMetadataFields, condField, disclosureSection, fieldLabel, fieldWithControl,
+        groupCardSettingsFields, markCardPrimaryField, renderBasicCardFields,
+        renderCardActiveColorToggle, renderCardEntityField, renderCardIconPair,
+        renderCardIconPicker, renderCardLargeNumbersToggle, renderCardModeSelector,
+        renderCardNumberField, renderCardOptionToggle, renderCardSegmentControl,
+        renderCardTextField, segmentControl, selectField, syncCardLargeNumbersToggle,
+        textInput, toggleRow,
+    } = fields;
     const {
         imageSlotCapacity,
         imageCardCountWithCandidate,

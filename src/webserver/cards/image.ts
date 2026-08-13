@@ -11,10 +11,13 @@ import { escHtml, iconSlug } from "../application/ui_primitives";
 import { WEB_UI_COLORS } from "../state/ui_tokens";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigImageOptionsFeature } from "../application/config_image_options";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 export function registerImageCardTypes(
     registry: CardRegistry,
     imageOptions: ConfigImageOptionsFeature,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { toggleRow } = fields;
     const {
         imageModalMode,
         imageLabelEnabled,

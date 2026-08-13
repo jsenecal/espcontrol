@@ -10,6 +10,7 @@ import {
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigWeatherOptionsFeature } from "../application/config_weather_options";
 import type { ClockBarFeature } from "../application/clock_bar_state";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 
 export interface WeatherCardRegistration {
     readonly entityMetadata: any;
@@ -20,7 +21,9 @@ export function registerWeatherCardTypes(
     registry: CardRegistry,
     weatherOptions: ConfigWeatherOptionsFeature,
     clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">,
+    fields: ControlsFieldsFeature,
 ): WeatherCardRegistration {
+    const { cardBadgeLabelHtml, cardSensorPreviewHtml } = fields;
     const { temperatureUnitSymbol } = clockBar;
     const {
         weatherCardDefaultForecastLabel,

@@ -17,6 +17,7 @@ import type { StateLoaderFeature } from "./state_loader_api";
 import type { FirmwareUpdatePostApiFeature } from "./firmware_update_post_api";
 import type { ArtworkPostApiFeature } from "./artwork_post_api";
 import type { PublicFirmwareInstallFeature } from "./public_firmware_install";
+import type { ControlsFieldsFeature } from "./controls_fields";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;
@@ -35,7 +36,9 @@ export function installSettingsSystemSectionModule(
     firmwarePostApi: FirmwareUpdatePostApiFeature,
     artworkPostApi: Pick<ArtworkPostApiFeature, "postHomeAssistantArtworkPort" | "postHomeAssistantArtworkProtocol">,
     publicFirmwareInstall: Pick<PublicFirmwareInstallFeature, "installPublicFirmwareViaWebOta">,
+    fields: Pick<ControlsFieldsFeature, "fieldLabel" | "makeCollapsibleCard" | "toggleRow">,
 ): GlobalDescriptors {
+    const { fieldLabel, makeCollapsibleCard, toggleRow } = fields;
     const { createActionButton } = shell;
     const els = runtime.els;
     const { render: renderFirmwareVersion } = firmwareVersion;

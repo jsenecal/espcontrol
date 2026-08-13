@@ -9,6 +9,7 @@ import {
     cardContractPickerKey,
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 
 const PUSH_CARD_METADATA: any = {
     icon: {
@@ -35,7 +36,8 @@ export function pushDefaultIconOn() {
     return pushActionSpec().defaultIconOn || "Auto";
 }
 
-export function registerPushCardTypes(registry: CardRegistry): void {
+export function registerPushCardTypes(registry: CardRegistry, fields: ControlsFieldsFeature): void {
+    const { cardBadgePreview } = fields;
     // Momentary trigger card: stored as "push" for config compatibility.
     // Fires an esphome.push_button_pressed event with no toggle state.
     registry.register("push", {

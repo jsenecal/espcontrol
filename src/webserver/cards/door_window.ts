@@ -10,10 +10,13 @@ import {
 import { iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
+import type { ControlsFieldsFeature } from "../application/controls_fields";
 export function registerDoorWindowCardTypes(
     registry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
+    fields: ControlsFieldsFeature,
 ): void {
+    const { cardBadgePreview } = fields;
     const {
         normalizeDoorWindowSubtype,
         doorWindowActiveColorEnabled,

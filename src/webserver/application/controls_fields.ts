@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { setConfigOption, setConfigOptionValue } from "../model/config_primitives";
 import { CARD_SIZE_LARGE, CARD_SIZE_SINGLE } from "../model/grid";
 import { escHtml, iconSlug } from "./ui_primitives";
@@ -11,9 +10,45 @@ import {
     largeNumbersExplicitlyDisabled,
 } from "./config_option_core";
 export interface ControlsFieldsFeature {
-    readonly globals: GlobalDescriptors;
+    makeCollapsibleCard(...args: any[]): any;
     fieldLabel(text?: any, forId?: any): any;
+    textInput(...args: any[]): any;
+    fieldWithControl(...args: any[]): any;
+    optionValue(...args: any[]): any;
+    optionLabel(...args: any[]): any;
+    selectField(...args: any[]): any;
+    segmentControl(...args: any[]): any;
+    disclosureSection(...args: any[]): any;
+    markCardPrimaryField(...args: any[]): any;
+    cardSettingsDisclosureIn(...args: any[]): any;
+    groupCardSettingsFields(...args: any[]): any;
+    colorField(...args: any[]): any;
     toggleRow(label?: any, id?: any, checked?: any): any;
+    cardMetadataValue(...args: any[]): any;
+    cardLargeNumbersSupportsCardSize(...args: any[]): any;
+    cardLargeNumbersMetadata(...args: any[]): any;
+    cardLargeNumbersActiveForCardSize(...args: any[]): any;
+    cardLargeNumbersHidePreviewLabel(...args: any[]): any;
+    applyCardMetadataFields(...args: any[]): any;
+    renderCardModeSelector(...args: any[]): any;
+    renderCardLargeNumbersToggle(...args: any[]): any;
+    syncCardLargeNumbersToggle(...args: any[]): any;
+    renderCardEntityField(...args: any[]): any;
+    renderCardTextField(...args: any[]): any;
+    renderCardNumberField(...args: any[]): any;
+    renderCardIconPicker(...args: any[]): any;
+    renderCardOptionToggle(...args: any[]): any;
+    renderCardIconPair(...args: any[]): any;
+    renderCardActiveColorToggle(...args: any[]): any;
+    renderBasicCardFields(...args: any[]): any;
+    renderCardSegmentControl(...args: any[]): any;
+    cardSensorPreviewHtml(...args: any[]): any;
+    cardBadgeLabelHtml(...args: any[]): any;
+    cardIconHtml(...args: any[]): any;
+    cardIconSlug(...args: any[]): any;
+    cardBadgePreview(...args: any[]): any;
+    condField(...args: any[]): any;
+    createRangeSlider(...args: any[]): any;
 }
 
 export function createControlsFieldsFeature(
@@ -553,46 +588,17 @@ export function createControlsFieldsFeature(
         wrap.appendChild(row);
         return { wrap: wrap, range: range, val: val };
     }
-    const globals: GlobalDescriptors = {
-        "makeCollapsibleCard": staticGlobal(makeCollapsibleCard),
-        "fieldLabel": staticGlobal(fieldLabel),
-        "textInput": staticGlobal(textInput),
-        "fieldWithControl": staticGlobal(fieldWithControl),
-        "optionValue": staticGlobal(optionValue),
-        "optionLabel": staticGlobal(optionLabel),
-        "selectField": staticGlobal(selectField),
-        "segmentControl": staticGlobal(segmentControl),
-        "disclosureSection": staticGlobal(disclosureSection),
-        "markCardPrimaryField": staticGlobal(markCardPrimaryField),
-        "cardSettingsDisclosureIn": staticGlobal(cardSettingsDisclosureIn),
-        "groupCardSettingsFields": staticGlobal(groupCardSettingsFields),
-        "colorField": staticGlobal(colorField),
-        "toggleRow": staticGlobal(toggleRow),
-        "cardMetadataValue": staticGlobal(cardMetadataValue),
-        "cardLargeNumbersSupportsCardSize": staticGlobal(cardLargeNumbersSupportsCardSize),
-        "cardLargeNumbersMetadata": staticGlobal(cardLargeNumbersMetadata),
-        "cardLargeNumbersActiveForCardSize": staticGlobal(cardLargeNumbersActiveForCardSize),
-        "cardLargeNumbersHidePreviewLabel": staticGlobal(cardLargeNumbersHidePreviewLabel),
-        "applyCardMetadataFields": staticGlobal(applyCardMetadataFields),
-        "renderCardModeSelector": staticGlobal(renderCardModeSelector),
-        "renderCardLargeNumbersToggle": staticGlobal(renderCardLargeNumbersToggle),
-        "syncCardLargeNumbersToggle": staticGlobal(syncCardLargeNumbersToggle),
-        "renderCardEntityField": staticGlobal(renderCardEntityField),
-        "renderCardTextField": staticGlobal(renderCardTextField),
-        "renderCardNumberField": staticGlobal(renderCardNumberField),
-        "renderCardIconPicker": staticGlobal(renderCardIconPicker),
-        "renderCardOptionToggle": staticGlobal(renderCardOptionToggle),
-        "renderCardIconPair": staticGlobal(renderCardIconPair),
-        "renderCardActiveColorToggle": staticGlobal(renderCardActiveColorToggle),
-        "renderBasicCardFields": staticGlobal(renderBasicCardFields),
-        "renderCardSegmentControl": staticGlobal(renderCardSegmentControl),
-        "cardSensorPreviewHtml": staticGlobal(cardSensorPreviewHtml),
-        "cardBadgeLabelHtml": staticGlobal(cardBadgeLabelHtml),
-        "cardIconHtml": staticGlobal(cardIconHtml),
-        "cardIconSlug": staticGlobal(cardIconSlug),
-        "cardBadgePreview": staticGlobal(cardBadgePreview),
-        "condField": staticGlobal(condField),
-        "createRangeSlider": staticGlobal(createRangeSlider),
+    return {
+        makeCollapsibleCard, fieldLabel, textInput, fieldWithControl, optionValue, optionLabel,
+        selectField, segmentControl, disclosureSection, markCardPrimaryField,
+        cardSettingsDisclosureIn, groupCardSettingsFields, colorField, toggleRow,
+        cardMetadataValue, cardLargeNumbersSupportsCardSize, cardLargeNumbersMetadata,
+        cardLargeNumbersActiveForCardSize, cardLargeNumbersHidePreviewLabel,
+        applyCardMetadataFields, renderCardModeSelector, renderCardLargeNumbersToggle,
+        syncCardLargeNumbersToggle, renderCardEntityField, renderCardTextField,
+        renderCardNumberField, renderCardIconPicker, renderCardOptionToggle,
+        renderCardIconPair, renderCardActiveColorToggle, renderBasicCardFields,
+        renderCardSegmentControl, cardSensorPreviewHtml, cardBadgeLabelHtml,
+        cardIconHtml, cardIconSlug, cardBadgePreview, condField, createRangeSlider,
     };
-    return { globals, fieldLabel, toggleRow };
 }
