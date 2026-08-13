@@ -12,6 +12,7 @@ import {
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
+import type { AppEventsFeature } from "./app_events";
 
 export function installPublicFirmwareInstallModule(
     deviceApi: DeviceApi,
@@ -19,6 +20,7 @@ export function installPublicFirmwareInstallModule(
     firmwareUpdate: FirmwareUpdateFeature,
     shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">,
     requestApi: Pick<ApplicationApiFeature, "getJsonQuietly">,
+    appEvents: Pick<AppEventsFeature, "connect">,
 ): GlobalDescriptors {
     const { setConfigLocked, showBanner } = shell;
     const {
@@ -133,7 +135,7 @@ export function installPublicFirmwareInstallModule(
         renderFirmwareUpdateStatus();
         setConfigLocked(true, "Waiting for device to restart\u2026");
         showBanner("Firmware uploaded. Waiting for device to restart\u2026", "offline");
-        setTimeout(connectEvents, 5000);
+        setTimeout(appEvents.connect, 5000);
     }
     function failPublicFirmwareUpload(this: any, message?: any) {
         var reason: any = message || "Could not upload firmware update.";

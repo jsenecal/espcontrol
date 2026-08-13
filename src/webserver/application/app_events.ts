@@ -18,9 +18,8 @@ import {
     isFirmwareUpdateEvent,
     isFirmwareVersionEvent,
 } from "../state/firmware_events";
-import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ReconnectController } from "../features/reconnect";
-import type { SseHandlerFactory } from "./app_state_event_handlers";
+import type { AppStateEventHandlersFeature } from "./app_state_event_handlers";
 import type { UiRuntimeState } from "./state";
 import type { AppTitleFeature } from "./app_title";
 import type { FirmwareVersionFeature } from "./firmware_version_state";
@@ -30,10 +29,16 @@ import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { StateLoaderFeature } from "./state_loader_api";
 import type { GridMigrationFeature } from "./grid_migration";
+import type { AppConfigEventsFeature } from "./app_config_events";
 
-export function installAppEventsModule(
+export interface AppEventsFeature {
+    connect(): void;
+}
+
+export function createAppEventsFeature(
     reconnectController: ReconnectController<unknown>,
-    createSseHandlers: SseHandlerFactory,
+    stateEventHandlers: AppStateEventHandlersFeature,
+    configEvents: Pick<AppConfigEventsFeature, "patterns">,
     runtime: UiRuntimeState,
     pageTitle: AppTitleFeature,
     firmwareVersion: FirmwareVersionFeature,
@@ -43,7 +48,7 @@ export function installAppEventsModule(
     shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">,
     stateLoader: Pick<StateLoaderFeature, "refreshFirmwareVersion" | "refreshScreensaverTimeout">,
     gridMigration: Pick<GridMigrationFeature, "schedule">,
-): GlobalDescriptors {
+): AppEventsFeature {
     const { rememberEntityPostPath } = entityState;
     const { setConfigLocked, showBanner } = shell;
     const els = runtime.els;
@@ -78,9 +83,9 @@ export function installAppEventsModule(
             setConfigLocked(true, "Reconnecting to device\u2026");
             showBanner("Reconnecting to device\u2026", "offline");
         }
-        var sseHandlers: any = createSseHandlers();
+        var sseHandlers: any = stateEventHandlers.createHandlers();
         applySseHandlerAliases(sseHandlers);
-        var ssePatterns: any = configEventPatterns();
+        var ssePatterns: any = configEvents.patterns();
         function handleState(this: any, d?: any) {
             rememberEntityPostPath(d);
             var keys: any = entityStateKeys(d);
@@ -162,7 +167,5 @@ export function installAppEventsModule(
             "onState": handleState,
         });
     }
-    return {
-        "connectEvents": staticGlobal(connectEvents),
-    };
+    return { connect: connectEvents };
 }

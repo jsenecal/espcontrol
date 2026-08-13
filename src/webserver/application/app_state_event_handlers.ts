@@ -28,7 +28,6 @@ import {
     normalizeTemperatureUnit,
     normalizeTimeOfDay,
 } from "../model/settings";
-import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 import type { CoreFeature } from "./core";
 import { languageOptionsWithFallback, syncLanguageSelect } from "./language_state";
@@ -48,7 +47,11 @@ import type { ClockBarFeature } from "./clock_bar_state";
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
 
-export function installAppStateEventHandlersModule(
+export interface AppStateEventHandlersFeature {
+    createHandlers: SseHandlerFactory;
+}
+
+export function createAppStateEventHandlersFeature(
     runtime: UiRuntimeState,
     core: Pick<CoreFeature, "syncPreviewOrientation">,
     environment: EnvironmentStateFeature,
@@ -60,8 +63,7 @@ export function installAppStateEventHandlersModule(
     firmwareUpdate: FirmwareUpdateFeature,
     c6Firmware: C6FirmwareFeature,
     clockBar: ClockBarFeature,
-    onCreateSseHandlers?: (factory: SseHandlerFactory) => void,
-): GlobalDescriptors {
+): AppStateEventHandlersFeature {
     const { syncPreviewOrientation } = core;
     const els = runtime.els;
     const { timezoneOptionsWithFallback, isHomeAssistantAutoTimezone } = environment;
@@ -571,8 +573,5 @@ export function installAppStateEventHandlersModule(
             },
         };
     };
-    onCreateSseHandlers?.(createSseHandlers);
-    return {
-        "createSseHandlers": staticGlobal(createSseHandlers),
-    };
+    return { createHandlers: createSseHandlers };
 }

@@ -1,13 +1,25 @@
 import { state } from "../state/app_instance";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { ApplicationLayoutState } from "./application_context";
-export function installAppConfigEventsModule(
+
+export interface ConfigEventPattern {
+    readonly re: RegExp;
+    readonly fn: (match: RegExpMatchArray, value: string, data: unknown) => void;
+}
+
+export interface AppConfigEventsFeature {
+    ensureSubpageRaw(slot: number): any;
+    applyButtonConfigStateEvent(slot: number, value: string): void;
+    applySubpageConfigStateEvent(slot: number, key: string, value: string): void;
+    patterns(): ConfigEventPattern[];
+}
+
+export function createAppConfigEventsFeature(
     configPersistence: ConfigPersistenceFeature,
     codec: ConfigCodecFeature,
     layout: ApplicationLayoutState,
-): GlobalDescriptors {
+): AppConfigEventsFeature {
     const { parseButtonConfig, buttonConfigNeedsMigration, applySubpageRaw } = codec;
     // ── Config Event Handlers ─────────────────────────────────────────────
     function ensureSubpageRaw(this: any, slot?: any) {
@@ -123,9 +135,9 @@ export function installAppConfigEventsModule(
         ];
     }
     return {
-        "ensureSubpageRaw": staticGlobal(ensureSubpageRaw),
-        "applyButtonConfigStateEvent": staticGlobal(applyButtonConfigStateEvent),
-        "applySubpageConfigStateEvent": staticGlobal(applySubpageConfigStateEvent),
-        "configEventPatterns": staticGlobal(configEventPatterns),
+        ensureSubpageRaw,
+        applyButtonConfigStateEvent,
+        applySubpageConfigStateEvent,
+        patterns: configEventPatterns,
     };
 }

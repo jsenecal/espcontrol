@@ -9,6 +9,7 @@ import type { ControlsShellFeature } from "./controls_shell";
 export interface ApplicationApiFeature {
     postQueue: Promise<any>;
     postQueueError: boolean;
+    connectReconnect(callback: () => void): void;
     setPostThrottle(ms?: number): void;
     postQueueIdle(): Promise<any>;
     resetPostQueueError(): void;
@@ -61,8 +62,12 @@ export function createApplicationApiFeature(
     const { setConfigLocked, showBanner } = shell;
     // ── POST queue ─────────────────────────────────────────────────────────
     var deviceApiClient: DeviceApi = deviceApi;
+    var reconnect: () => void = function () {};
     var _postQueue: any = Promise.resolve(null);
     var _postQueueHadError: any = false;
+    function connectReconnect(this: any, callback: () => void) {
+        reconnect = callback;
+    }
     function setPostThrottle(this: any, ms?: any) {
         deviceApiClient.setPostThrottle(ms);
     }
@@ -94,7 +99,7 @@ export function createApplicationApiFeature(
                 _postQueueHadError = true;
                 setConfigLocked(true, "Reconnecting to device\u2026");
                 showBanner(failure.message, "error");
-                setTimeout(connectEvents, 5000);
+                setTimeout(reconnect, 5000);
                 return null;
             }
             if (failure) {
@@ -116,7 +121,7 @@ export function createApplicationApiFeature(
                 _postQueueHadError = true;
                 setConfigLocked(true, "Reconnecting to device\u2026");
                 showBanner(failure.message, "error");
-                setTimeout(connectEvents, 5000);
+                setTimeout(reconnect, 5000);
                 return null;
             }
             return result.value;
@@ -261,6 +266,7 @@ export function createApplicationApiFeature(
         set postQueue(value: Promise<any>) { _postQueue = value; },
         get postQueueError() { return _postQueueHadError; },
         set postQueueError(value: boolean) { _postQueueHadError = value; },
+        connectReconnect,
         setPostThrottle,
         postQueueIdle,
         resetPostQueueError,

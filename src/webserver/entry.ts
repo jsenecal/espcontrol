@@ -90,13 +90,12 @@ import { installBackupContractModule } from "./application/backup_contract";
 import { createAppBackupFeature } from "./application/app_backup";
 import { installAppStatusPreviewModule } from "./application/app_status_preview";
 import { createAppTitleFeature } from "./application/app_title";
-import { installAppConfigEventsModule } from "./application/app_config_events";
-import { installAppStateEventHandlersModule } from "./application/app_state_event_handlers";
-import { installAppEventsModule } from "./application/app_events";
+import { createAppConfigEventsFeature } from "./application/app_config_events";
+import { createAppStateEventHandlersFeature } from "./application/app_state_event_handlers";
+import { createAppEventsFeature, type AppEventsFeature } from "./application/app_events";
 import { installAppModule } from "./application/app";
 import { installAppStartModule } from "./application/app_start";
 import { createReconnectController } from "./features/reconnect";
-import type { SseHandlerFactory } from "./application/app_state_event_handlers";
 import { registerActionCardTypes } from "./cards/action";
 import { registerAlarmCardTypes } from "./cards/alarm";
 import { registerCalendarCardTypes } from "./cards/calendar";
@@ -158,7 +157,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const cardEditorValidation = context.controllers.cardEditorValidation;
   const previewPlacementController = context.controllers.previewPlacement;
   installGlobals(installFirmwareUpdatePostApiModule(context.controllers.entityState, context.controllers.requestApi));
-  installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell, context.controllers.requestApi));
+  installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell, context.controllers.requestApi, context.controllers.appEvents));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
   installGlobals(installArtworkPostApiModule(context.controllers.entityState, context.controllers.requestApi));
@@ -258,16 +257,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState));
-  installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
-  let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, firmwareVersion, firmwareUpdate, c6Firmware, clockBarState, (factory) => {
-    sseHandlerFactory = factory;
-  }));
-  const reconnectController = context.controllers.reconnect;
-  if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
-  installGlobals(installAppEventsModule(
-    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState, context.controllers.shell, context.controllers.stateLoader, context.controllers.gridMigration,
-  ));
   installGlobals(installAppModule(
     context.controllers.pageTitle,
     createWebStyles(context.layout.config.dragAnimation),
@@ -275,6 +264,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     screenRotation,
     clockBarState,
     context.controllers.shell,
+    context.controllers.appEvents,
   ));
 }
 
@@ -393,6 +383,7 @@ function composeApplicationContext(): ApplicationContext {
   const runtime = createUiRuntimeState(layout, dom.document);
   let requestApi: ApplicationApiFeature;
   let stateLoader: StateLoaderFeature;
+  let appEvents: AppEventsFeature;
   const shell = createControlsShellFeature(runtime, {
     document: dom.document,
     state: AppInstance.state,
@@ -572,7 +563,7 @@ function composeApplicationContext(): ApplicationContext {
     gridMigration,
     {
       subpageEntityKeys: configurationPersistence.subpageEntityKeys,
-      connectEvents: () => connectEvents(),
+      connectEvents: () => appEvents.connect(),
     },
   );
   const clockBar = createClockBarController();
@@ -594,6 +585,20 @@ function composeApplicationContext(): ApplicationContext {
     updateNetworkPreview: () => updateNetworkPreview(),
     updateVoicePreview: () => updateVoicePreview(),
   });
+  const configEvents = createAppConfigEventsFeature(configurationPersistence, configurationCodec, layout);
+  const stateEventHandlers = createAppStateEventHandlersFeature(
+    runtime,
+    core,
+    environment,
+    screenScheduleState,
+    screensaverTimeout,
+    screenRotation,
+    appearance,
+    firmwareVersion,
+    firmwareUpdate,
+    c6Firmware,
+    clockBarState,
+  );
   const settingsUi = createSettingsUiFeature({
     document: dom.document,
     textSpan: (text, className) => textSpan(text, className),
@@ -746,6 +751,21 @@ function composeApplicationContext(): ApplicationContext {
     setActiveSource: (source) => { runtime.eventSource = source; },
     schedule: (callback, delayMs) => dom.schedule(callback, delayMs),
   });
+  appEvents = createAppEventsFeature(
+    reconnect,
+    stateEventHandlers,
+    configEvents,
+    runtime,
+    pageTitle,
+    firmwareVersion,
+    firmwareUpdate,
+    c6Firmware,
+    entityState,
+    shell,
+    stateLoader,
+    gridMigration,
+  );
+  requestApi.connectReconnect(appEvents.connect);
   return createApplicationContext({
     layout,
     model: Model,
@@ -784,6 +804,9 @@ function composeApplicationContext(): ApplicationContext {
     requestApi,
     stateLoader,
     gridMigration,
+    configEvents,
+    stateEventHandlers,
+    appEvents,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,

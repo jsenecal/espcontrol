@@ -108,10 +108,25 @@ describe("browserless application contracts", () => {
     assert.match(migration, /export interface GridMigrationFeature/);
     assert.match(migration, /export function createGridMigrationFeature/);
     assert.match(entry, /gridMigration = createGridMigrationFeature\(/);
-    assert.match(entry, /context\.controllers\.stateLoader, context\.controllers\.gridMigration/);
+    assert.match(entry, /createAppEventsFeature\([\s\S]*stateLoader,[\s\S]*gridMigration/);
     assert.match(entry, /requestApi,[\s\S]*gridMigration,[\s\S]*subpageEntityKeys:/);
     assert.doesNotMatch(statusPreview, /\b(?:gridHasAny|scheduleMigration)\b/);
     assert.doesNotMatch(globals, /\bvar (?:gridHasAny|scheduleMigration):/);
+  });
+
+  test("owns event-stream composition without application globals", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const events = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_events.ts"), "utf8");
+    const configEvents = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_config_events.ts"), "utf8");
+    const stateHandlers = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_state_event_handlers.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(events, /export interface AppEventsFeature/);
+    assert.match(events, /export function createAppEventsFeature/);
+    assert.match(configEvents, /export function createAppConfigEventsFeature/);
+    assert.match(stateHandlers, /export function createAppStateEventHandlersFeature/);
+    assert.match(entry, /requestApi\.connectReconnect\(appEvents\.connect\)/);
+    assert.doesNotMatch(entry, /installApp(?:ConfigEvents|StateEventHandlers|Events)Module/);
+    assert.doesNotMatch(globals, /\bvar (?:applyButtonConfigStateEvent|applySubpageConfigStateEvent|configEventPatterns|connectEvents|createSseHandlers|ensureSubpageRaw):/);
   });
 
   test("imports the browser core service without ambient application names", () => {
@@ -138,7 +153,7 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar DEVICE_ID:/);
     assert.doesNotMatch(migration, /\bDEVICE_ID\b|\bNUM_SLOTS\b|dependencies\?/);
     assert.match(entry, /createFirmwareUpdateFeature\(runtime, layout\.deviceId, firmwareVersion/);
-    assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id, firmwareUpdate, context\.controllers\.shell, context\.controllers\.requestApi\)/);
+    assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id, firmwareUpdate, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.appEvents\)/);
   });
 
   test("owns all slot and grid geometry without layout globals", () => {
@@ -147,7 +162,7 @@ describe("browserless application contracts", () => {
     assert.equal(fs.existsSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts")), false);
     assert.doesNotMatch(globals, /\bvar (?:NUM_SLOTS|TOTAL_SLOTS|GRID_COLS|GRID_ROWS):/);
     assert.match(entry, /installGridModule\(context\.configuration\.codec, context\.runtime, context\.layout, context\.controllers\.entityState, context\.controllers\.requestApi\)/);
-    assert.match(entry, /installAppConfigEventsModule\(configPersistence, context\.configuration\.codec, context\.layout\)/);
+    assert.match(entry, /createAppConfigEventsFeature\(configurationPersistence, configurationCodec, layout\)/);
     assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion\)/);
   });
 
@@ -665,7 +680,7 @@ describe("browserless application contracts", () => {
     assert.match(core, /serializeSubpageGrid: \(subpage: any\) => any/);
     assert.match(entry, /\(subpage\) => configurationCodec\.serializeSubpageGrid\(subpage\)/);
     assert.match(entry, /configurationPersistence\.connectCodec\(configurationCodec\)/);
-    assert.match(entry, /installAppConfigEventsModule\(configPersistence, context\.configuration\.codec, context\.layout\)/);
+    assert.match(entry, /createAppConfigEventsFeature\(configurationPersistence, configurationCodec, layout\)/);
     assert.doesNotMatch(entry, /configuration\.codec\.globals/);
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar (?:normalizeButtonConfig|serializeButtonConfig|parseSubpageConfig|serializeSubpageConfig|getSubpage|bindTextPost):/);
@@ -720,7 +735,7 @@ describe("browserless application contracts", () => {
     }
     assert.match(entry, /createApplicationApiFeature\([\s\S]*screensaverTimeout,[\s\S]*shell/);
     assert.doesNotMatch(entry, /applicationApiCompatibilityGlobals/);
-    assert.match(entry, /installAppEventsModule\([\s\S]*context\.controllers\.shell/);
+    assert.match(entry, /createAppEventsFeature\([\s\S]*entityState,[\s\S]*shell/);
   });
 
   test("injects the UI shell into settings and card-editor modules", () => {
@@ -778,7 +793,7 @@ describe("browserless application contracts", () => {
     const persistence = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_post_api.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout, entityState, shell\)/);
-    assert.match(entry, /installAppEventsModule\([\s\S]*reconnectController, sseHandlerFactory, context\.runtime, context\.controllers\.pageTitle/);
+    assert.match(entry, /createAppEventsFeature\([\s\S]*reconnect,[\s\S]*stateEventHandlers,[\s\S]*configEvents,[\s\S]*runtime,[\s\S]*pageTitle/);
     assert.match(persistence, /runtime\.pendingSliderSubpageMigrations/);
     assert.doesNotMatch(runtime, /"(?:orderReceived|migrationTimer|sliderMigrationTimer|pendingSliderSubpageMigrations)"/);
     assert.doesNotMatch(globals, /\bvar (?:orderReceived|migrationTimer|sliderMigrationTimer|pendingSliderSubpageMigrations):/);

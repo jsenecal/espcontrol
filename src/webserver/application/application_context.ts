@@ -52,6 +52,9 @@ import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { StateLoaderFeature } from "./state_loader_api";
 import type { GridMigrationFeature } from "./grid_migration";
+import type { AppConfigEventsFeature } from "./app_config_events";
+import type { AppStateEventHandlersFeature } from "./app_state_event_handlers";
+import type { AppEventsFeature } from "./app_events";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -119,6 +122,9 @@ export interface ApplicationContext {
     readonly requestApi: ApplicationApiFeature;
     readonly stateLoader: StateLoaderFeature;
     readonly gridMigration: GridMigrationFeature;
+    readonly configEvents: AppConfigEventsFeature;
+    readonly stateEventHandlers: AppStateEventHandlersFeature;
+    readonly appEvents: AppEventsFeature;
     readonly alarmDelayAudio: AlarmDelayAudioController;
     readonly cardEditorDraft: CardEditorDraftController;
     readonly cardEditorSave: CardEditorSaveController;
@@ -180,6 +186,9 @@ export interface ApplicationContextOptions {
   readonly requestApi: ApplicationApiFeature;
   readonly stateLoader: StateLoaderFeature;
   readonly gridMigration: GridMigrationFeature;
+  readonly configEvents: AppConfigEventsFeature;
+  readonly stateEventHandlers: AppStateEventHandlersFeature;
+  readonly appEvents: AppEventsFeature;
   readonly alarmDelayAudio: AlarmDelayAudioController;
   readonly cardEditorDraft: CardEditorDraftController;
   readonly cardEditorSave: CardEditorSaveController;
@@ -261,6 +270,9 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       requestApi: options.requestApi,
       stateLoader: options.stateLoader,
       gridMigration: options.gridMigration,
+      configEvents: options.configEvents,
+      stateEventHandlers: options.stateEventHandlers,
+      appEvents: options.appEvents,
       alarmDelayAudio: options.alarmDelayAudio,
       cardEditorDraft: options.cardEditorDraft,
       cardEditorSave: options.cardEditorSave,

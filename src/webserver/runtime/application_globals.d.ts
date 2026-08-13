@@ -38,12 +38,10 @@ declare global {
   var addSupportButton: any;
   var appendSettingsSection: any;
   var appendTimezoneOption: any;
-  var applyButtonConfigStateEvent: any;
   var applyButtonOrderValue: any;
   var applyCardMetadataFields: any;
   var applyImportedButtonOrder: any;
   var addNativeConfigToBackup: any;
-  var applySubpageConfigStateEvent: any;
   var backupEmptyButtonConfig: any;
   var backupExportFileDate: any;
   var backupExportFileName: any;
@@ -98,8 +96,6 @@ declare global {
   var closestGridCell: any;
   var colorField: any;
   var condField: any;
-  var configEventPatterns: any;
-  var connectEvents: any;
   var copyButtons: any;
   var copySlot: any;
   var coverArtDelayPostUrls: any;
@@ -119,7 +115,6 @@ declare global {
   var coverArtScreensaverState: any;
   var applyCoverArtScreensaverState: any;
   var createScreensaverThenControls: any;
-  var createSseHandlers: any;
   var createTimeInput: any;
   var ctx: any;
   var ctxMenu: any;
@@ -135,7 +130,6 @@ declare global {
   var duplicateSubpageButton: any;
   var emptyButtonConfig: any;
   var ensurePublicFirmwareOtaUrl: any;
-  var ensureSubpageRaw: any;
   var exportConfig: any;
   var failPublicFirmwareUpload: any;
   var fieldLabel: any;
