@@ -6,9 +6,6 @@ declare global {
   var CLOCK_BAR_NIGHT_MODE_UNAVAILABLE: any;
   var CLOCK_BAR_TIME_UNAVAILABLE: any;
   var CLOCK_BAR_UNAVAILABLE: any;
-  var _screenScheduleController: any;
-  var screenScheduleControllerState: any;
-  var applyScreenScheduleControllerState: any;
   var FAVICON_SVG: any;
   var FIRMWARE_CHECKING_VERSION_LABEL: any;
   var FIRMWARE_DEV_VERSION_LABEL: any;
@@ -218,9 +215,7 @@ declare global {
   var firmwareWebOtaFallbackTimer: any;
   var firstFreeCell: any;
   var firstFreeSlot: any;
-  var formatDuration: any;
   var formatGmtOffset: any;
-  var formatHour: any;
   var formatTimezoneOption: any;
   var getCellFromEvent: any;
   var getJsonFirst: any;
@@ -477,7 +472,6 @@ declare global {
   var syncMediaPlayerSleepPreventionUi: any;
   var syncOptionalClockBrightness: any;
   var syncScreenRotationSelect: any;
-  var syncScreenScheduleUi: any;
   var syncScreensaverTimeoutLimits: any;
   var syncScreensaverTimeoutUi: any;
   var syncTabChrome: any;

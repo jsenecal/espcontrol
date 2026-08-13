@@ -36,6 +36,7 @@ import { hasCustomNtpServers, syncNtpServerUi } from "./ntp_state";
 import { syncIdleUi } from "./idle_state";
 import { getActiveScreensaverMode } from "./screensaver_state";
 import type { EnvironmentStateFeature } from "./environment_state";
+import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
@@ -44,11 +45,13 @@ export function installAppStateEventHandlersModule(
     runtime: UiRuntimeState,
     core: Pick<CoreFeature, "syncPreviewOrientation">,
     environment: EnvironmentStateFeature,
+    schedule: ScreenScheduleStateFeature,
     onCreateSseHandlers?: (factory: SseHandlerFactory) => void,
 ): GlobalDescriptors {
     const { syncPreviewOrientation } = core;
     const els = runtime.els;
     const { timezoneOptionsWithFallback, isHomeAssistantAutoTimezone } = environment;
+    const { syncUi: syncScreenScheduleUi } = schedule;
     // ── State Event Handlers ──────────────────────────────────────────
     const createSseHandlers: SseHandlerFactory = () => {
         return {

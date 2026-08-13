@@ -3,9 +3,16 @@ import { normalizeHexColor } from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
-export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState): GlobalDescriptors {
+import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
+export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, schedule: ScreenScheduleStateFeature): GlobalDescriptors {
     const { bindTextPost } = codec;
     const els = runtime.els;
+    const {
+        controller: _screenScheduleController,
+        controllerState: screenScheduleControllerState,
+        applyControllerState: applyScreenScheduleControllerState,
+        syncUi: syncScreenScheduleUi,
+    } = schedule;
     // ── Settings Schedule Section ──────────────────────────────────────
     function buildScreenScheduleSettingsCard(this: any) {
         var scheduleBody: any = document.createElement("div");

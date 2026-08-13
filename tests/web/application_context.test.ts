@@ -64,6 +64,7 @@ export function runApplicationContextTests(): void {
   const mediaPlayback = {} as any;
   const pageTitle = {} as any;
   const screenSchedule = {} as any;
+  const screenScheduleState = {} as any;
   const screensaver = {} as any;
   const settingsUi = {} as any;
   const voiceServices = {} as any;
@@ -112,6 +113,7 @@ export function runApplicationContextTests(): void {
     pageTitle,
     reconnect,
     screenSchedule,
+    screenScheduleState,
     screensaver,
     settingsUi,
     voiceServices,
@@ -151,6 +153,7 @@ export function runApplicationContextTests(): void {
   equal(context.backup.application, backupApplication, "context retains the backup journey");
   equal(context.controllers.cardEditorDraft, cardEditorDraft, "context retains editor draft ownership");
   equal(context.controllers.environment, environment, "context retains environment state ownership");
+  equal(context.controllers.screenScheduleState, screenScheduleState, "context retains screen schedule state ownership");
   equal(context.controllers.alarmDelayAudio, alarmDelayAudio, "context retains alarm settings ownership");
   equal(context.controllers.cardEditorSave, cardEditorSave, "context retains editor save ownership");
   equal(context.controllers.cardEditorValidation, cardEditorValidation, "context retains editor validation ownership");

@@ -39,6 +39,7 @@ import type { UiRuntimeState } from "./state";
 import type { AppTitleFeature } from "./app_title";
 import type { CoreFeature } from "./core";
 import type { EnvironmentStateFeature } from "./environment_state";
+import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -107,6 +108,7 @@ export interface ApplicationContext {
     readonly previewPlacement: PreviewPlacementController;
     readonly reconnect: ReconnectController<unknown>;
     readonly screenSchedule: ScreenScheduleController;
+    readonly screenScheduleState: ScreenScheduleStateFeature;
     readonly screensaver: ScreensaverController;
     readonly settingsUi: SettingsUiFeature;
     readonly voiceServices: VoiceServicesController;
@@ -155,6 +157,7 @@ export interface ApplicationContextOptions {
   readonly previewPlacement: PreviewPlacementController;
   readonly reconnect: ReconnectController<unknown>;
   readonly screenSchedule: ScreenScheduleController;
+  readonly screenScheduleState: ScreenScheduleStateFeature;
   readonly screensaver: ScreensaverController;
   readonly settingsUi: SettingsUiFeature;
   readonly voiceServices: VoiceServicesController;
@@ -223,6 +226,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       previewPlacement: options.previewPlacement,
       reconnect: options.reconnect,
       screenSchedule: options.screenSchedule,
+      screenScheduleState: options.screenScheduleState,
       screensaver: options.screensaver,
       settingsUi: options.settingsUi,
       voiceServices: options.voiceServices,

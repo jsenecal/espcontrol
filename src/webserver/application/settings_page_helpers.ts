@@ -18,6 +18,7 @@ import type { MediaPlaybackController } from "../features/media_playback_control
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ApplicationLayoutState } from "./application_context";
+import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 
 export interface SettingsPageHelpersControllers {
     readonly settingsUiFeature: SettingsUiFeature;
@@ -28,6 +29,7 @@ export interface SettingsPageHelpersControllers {
     readonly codec: Pick<ConfigCodecFeature, "bindTextPost">;
     readonly runtime: UiRuntimeState;
     readonly layout: ApplicationLayoutState;
+    readonly screenScheduleState: ScreenScheduleStateFeature;
 }
 
 export function installSettingsPageHelpersModule(
@@ -35,6 +37,7 @@ export function installSettingsPageHelpersModule(
 ): GlobalDescriptors {
     const { bindTextPost } = controllers.codec;
     const els = controllers.runtime.els;
+    const { formatDuration, formatHour } = controllers.screenScheduleState;
     // ── Settings Page Helpers ──────────────────────────────────────────
     // ── Settings UI helpers ─────────────────────────────────────────────
     var _settingsUiFeature: SettingsUiFeature = controllers.settingsUiFeature;

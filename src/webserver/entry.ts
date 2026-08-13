@@ -18,7 +18,7 @@ import { createWebStyles } from "./application/styles";
 import { createUiRuntimeState } from "./application/state";
 import { createEnvironmentStateFeature } from "./application/environment_state";
 import { installScreenRotationStateModule } from "./application/screen_rotation_state";
-import { installScreenScheduleStateModule } from "./application/screen_schedule_state";
+import { createScreenScheduleStateFeature } from "./application/screen_schedule_state";
 import { installAppearanceStateModule } from "./application/appearance_state";
 import { installFirmwareVersionStateModule } from "./application/firmware_version_state";
 import { installEntityStateModule } from "./application/entity_state";
@@ -139,15 +139,14 @@ const startupState = globalThis as typeof globalThis & {
 
 function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installScreenRotationStateModule(context.runtime, context.layout));
-  const screenScheduleController = context.controllers.screenSchedule;
-  installGlobals(installScreenScheduleStateModule(screenScheduleController, context.runtime));
+  const screenScheduleState = context.controllers.screenScheduleState;
   installGlobals(installAppearanceStateModule(context.runtime));
   installGlobals(installFirmwareVersionStateModule(context.runtime));
   installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout));
   const clockBarController = context.controllers.clockBar;
   installGlobals(installClockBarStateModule(clockBarController, context.runtime, context.core, context.controllers.environment));
   installGlobals(installFirmwareUpdateStateModule(context.runtime, context.device.id));
-  installGlobals(installScreensaverTimeoutModule(context.runtime));
+  installGlobals(installScreensaverTimeoutModule(context.runtime, screenScheduleState));
   installGlobals(installC6FirmwareUiModule(context.runtime));
   installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout));
   const deviceApi = context.api;
@@ -181,10 +180,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     codec: context.configuration.codec,
     runtime: context.runtime,
     layout: context.layout,
+    screenScheduleState,
   }));
-  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime));
+  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -245,7 +245,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, (factory) => {
+  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, (factory) => {
     sseHandlerFactory = factory;
   }));
   const reconnectController = context.controllers.reconnect;
@@ -463,6 +463,14 @@ function composeApplicationContext(): ApplicationContext {
     dimmedBrightness: (value) => Model.normalizeScheduleDimmedBrightness(value),
     clockBrightness: (value) => Model.normalizeScheduleClockBrightness(value),
   });
+  const screenScheduleState = createScreenScheduleStateFeature(
+    screenSchedule,
+    runtime,
+    {
+      syncClockScreensaverControls: () => syncClockScreensaverControls(),
+      updateSunInfo: () => updateSunInfo(),
+    },
+  );
   const clockBar = createClockBarController();
   const settingsUi = createSettingsUiFeature({
     document: dom.document,
@@ -599,6 +607,7 @@ function composeApplicationContext(): ApplicationContext {
     codec: configurationCodec,
     runtime,
     core,
+    screenScheduleState,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),
@@ -648,6 +657,7 @@ function composeApplicationContext(): ApplicationContext {
     previewPlacement,
     reconnect,
     screenSchedule,
+    screenScheduleState,
     screensaver,
     settingsUi,
     voiceServices,

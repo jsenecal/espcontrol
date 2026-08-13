@@ -34,6 +34,7 @@ import { syncLanguageSelect } from "./language_state";
 import { hasCustomNtpServers, syncNtpServerUi } from "./ntp_state";
 import { syncIdleUi } from "./idle_state";
 import { getActiveScreensaverMode } from "./screensaver_state";
+import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -47,6 +48,7 @@ export interface AppBackupControllers {
     readonly codec: ConfigCodecFeature;
     readonly runtime: UiRuntimeState;
     readonly core: Pick<CoreFeature, "syncPreviewOrientation">;
+    readonly screenScheduleState: ScreenScheduleStateFeature;
 }
 
 export interface AppBackupFeature {
@@ -59,6 +61,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
     const { syncPreviewOrientation } = controllers.core;
     const { serializeButtonConfig, serializeSubpageConfig } = controllers.codec;
     const els = controllers.runtime.els;
+    const { syncUi: syncScreenScheduleUi } = controllers.screenScheduleState;
     // ── Export / Import ────────────────────────────────────────────────────
     var backupExportController: BackupExportController = controllers.backupExport;
     function backupExportScreenSizeSlug(this: any, value?: any) {

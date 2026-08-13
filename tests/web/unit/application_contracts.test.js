@@ -36,7 +36,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
   });
 
@@ -83,6 +83,17 @@ describe("browserless application contracts", () => {
     assert.match(environment, /export interface EnvironmentStateFeature/);
     assert.doesNotMatch(environment, /GlobalDescriptors|liveGlobal|staticGlobal/);
     assert.doesNotMatch(globals, /\bvar (?:_voiceServicesController|voiceServicesSupported|voiceServicesState|applyVoiceServicesState|voiceServicesUiState|isHomeAssistantAutoTimezone|effectiveTimezoneOptionForWeb|timezoneOptionsWithFallback|monthNameForIndex):/);
+  });
+
+  test("owns screen-schedule state without application globals", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const schedule = fs.readFileSync(path.join(ROOT, "src/webserver/application/screen_schedule_state.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(entry, /createScreenScheduleStateFeature\(/);
+    assert.doesNotMatch(entry, /installScreenScheduleStateModule/);
+    assert.match(schedule, /export interface ScreenScheduleStateFeature/);
+    assert.doesNotMatch(schedule, /GlobalDescriptors|liveGlobal|staticGlobal/);
+    assert.doesNotMatch(globals, /\bvar (?:_screenScheduleController|screenScheduleControllerState|applyScreenScheduleControllerState|formatDuration|formatHour|syncScreenScheduleUi):/);
   });
 
   test("registers migrated card families through the typed registry", () => {
@@ -625,7 +636,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime\)\)/);
   });
 
@@ -641,7 +652,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installScreenScheduleStateModule\(screenScheduleController, context\.runtime\)/);
+    assert.match(entry, /createScreenScheduleStateFeature\(/);
     assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime, context\.device\.id\)/);
   });
 
