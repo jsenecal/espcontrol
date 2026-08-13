@@ -3,8 +3,10 @@ import { firmwareVersionsSame, isSpecificFirmwareVersion } from "./firmware_meta
 import { escHtml } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
-export function installFirmwareUpdateStateModule(runtime: UiRuntimeState, deviceId: string): GlobalDescriptors {
+import type { FirmwareVersionFeature } from "./firmware_version_state";
+export function installFirmwareUpdateStateModule(runtime: UiRuntimeState, deviceId: string, firmwareVersion: FirmwareVersionFeature): GlobalDescriptors {
     const els = runtime.els;
+    const { set: setFirmwareVersion } = firmwareVersion;
     // ── Firmware Update State ─────────────────────────────────────────────
     var firmwareInstallRefreshTimer: any = null;
     var firmwareInstallRefreshUntil: any = 0;

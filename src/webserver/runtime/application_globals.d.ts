@@ -7,9 +7,6 @@ declare global {
   var CLOCK_BAR_TIME_UNAVAILABLE: any;
   var CLOCK_BAR_UNAVAILABLE: any;
   var FAVICON_SVG: any;
-  var FIRMWARE_CHECKING_VERSION_LABEL: any;
-  var FIRMWARE_DEV_VERSION_LABEL: any;
-  var FIRMWARE_UNKNOWN_VERSION_LABEL: any;
   var FIRMWARE_WEB_OTA_FALLBACK_DELAY_MS: any;
   var MAX_CLOCK_BAR_TEMPERATURES: any;
   var NETWORK_STATUS_ICON_UNAVAILABLE: any;
@@ -165,7 +162,6 @@ declare global {
   var deleteSlot: any;
   var disclosureSection: any;
   var displayC6FirmwareVersion: any;
-  var displayFirmwareVersion: any;
   var duplicateButton: any;
   var duplicateSubpageButton: any;
   var emptyButtonConfig: any;
@@ -200,7 +196,6 @@ declare global {
   var firmwareInstallRefreshUntil: any;
   var firmwareUpdateAvailable: any;
   var firmwareUpdateControlsVisible: any;
-  var firmwareVersionLabel: any;
   var firmwareVersionMatches: any;
   var firmwareVersionSelectorVisible: any;
   var firmwareWebOtaFallbackTimer: any;
@@ -376,7 +371,6 @@ declare global {
   var renderClockBarLayout: any;
   var renderClockBarSelectionBar: any;
   var renderFirmwareUpdateStatus: any;
-  var renderFirmwareVersion: any;
   var renderPreview: any;
   var renderSelectionBar: any;
   var resetPostQueueError: any;
@@ -412,7 +406,6 @@ declare global {
   var setConfigLocked: any;
   var setFavicon: any;
   var setFirmwareUpdateInfo: any;
-  var setFirmwareVersion: any;
   var setPostThrottle: any;
   var setPublicFirmwareInfo: any;
   var setPublicFirmwareVersions: any;

@@ -9,6 +9,7 @@ import type { UiRuntimeState } from "../application/state";
 import type { CoreFeature } from "../application/core";
 import type { ApplicationLayoutState } from "../application/application_context";
 import type { ScreenRotationFeature } from "../application/screen_rotation_state";
+import type { FirmwareVersionFeature } from "../application/firmware_version_state";
 export function installAppTestHooksPreview(
     cardRegistry: CardRegistry,
     codec: ConfigCodecFeature,
@@ -16,6 +17,7 @@ export function installAppTestHooksPreview(
     core: Pick<CoreFeature, "mockNow" | "now" | "withMockNow" | "normalizeGridSpansForLayout" | "clockBarVisibleInPreview">,
     layout: ApplicationLayoutState,
     screenRotation: ScreenRotationFeature,
+    firmwareVersion: FirmwareVersionFeature,
 ): GlobalDescriptors {
     const {
         mockNow: webserverMockNow,
@@ -25,6 +27,7 @@ export function installAppTestHooksPreview(
         clockBarVisibleInPreview,
     } = core;
     const { applyDeferredButtonOrder: applyDeferredButtonOrderValue } = screenRotation;
+    const { display: displayFirmwareVersion, label: firmwareVersionLabel } = firmwareVersion;
     const {
         buildSubpageGrid,
         buildSubpageGridAndNormalizeOrder,

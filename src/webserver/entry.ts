@@ -20,7 +20,7 @@ import { createEnvironmentStateFeature } from "./application/environment_state";
 import { createScreenRotationFeature } from "./application/screen_rotation_state";
 import { createScreenScheduleStateFeature } from "./application/screen_schedule_state";
 import { createAppearanceFeature } from "./application/appearance_state";
-import { installFirmwareVersionStateModule } from "./application/firmware_version_state";
+import { createFirmwareVersionFeature } from "./application/firmware_version_state";
 import { installEntityStateModule } from "./application/entity_state";
 import { installClockBarStateModule } from "./application/clock_bar_state";
 import { installFirmwareUpdateStateModule } from "./application/firmware_update_state";
@@ -142,11 +142,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const screenScheduleState = context.controllers.screenScheduleState;
   const screensaverTimeout = context.controllers.screensaverTimeout;
   const appearance = context.controllers.appearance;
-  installGlobals(installFirmwareVersionStateModule(context.runtime));
+  const firmwareVersion = context.controllers.firmwareVersion;
   installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout));
   const clockBarController = context.controllers.clockBar;
   installGlobals(installClockBarStateModule(clockBarController, context.runtime, context.core, context.controllers.environment));
-  installGlobals(installFirmwareUpdateStateModule(context.runtime, context.device.id));
+  installGlobals(installFirmwareUpdateStateModule(context.runtime, context.device.id, firmwareVersion));
   installGlobals(installC6FirmwareUiModule(context.runtime));
   installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout));
   const deviceApi = context.api;
@@ -160,7 +160,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout));
+  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion));
   installGlobals(installArtworkPostApiModule());
   installGlobals(installScreenSchedulePostApiModule());
   installGlobals(installClockBarPostApiModule());
@@ -241,18 +241,18 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
-  }, context.runtime));
+  }, context.runtime, firmwareVersion));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, (factory) => {
+  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, firmwareVersion, (factory) => {
     sseHandlerFactory = factory;
   }));
   const reconnectController = context.controllers.reconnect;
   if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
   installGlobals(installAppEventsModule(
-    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle,
+    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion,
   ));
   installGlobals(installAppModule(
     context.controllers.pageTitle,
@@ -333,12 +333,13 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.core,
     context.layout,
   ));
-  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation));
+  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion));
   installGlobals(installAppTestHooksBackup(context.layout));
   installGlobals(installAppTestHooksSettings(
     () => defaultTimezoneOptionsForDevice(context.device.profile),
     context.controllers.environment,
     context.controllers.screensaverTimeout,
+    context.controllers.firmwareVersion,
   ));
 }
 
@@ -377,6 +378,11 @@ function composeApplicationContext(): ApplicationContext {
   const appearance = createAppearanceFeature(runtime, {
     renderPreview: () => renderPreview(),
     postOnColor: (value) => postText(entityName("button_on_color"), value),
+  });
+  const firmwareVersion = createFirmwareVersionFeature(runtime, {
+    syncVersionSelect: () => syncFirmwareVersionSelect(),
+    renderUpdateStatus: () => renderFirmwareUpdateStatus(),
+    stopInstallRefreshIfComplete: () => stopFirmwareInstallRefreshIfComplete(),
   });
   const voiceServices = createVoiceServicesController();
   const environment = createEnvironmentStateFeature(
@@ -661,6 +667,7 @@ function composeApplicationContext(): ApplicationContext {
     backupRestore,
     backupApplication,
     appearance,
+    firmwareVersion,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,

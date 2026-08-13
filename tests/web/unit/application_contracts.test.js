@@ -46,7 +46,7 @@ describe("browserless application contracts", () => {
     const migration = fs.readFileSync(path.join(ROOT, "src/webserver/application/native_panel_config_migration.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar DEVICE_ID:/);
     assert.doesNotMatch(migration, /\bDEVICE_ID\b|\bNUM_SLOTS\b|dependencies\?/);
-    assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime, context\.device\.id\)/);
+    assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime, context\.device\.id, firmwareVersion\)/);
     assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id\)/);
   });
 
@@ -57,7 +57,7 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:NUM_SLOTS|TOTAL_SLOTS|GRID_COLS|GRID_ROWS):/);
     assert.match(entry, /installGridModule\(context\.configuration\.codec, context\.runtime, context\.layout\)/);
     assert.match(entry, /installAppConfigEventsModule\(configPersistence, context\.configuration\.codec, context\.layout\)/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion\)/);
   });
 
   test("imports shared settings state helpers without application globals", () => {
@@ -547,7 +547,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /codec: context\.configuration\.codec/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion\)/);
   });
 
   test("injects the configuration codec into persistence and application services", () => {
@@ -659,7 +659,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance\)/);
-    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime\)\)/);
+    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion\)\)/);
   });
 
   test("injects display-state DOM references", () => {
@@ -675,7 +675,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /createScreenScheduleStateFeature\(/);
-    assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime, context\.device\.id\)/);
+    assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime, context\.device\.id, firmwareVersion\)/);
   });
 
   test("owns appearance behavior without application globals", () => {
@@ -688,6 +688,18 @@ describe("browserless application contracts", () => {
     assert.match(entry, /appearance = createAppearanceFeature/);
     assert.doesNotMatch(entry, /installAppearanceStateModule/);
     assert.doesNotMatch(globals, /\bvar (?:syncColorUi|resetAppearanceColors):/);
+  });
+
+  test("owns firmware version behavior without application globals", () => {
+    const firmwareVersion = fs.readFileSync(path.join(ROOT, "src/webserver/application/firmware_version_state.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(firmwareVersion, /export interface FirmwareVersionFeature/);
+    assert.match(firmwareVersion, /createFirmwareVersionFeature/);
+    assert.doesNotMatch(firmwareVersion, /GlobalDescriptors|(?:live|static)Global/);
+    assert.match(entry, /firmwareVersion = createFirmwareVersionFeature/);
+    assert.doesNotMatch(entry, /installFirmwareVersionStateModule/);
+    assert.doesNotMatch(globals, /\bvar (?:renderFirmwareVersion|setFirmwareVersion|displayFirmwareVersion|firmwareVersionLabel):/);
   });
 
   test("removes the ambient DOM registry", () => {

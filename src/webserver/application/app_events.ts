@@ -23,14 +23,17 @@ import type { ReconnectController } from "../features/reconnect";
 import type { SseHandlerFactory } from "./app_state_event_handlers";
 import type { UiRuntimeState } from "./state";
 import type { AppTitleFeature } from "./app_title";
+import type { FirmwareVersionFeature } from "./firmware_version_state";
 
 export function installAppEventsModule(
     reconnectController: ReconnectController<unknown>,
     createSseHandlers: SseHandlerFactory,
     runtime: UiRuntimeState,
     pageTitle: AppTitleFeature,
+    firmwareVersion: FirmwareVersionFeature,
 ): GlobalDescriptors {
     const els = runtime.els;
+    const { set: setFirmwareVersion } = firmwareVersion;
     // ── SSE ────────────────────────────────────────────────────────────────
     function connectEvents(this: any) {
         function markConnected(this: any) {

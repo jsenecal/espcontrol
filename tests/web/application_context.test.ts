@@ -54,6 +54,7 @@ export function runApplicationContextTests(): void {
   const backupRestore = {} as any;
   const backupApplication = {} as any;
   const appearance = {} as any;
+  const firmwareVersion = {} as any;
   const reconnect = { connect() {} } as any;
   const alarmDelayAudio = {} as any;
   const cardEditorDraft = {} as any;
@@ -106,6 +107,7 @@ export function runApplicationContextTests(): void {
     backupRestore,
     backupApplication,
     appearance,
+    firmwareVersion,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,
@@ -130,6 +132,7 @@ export function runApplicationContextTests(): void {
 
   equal(context.device.id, "guition-esp32-p4-jc8012p4a1", "context owns the selected device");
   equal(context.controllers.appearance, appearance, "context owns appearance behavior");
+  equal(context.controllers.firmwareVersion, firmwareVersion, "context owns firmware version behavior");
   equal(context.layout.numSlots, 12, "context initializes slot count");
   equal(context.layout.totalSlots, 12, "context initializes total slot count");
   equal(context.layout.gridCols, 4, "context initializes grid columns");

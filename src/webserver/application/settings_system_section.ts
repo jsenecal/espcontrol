@@ -8,6 +8,7 @@ import {
     publicFirmwareManifestUrl,
     publicFirmwareVersionsUrl,
 } from "./firmware_metadata";
+import type { FirmwareVersionFeature } from "./firmware_version_state";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;
@@ -17,8 +18,10 @@ export interface SettingsSystemSectionActions {
 export function installSettingsSystemSectionModule(
     actions: SettingsSystemSectionActions,
     runtime: UiRuntimeState,
+    firmwareVersion: FirmwareVersionFeature,
 ): GlobalDescriptors {
     const els = runtime.els;
+    const { render: renderFirmwareVersion } = firmwareVersion;
     // ── Settings System Section ────────────────────────────────────────
     function buildSystemSettingsCards(this: any) {
         var backupBody: any = document.createElement("div");

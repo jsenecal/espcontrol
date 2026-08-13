@@ -12,8 +12,10 @@ import {
     publicFirmwareVersionsUrl,
 } from "./firmware_metadata";
 import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
-export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature): GlobalDescriptors {
+import type { FirmwareVersionFeature } from "./firmware_version_state";
+export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature): GlobalDescriptors {
     const { applyState: applyScreensaverTimeoutState } = screensaverTimeout;
+    const { render: renderFirmwareVersion, set: setFirmwareVersion } = firmwareVersion;
     // ── State Loader API ──────────────────────────────────────────────────
     function eventStreamEnabled(this: any) {
         try {
