@@ -129,6 +129,16 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:applyButtonConfigStateEvent|applySubpageConfigStateEvent|configEventPatterns|connectEvents|createSseHandlers|ensureSubpageRaw):/);
   });
 
+  test("composes status and connectivity preview as one context service", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const preview = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_status_preview.ts"), "utf8");
+    assert.match(preview, /export interface AppStatusPreviewFeature/);
+    assert.match(preview, /export function createAppStatusPreviewFeature/);
+    assert.match(entry, /statusPreview = createAppStatusPreviewFeature\(runtime, core, layout, environment, clockBarState\)/);
+    assert.match(entry, /appStatusPreviewCompatibilityGlobals\(context\.controllers\.statusPreview\)/);
+    assert.doesNotMatch(entry, /installAppStatusPreviewModule/);
+  });
+
   test("imports the browser core service without ambient application names", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");

@@ -88,7 +88,7 @@ import { createBackupRestoreController } from "./features/backup_restore_control
 import { createBackupFeature } from "./features/backup";
 import { installBackupContractModule } from "./application/backup_contract";
 import { createAppBackupFeature } from "./application/app_backup";
-import { installAppStatusPreviewModule } from "./application/app_status_preview";
+import { appStatusPreviewCompatibilityGlobals, createAppStatusPreviewFeature } from "./application/app_status_preview";
 import { createAppTitleFeature } from "./application/app_title";
 import { createAppConfigEventsFeature } from "./application/app_config_events";
 import { createAppStateEventHandlersFeature } from "./application/app_state_event_handlers";
@@ -256,7 +256,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     importBackup: backupUiFeature.importConfig,
   }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader));
   installGlobals(backupUiFeature.globals);
-  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState));
+  installGlobals(appStatusPreviewCompatibilityGlobals(context.controllers.statusPreview));
   installGlobals(installAppModule(
     context.controllers.pageTitle,
     createWebStyles(context.layout.config.dragAnimation),
@@ -585,6 +585,7 @@ function composeApplicationContext(): ApplicationContext {
     updateNetworkPreview: () => updateNetworkPreview(),
     updateVoicePreview: () => updateVoicePreview(),
   });
+  const statusPreview = createAppStatusPreviewFeature(runtime, core, layout, environment, clockBarState);
   const configEvents = createAppConfigEventsFeature(configurationPersistence, configurationCodec, layout);
   const stateEventHandlers = createAppStateEventHandlersFeature(
     runtime,
@@ -807,6 +808,7 @@ function composeApplicationContext(): ApplicationContext {
     configEvents,
     stateEventHandlers,
     appEvents,
+    statusPreview,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,
