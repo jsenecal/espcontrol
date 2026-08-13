@@ -49,7 +49,6 @@ import { installStateLoaderApiModule } from "./application/state_loader_api";
 import { installArtworkPostApiModule } from "./application/artwork_post_api";
 import { installScreenSchedulePostApiModule } from "./application/screen_schedule_post_api";
 import { installClockBarPostApiModule } from "./application/clock_bar_post_api";
-import { installControlsModule } from "./application/controls";
 import { installControlsShellModule } from "./application/controls_shell";
 import { installSettingsPageHelpersModule } from "./application/settings_page_helpers";
 import { installSettingsScheduleSectionModule } from "./application/settings_schedule_section";
@@ -163,7 +162,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installArtworkPostApiModule(context.controllers.entityState));
   installGlobals(installScreenSchedulePostApiModule(context.controllers.entityState));
   installGlobals(installClockBarPostApiModule(context.controllers.entityState));
-  installGlobals(installControlsModule());
   installGlobals(installControlsShellModule(context.runtime));
   const settingsUiFeature = context.controllers.settingsUi;
   const alarmDelayAudioController = context.controllers.alarmDelayAudio;

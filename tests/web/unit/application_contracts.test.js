@@ -55,6 +55,12 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:entityName|entityInput|refreshEntityDatalist|rememberEntityPostPath):/);
   });
 
+  test("removes the empty controls bootstrap layer", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    assert.equal(fs.existsSync(path.join(ROOT, "src/webserver/application/controls.ts")), false);
+    assert.doesNotMatch(entry, /installControlsModule/);
+  });
+
   test("injects entity state into API and persistence modules", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const modules = [
