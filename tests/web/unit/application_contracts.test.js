@@ -95,7 +95,11 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /installScreenSchedulePostApiModule/);
     assert.doesNotMatch(schedulePosts, /GlobalDescriptors|staticGlobal|liveGlobal|installScreenSchedulePostApiModule/);
     assert.doesNotMatch(globals, /\bvar (?:BRIGHTNESS_TIME_UNAVAILABLE|SCREEN_SCHEDULE_CLOCK_BRIGHTNESS_UNAVAILABLE|SCREEN_SCHEDULE_DIMMED_BRIGHTNESS_UNAVAILABLE|SCREEN_SCHEDULE_MODE_UNAVAILABLE|SCREEN_SCHEDULE_SENSOR_ACTIVATION_UNAVAILABLE|SCREEN_SCHEDULE_TRIGGER_UNAVAILABLE|SCREEN_SCHEDULE_UNAVAILABLE|SCREEN_SCHEDULE_WAKE_BRIGHTNESS_UNAVAILABLE|SCREEN_SCHEDULE_WAKE_TIMEOUT_UNAVAILABLE|postBrightnessMode|postDisplayBacklightBrightness|postBrightnessDawnTime|postBrightnessDuskTime|postScreenScheduleClockBrightness|postScreenScheduleDimmedBrightness|postScreenScheduleEnabled|postScreenScheduleMode|postScreenScheduleOffHour|postScreenScheduleOnHour|postScreenScheduleSensorActivation|postScreenScheduleSensorEntity|postScreenScheduleTrigger|postScreenScheduleWakeBrightness|postScreenScheduleWakeTimeout):/);
-    assert.match(entry, /installClockBarPostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
+    const clockBarPosts = fs.readFileSync(path.join(ROOT, "src/webserver/application/clock_bar_post_api.ts"), "utf8");
+    assert.match(entry, /clockBarPostApi = createClockBarPostApiFeature\(entityState, requestApi\)/);
+    assert.doesNotMatch(entry, /installClockBarPostApiModule/);
+    assert.doesNotMatch(clockBarPosts, /GlobalDescriptors|staticGlobal|liveGlobal|installClockBarPostApiModule/);
+    assert.doesNotMatch(globals, /\bvar (?:CLOCK_BAR_NIGHT_MODE_UNAVAILABLE|CLOCK_BAR_TIME_UNAVAILABLE|CLOCK_BAR_UNAVAILABLE|NETWORK_STATUS_ICON_UNAVAILABLE|SUBPAGE_CHEVRON_UNAVAILABLE|TEMPERATURE_DEGREE_SYMBOL_UNAVAILABLE|VOICE_SERVICES_UNAVAILABLE|postClockBar|postClockBarNightMode|postClockBarTemperatureEntities|postClockBarTime|postClockBrightnessDay|postClockBrightnessNight|postClockScreensaver|postNetworkStatusIcon|postBatteryStatus|postSubpageChevron|postTemperatureDegreeSymbol|postVoiceServices|voiceServicesPostUrls|postAlarmDelayAudio|postAlarmDelayTts|postAlarmDelayEntryAnnouncement|postAlarmDelayExitAnnouncement|postAlarmDelayBeepVolume|postAlarmDelayFinalCountdown):/);
   });
 
   test("owns initial-state loading and reconnect through the application context", () => {
@@ -190,7 +194,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview, context\.controllers\.artworkPostApi, context\.controllers\.schedulePostApi\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview, context\.controllers\.artworkPostApi, context\.controllers\.schedulePostApi, context\.controllers\.clockBarPostApi\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout, entityState, shell\)/);
   });
 
@@ -899,7 +903,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview, context\.controllers\.artworkPostApi, context\.controllers\.schedulePostApi\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview, context\.controllers\.artworkPostApi, context\.controllers\.schedulePostApi, context\.controllers\.clockBarPostApi\)/);
     assert.match(entry, /installSettingsScheduleSectionModule\(context\.configuration\.codec, context\.runtime, screenScheduleState, context\.controllers\.entityState, context\.controllers\.requestApi, context\.controllers\.schedulePostApi\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.stateLoader, context\.controllers\.firmwarePostApi, context\.controllers\.artworkPostApi\)\)/);
   });

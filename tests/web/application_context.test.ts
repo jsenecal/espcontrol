@@ -78,6 +78,7 @@ export function runApplicationContextTests(): void {
   const firmwarePostApi = {} as any;
   const artworkPostApi = {} as any;
   const schedulePostApi = {} as any;
+  const clockBarPostApi = {} as any;
   const coverArtScreensaver = {} as any;
   const mediaPlayback = {} as any;
   const pageTitle = {} as any;
@@ -128,6 +129,7 @@ export function runApplicationContextTests(): void {
     firmwarePostApi,
     artworkPostApi,
     schedulePostApi,
+    clockBarPostApi,
     c6Firmware,
     alarmDelayAudio,
     cardEditorDraft,
@@ -169,6 +171,7 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.firmwarePostApi, firmwarePostApi, "context owns firmware update posting behavior");
   equal(context.controllers.artworkPostApi, artworkPostApi, "context owns artwork posting behavior");
   equal(context.controllers.schedulePostApi, schedulePostApi, "context owns screen schedule posting behavior");
+  equal(context.controllers.clockBarPostApi, clockBarPostApi, "context owns Clock Bar posting behavior");
   equal(context.controllers.c6Firmware, c6Firmware, "context owns C6 firmware behavior");
   equal(context.controllers.clockBarState, clockBarState, "context owns Clock Bar behavior");
   equal(context.controllers.entityState, entityState, "context owns entity lookup and post-path behavior");

@@ -60,6 +60,7 @@ import type { GridFeature } from "./grid";
 import type { FirmwareUpdatePostApiFeature } from "./firmware_update_post_api";
 import type { ArtworkPostApiFeature } from "./artwork_post_api";
 import type { ScreenSchedulePostApiFeature } from "./screen_schedule_post_api";
+import type { ClockBarPostApiFeature } from "./clock_bar_post_api";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -123,6 +124,7 @@ export interface ApplicationContext {
     readonly firmwarePostApi: FirmwareUpdatePostApiFeature;
     readonly artworkPostApi: ArtworkPostApiFeature;
     readonly schedulePostApi: ScreenSchedulePostApiFeature;
+    readonly clockBarPostApi: ClockBarPostApiFeature;
     readonly c6Firmware: C6FirmwareFeature;
     readonly clockBarState: ClockBarFeature;
     readonly entityState: EntityStateFeature;
@@ -192,6 +194,7 @@ export interface ApplicationContextOptions {
   readonly firmwarePostApi: FirmwareUpdatePostApiFeature;
   readonly artworkPostApi: ArtworkPostApiFeature;
   readonly schedulePostApi: ScreenSchedulePostApiFeature;
+  readonly clockBarPostApi: ClockBarPostApiFeature;
   readonly c6Firmware: C6FirmwareFeature;
   readonly clockBarState: ClockBarFeature;
   readonly entityState: EntityStateFeature;
@@ -281,6 +284,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       firmwarePostApi: options.firmwarePostApi,
       artworkPostApi: options.artworkPostApi,
       schedulePostApi: options.schedulePostApi,
+      clockBarPostApi: options.clockBarPostApi,
       c6Firmware: options.c6Firmware,
       clockBarState: options.clockBarState,
       entityState: options.entityState,

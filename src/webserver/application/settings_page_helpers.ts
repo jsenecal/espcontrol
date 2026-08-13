@@ -24,6 +24,7 @@ import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
+import type { ClockBarPostApiFeature } from "./clock_bar_post_api";
 
 export interface SettingsPageHelpersControllers {
     readonly settingsUiFeature: SettingsUiFeature;
@@ -40,6 +41,7 @@ export interface SettingsPageHelpersControllers {
     readonly shell: Pick<ControlsShellFeature, "isConfigLocked" | "switchTab">;
     readonly requestApi: Pick<ApplicationApiFeature, "postScreensaverAction" | "postScreensaverDimmedBrightness" | "postScreensaverDimmedBrightnessDay" | "postScreensaverDimmedBrightnessNight" | "postSwitch">;
     readonly statusPreview: Pick<AppStatusPreviewFeature, "syncInput">;
+    readonly clockBarPostApi: Pick<ClockBarPostApiFeature, "postClockBrightnessDay" | "postClockBrightnessNight" | "postClockScreensaver" | "postAlarmDelayAudio" | "postAlarmDelayTts" | "postAlarmDelayEntryAnnouncement" | "postAlarmDelayExitAnnouncement" | "postAlarmDelayBeepVolume" | "postAlarmDelayFinalCountdown">;
 }
 
 export function installSettingsPageHelpersModule(
@@ -49,6 +51,17 @@ export function installSettingsPageHelpersModule(
     const { isConfigLocked, switchTab } = controllers.shell;
     const { bindTextPost } = controllers.codec;
     const { syncInput } = controllers.statusPreview;
+    const {
+        postClockBrightnessDay,
+        postClockBrightnessNight,
+        postClockScreensaver,
+        postAlarmDelayAudio,
+        postAlarmDelayTts,
+        postAlarmDelayEntryAnnouncement,
+        postAlarmDelayExitAnnouncement,
+        postAlarmDelayBeepVolume,
+        postAlarmDelayFinalCountdown,
+    } = controllers.clockBarPostApi;
     const {
         postScreensaverAction,
         postScreensaverDimmedBrightness,

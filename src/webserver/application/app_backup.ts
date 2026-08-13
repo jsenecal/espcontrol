@@ -45,6 +45,7 @@ import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { GridFeature } from "./grid";
 import type { ArtworkPostApiFeature } from "./artwork_post_api";
 import type { ScreenSchedulePostApiFeature } from "./screen_schedule_post_api";
+import type { ClockBarPostApiFeature } from "./clock_bar_post_api";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -69,6 +70,7 @@ export interface AppBackupControllers {
     readonly grid: Pick<GridFeature, "applyImportedButtonOrder" | "cancelMainGridSave" | "serializeGrid">;
     readonly artworkPostApi: ArtworkPostApiFeature;
     readonly schedulePostApi: ScreenSchedulePostApiFeature;
+    readonly clockBarPostApi: ClockBarPostApiFeature;
 }
 
 export interface AppBackupFeature {
@@ -114,6 +116,25 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
         postScreenScheduleDimmedBrightness,
         postScreenScheduleClockBrightness,
     } = controllers.schedulePostApi;
+    const {
+        postClockBrightnessDay,
+        postClockBrightnessNight,
+        postClockScreensaver,
+        postClockBar,
+        postClockBarTemperatureEntities,
+        postClockBarTime,
+        postClockBarNightMode,
+        postNetworkStatusIcon,
+        postVoiceServices,
+        postAlarmDelayAudio,
+        postAlarmDelayTts,
+        postAlarmDelayEntryAnnouncement,
+        postAlarmDelayExitAnnouncement,
+        postAlarmDelayBeepVolume,
+        postAlarmDelayFinalCountdown,
+        postTemperatureDegreeSymbol,
+        postSubpageChevron,
+    } = controllers.clockBarPostApi;
     const {
         postText,
         postSwitch,

@@ -52,7 +52,7 @@ import { createStateLoaderFeature, type StateLoaderFeature } from "./application
 import { createGridMigrationFeature } from "./application/grid_migration";
 import { createArtworkPostApiFeature } from "./application/artwork_post_api";
 import { createScreenSchedulePostApiFeature } from "./application/screen_schedule_post_api";
-import { installClockBarPostApiModule } from "./application/clock_bar_post_api";
+import { createClockBarPostApiFeature } from "./application/clock_bar_post_api";
 import { createControlsShellFeature } from "./application/controls_shell";
 import { installSettingsPageHelpersModule } from "./application/settings_page_helpers";
 import { installSettingsScheduleSectionModule } from "./application/settings_schedule_section";
@@ -158,7 +158,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell, context.controllers.requestApi, context.controllers.appEvents));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installClockBarPostApiModule(context.controllers.entityState, context.controllers.requestApi));
   const settingsUiFeature = context.controllers.settingsUi;
   const alarmDelayAudioController = context.controllers.alarmDelayAudio;
   const screensaverController = context.controllers.screensaver;
@@ -179,10 +178,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     shell: context.controllers.shell,
     requestApi: context.controllers.requestApi,
     statusPreview: context.controllers.statusPreview,
+    clockBarPostApi: context.controllers.clockBarPostApi,
   }));
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState, context.controllers.entityState, context.controllers.requestApi, context.controllers.schedulePostApi));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState, context.controllers.statusPreview, context.controllers.artworkPostApi));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi, context.controllers.statusPreview, context.controllers.artworkPostApi, context.controllers.schedulePostApi));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi, context.controllers.statusPreview, context.controllers.artworkPostApi, context.controllers.schedulePostApi, context.controllers.clockBarPostApi));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options, context.controllers.shell, context.controllers.requestApi));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -357,6 +357,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.controllers.requestApi,
     context.controllers.statusPreview,
     context.controllers.artworkPostApi,
+    context.controllers.clockBarPostApi,
   ));
 }
 
@@ -554,6 +555,7 @@ function composeApplicationContext(): ApplicationContext {
   firmwarePostApi = createFirmwareUpdatePostApiFeature(entityState, requestApi);
   const artworkPostApi = createArtworkPostApiFeature(entityState, requestApi);
   const schedulePostApi = createScreenSchedulePostApiFeature(entityState, requestApi);
+  const clockBarPostApi = createClockBarPostApiFeature(entityState, requestApi);
   configurationPersistence.connectRequestApi(requestApi);
   configurationCodec.connectRequestApi(requestApi);
   const grid = createGridFeature(configurationCodec, runtime, layout, entityState, requestApi);
@@ -582,17 +584,17 @@ function composeApplicationContext(): ApplicationContext {
   clockBarState = createClockBarFeature(clockBar, runtime, core, environment, {
     hideSettingsOverlay: () => hideSettingsOverlay(),
     timezoneId: (value) => statusPreview.getTzId(value),
-    postTemperatureEntities: (value) => postClockBarTemperatureEntities(value),
+    postTemperatureEntities: (value) => clockBarPostApi.postClockBarTemperatureEntities(value),
     postSwitch: (name, value) => requestApi.postSwitch(name, value),
     entityName: (key) => entityState.entityName(key),
     postText: (name, value) => requestApi.postText(name, value),
     updateTemperaturePreview: () => statusPreview.updateTempPreview(),
     updateItemUi: () => statusPreview.updateClockBarItemUi(),
-    postTemperatureDegreeSymbol: (value) => postTemperatureDegreeSymbol(value),
+    postTemperatureDegreeSymbol: (value) => clockBarPostApi.postTemperatureDegreeSymbol(value),
     isTemperatureItem: (item) => statusPreview.isClockBarTemperatureItem(item),
-    postTime: (value) => postClockBarTime(value),
-    postVoiceServices: (value) => postVoiceServices(value),
-    postNetworkStatus: (value) => postNetworkStatusIcon(value),
+    postTime: (value) => clockBarPostApi.postClockBarTime(value),
+    postVoiceServices: (value) => clockBarPostApi.postVoiceServices(value),
+    postNetworkStatus: (value) => clockBarPostApi.postNetworkStatusIcon(value),
     renderSelectionBar: () => renderSelectionBar(grid.ctx()),
     updateNetworkPreview: () => statusPreview.updateNetworkPreview(),
     updateVoicePreview: () => statusPreview.updateVoicePreview(),
@@ -760,6 +762,7 @@ function composeApplicationContext(): ApplicationContext {
     grid,
     artworkPostApi,
     schedulePostApi,
+    clockBarPostApi,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: stateLoader.eventStreamEnabled,
@@ -819,6 +822,7 @@ function composeApplicationContext(): ApplicationContext {
     firmwarePostApi,
     artworkPostApi,
     schedulePostApi,
+    clockBarPostApi,
     c6Firmware,
     clockBarState,
     entityState,

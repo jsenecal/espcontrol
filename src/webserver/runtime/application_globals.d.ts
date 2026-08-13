@@ -2,15 +2,8 @@ export {};
 
 declare global {
   var AUTOMATIC_BRIGHTNESS_UNAVAILABLE: any;
-  var CLOCK_BAR_NIGHT_MODE_UNAVAILABLE: any;
-  var CLOCK_BAR_TIME_UNAVAILABLE: any;
-  var CLOCK_BAR_UNAVAILABLE: any;
   var FAVICON_SVG: any;
-  var NETWORK_STATUS_ICON_UNAVAILABLE: any;
-  var SUBPAGE_CHEVRON_UNAVAILABLE: any;
   var SUBPAGE_RAW_CHUNK_FIELDS: any;
-  var TEMPERATURE_DEGREE_SYMBOL_UNAVAILABLE: any;
-  var VOICE_SERVICES_UNAVAILABLE: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
   var _backupFeature: any;
   var _renderPending: any;
@@ -147,18 +140,6 @@ declare global {
   var planBackupImport: any;
   var planClipboardPaste: any;
   var positionMenu: any;
-  var postClockBar: any;
-  var postClockBarNightMode: any;
-  var postClockBarTemperatureEntities: any;
-  var postClockBarTime: any;
-  var postClockBrightnessDay: any;
-  var postClockBrightnessNight: any;
-  var postClockScreensaver: any;
-  var postNetworkStatusIcon: any;
-  var postBatteryStatus: any;
-  var postSubpageChevron: any;
-  var postTemperatureDegreeSymbol: any;
-  var postVoiceServices: any;
   var previewHtmlValue: any;
   var previewValue: any;
   var publicFirmwareOtaFilename: any;
@@ -216,13 +197,6 @@ declare global {
   var toggleRow: any;
   var updatePreviewHint: any;
   var vacuumUsesDefaultIcon: any;
-  var voiceServicesPostUrls: any;
-  var postAlarmDelayAudio: any;
-  var postAlarmDelayTts: any;
-  var postAlarmDelayEntryAnnouncement: any;
-  var postAlarmDelayExitAnnouncement: any;
-  var postAlarmDelayBeepVolume: any;
-  var postAlarmDelayFinalCountdown: any;
   var syncAlarmDelayAudioUi: any;
   var buildAlarmDelayAudioSettingsCard: any;
   var waitForFirmwareRestart: any;
