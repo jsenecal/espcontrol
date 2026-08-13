@@ -24,15 +24,7 @@ declare global {
   var buildScreenScheduleSettingsCard: any;
   var buildSettingsPage: any;
   var buildSystemSettingsCards: any;
-  var buttonTypeDisabledForDevice: any;
-  var buttonConfigDisabledForDevice: any;
   var clipboardEntriesFromCardTransfer: any;
-  var buttonTypeInfoOnlyVisible: any;
-  var buttonTypePickerDetails: any;
-  var buttonTypePickerKeys: any;
-  var buttonTypePickerOptionList: any;
-  var buttonTypeRegistryValue: any;
-  var buttonTypeVisibleInPicker: any;
   var canPlaceSlotAt: any;
   var cardBadgeLabelHtml: any;
   var cardBadgePreview: any;
@@ -71,7 +63,6 @@ declare global {
   var ctxMenu: any;
   var cutButtons: any;
   var cutSlot: any;
-  var defaultButtonTypeForPicker: any;
   var defaultCardTypeForPicker: any;
   var deleteButtons: any;
   var deleteSlot: any;
@@ -111,7 +102,6 @@ declare global {
   var placeSlotAt: any;
   var planClipboardPaste: any;
   var positionMenu: any;
-  var previewHtmlValue: any;
   var previewValue: any;
   var registerEspControlTestHookGroup: any;
   var registryValue: any;

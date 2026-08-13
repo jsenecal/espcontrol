@@ -60,7 +60,7 @@ import { installSettingsCoverArtSectionModule } from "./application/settings_cov
 import { installSettingsSystemSectionModule } from "./application/settings_system_section";
 import { installSettingsPageModule } from "./application/settings_page";
 import { createControlsFieldsFeature } from "./application/controls_fields";
-import { installPreviewRenderModule } from "./application/preview_render";
+import { createPreviewRenderFeature, type PreviewRenderFeature } from "./application/preview_render";
 import { createButtonSettingsSelectionFeature, type ButtonSettingsSelectionFeature } from "./application/button_settings_selection";
 import { createButtonSettingsRenderQueueFeature } from "./application/button_settings_render_queue";
 import { createButtonSettingsIconPickerFeature } from "./application/button_settings_icon_picker";
@@ -182,18 +182,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState, context.controllers.statusPreview, context.controllers.artworkPostApi));
   installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi, context.controllers.statusPreview, context.controllers.artworkPostApi, context.controllers.schedulePostApi, context.controllers.clockBarPostApi));
   installGlobals(context.controllers.fields.globals);
-  installGlobals(installPreviewRenderModule({
-    document: context.dom.document,
-    layout: context.layout,
-    cards: context.cards,
-    confirmationOptions: context.configuration.confirmationOptions,
-    codec: context.configuration.codec,
-    runtime: context.runtime,
-    screenRotation,
-    shell: context.controllers.shell,
-    grid: context.controllers.grid,
-    selection: context.controllers.selection,
-  }));
+  installGlobals(context.controllers.preview.globals);
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence, context.cards,
     context.configuration.imageOptions,
@@ -207,6 +196,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.controllers.grid,
     context.controllers.iconPicker,
     context.controllers.selection,
+    context.controllers.preview,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,
@@ -225,6 +215,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     statusPreview: context.controllers.statusPreview,
     grid: context.controllers.grid,
     selection: context.controllers.selection,
+    preview: context.controllers.preview,
   }));
   installGlobals(installPreviewClipboardModule({
     configPersistence,
@@ -238,6 +229,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     shell: context.controllers.shell,
     requestApi: context.controllers.requestApi,
     grid: context.controllers.grid,
+    preview: context.controllers.preview,
   }));
   installGlobals(installPreviewInteractionsModule({
     cardEditorDraft,
@@ -344,6 +336,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.core,
     context.layout,
     context.configuration.persistence,
+    context.controllers.preview,
   ));
   installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion, context.controllers.statusPreview, context.controllers.grid));
   installGlobals(installAppTestHooksBackup(context.layout, context.backup.contract, context.backup.application));
@@ -394,6 +387,7 @@ function composeApplicationContext(): ApplicationContext {
   let stateLoader: StateLoaderFeature;
   let appEvents: AppEventsFeature;
   let selection: ButtonSettingsSelectionFeature;
+  let preview: PreviewRenderFeature;
   const shell = createControlsShellFeature(runtime, {
     document: dom.document,
     state: AppInstance.state,
@@ -460,11 +454,11 @@ function composeApplicationContext(): ApplicationContext {
   });
   const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime, layout, entityState, shell);
   const cards = createCardRegistry();
-  const iconPicker = createButtonSettingsIconPickerFeature(dom.document, () => renderPreview());
+  const iconPicker = createButtonSettingsIconPickerFeature(dom.document, () => preview.render());
   const renderQueue = createButtonSettingsRenderQueueFeature(runtime, {
     document: dom.document,
     requestFrame: (callback) => requestAnimationFrame(callback),
-    renderPreview: () => renderPreview(),
+    renderPreview: () => preview.render(),
     renderButtonSettings: () => renderButtonSettings(),
     closeSettings: () => selection.closeSettings(),
   });
@@ -626,10 +620,22 @@ function composeApplicationContext(): ApplicationContext {
     {
       document: dom.document,
       fields,
-      renderPreview: () => renderPreview(),
+      renderPreview: () => preview.render(),
       renderButtonSettings: (force) => renderButtonSettings(force),
     },
   );
+  preview = createPreviewRenderFeature({
+    document: dom.document,
+    layout,
+    cards,
+    confirmationOptions,
+    codec: configurationCodec,
+    runtime,
+    screenRotation,
+    shell,
+    grid,
+    selection,
+  });
   const configEvents = createAppConfigEventsFeature(configurationPersistence, configurationCodec, layout, renderQueue);
   const stateEventHandlers = createAppStateEventHandlersFeature(
     runtime,
@@ -899,6 +905,7 @@ function composeApplicationContext(): ApplicationContext {
     renderQueue,
     fields,
     selection,
+    preview,
     dom,
     cards,
   });

@@ -4,6 +4,7 @@ import { sizeFromToken } from "../model/grid";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createClipboardEntry } from "../features/clipboard";
 import type { ConfigPersistenceFeature } from "./config_post_api";
+import type { PreviewRenderFeature } from "./preview_render";
 import type { ApplicationLayoutState } from "./application_context";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
@@ -26,11 +27,13 @@ export interface PreviewClipboardDependencies {
     readonly shell: Pick<ControlsShellFeature, "isConfigLocked" | "showBanner" | "createActionButton">;
     readonly requestApi: Pick<ApplicationApiFeature, "postText">;
     readonly grid: Pick<GridFeature, "ctx" | "serializeGrid">;
+    readonly preview: Pick<PreviewRenderFeature, "configDisabled" | "registryValue">;
 }
 export function installPreviewClipboardModule(
     dependencies: PreviewClipboardDependencies,
 ): GlobalDescriptors {
     const configPersistence = dependencies.configPersistence;
+    const { configDisabled: buttonConfigDisabledForDevice, registryValue: buttonTypeRegistryValue } = dependencies.preview;
     const document = dependencies.document;
     const { entityName } = dependencies.entityState;
     const { isConfigLocked, showBanner, createActionButton } = dependencies.shell;

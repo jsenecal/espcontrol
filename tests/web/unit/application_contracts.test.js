@@ -823,7 +823,7 @@ describe("browserless application contracts", () => {
     assert.match(settings, /iconPicker: ButtonSettingsIconPickerFeature/);
     assert.match(settings, /iconPicker\.init\(picker, currentVal, onSelect\)/);
     assert.match(context, /readonly iconPicker: ButtonSettingsIconPickerFeature/);
-    assert.match(entry, /createButtonSettingsIconPickerFeature\(dom\.document, \(\) => renderPreview\(\)\)/);
+    assert.match(entry, /createButtonSettingsIconPickerFeature\(dom\.document, \(\) => preview\.render\(\)\)/);
     assert.doesNotMatch(entry, /installGlobals\(installButtonSettingsIconPickerModule/);
     assert.doesNotMatch(globals, /\bvar initIconPicker:/);
   });
@@ -909,6 +909,24 @@ describe("browserless application contracts", () => {
     assert.match(context, /readonly selection: ButtonSettingsSelectionFeature/);
     assert.match(entry, /selection = createButtonSettingsSelectionFeature\(/);
     assert.doesNotMatch(globals, /\bvar (?:clearCardSelection|closeSettings|handleDocumentSelectionMouseDown|hideSettingsOverlay|isSelectionControlTarget|openClockBarTemperatureSettings|openSelectedCardSettings|renderClockBarSelectionBar|renderSelectionBar|selectClockBarItem|updatePreviewHint):/);
+  });
+
+  test("composes preview rendering with only its temporary render adapter", () => {
+    const preview = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_render.ts"), "utf8");
+    const settings = fs.readFileSync(path.join(ROOT, "src/webserver/application/button_settings.ts"), "utf8");
+    const clipboard = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_clipboard.ts"), "utf8");
+    const hooks = fs.readFileSync(path.join(ROOT, "src/webserver/testing/app_test_hooks_config.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(preview, /export function createPreviewRenderFeature/);
+    assert.match(preview, /globals: \{ "renderPreview": staticGlobal\(renderPreview\) \}/);
+    assert.doesNotMatch(preview, /liveGlobal|installPreviewRenderModule/);
+    assert.match(settings, /preview: Pick<PreviewRenderFeature/);
+    assert.match(clipboard, /preview: Pick<PreviewRenderFeature/);
+    assert.match(hooks, /preview: Pick<PreviewRenderFeature/);
+    assert.match(entry, /preview = createPreviewRenderFeature\(\{/);
+    assert.match(entry, /installGlobals\(context\.controllers\.preview\.globals\)/);
+    assert.doesNotMatch(globals, /\bvar (?:buttonTypeDisabledForDevice|buttonConfigDisabledForDevice|buttonTypeInfoOnlyVisible|buttonTypePickerDetails|buttonTypePickerKeys|buttonTypePickerOptionList|buttonTypeRegistryValue|buttonTypeVisibleInPicker|defaultButtonTypeForPicker|previewHtmlValue):/);
   });
 
   test("injects the UI shell into preview, persistence, backup, and startup modules", () => {

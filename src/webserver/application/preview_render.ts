@@ -1,7 +1,7 @@
 import { state } from "../state/app_instance";
 import { WEB_UI_COLORS } from "../state/ui_tokens";
 import { escHtml } from "./ui_primitives";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     buttonConfigDisabledForDevice as isButtonConfigDisabledForDevice,
     cardTypePickerDetails,
@@ -32,7 +32,18 @@ export interface PreviewRenderDependencies {
     readonly grid: Pick<GridFeature, "ctx" | "resolveIcon" | "sizeClass">;
     readonly selection: Pick<ButtonSettingsSelectionFeature, "renderSelectionBar" | "updatePreviewHint">;
 }
-export function installPreviewRenderModule(dependencies: PreviewRenderDependencies): GlobalDescriptors {
+export interface PreviewRenderFeature {
+    readonly globals: GlobalDescriptors;
+    render(): void;
+    registryValue(typeDefinition?: any, key?: any, fallback?: any): any;
+    configDisabled(button?: any): boolean;
+    defaultTypeForPicker(key?: any): any;
+    pickerOptions(isSubpage?: any, selectedTypeKey?: any): any[];
+    pickerKeys(isSubpage?: any, selectedTypeKey?: any): any[];
+    typeVisibleInPicker(key?: any, isSubpage?: any): boolean;
+}
+
+export function createPreviewRenderFeature(dependencies: PreviewRenderDependencies): PreviewRenderFeature {
     const document = dependencies.document;
     const els = dependencies.runtime.els;
     const { cardOnPattern } = dependencies.confirmationOptions;
@@ -179,16 +190,13 @@ export function installPreviewRenderModule(dependencies: PreviewRenderDependenci
         renderSelectionBar(c);
     }
     return {
-        "previewHtmlValue": staticGlobal(previewHtmlValue),
-        "buttonTypeRegistryValue": staticGlobal(buttonTypeRegistryValue),
-        "buttonTypeDisabledForDevice": staticGlobal(buttonTypeDisabledForDevice),
-        "buttonConfigDisabledForDevice": staticGlobal(buttonConfigDisabledForDevice),
-        "buttonTypeInfoOnlyVisible": staticGlobal(buttonTypeInfoOnlyVisible),
-        "defaultButtonTypeForPicker": staticGlobal(defaultButtonTypeForPicker),
-        "buttonTypePickerDetails": staticGlobal(buttonTypePickerDetails),
-        "buttonTypePickerOptionList": staticGlobal(buttonTypePickerOptionList),
-        "buttonTypePickerKeys": staticGlobal(buttonTypePickerKeys),
-        "buttonTypeVisibleInPicker": staticGlobal(buttonTypeVisibleInPicker),
-        "renderPreview": staticGlobal(renderPreview),
+        globals: { "renderPreview": staticGlobal(renderPreview) },
+        render: renderPreview,
+        registryValue: buttonTypeRegistryValue,
+        configDisabled: buttonConfigDisabledForDevice,
+        defaultTypeForPicker: defaultButtonTypeForPicker,
+        pickerOptions: buttonTypePickerOptionList,
+        pickerKeys: buttonTypePickerKeys,
+        typeVisibleInPicker: buttonTypeVisibleInPicker,
     };
 }

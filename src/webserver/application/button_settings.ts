@@ -19,6 +19,7 @@ import type { ApplicationApiFeature } from "./api";
 import type { GridFeature } from "./grid";
 import type { ButtonSettingsIconPickerFeature } from "./button_settings_icon_picker";
 import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
+import type { PreviewRenderFeature } from "./preview_render";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
@@ -36,12 +37,14 @@ export function installButtonSettingsModule(
     grid: Pick<GridFeature, "ctx" | "serializeGrid">,
     iconPicker: ButtonSettingsIconPickerFeature,
     selection: Pick<ButtonSettingsSelectionFeature, "closeSettings" | "hideSettingsOverlay">,
+    preview: Pick<PreviewRenderFeature, "defaultTypeForPicker" | "pickerOptions" | "registryValue">,
 ): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
     const { isConfigLocked, createActionButton, showBanner } = shell;
     const els = runtime.els;
     const { ctx, serializeGrid } = grid;
     const { closeSettings, hideSettingsOverlay } = selection;
+    const { defaultTypeForPicker: defaultButtonTypeForPicker, pickerOptions: buttonTypePickerOptionList, registryValue: buttonTypeRegistryValue } = preview;
     const {
         imageSlotCapacity,
         imageCardCountWithCandidate,

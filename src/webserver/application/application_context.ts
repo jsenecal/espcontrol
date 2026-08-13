@@ -66,6 +66,7 @@ import type { ButtonSettingsIconPickerFeature } from "./button_settings_icon_pic
 import type { ButtonSettingsRenderQueueFeature } from "./button_settings_render_queue";
 import type { ControlsFieldsFeature } from "./controls_fields";
 import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
+import type { PreviewRenderFeature } from "./preview_render";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -165,6 +166,7 @@ export interface ApplicationContext {
     readonly renderQueue: ButtonSettingsRenderQueueFeature;
     readonly fields: ControlsFieldsFeature;
     readonly selection: ButtonSettingsSelectionFeature;
+    readonly preview: PreviewRenderFeature;
   };
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
@@ -240,6 +242,7 @@ export interface ApplicationContextOptions {
   readonly renderQueue: ButtonSettingsRenderQueueFeature;
   readonly fields: ControlsFieldsFeature;
   readonly selection: ButtonSettingsSelectionFeature;
+  readonly preview: PreviewRenderFeature;
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
 }
@@ -335,6 +338,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       renderQueue: options.renderQueue,
       fields: options.fields,
       selection: options.selection,
+      preview: options.preview,
     },
     dom: options.dom,
     cards: options.cards,

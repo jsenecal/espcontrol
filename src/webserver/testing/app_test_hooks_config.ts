@@ -33,6 +33,7 @@ import type { LightCardRegistration } from "../cards/light_temperature";
 import type { CoreFeature } from "../application/core";
 import type { ApplicationLayoutState } from "../application/application_context";
 import type { ConfigPersistenceFeature } from "../application/config_post_api";
+import type { PreviewRenderFeature } from "../application/preview_render";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 import { pushDefaultIcon, pushDefaultIconOn } from "../cards/push";
@@ -60,8 +61,10 @@ export function installAppTestHooksConfig(
     core: Pick<CoreFeature, "subpageStateDisplayMode">,
     layout: ApplicationLayoutState,
     configPersistence: Pick<ConfigPersistenceFeature, "subpageEntityKeys" | "subpageChunkShouldPost">,
+    preview: Pick<PreviewRenderFeature, "defaultTypeForPicker" | "pickerKeys" | "pickerOptions" | "registryValue" | "typeVisibleInPicker">,
 ): GlobalDescriptors {
     const { subpageEntityKeys, subpageChunkShouldPost } = configPersistence;
+    const { defaultTypeForPicker: defaultButtonTypeForPicker, pickerKeys: buttonTypePickerKeys, pickerOptions: buttonTypePickerOptionList, registryValue: buttonTypeRegistryValue, typeVisibleInPicker: buttonTypeVisibleInPicker } = preview;
     const { subpageStateDisplayMode } = core;
     const {
         sensorCardIsLocal,
