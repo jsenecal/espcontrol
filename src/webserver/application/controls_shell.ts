@@ -6,7 +6,7 @@ export interface ControlsShellDependencies {
     readonly document: Document;
     readonly state: AppState;
     readonly schedule: typeof setTimeout;
-    readonly cancelSchedule: typeof clearTimeout;
+    readonly cancelSchedule: (handle: any) => void;
     readonly buildSettingsPage: (parent: HTMLElement) => void;
     readonly closeSettings: () => void;
     readonly postButtonPress: (name: string) => Promise<Response>;

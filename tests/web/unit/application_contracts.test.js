@@ -670,6 +670,8 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(shell, /export function createControlsShellFeature/);
     assert.match(entry, /shell = createControlsShellFeature\(runtime, \{/);
+    assert.match(entry, /schedule: \(\(callback: TimerHandler, delay\?: number\) => window\.setTimeout\(callback, delay\)\)/);
+    assert.match(entry, /cancelSchedule: \(handle\) => \{ dom\.window\.clearTimeout\(handle\); \}/);
     assert.match(entry, /showBanner: shell\.showBanner/);
     assert.match(entry, /createDisclosureChevron: shell\.createDisclosureChevron/);
     assert.match(entry, /controlsShellCompatibilityGlobals\(context\.controllers\.shell\)/);

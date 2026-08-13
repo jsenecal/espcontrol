@@ -360,7 +360,7 @@ function composeApplicationContext(): ApplicationContext {
     window,
     fetch: fetchService,
     createEventSource: () => new EventSource("/events"),
-    schedule: setTimeout,
+    schedule: ((callback: TimerHandler, delay?: number) => window.setTimeout(callback, delay)) as typeof setTimeout,
   };
   const deviceApi = createDeviceApi((url, init) =>
     dom.fetch(url, init as RequestInit));
@@ -382,7 +382,7 @@ function composeApplicationContext(): ApplicationContext {
     document: dom.document,
     state: AppInstance.state,
     schedule: dom.schedule,
-    cancelSchedule: clearTimeout,
+    cancelSchedule: (handle) => { dom.window.clearTimeout(handle); },
     buildSettingsPage: (parent) => { buildSettingsPage(parent); },
     closeSettings: () => { closeSettings(); },
     postButtonPress: (name) => postButtonPress(name),
