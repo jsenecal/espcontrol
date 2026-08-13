@@ -77,8 +77,9 @@ describe("browserless application contracts", () => {
       assert.match(source, /Pick<EntityStateFeature,/i, `${fileName} should declare its entity dependency`);
     }
     assert.match(entry, /requestApi = createApplicationApiFeature\([\s\S]*entityState,[\s\S]*screensaverTimeout,[\s\S]*shell/);
-    assert.match(entry, /applicationApiCompatibilityGlobals\(context\.controllers\.requestApi\)/);
-    assert.doesNotMatch(entry, /installApiModule/);
+    assert.doesNotMatch(entry, /installApiModule|applicationApiCompatibilityGlobals/);
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(globals, /\bvar (?:_postQueue|_postQueueHadError|post|postText|postSwitch|getJsonQuietly|entityDetailPath):/);
     assert.match(entry, /installFirmwareUpdatePostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
     assert.match(entry, /installArtworkPostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
     assert.match(entry, /installScreenSchedulePostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
@@ -690,7 +691,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const \{ setConfigLocked, showBanner \} = shell/);
     }
     assert.match(entry, /createApplicationApiFeature\([\s\S]*screensaverTimeout,[\s\S]*shell/);
-    assert.match(entry, /applicationApiCompatibilityGlobals\(context\.controllers\.requestApi\)/);
+    assert.doesNotMatch(entry, /applicationApiCompatibilityGlobals/);
     assert.match(entry, /installAppEventsModule\([\s\S]*context\.controllers\.shell/);
   });
 

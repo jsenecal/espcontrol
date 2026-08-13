@@ -28,7 +28,6 @@ import { createScreensaverTimeoutFeature } from "./application/screensaver_timeo
 import { createC6FirmwareFeature, type C6FirmwareFeature } from "./application/c6_firmware_ui";
 import { installGridModule } from "./application/grid";
 import {
-  applicationApiCompatibilityGlobals,
   createApplicationApiFeature,
   type ApplicationApiFeature,
 } from "./application/api";
@@ -157,7 +156,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const cardEditorDraft = context.controllers.cardEditorDraft;
   const cardEditorValidation = context.controllers.cardEditorValidation;
   const previewPlacementController = context.controllers.previewPlacement;
-  installGlobals(applicationApiCompatibilityGlobals(context.controllers.requestApi));
   installGlobals(installFirmwareUpdatePostApiModule(context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell, context.controllers.requestApi));
   const cardEditorSave = context.controllers.cardEditorSave;
@@ -362,6 +360,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.controllers.firmwareUpdate,
     context.controllers.clockBarState,
     context.controllers.entityState,
+    context.controllers.requestApi,
   ));
 }
 

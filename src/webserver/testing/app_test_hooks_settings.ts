@@ -20,7 +20,8 @@ import type { FirmwareVersionFeature } from "../application/firmware_version_sta
 import type { FirmwareUpdateFeature } from "../application/firmware_update_state";
 import type { ClockBarFeature } from "../application/clock_bar_state";
 import type { EntityStateFeature } from "../application/entity_state";
-export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">, entityState: Pick<EntityStateFeature, "entityLookupNames">): GlobalDescriptors {
+import type { ApplicationApiFeature } from "../application/api";
+export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">, entityState: Pick<EntityStateFeature, "entityLookupNames">, requestApi: Pick<ApplicationApiFeature, "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">): GlobalDescriptors {
     const { timezoneOptionsWithFallback, effectiveTimezoneOptionForWeb } = environment;
     const { supported: screensaverTimeoutSupported } = screensaverTimeout;
     const { set: setFirmwareVersion } = firmwareVersion;
@@ -54,9 +55,9 @@ export function installAppTestHooksSettings(defaultTimezoneOptions: () => string
             firmwareVersionFromMetadata: firmwareVersionFromMetadata,
             firmwareInfoFromPublicManifest: firmwareInfoFromPublicManifest,
             firmwareInfosFromPublicVersions: firmwareInfosFromPublicVersions,
-            entityDetailPath: entityDetailPath,
-            entityDetailPaths: entityDetailPaths,
-            entityInitialDetail: entityInitialDetail,
+            entityDetailPath: requestApi.entityDetailPath,
+            entityDetailPaths: requestApi.entityDetailPaths,
+            entityInitialDetail: requestApi.entityInitialDetail,
             entityLookupNames: entityLookupNames,
             coverArtHideExternalInputPostUrls: coverArtHideExternalInputPostUrls,
             coverArtDelayPostUrls: coverArtDelayPostUrls,

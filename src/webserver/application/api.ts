@@ -1,4 +1,3 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
 import type { DeviceApi } from "../api/device_api";
 import { requestFailureInfo } from "../api/request_failure";
@@ -10,7 +9,6 @@ import type { ControlsShellFeature } from "./controls_shell";
 export interface ApplicationApiFeature {
     postQueue: Promise<any>;
     postQueueError: boolean;
-    screensaverActionUnavailable: string;
     setPostThrottle(ms?: number): void;
     postQueueIdle(): Promise<any>;
     resetPostQueueError(): void;
@@ -202,7 +200,7 @@ export function createApplicationApiFeature(
         }
         postNumberWithObjectIds(entityName("screensaver_timeout"), entityObjectIds("screensaver_timeout"), value);
     }
-    var SCREENSAVER_ACTION_UNAVAILABLE: any = "Screen dimmed screensaver is not available on this firmware. Update the device firmware, then reload this page.";
+    const SCREENSAVER_ACTION_UNAVAILABLE = "Screen dimmed screensaver is not available on this firmware. Update the device firmware, then reload this page.";
     function postScreensaverAction(this: any, value?: any) {
         postSelectWithObjectIds(entityName("screen_saver_action"), entityObjectIds("screen_saver_action"), screensaverActionOption(value), SCREENSAVER_ACTION_UNAVAILABLE);
     }
@@ -263,8 +261,6 @@ export function createApplicationApiFeature(
         set postQueue(value: Promise<any>) { _postQueue = value; },
         get postQueueError() { return _postQueueHadError; },
         set postQueueError(value: boolean) { _postQueueHadError = value; },
-        get screensaverActionUnavailable() { return SCREENSAVER_ACTION_UNAVAILABLE; },
-        set screensaverActionUnavailable(value: string) { SCREENSAVER_ACTION_UNAVAILABLE = value; },
         setPostThrottle,
         postQueueIdle,
         resetPostQueueError,
@@ -303,54 +299,5 @@ export function createApplicationApiFeature(
         entityDetailPath,
         entityDetailPaths,
         entityInitialDetail,
-    };
-}
-
-export function applicationApiCompatibilityGlobals(feature: ApplicationApiFeature): GlobalDescriptors {
-    return {
-        "_postQueue": liveGlobal(() => feature.postQueue, (value?: any) => { feature.postQueue = value; }),
-        "_postQueueHadError": liveGlobal(() => feature.postQueueError, (value?: any) => { feature.postQueueError = Boolean(value); }),
-        "setPostThrottle": staticGlobal(feature.setPostThrottle),
-        "postQueueIdle": staticGlobal(feature.postQueueIdle),
-        "resetPostQueueError": staticGlobal(feature.resetPostQueueError),
-        "postQueueHadError": staticGlobal(feature.postQueueHadError),
-        "postQuiet": staticGlobal(feature.postQuiet),
-        "post": staticGlobal(feature.post),
-        "postTextLegacy": staticGlobal(feature.postTextLegacy),
-        "postOptional": staticGlobal(feature.postOptional),
-        "postFirstAvailable": staticGlobal(feature.postFirstAvailable),
-        "postText": staticGlobal(feature.postText),
-        "postTextWithObjectIds": staticGlobal(feature.postTextWithObjectIds),
-        "postSelect": staticGlobal(feature.postSelect),
-        "postButtonPress": staticGlobal(feature.postButtonPress),
-        "postSwitch": staticGlobal(feature.postSwitch),
-        "postScreensaverMode": staticGlobal(feature.postScreensaverMode),
-        "postFirmwareAutoUpdate": staticGlobal(feature.postFirmwareAutoUpdate),
-        "postC6FirmwareAutoUpdate": staticGlobal(feature.postC6FirmwareAutoUpdate),
-        "postFirmwareUpdateFrequency": staticGlobal(feature.postFirmwareUpdateFrequency),
-        "postNumber": staticGlobal(feature.postNumber),
-        "postWithObjectId": staticGlobal(feature.postWithObjectId),
-        "postWithObjectIds": staticGlobal(feature.postWithObjectIds),
-        "postNumberWithObjectId": staticGlobal(feature.postNumberWithObjectId),
-        "postNumberWithObjectIds": staticGlobal(feature.postNumberWithObjectIds),
-        "postSelectWithObjectId": staticGlobal(feature.postSelectWithObjectId),
-        "postSelectWithObjectIds": staticGlobal(feature.postSelectWithObjectIds),
-        "postScreensaverTimeout": staticGlobal(feature.postScreensaverTimeout),
-        "SCREENSAVER_ACTION_UNAVAILABLE": liveGlobal(
-            () => feature.screensaverActionUnavailable,
-            (value?: any) => { feature.screensaverActionUnavailable = String(value); },
-        ),
-        "postScreensaverAction": staticGlobal(feature.postScreensaverAction),
-        "postScreensaverDimmedBrightness": staticGlobal(feature.postScreensaverDimmedBrightness),
-        "postScreensaverDimmedBrightnessDay": staticGlobal(feature.postScreensaverDimmedBrightnessDay),
-        "postScreensaverDimmedBrightnessNight": staticGlobal(feature.postScreensaverDimmedBrightnessNight),
-        "postHomeScreenTimeout": staticGlobal(feature.postHomeScreenTimeout),
-        "postSwitchWithObjectId": staticGlobal(feature.postSwitchWithObjectId),
-        "postSwitchWithObjectIds": staticGlobal(feature.postSwitchWithObjectIds),
-        "getJsonQuietly": staticGlobal(feature.getJsonQuietly),
-        "getJsonFirst": staticGlobal(feature.getJsonFirst),
-        "entityDetailPath": staticGlobal(feature.entityDetailPath),
-        "entityDetailPaths": staticGlobal(feature.entityDetailPaths),
-        "entityInitialDetail": staticGlobal(feature.entityInitialDetail),
     };
 }
