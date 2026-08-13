@@ -1,9 +1,12 @@
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { EntityStateFeature } from "./entity_state";
+import type { ApplicationApiFeature } from "./api";
 export function installClockBarPostApiModule(
     entityState: Pick<EntityStateFeature, "entityName" | "entityObjectIds" | "entityPostUrls">,
+    requestApi: Pick<ApplicationApiFeature, "post" | "postOptional" | "postTextWithObjectIds" | "postNumberWithObjectIds" | "postSwitchWithObjectIds">,
 ): GlobalDescriptors {
     const { entityName, entityObjectIds, entityPostUrls } = entityState;
+    const { post, postOptional, postTextWithObjectIds, postNumberWithObjectIds, postSwitchWithObjectIds } = requestApi;
     // ── Clock Bar Post API ────────────────────────────────────────────────
     function postClockBrightnessDay(this: any, value?: any) {
         postNumberWithObjectIds(entityName("screen_saver_daytime_clock_brightness"), entityObjectIds("screen_saver_daytime_clock_brightness"), value);

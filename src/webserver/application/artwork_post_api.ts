@@ -1,10 +1,13 @@
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { normalizeCoverArtDelay, normalizeHomeAssistantArtworkProtocol } from "../model/settings";
 import type { EntityStateFeature } from "./entity_state";
+import type { ApplicationApiFeature } from "./api";
 export function installArtworkPostApiModule(
     entityState: Pick<EntityStateFeature, "entityName" | "entityObjectIds" | "entityPostUrls">,
+    requestApi: Pick<ApplicationApiFeature, "post" | "postTextWithObjectIds" | "postSwitchWithObjectIds" | "postSelectWithObjectIds">,
 ): GlobalDescriptors {
     const { entityName, entityObjectIds, entityPostUrls } = entityState;
+    const { post, postTextWithObjectIds, postSwitchWithObjectIds, postSelectWithObjectIds } = requestApi;
     // ── Artwork Post API ──────────────────────────────────────────────────
     function postPresenceSensorEntity(this: any, value?: any) {
         return postTextWithObjectIds(entityName("presence_sensor_entity"), entityObjectIds("presence_sensor_entity"), value);

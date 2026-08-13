@@ -8,10 +8,19 @@ import {
 } from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { EntityStateFeature } from "./entity_state";
+import type { ApplicationApiFeature } from "./api";
 export function installScreenSchedulePostApiModule(
     entityState: Pick<EntityStateFeature, "entityName" | "entityObjectIds">,
+    requestApi: Pick<ApplicationApiFeature, "postWithObjectIds" | "postTextWithObjectIds" | "postNumberWithObjectIds" | "postSelectWithObjectIds" | "postSwitchWithObjectIds">,
 ): GlobalDescriptors {
     const { entityName, entityObjectIds } = entityState;
+    const {
+        postWithObjectIds,
+        postTextWithObjectIds,
+        postNumberWithObjectIds,
+        postSelectWithObjectIds,
+        postSwitchWithObjectIds,
+    } = requestApi;
     // ── Screen Schedule Post API ──────────────────────────────────────────
     var SCREEN_SCHEDULE_UNAVAILABLE: any = "Screen schedule is not available on this firmware. Update the device firmware, then reload this page.";
     var SCREEN_SCHEDULE_TRIGGER_UNAVAILABLE: any = "The schedule trigger setting is not available on this firmware. Update the device firmware, then reload this page.";

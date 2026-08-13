@@ -158,14 +158,14 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const cardEditorValidation = context.controllers.cardEditorValidation;
   const previewPlacementController = context.controllers.previewPlacement;
   installGlobals(applicationApiCompatibilityGlobals(context.controllers.requestApi));
-  installGlobals(installFirmwareUpdatePostApiModule(context.controllers.entityState));
+  installGlobals(installFirmwareUpdatePostApiModule(context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
   installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState, context.controllers.shell));
-  installGlobals(installArtworkPostApiModule(context.controllers.entityState));
-  installGlobals(installScreenSchedulePostApiModule(context.controllers.entityState));
-  installGlobals(installClockBarPostApiModule(context.controllers.entityState));
+  installGlobals(installArtworkPostApiModule(context.controllers.entityState, context.controllers.requestApi));
+  installGlobals(installScreenSchedulePostApiModule(context.controllers.entityState, context.controllers.requestApi));
+  installGlobals(installClockBarPostApiModule(context.controllers.entityState, context.controllers.requestApi));
   const settingsUiFeature = context.controllers.settingsUi;
   const alarmDelayAudioController = context.controllers.alarmDelayAudio;
   const screensaverController = context.controllers.screensaver;

@@ -79,10 +79,10 @@ describe("browserless application contracts", () => {
     assert.match(entry, /requestApi = createApplicationApiFeature\([\s\S]*entityState,[\s\S]*screensaverTimeout,[\s\S]*shell/);
     assert.match(entry, /applicationApiCompatibilityGlobals\(context\.controllers\.requestApi\)/);
     assert.doesNotMatch(entry, /installApiModule/);
-    assert.match(entry, /installFirmwareUpdatePostApiModule\(context\.controllers\.entityState\)/);
-    assert.match(entry, /installArtworkPostApiModule\(context\.controllers\.entityState\)/);
-    assert.match(entry, /installScreenSchedulePostApiModule\(context\.controllers\.entityState\)/);
-    assert.match(entry, /installClockBarPostApiModule\(context\.controllers\.entityState\)/);
+    assert.match(entry, /installFirmwareUpdatePostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
+    assert.match(entry, /installArtworkPostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
+    assert.match(entry, /installScreenSchedulePostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
+    assert.match(entry, /installClockBarPostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
   });
 
   test("imports the browser core service without ambient application names", () => {
