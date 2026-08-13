@@ -800,6 +800,18 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:_backupFeature|backupEmptyButtonConfig|backupNormalizeButtonConfig|createBackupConfig|normalizeBackupConfig|planBackupImport):/);
   });
 
+  test("composes backup and restore UI without compatibility globals", () => {
+    const backup = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_backup.ts"), "utf8");
+    const hooks = fs.readFileSync(path.join(ROOT, "src/webserver/testing/app_test_hooks_backup.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(backup, /GlobalDescriptors|staticGlobal|readonly globals|installAppBackupModule/);
+    assert.doesNotMatch(entry, /backupUiFeature\.globals/);
+    assert.match(hooks, /application: AppBackupFeature/);
+    assert.match(entry, /installAppTestHooksBackup\(context\.layout, context\.backup\.contract, context\.backup\.application\)/);
+    assert.doesNotMatch(globals, /\bvar (?:addNativeConfigToBackup|backupExportFileDate|backupExportFileName|normalizeImportedPanelSettings|gridColsForImportedSettings|backupExportScreenSizeSlug|downloadBackupConfig|exportConfig|importConfig):/);
+  });
+
   test("imports shared UI primitives without application globals", () => {
     const primitives = fs.readFileSync(path.join(ROOT, "src/webserver/application/ui_primitives.ts"), "utf8");
     const stateModule = fs.readFileSync(path.join(ROOT, "src/webserver/application/state.ts"), "utf8");

@@ -19,7 +19,6 @@ import {
     normalizeTemperatureUnit,
     normalizeTimeOfDay,
 } from "../model/settings";
-import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { BackupImportController } from "../features/backup_import_controller";
 import type { BackupExportController } from "../features/backup_export_controller";
 import type { BackupFileController } from "../features/backup_file_controller";
@@ -78,7 +77,9 @@ export interface AppBackupControllers {
 }
 
 export interface AppBackupFeature {
-    readonly globals: GlobalDescriptors;
+    backupExportFileName(value?: unknown): string;
+    normalizeImportedPanelSettings(settings?: unknown): unknown;
+    gridColsForImportedSettings(settings?: unknown): number;
     exportConfig(): void;
     importConfig(): void;
 }
@@ -606,24 +607,10 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
         });
     }
     return {
-        globals: {
-            "backupExportScreenSizeSlug": staticGlobal(backupExportScreenSizeSlug),
-            "backupExportFileDate": staticGlobal(backupExportFileDate),
-            "backupExportFileName": staticGlobal(backupExportFileName),
-            "downloadBackupConfig": staticGlobal(downloadBackupConfig),
-            "addNativeConfigToBackup": staticGlobal(addNativeConfigToBackup),
-            "normalizeImportedPanelSettings": staticGlobal(normalizeImportedPanelSettings),
-            "gridColsForImportedSettings": staticGlobal(gridColsForImportedSettings),
-            "exportConfig": staticGlobal(exportConfig),
-            "importConfig": staticGlobal(importConfig),
-        },
+        backupExportFileName: (value) => backupExportFileName(value),
+        normalizeImportedPanelSettings: (settings) => normalizeImportedPanelSettings(settings),
+        gridColsForImportedSettings: (settings) => gridColsForImportedSettings(settings),
         exportConfig: () => exportConfig(),
         importConfig: () => importConfig(),
     };
-}
-
-// Legacy modules still consume these names from the compatibility bridge.
-// New UI code should receive the AppBackupFeature directly instead.
-export function installAppBackupModule(controllers: AppBackupControllers): GlobalDescriptors {
-    return createAppBackupFeature(controllers).globals;
 }

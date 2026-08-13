@@ -20,12 +20,6 @@ declare global {
   var addSupportButton: any;
   var appendSettingsSection: any;
   var applyCardMetadataFields: any;
-  var addNativeConfigToBackup: any;
-  var backupExportFileDate: any;
-  var backupExportFileName: any;
-  var normalizeImportedPanelSettings: any;
-  var gridColsForImportedSettings: any;
-  var backupExportScreenSizeSlug: any;
   var beginNewCardDraft: any;
   var buildClipboardEntry: any;
   var buildCoverArtSettingsCard: any;
@@ -83,14 +77,12 @@ declare global {
   var cutSlot: any;
   var defaultButtonTypeForPicker: any;
   var defaultCardTypeForPicker: any;
-  var downloadBackupConfig: any;
   var deleteButtons: any;
   var deleteSlot: any;
   var disclosureSection: any;
   var duplicateButton: any;
   var duplicateSubpageButton: any;
   var emptyButtonConfig: any;
-  var exportConfig: any;
   var fieldLabel: any;
   var fieldWithControl: any;
   var findDuplicatePlacement: any;
@@ -103,7 +95,6 @@ declare global {
   var handleDocumentSelectionMouseDown: any;
   var hideContextMenu: any;
   var hideSettingsOverlay: any;
-  var importConfig: any;
   var infoOnlyCardVisible: any;
   var infoPanel: any;
   var init: any;

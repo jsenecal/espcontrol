@@ -256,7 +256,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
   }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader, context.controllers.firmwarePostApi, context.controllers.artworkPostApi, context.controllers.publicFirmwareInstall));
-  installGlobals(backupUiFeature.globals);
   installGlobals(installAppModule(
     context.controllers.pageTitle,
     createWebStyles(context.layout.config.dragAnimation),
@@ -343,7 +342,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.configuration.persistence,
   ));
   installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion, context.controllers.statusPreview, context.controllers.grid));
-  installGlobals(installAppTestHooksBackup(context.layout, context.backup.contract));
+  installGlobals(installAppTestHooksBackup(context.layout, context.backup.contract, context.backup.application));
   installGlobals(installAppTestHooksSettings(
     () => defaultTimezoneOptionsForDevice(context.device.profile),
     context.controllers.environment,

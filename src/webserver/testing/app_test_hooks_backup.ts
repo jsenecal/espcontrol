@@ -3,7 +3,8 @@ import { BACKUP_CONFIG_VERSION, BACKUP_FORMAT } from "../model/backup";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ApplicationLayoutState } from "../application/application_context";
 import type { BackupContractFeature } from "../application/backup_contract";
-export function installAppTestHooksBackup(layout: ApplicationLayoutState, backup: BackupContractFeature): GlobalDescriptors {
+import type { AppBackupFeature } from "../application/app_backup";
+export function installAppTestHooksBackup(layout: ApplicationLayoutState, backup: BackupContractFeature, application: AppBackupFeature): GlobalDescriptors {
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("backup", {
             BACKUP_CONFIG_VERSION: BACKUP_CONFIG_VERSION,
@@ -15,7 +16,7 @@ export function installAppTestHooksBackup(layout: ApplicationLayoutState, backup
                 var oldRotation: any = state.screenRotation;
                 state.screenRotation = currentRotation;
                 try {
-                    return gridColsForImportedSettings(normalizeImportedPanelSettings(settings));
+                    return application.gridColsForImportedSettings(application.normalizeImportedPanelSettings(settings));
                 }
                 finally {
                     state.screenRotation = oldRotation;
@@ -31,7 +32,7 @@ export function installAppTestHooksBackup(layout: ApplicationLayoutState, backup
                     layout.gridCols = oldGridCols;
                 }
             },
-            backupExportFileName: backupExportFileName,
+            backupExportFileName: application.backupExportFileName,
         });
     }
     return {};
