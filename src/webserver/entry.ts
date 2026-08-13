@@ -49,7 +49,7 @@ import { installStateLoaderApiModule } from "./application/state_loader_api";
 import { installArtworkPostApiModule } from "./application/artwork_post_api";
 import { installScreenSchedulePostApiModule } from "./application/screen_schedule_post_api";
 import { installClockBarPostApiModule } from "./application/clock_bar_post_api";
-import { installControlsShellModule } from "./application/controls_shell";
+import { controlsShellCompatibilityGlobals, createControlsShellFeature } from "./application/controls_shell";
 import { installSettingsPageHelpersModule } from "./application/settings_page_helpers";
 import { installSettingsScheduleSectionModule } from "./application/settings_schedule_section";
 import { installSettingsCoverArtSectionModule } from "./application/settings_cover_art_section";
@@ -162,7 +162,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installArtworkPostApiModule(context.controllers.entityState));
   installGlobals(installScreenSchedulePostApiModule(context.controllers.entityState));
   installGlobals(installClockBarPostApiModule(context.controllers.entityState));
-  installGlobals(installControlsShellModule(context.runtime));
+  installGlobals(controlsShellCompatibilityGlobals(context.controllers.shell));
   const settingsUiFeature = context.controllers.settingsUi;
   const alarmDelayAudioController = context.controllers.alarmDelayAudio;
   const screensaverController = context.controllers.screensaver;
@@ -378,6 +378,21 @@ function composeApplicationContext(): ApplicationContext {
     DeviceConfig.deviceConfig,
   );
   const runtime = createUiRuntimeState(layout, dom.document);
+  const shell = createControlsShellFeature(runtime, {
+    document: dom.document,
+    state: AppInstance.state,
+    schedule: dom.schedule,
+    cancelSchedule: clearTimeout,
+    buildSettingsPage: (parent) => { buildSettingsPage(parent); },
+    closeSettings: () => { closeSettings(); },
+    postButtonPress: (name) => postButtonPress(name),
+    waitForReboot: () => { waitForReboot(); },
+    hideContextMenu: () => { hideContextMenu(); },
+    hideSettingsOverlay: () => { hideSettingsOverlay(); },
+    clearPlaceholder: () => { clearPlaceholder(); },
+    updatePreviewHint: () => { updatePreviewHint(); },
+    renderPreview: () => { renderPreview(); },
+  });
   let confirmationOptions: ReturnType<typeof createConfigConfirmationOptionsFeature>;
   let clockBarState: ClockBarFeature;
   const entityState = createEntityStateFeature({
@@ -421,7 +436,7 @@ function composeApplicationContext(): ApplicationContext {
     entityName: (name) => entityState.entityName(name),
     entityNameForSlot: (name, slot) => entityState.entityNameForSlot(name, slot),
     normalizeHexColor: (value, fallback) => Model.normalizeHexColor(value, fallback),
-    showBanner: (message, level) => showBanner(message, level),
+    showBanner: shell.showBanner,
     delay: (callback, milliseconds) => dom.schedule(callback, milliseconds),
   });
   const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime, layout, entityState);
@@ -431,7 +446,7 @@ function composeApplicationContext(): ApplicationContext {
   const imageConfigurationOptions = createConfigImageOptionsFeature({
     layout,
     mediaOptions: mediaConfigurationOptions,
-    showBanner: (message, kind) => showBanner(message, kind),
+    showBanner: shell.showBanner,
   });
   const weatherConfigurationOptions = createConfigWeatherOptionsFeature(layout.config);
   const webhookConfigurationOptions = createConfigWebhookOptionsFeature();
@@ -537,7 +552,7 @@ function composeApplicationContext(): ApplicationContext {
   const settingsUi = createSettingsUiFeature({
     document: dom.document,
     textSpan: (text, className) => textSpan(text, className),
-    createDisclosureChevron: (className) => createDisclosureChevron(className),
+    createDisclosureChevron: shell.createDisclosureChevron,
   });
   const alarmDelayAudio = createAlarmDelayAudioController({
     announcement: (value, fallback) => Model.normalizeAlarmDelayAnnouncement(value, fallback),
@@ -607,7 +622,7 @@ function composeApplicationContext(): ApplicationContext {
   const backupRestore = createBackupRestoreController<any, any>({
     plan: backupImport.plan,
     warnings: (plannedImport) => plannedImport.backupPlan.warnings,
-    showBanner: (message, kind) => showBanner(message, kind),
+    showBanner: shell.showBanner,
     setPostThrottle: (milliseconds) => setPostThrottle(milliseconds),
     resetPostQueueError: () => resetPostQueueError(),
     postQueueIdle: () => postQueueIdle(),
@@ -655,7 +670,7 @@ function composeApplicationContext(): ApplicationContext {
         input.click();
       },
     },
-    showBanner: (message, kind) => showBanner(message, kind),
+    showBanner: shell.showBanner,
   });
   const backupApplication = createAppBackupFeature({
     layout,
@@ -718,6 +733,7 @@ function composeApplicationContext(): ApplicationContext {
     c6Firmware,
     clockBarState,
     entityState,
+    shell,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,

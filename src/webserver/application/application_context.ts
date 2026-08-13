@@ -48,6 +48,7 @@ import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
+import type { ControlsShellFeature } from "./controls_shell";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -111,6 +112,7 @@ export interface ApplicationContext {
     readonly c6Firmware: C6FirmwareFeature;
     readonly clockBarState: ClockBarFeature;
     readonly entityState: EntityStateFeature;
+    readonly shell: ControlsShellFeature;
     readonly alarmDelayAudio: AlarmDelayAudioController;
     readonly cardEditorDraft: CardEditorDraftController;
     readonly cardEditorSave: CardEditorSaveController;
@@ -168,6 +170,7 @@ export interface ApplicationContextOptions {
   readonly c6Firmware: C6FirmwareFeature;
   readonly clockBarState: ClockBarFeature;
   readonly entityState: EntityStateFeature;
+  readonly shell: ControlsShellFeature;
   readonly alarmDelayAudio: AlarmDelayAudioController;
   readonly cardEditorDraft: CardEditorDraftController;
   readonly cardEditorSave: CardEditorSaveController;
@@ -245,6 +248,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       c6Firmware: options.c6Firmware,
       clockBarState: options.clockBarState,
       entityState: options.entityState,
+      shell: options.shell,
       alarmDelayAudio: options.alarmDelayAudio,
       cardEditorDraft: options.cardEditorDraft,
       cardEditorSave: options.cardEditorSave,
