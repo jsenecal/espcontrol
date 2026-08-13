@@ -150,8 +150,6 @@ declare global {
   var entityDetailPath: any;
   var entityDetailPaths: any;
   var entityInitialDetail: any;
-  var entityInput: any;
-  var entityName: any;
   var eventStreamEnabled: any;
   var exportConfig: any;
   var failPublicFirmwareUpload: any;
@@ -289,12 +287,10 @@ declare global {
   var previewHtmlValue: any;
   var previewValue: any;
   var publicFirmwareOtaFilename: any;
-  var refreshEntityDatalist: any;
   var refreshFirmwareVersion: any;
   var refreshScreensaverTimeout: any;
   var registerEspControlTestHookGroup: any;
   var registryValue: any;
-  var rememberEntityPostPath: any;
   var renderBackButtonSettings: any;
   var renderBasicCardFields: any;
   var renderButtonSettings: any;

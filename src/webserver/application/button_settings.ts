@@ -13,6 +13,7 @@ import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_opt
 import type { ConfigCodecFeature } from "./config_codec";
 import type { ApplicationLayoutState } from "./application_context";
 import type { UiRuntimeState } from "./state";
+import type { EntityStateFeature } from "./entity_state";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
@@ -24,7 +25,9 @@ export function installButtonSettingsModule(
     codec: ConfigCodecFeature,
     layout: ApplicationLayoutState,
     runtime: UiRuntimeState,
+    entityState: Pick<EntityStateFeature, "entityName" | "entityInput">,
 ): GlobalDescriptors {
+    const { entityName, entityInput } = entityState;
     const els = runtime.els;
     const {
         imageSlotCapacity,

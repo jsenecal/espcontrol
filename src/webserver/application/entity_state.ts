@@ -1,7 +1,6 @@
 import { state } from "../state/app_instance";
 import { ENTITY_CATALOG } from "../generated/entity_catalog";
 import { entityStateKeys } from "../state/event_state";
-import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
 
 type EntityDefinition = {
@@ -347,13 +346,3 @@ export function createEntityStateFeature(dependencies: EntityStateDependencies) 
 }
 
 export type EntityStateFeature = ReturnType<typeof createEntityStateFeature>;
-
-/** Temporary adapter for application modules that have not yet received EntityStateFeature directly. */
-export function entityStateCompatibilityGlobals(feature: EntityStateFeature): GlobalDescriptors {
-    return {
-        "entityName": staticGlobal(feature.entityName),
-        "refreshEntityDatalist": staticGlobal(feature.refreshEntityDatalist),
-        "entityInput": staticGlobal(feature.entityInput),
-        "rememberEntityPostPath": staticGlobal(feature.rememberEntityPostPath),
-    };
-}

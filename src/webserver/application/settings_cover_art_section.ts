@@ -2,7 +2,9 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
-export function installSettingsCoverArtSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState): GlobalDescriptors {
+import type { EntityStateFeature } from "./entity_state";
+export function installSettingsCoverArtSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">): GlobalDescriptors {
+    const { entityName, entityInput } = entityState;
     const { bindTextPost } = codec;
     const els = runtime.els;
     // ── Settings Cover Art Section ─────────────────────────────────────

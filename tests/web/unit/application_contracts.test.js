@@ -43,13 +43,16 @@ describe("browserless application contracts", () => {
     assert.equal(entities.titleFromEntityId("sensor.kitchen_temperature"), "Kitchen Temperature");
   });
 
-  test("composes entity state before exposing its temporary compatibility adapter", () => {
+  test("composes entity state without a compatibility adapter", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const source = fs.readFileSync(path.join(ROOT, "src/webserver/application/entity_state.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.match(entry, /createEntityStateFeature\(/);
-    assert.match(entry, /entityStateCompatibilityGlobals\(context\.controllers\.entityState\)/);
+    assert.doesNotMatch(entry, /entityStateCompatibilityGlobals/);
+    assert.doesNotMatch(source, /GlobalDescriptors|staticGlobal|entityStateCompatibilityGlobals/);
     assert.doesNotMatch(entry, /installEntityStateModule/);
     assert.match(source, /export type EntityStateFeature/);
+    assert.doesNotMatch(globals, /\bvar (?:entityName|entityInput|refreshEntityDatalist|rememberEntityPostPath):/);
   });
 
   test("injects entity state into API and persistence modules", () => {
@@ -87,7 +90,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout, entityState\)/);
   });
 
@@ -106,7 +109,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.equal(fs.existsSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts")), false);
     assert.doesNotMatch(globals, /\bvar (?:NUM_SLOTS|TOTAL_SLOTS|GRID_COLS|GRID_ROWS):/);
-    assert.match(entry, /installGridModule\(context\.configuration\.codec, context\.runtime, context\.layout\)/);
+    assert.match(entry, /installGridModule\(context\.configuration\.codec, context\.runtime, context\.layout, context\.controllers\.entityState\)/);
     assert.match(entry, /installAppConfigEventsModule\(configPersistence, context\.configuration\.codec, context\.layout\)/);
     assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion\)/);
   });
@@ -429,7 +432,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.match(options, /const actionCardActions/);
-    assert.match(entry, /registerActionCardTypes\(registry, context\.configuration\.confirmationOptions\);/);
+    assert.match(entry, /registerActionCardTypes\(registry, context\.configuration\.confirmationOptions, context\.controllers\.entityState\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerActionCardTypes/);
     assert.match(entry, /actionCardStateEntity: \(button\) => confirmationOptions\.actionCardStateEntity\(button\)/);
     assert.doesNotMatch(globals, /\bvar (?:ACTION_CARD_ACTIONS|ACTION_CARD_METADATA|actionCardInfo|actionCardIsLocal|actionCardIsOptionSelect|actionCardNeedsExtraValue|actionCardStateDisplayMode|actionCardStateEntity|actionCardStatePrecision|actionCardStateUnit|normalizeActionCardConfig|normalizeSavedConfigActionFields|renderActionCardLocalSettings|setActionCardStateOptions):/);
@@ -709,7 +712,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware\)\)/);
   });
 

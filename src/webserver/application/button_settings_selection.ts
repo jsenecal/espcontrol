@@ -2,7 +2,9 @@ import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 import type { ClockBarFeature } from "./clock_bar_state";
-export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, clockBar: ClockBarFeature): GlobalDescriptors {
+import type { EntityStateFeature } from "./entity_state";
+export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityInput">): GlobalDescriptors {
+    const { entityInput } = entityState;
     const els = runtime.els;
     const {
         primaryTemperatureEntity: primaryClockBarTemperatureEntity,

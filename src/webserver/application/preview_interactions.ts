@@ -8,6 +8,7 @@ import type { ApplicationLayoutState } from "./application_context";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
+import type { EntityStateFeature } from "./entity_state";
 export interface PreviewInteractionsDependencies {
     readonly cardEditorDraft: CardEditorDraftController;
     readonly configPersistence: ConfigPersistenceFeature;
@@ -16,6 +17,7 @@ export interface PreviewInteractionsDependencies {
     readonly imageOptions: ConfigImageOptionsFeature;
     readonly codec: ConfigCodecFeature;
     readonly runtime: UiRuntimeState;
+    readonly entityState: Pick<EntityStateFeature, "entityName">;
 }
 export function installPreviewInteractionsModule(
     dependencies: PreviewInteractionsDependencies,
@@ -24,6 +26,7 @@ export function installPreviewInteractionsModule(
     const configPersistence = dependencies.configPersistence;
     const window = dependencies.window;
     const runtime = dependencies.runtime;
+    const { entityName } = dependencies.entityState;
     const els = runtime.els;
     const {
         isImageCard,

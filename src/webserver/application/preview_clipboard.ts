@@ -10,6 +10,7 @@ import type { ConfigImageOptionsFeature } from "./config_image_options";
 import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
 import { ACTION_CARD_LOCAL_ACTION } from "./config_action_contract";
 import type { ConfigCodecFeature } from "./config_codec";
+import type { EntityStateFeature } from "./entity_state";
 export interface PreviewClipboardDependencies {
     readonly configPersistence: ConfigPersistenceFeature;
     readonly document: Document;
@@ -18,12 +19,14 @@ export interface PreviewClipboardDependencies {
     readonly imageOptions: ConfigImageOptionsFeature;
     readonly sensorOptions: ConfigSensorOptionsFeature;
     readonly codec: ConfigCodecFeature;
+    readonly entityState: Pick<EntityStateFeature, "entityName">;
 }
 export function installPreviewClipboardModule(
     dependencies: PreviewClipboardDependencies,
 ): GlobalDescriptors {
     const configPersistence = dependencies.configPersistence;
     const document = dependencies.document;
+    const { entityName } = dependencies.entityState;
     const {
         imageSlotCapacityMessage,
         imageCardCountInClipboardEntries,

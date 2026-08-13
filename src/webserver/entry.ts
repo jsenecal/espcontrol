@@ -21,7 +21,7 @@ import { createScreenRotationFeature } from "./application/screen_rotation_state
 import { createScreenScheduleStateFeature } from "./application/screen_schedule_state";
 import { createAppearanceFeature } from "./application/appearance_state";
 import { createFirmwareVersionFeature } from "./application/firmware_version_state";
-import { createEntityStateFeature, entityStateCompatibilityGlobals } from "./application/entity_state";
+import { createEntityStateFeature } from "./application/entity_state";
 import { createClockBarFeature, type ClockBarFeature } from "./application/clock_bar_state";
 import { createFirmwareUpdateFeature, type FirmwareUpdateFeature } from "./application/firmware_update_state";
 import { createScreensaverTimeoutFeature } from "./application/screensaver_timeout";
@@ -146,9 +146,8 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const firmwareUpdate = context.controllers.firmwareUpdate;
   const c6Firmware = context.controllers.c6Firmware;
   const clockBarState = context.controllers.clockBarState;
-  installGlobals(entityStateCompatibilityGlobals(context.controllers.entityState));
   const clockBarController = context.controllers.clockBar;
-  installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout));
+  installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout, context.controllers.entityState));
   const deviceApi = context.api;
   const nativePanelConfig = context.configuration.native;
   const configPersistence = context.configuration.persistence;
@@ -182,10 +181,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     layout: context.layout,
     screenScheduleState,
     clockBar: clockBarState,
+    entityState: context.controllers.entityState,
   }));
-  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState));
-  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState));
+  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState, context.controllers.entityState));
+  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -196,7 +196,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     runtime: context.runtime,
     screenRotation,
   }));
-  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState));
+  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState));
   installGlobals(installButtonSettingsRenderQueueModule(context.runtime));
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
@@ -206,6 +206,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.configuration.codec,
     context.layout,
     context.runtime,
+    context.controllers.entityState,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,
@@ -228,6 +229,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     imageOptions: context.configuration.imageOptions,
     sensorOptions: context.configuration.options,
     codec: context.configuration.codec,
+    entityState: context.controllers.entityState,
   }));
   installGlobals(installPreviewInteractionsModule({
     cardEditorDraft,
@@ -237,6 +239,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     imageOptions: context.configuration.imageOptions,
     codec: context.configuration.codec,
     runtime: context.runtime,
+    entityState: context.controllers.entityState,
   }));
   installGlobals(installBackupContractModule(context.backup.contract, context.configuration.codec));
   const backupUiFeature = context.backup.application;
@@ -245,7 +248,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     importBackup: backupUiFeature.importConfig,
   }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware));
   installGlobals(backupUiFeature.globals);
-  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState));
+  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState, context.controllers.entityState));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
   installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, firmwareVersion, firmwareUpdate, c6Firmware, clockBarState, (factory) => {
@@ -254,7 +257,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const reconnectController = context.controllers.reconnect;
   if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
   installGlobals(installAppEventsModule(
-    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate, c6Firmware,
+    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState,
   ));
   installGlobals(installAppModule(
     context.controllers.pageTitle,
@@ -268,7 +271,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
 function registerCards(context: ApplicationContext) {
   const registry = context.cards;
   const coverLikeCards = createCoverLikeCardRegistration(registry);
-  registerActionCardTypes(registry, context.configuration.confirmationOptions);
+  registerActionCardTypes(registry, context.configuration.confirmationOptions, context.controllers.entityState);
   registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm);
   registerCalendarCardTypes(registry, context.configuration.dateTimeOptions);
   registerClimateCardTypes(
@@ -672,6 +675,7 @@ function composeApplicationContext(): ApplicationContext {
     screensaverTimeout,
     firmwareUpdate,
     clockBar: clockBarState,
+    entityState,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),

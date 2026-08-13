@@ -2,6 +2,7 @@ import { state } from "../state/app_instance";
 import { iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
+import type { EntityStateFeature } from "../application/entity_state";
 import {
     SWITCH_CONFIRM_DEFAULT_NO,
     SWITCH_CONFIRM_DEFAULT_YES,
@@ -9,7 +10,9 @@ import {
 export function registerActionCardTypes(
     registry: CardRegistry,
     confirmationOptions: ConfigConfirmationOptionsFeature,
+    entityState: Pick<EntityStateFeature, "refreshEntityDatalist">,
 ): void {
+    const { refreshEntityDatalist } = entityState;
     const {
         actionCardActions: ACTION_CARD_ACTIONS,
         actionCardInfo,

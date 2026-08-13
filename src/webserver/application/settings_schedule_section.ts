@@ -4,7 +4,9 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
-export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, schedule: ScreenScheduleStateFeature): GlobalDescriptors {
+import type { EntityStateFeature } from "./entity_state";
+export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, schedule: ScreenScheduleStateFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">): GlobalDescriptors {
+    const { entityName, entityInput } = entityState;
     const { bindTextPost } = codec;
     const els = runtime.els;
     const {

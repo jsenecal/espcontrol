@@ -6,7 +6,9 @@ import type { CoreFeature } from "./core";
 import type { ApplicationLayoutState } from "./application_context";
 import type { EnvironmentStateFeature } from "./environment_state";
 import type { ClockBarFeature } from "./clock_bar_state";
-export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, clockBar: ClockBarFeature): GlobalDescriptors {
+import type { EntityStateFeature } from "./entity_state";
+export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityName">): GlobalDescriptors {
+    const { entityName } = entityState;
     const { now: webserverNow } = core;
     const { isHomeAssistantAutoTimezone, effectiveTimezoneOptionForWeb, voiceServicesUiState } = environment;
     const els = runtime.els;

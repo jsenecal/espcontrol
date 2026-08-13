@@ -5,7 +5,9 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ApplicationLayoutState } from "./application_context";
-export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeState, layout: ApplicationLayoutState): GlobalDescriptors {
+import type { EntityStateFeature } from "./entity_state";
+export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeState, layout: ApplicationLayoutState, entityState: Pick<EntityStateFeature, "entityName">): GlobalDescriptors {
+    const { entityName } = entityState;
     const { getSubpage, saveSubpageConfig } = codec;
     // ── Context abstraction ────────────────────────────────────────────────
     var mainGridSaveTimer: any = null;
