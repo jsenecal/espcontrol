@@ -1,4 +1,3 @@
-import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { AppState } from "../state/types";
 import type { UiRuntimeState } from "./state";
 
@@ -313,23 +312,5 @@ export function createControlsShellFeature(
         isConfigLocked,
         syncConfigLockUi,
         setConfigLocked,
-    };
-}
-
-export function controlsShellCompatibilityGlobals(feature: ControlsShellFeature): GlobalDescriptors {
-    return {
-        "createMdiIcon": staticGlobal(feature.createMdiIcon),
-        "createActionButton": staticGlobal(feature.createActionButton),
-        "createDisclosureChevron": staticGlobal(feature.createDisclosureChevron),
-        "showBanner": staticGlobal(feature.showBanner),
-        "buildUI": staticGlobal(feature.buildUI),
-        "buildHeader": staticGlobal(feature.buildHeader),
-        "buildScreenPage": staticGlobal(feature.buildScreenPage),
-        "buildApplyBar": staticGlobal(feature.buildApplyBar),
-        "switchTab": staticGlobal(feature.switchTab),
-        "syncTabChrome": staticGlobal(feature.syncTabChrome),
-        "isConfigLocked": staticGlobal(feature.isConfigLocked),
-        "syncConfigLockUi": staticGlobal(feature.syncConfigLockUi),
-        "setConfigLocked": staticGlobal(feature.setConfigLocked),
     };
 }

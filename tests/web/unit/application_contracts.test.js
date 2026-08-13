@@ -668,13 +668,16 @@ describe("browserless application contracts", () => {
   test("composes the UI shell as one context-owned service", () => {
     const shell = fs.readFileSync(path.join(ROOT, "src/webserver/application/controls_shell.ts"), "utf8");
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.match(shell, /export function createControlsShellFeature/);
     assert.match(entry, /shell = createControlsShellFeature\(runtime, \{/);
     assert.match(entry, /schedule: \(\(callback: TimerHandler, delay\?: number\) => window\.setTimeout\(callback, delay\)\)/);
     assert.match(entry, /cancelSchedule: \(handle\) => \{ dom\.window\.clearTimeout\(handle\); \}/);
     assert.match(entry, /showBanner: shell\.showBanner/);
     assert.match(entry, /createDisclosureChevron: shell\.createDisclosureChevron/);
-    assert.match(entry, /controlsShellCompatibilityGlobals\(context\.controllers\.shell\)/);
+    assert.doesNotMatch(entry, /controlsShellCompatibilityGlobals/);
+    assert.doesNotMatch(shell, /GlobalDescriptors|staticGlobal|controlsShellCompatibilityGlobals/);
+    assert.doesNotMatch(globals, /\bvar (?:createMdiIcon|createActionButton|createDisclosureChevron|showBanner|buildUI|buildHeader|buildScreenPage|buildApplyBar|switchTab|syncTabChrome|isConfigLocked|syncConfigLockUi|setConfigLocked):/);
   });
 
   test("injects the UI shell into API and reconnect modules", () => {
@@ -731,7 +734,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.match(interactions, /readonly runtime: UiRuntimeState/);
     assert.match(shell, /createControlsShellFeature\([\s\S]*runtime: UiRuntimeState/);
-    assert.match(entry, /controlsShellCompatibilityGlobals\(context\.controllers\.shell\)/);
+    assert.doesNotMatch(entry, /controlsShellCompatibilityGlobals/);
     assert.match(entry, /runtime: context\.runtime/);
     assert.doesNotMatch(runtime, /"(?:dragSrcPos|didDrag|previewPlaceholder|previewDropIdx|dragRafPending|dragSrcEl|dragIsSubpage|dragEnterCount)"/);
     assert.doesNotMatch(globals, /\bvar (?:dragSrcPos|didDrag|previewPlaceholder|previewDropIdx|dragRafPending|dragSrcEl|dragIsSubpage|dragEnterCount):/);
