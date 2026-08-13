@@ -22,7 +22,7 @@ import { createScreenScheduleStateFeature } from "./application/screen_schedule_
 import { createAppearanceFeature } from "./application/appearance_state";
 import { createFirmwareVersionFeature } from "./application/firmware_version_state";
 import { installEntityStateModule } from "./application/entity_state";
-import { installClockBarStateModule } from "./application/clock_bar_state";
+import { createClockBarFeature, type ClockBarFeature } from "./application/clock_bar_state";
 import { createFirmwareUpdateFeature, type FirmwareUpdateFeature } from "./application/firmware_update_state";
 import { createScreensaverTimeoutFeature } from "./application/screensaver_timeout";
 import { createC6FirmwareFeature, type C6FirmwareFeature } from "./application/c6_firmware_ui";
@@ -145,9 +145,9 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const firmwareVersion = context.controllers.firmwareVersion;
   const firmwareUpdate = context.controllers.firmwareUpdate;
   const c6Firmware = context.controllers.c6Firmware;
-  installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout));
+  const clockBarState = context.controllers.clockBarState;
+  installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout, clockBarState));
   const clockBarController = context.controllers.clockBar;
-  installGlobals(installClockBarStateModule(clockBarController, context.runtime, context.core, context.controllers.environment));
   installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout));
   const deviceApi = context.api;
   const nativePanelConfig = context.configuration.native;
@@ -181,10 +181,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     runtime: context.runtime,
     layout: context.layout,
     screenScheduleState,
+    clockBar: clockBarState,
   }));
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -195,7 +196,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     runtime: context.runtime,
     screenRotation,
   }));
-  installGlobals(installButtonSettingsSelectionModule(context.runtime));
+  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState));
   installGlobals(installButtonSettingsRenderQueueModule(context.runtime));
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
@@ -217,6 +218,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     layout: context.layout,
     cards: context.cards,
     codec: context.configuration.codec,
+    clockBar: clockBarState,
   }));
   installGlobals(installPreviewClipboardModule({
     configPersistence,
@@ -243,10 +245,10 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     importBackup: backupUiFeature.importConfig,
   }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware));
   installGlobals(backupUiFeature.globals);
-  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment));
+  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, firmwareVersion, firmwareUpdate, c6Firmware, (factory) => {
+  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, firmwareVersion, firmwareUpdate, c6Firmware, clockBarState, (factory) => {
     sseHandlerFactory = factory;
   }));
   const reconnectController = context.controllers.reconnect;
@@ -259,6 +261,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     createWebStyles(context.layout.config.dragAnimation),
     context.core,
     screenRotation,
+    clockBarState,
   ));
 }
 
@@ -272,6 +275,7 @@ function registerCards(context: ApplicationContext) {
     registry,
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
+    context.controllers.clockBarState,
   );
   registerClockCardTypes(registry, context.configuration.dateTimeOptions);
   registerDoorWindowCardTypes(registry, context.configuration.options);
@@ -307,8 +311,8 @@ function registerCards(context: ApplicationContext) {
   registerSwitchCardTypes(registry, context.configuration.confirmationOptions, lightCards);
   registerTimezoneCardTypes(registry, context.configuration.dateTimeOptions, context.dom.document);
   registerVacuumCardTypes(registry, context.configuration.robotOptions);
-  const weatherCards = registerWeatherCardTypes(registry, context.configuration.weatherOptions);
-  registerWeatherForecastCardTypes(registry, weatherCards);
+  const weatherCards = registerWeatherCardTypes(registry, context.configuration.weatherOptions, context.controllers.clockBarState);
+  registerWeatherForecastCardTypes(registry, weatherCards, context.controllers.clockBarState);
   registerWebhookCardTypes(registry, context.configuration.webhookOptions);
   return lightCards;
 }
@@ -341,6 +345,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.controllers.screensaverTimeout,
     context.controllers.firmwareVersion,
     context.controllers.firmwareUpdate,
+    context.controllers.clockBarState,
   ));
 }
 
@@ -424,6 +429,7 @@ function composeApplicationContext(): ApplicationContext {
   const robotConfigurationOptions = createConfigRobotCardOptionsFeature();
   const lockConfigurationOptions = createConfigLockOptionsFeature();
   let configurationCodec: ReturnType<typeof createConfigCodecFeature>;
+  let clockBarState: ClockBarFeature;
   const core = createCoreFeature(
     layout,
     (subpage) => configurationCodec.serializeSubpageGrid(subpage),
@@ -431,7 +437,7 @@ function composeApplicationContext(): ApplicationContext {
     {
       state: AppInstance.state,
       document: dom.document,
-      clockBarVisibleInPreview: () => clockBarVisibleInPreview(),
+      clockBarVisibleInPreview: () => clockBarState.visibleInPreview(),
       postButtonOrder: (value) => postText(entityName("button_order"), value),
       saveSubpage: (homeSlot) => saveSubpageEntity(homeSlot),
     },
@@ -501,6 +507,24 @@ function composeApplicationContext(): ApplicationContext {
   );
   const screensaverTimeout = createScreensaverTimeoutFeature(runtime, screenScheduleState);
   const clockBar = createClockBarController();
+  clockBarState = createClockBarFeature(clockBar, runtime, core, environment, {
+    hideSettingsOverlay: () => hideSettingsOverlay(),
+    timezoneId: (value) => getTzId(value),
+    postTemperatureEntities: (value) => postClockBarTemperatureEntities(value),
+    postSwitch: (name, value) => postSwitch(name, value),
+    entityName: (key) => entityName(key),
+    postText: (name, value) => postText(name, value),
+    updateTemperaturePreview: () => updateTempPreview(),
+    updateItemUi: () => updateClockBarItemUi(),
+    postTemperatureDegreeSymbol: (value) => postTemperatureDegreeSymbol(value),
+    isTemperatureItem: (item) => isClockBarTemperatureItem(item),
+    postTime: (value) => postClockBarTime(value),
+    postVoiceServices: (value) => postVoiceServices(value),
+    postNetworkStatus: (value) => postNetworkStatusIcon(value),
+    renderSelectionBar: () => renderSelectionBar(ctx()),
+    updateNetworkPreview: () => updateNetworkPreview(),
+    updateVoicePreview: () => updateVoicePreview(),
+  });
   const settingsUi = createSettingsUiFeature({
     document: dom.document,
     textSpan: (text, className) => textSpan(text, className),
@@ -639,6 +663,7 @@ function composeApplicationContext(): ApplicationContext {
     screenScheduleState,
     screensaverTimeout,
     firmwareUpdate,
+    clockBar: clockBarState,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),
@@ -681,6 +706,7 @@ function composeApplicationContext(): ApplicationContext {
     firmwareVersion,
     firmwareUpdate,
     c6Firmware,
+    clockBarState,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,

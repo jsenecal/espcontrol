@@ -11,11 +11,14 @@ import { iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
+import type { ClockBarFeature } from "../application/clock_bar_state";
 export function registerClimateCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
+    clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">,
 ): void {
+    const { temperatureUnitSymbol } = clockBar;
     const {
         climateControlTabDefinitions,
         climateControlTabs,

@@ -19,6 +19,7 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ApplicationLayoutState } from "./application_context";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
+import type { ClockBarFeature } from "./clock_bar_state";
 
 export interface SettingsPageHelpersControllers {
     readonly settingsUiFeature: SettingsUiFeature;
@@ -30,6 +31,7 @@ export interface SettingsPageHelpersControllers {
     readonly runtime: UiRuntimeState;
     readonly layout: ApplicationLayoutState;
     readonly screenScheduleState: ScreenScheduleStateFeature;
+    readonly clockBar: Pick<ClockBarFeature, "syncUi">;
 }
 
 export function installSettingsPageHelpersModule(
@@ -38,6 +40,7 @@ export function installSettingsPageHelpersModule(
     const { bindTextPost } = controllers.codec;
     const els = controllers.runtime.els;
     const { formatDuration, formatHour } = controllers.screenScheduleState;
+    const { syncUi: syncClockBarUi } = controllers.clockBar;
     // ── Settings Page Helpers ──────────────────────────────────────────
     // ── Settings UI helpers ─────────────────────────────────────────────
     var _settingsUiFeature: SettingsUiFeature = controllers.settingsUiFeature;

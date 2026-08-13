@@ -4,6 +4,7 @@ import { entityStateKeys } from "../state/event_state";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
 import type { ApplicationLayoutState } from "./application_context";
+import type { ClockBarFeature } from "./clock_bar_state";
 
 type EntityDefinition = {
     readonly domain?: string;
@@ -17,8 +18,10 @@ const entityDefinitions = ENTITY_CATALOG.entities as unknown as Readonly<Record<
 export function installEntityStateModule(
     confirmationOptions: ConfigConfirmationOptionsFeature,
     layout: ApplicationLayoutState,
+    clockBar: Pick<ClockBarFeature, "temperatureEntities">,
 ): GlobalDescriptors {
     const { actionCardStateEntity } = confirmationOptions;
+    const { temperatureEntities: clockBarTemperatureEntities } = clockBar;
     // ── Entity State Helpers ───────────────────────────────────────────────
     function uniquePush(this: any, list?: any, value?: any) {
         if (value && list.indexOf(value) === -1)

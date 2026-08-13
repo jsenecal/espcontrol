@@ -21,7 +21,8 @@ import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
 import type { ScreenRotationFeature } from "./screen_rotation_state";
 import type { AppearanceFeature } from "./appearance_state";
-export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, screenRotation: ScreenRotationFeature, appearance: AppearanceFeature): GlobalDescriptors {
+import type { ClockBarFeature } from "./clock_bar_state";
+export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, screenRotation: ScreenRotationFeature, appearance: AppearanceFeature, clockBar: ClockBarFeature): GlobalDescriptors {
     const { bindTextPost } = codec;
     const { syncPreviewOrientation } = core;
     const els = runtime.els;
@@ -30,6 +31,14 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
     const { syncUi: syncScreensaverTimeoutUi } = screensaverTimeout;
     const { normalize: normalizeScreenRotation, activeOptions: activeScreenRotationOptions, appendOption: appendScreenRotationOption } = screenRotation;
     const { resetColors: resetAppearanceColors } = appearance;
+    const {
+        controllerState: clockBarControllerState,
+        applyControllerState: applyClockBarControllerState,
+        setEnabled: setClockBarEnabled,
+        setNightModeEnabled,
+        syncUi: syncClockBarUi,
+        syncTemperatureUi,
+    } = clockBar;
     // ── Settings Page ──────────────────────────────────────────────────────
     function buildSettingsPage(this: any, parent?: any) {
         var page: any = document.createElement("div");
@@ -230,7 +239,7 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
         clockBarBody.appendChild(clockBarNightMode.row);
         els.setClockBarNightModeToggle = clockBarNightMode.input;
         clockBarNightMode.input.addEventListener("change", function (this: any) {
-            applyClockBarControllerState(_clockBarController.setNightModeEnabled(clockBarControllerState(), this.checked));
+            setNightModeEnabled(this.checked);
             syncClockBarUi();
             postClockBarNightMode(state.clockBarNightModeOn);
         });

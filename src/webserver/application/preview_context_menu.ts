@@ -19,16 +19,19 @@ import { resizeGridSlot } from "../features/preview_grid";
 import type { ApplicationLayoutState } from "./application_context";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigCodecFeature } from "./config_codec";
+import type { ClockBarFeature } from "./clock_bar_state";
 export interface PreviewContextMenuDependencies {
     readonly document: Document;
     readonly window: Window;
     readonly layout: ApplicationLayoutState;
     readonly cards: CardRegistry;
     readonly codec: ConfigCodecFeature;
+    readonly clockBar: Pick<ClockBarFeature, "setItemVisible">;
 }
 export function installPreviewContextMenuModule(dependencies: PreviewContextMenuDependencies): GlobalDescriptors {
     const document = dependencies.document;
     const window = dependencies.window;
+    const { setItemVisible: setClockBarItemVisible } = dependencies.clockBar;
     const {
         cardRequiresSquareSize,
         cardSupportsMaxSize,

@@ -5,10 +5,17 @@ import type { UiRuntimeState } from "./state";
 import type { CoreFeature } from "./core";
 import type { ApplicationLayoutState } from "./application_context";
 import type { EnvironmentStateFeature } from "./environment_state";
-export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature, layout: ApplicationLayoutState, environment: EnvironmentStateFeature): GlobalDescriptors {
+import type { ClockBarFeature } from "./clock_bar_state";
+export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, clockBar: ClockBarFeature): GlobalDescriptors {
     const { now: webserverNow } = core;
     const { isHomeAssistantAutoTimezone, effectiveTimezoneOptionForWeb, voiceServicesUiState } = environment;
     const els = runtime.els;
+    const {
+        clockBarTemperatureUnitSymbol,
+        temperatureVisible: clockBarTemperatureVisible,
+        visibleInPreview: clockBarVisibleInPreview,
+        primaryTemperatureEntity: primaryClockBarTemperatureEntity,
+    } = clockBar;
     // ── Clock (minute-aligned) ─────────────────────────────────────────────
     function getTzId(this: any, tz?: any) {
         if (isHomeAssistantAutoTimezone(tz))

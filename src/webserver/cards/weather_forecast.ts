@@ -1,10 +1,13 @@
 import type { CardRegistry } from "../application/card_registry";
 import type { WeatherCardRegistration } from "./weather";
+import type { ClockBarFeature } from "../application/clock_bar_state";
 
 export function registerWeatherForecastCardTypes(
     registry: CardRegistry,
     weather: WeatherCardRegistration,
+    clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">,
 ): void {
+    const { temperatureUnitSymbol } = clockBar;
     // Legacy read-only forecast card: displays tomorrow's high / low temperature.
     const WEATHER_FORECAST_CARD_METADATA: any = {
         entity: weather.entityMetadata,

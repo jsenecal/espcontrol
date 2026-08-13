@@ -1,8 +1,14 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
-export function installButtonSettingsSelectionModule(runtime: UiRuntimeState): GlobalDescriptors {
+import type { ClockBarFeature } from "./clock_bar_state";
+export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, clockBar: ClockBarFeature): GlobalDescriptors {
     const els = runtime.els;
+    const {
+        primaryTemperatureEntity: primaryClockBarTemperatureEntity,
+        saveTemperatureSettings: saveClockBarTemperatureSettings,
+        setItemVisible: setClockBarItemVisible,
+    } = clockBar;
     // ── Button Settings Selection ─────────────────────────────────────
     function hideSettingsOverlay(this: any) {
         if (els.settingsOverlay)

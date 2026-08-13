@@ -7,7 +7,6 @@ declare global {
   var CLOCK_BAR_TIME_UNAVAILABLE: any;
   var CLOCK_BAR_UNAVAILABLE: any;
   var FAVICON_SVG: any;
-  var MAX_CLOCK_BAR_TEMPERATURES: any;
   var NETWORK_STATUS_ICON_UNAVAILABLE: any;
   var SCREENSAVER_ACTION_UNAVAILABLE: any;
   var SCREEN_SCHEDULE_CLOCK_BRIGHTNESS_UNAVAILABLE: any;
@@ -45,7 +44,6 @@ declare global {
   var applyButtonConfigStateEvent: any;
   var applyButtonOrderValue: any;
   var applyCardMetadataFields: any;
-  var applyClockBarTemperatureEntities: any;
   var applyImportedButtonOrder: any;
   var addNativeConfigToBackup: any;
   var applySubpageConfigStateEvent: any;
@@ -102,14 +100,9 @@ declare global {
   var clockBarItemLabel: any;
   var clockBarItems: any;
   var clockBarTemperatureActive: any;
-  var clockBarTemperatureEntities: any;
-  var clockBarTemperatureEntries: any;
   var clockBarTemperatureItemId: any;
   var clockBarTemperatureItemIds: any;
   var clockBarTemperatureItemIndex: any;
-  var clockBarTemperatureUnitSymbol: any;
-  var clockBarTemperatureVisible: any;
-  var clockBarVisibleInPreview: any;
   var closeEntityDropdown: any;
   var closeSettings: any;
   var closestGridCell: any;
@@ -134,11 +127,6 @@ declare global {
   var createRangeSlider: any;
   var _coverArtScreensaverController: any;
   var _mediaPlaybackController: any;
-  var _clockBarController: any;
-  var clockBarControllerState: any;
-  var setClockBarEnabled: any;
-  var applyClockBarControllerState: any;
-  var clockBarUiState: any;
   var mediaPlaybackState: any;
   var applyMediaPlaybackState: any;
   var coverArtScreensaverState: any;
@@ -152,7 +140,6 @@ declare global {
   var cutSlot: any;
   var defaultButtonTypeForPicker: any;
   var defaultCardTypeForPicker: any;
-  var defaultClockBarTemperatureEntity: any;
   var downloadBackupConfig: any;
   var deleteButtons: any;
   var deleteSlot: any;
@@ -212,7 +199,6 @@ declare global {
   var isClockBarTemperatureItem: any;
   var isConfigLocked: any;
   var isSelectionControlTarget: any;
-  var legacyClockBarTemperatureEntities: any;
   var loadInitialState: any;
   var loadStateItems: any;
   var makeCollapsibleCard: any;
@@ -223,8 +209,6 @@ declare global {
   var networkPreviewIconSlug: any;
   var newCardDraftKey: any;
   var normalizeBackupConfig: any;
-  var normalizeClockBarTemperatureEntities: any;
-  var normalizeClockBarTemperatureEntries: any;
   var normalizeNetworkTransport: any;
   var normalizeVacuumMode: any;
   var normalizeWifiStrengthPercent: any;
@@ -321,7 +305,6 @@ declare global {
   var postWithObjectIds: any;
   var previewHtmlValue: any;
   var previewValue: any;
-  var primaryClockBarTemperatureEntity: any;
   var publicFirmwareOtaFilename: any;
   var refreshEntityDatalist: any;
   var refreshFirmwareVersion: any;
@@ -358,7 +341,6 @@ declare global {
   var resolveSpanPos: any;
   var resolveSpanPosition: any;
   var saveButtonConfig: any;
-  var saveClockBarTemperatureSettings: any;
   var saveSubpageEntity: any;
   var saveSubpageEntityLegacy: any;
   var scheduleMigration: any;
@@ -368,9 +350,7 @@ declare global {
   var selectButton: any;
   var selectClockBarItem: any;
   var selectField: any;
-  var serializeClockBarTemperatureEntities: any;
   var serializeGrid: any;
-  var setClockBarItemVisible: any;
   var setConfigLocked: any;
   var setFavicon: any;
   var setPostThrottle: any;
@@ -395,7 +375,6 @@ declare global {
   var switchTab: any;
   var syncCardLargeNumbersToggle: any;
   var syncClockBarItemElement: any;
-  var syncClockBarUi: any;
   var syncClockScreensaverControls: any;
   var syncConfigLockUi: any;
   var syncCoverArtScreensaverUi: any;
@@ -403,11 +382,8 @@ declare global {
   var syncMediaPlayerSleepPreventionUi: any;
   var syncOptionalClockBrightness: any;
   var syncTabChrome: any;
-  var syncTemperatureUi: any;
-  var temperatureUnitSymbol: any;
   var textInput: any;
   var timezoneOffsetMinutes: any;
-  var timezonePrefersFahrenheit: any;
   var titleFromEntityId: any;
   var toggleRow: any;
   var uniquePush: any;

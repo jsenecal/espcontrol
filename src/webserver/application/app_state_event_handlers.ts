@@ -43,6 +43,7 @@ import type { AppearanceFeature } from "./appearance_state";
 import type { FirmwareVersionFeature } from "./firmware_version_state";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { C6FirmwareFeature } from "./c6_firmware_ui";
+import type { ClockBarFeature } from "./clock_bar_state";
 
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
@@ -58,6 +59,7 @@ export function installAppStateEventHandlersModule(
     firmwareVersion: FirmwareVersionFeature,
     firmwareUpdate: FirmwareUpdateFeature,
     c6Firmware: C6FirmwareFeature,
+    clockBar: ClockBarFeature,
     onCreateSseHandlers?: (factory: SseHandlerFactory) => void,
 ): GlobalDescriptors {
     const { syncPreviewOrientation } = core;
@@ -80,6 +82,12 @@ export function installAppStateEventHandlersModule(
         setUpdateAvailable: setC6FirmwareUpdateAvailable,
         syncUi: syncC6FirmwareUi,
     } = c6Firmware;
+    const {
+        applyTemperatureEntities: applyClockBarTemperatureEntities,
+        normalizeTemperatureEntities: normalizeClockBarTemperatureEntities,
+        syncUi: syncClockBarUi,
+        syncTemperatureUi,
+    } = clockBar;
     // ── State Event Handlers ──────────────────────────────────────────
     const createSseHandlers: SseHandlerFactory = () => {
         return {

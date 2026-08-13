@@ -36,7 +36,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
   });
 
@@ -144,7 +144,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /registry\.register\(/, `${relativePath} should use the typed card registry`);
       assert.doesNotMatch(source, /\bregisterButtonType\s*\(/, `${relativePath} should not read ambient registration state`);
       assert.match(entry, new RegExp(
-        `${registrationFunction}\\(\\s*registry(?:,\\s*(?:context\\.(?:configuration\\.[A-Za-z]+|core|device\\.id)|lightCards))*[,]?\\s*\\)`,
+        `${registrationFunction}\\(\\s*registry(?:,\\s*(?:context\\.(?:configuration\\.[A-Za-z]+|controllers\\.[A-Za-z]+|core|device\\.id)|lightCards))*[,]?\\s*\\)`,
       ));
     }
   });
@@ -225,8 +225,8 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(weather, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|CFG)\b/);
     assert.doesNotMatch(forecast, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|WEATHER_CARD_METADATA)\b/);
-    assert.match(entry, /const weatherCards = registerWeatherCardTypes\(registry, context\.configuration\.weatherOptions\);/);
-    assert.match(entry, /registerWeatherForecastCardTypes\(registry, weatherCards\);/);
+    assert.match(entry, /const weatherCards = registerWeatherCardTypes\(registry, context\.configuration\.weatherOptions, context\.controllers\.clockBarState\);/);
+    assert.match(entry, /registerWeatherForecastCardTypes\(registry, weatherCards, context\.controllers\.clockBarState\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerWeather/);
     assert.doesNotMatch(globals, /\bvar (?:WEATHER_CARD_METADATA|WEATHER_FORECAST_CARD_METADATA|normalizeWeatherCardMode|weatherCardDefaultForecastLabel|weatherCardIsForecastMode|weatherForecastCardsSupported|weatherModeOptionValues|weatherModeOptions):/);
   });
@@ -380,7 +380,7 @@ describe("browserless application contracts", () => {
     assert.match(options, /const actionCardActions/);
     assert.match(entry, /registerActionCardTypes\(registry, context\.configuration\.confirmationOptions\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerActionCardTypes/);
-    assert.match(entry, /installEntityStateModule\(context\.configuration\.confirmationOptions, context\.layout\)/);
+    assert.match(entry, /installEntityStateModule\(context\.configuration\.confirmationOptions, context\.layout, clockBarState\)/);
     assert.doesNotMatch(globals, /\bvar (?:ACTION_CARD_ACTIONS|ACTION_CARD_METADATA|actionCardInfo|actionCardIsLocal|actionCardIsOptionSelect|actionCardNeedsExtraValue|actionCardStateDisplayMode|actionCardStateEntity|actionCardStatePrecision|actionCardStateUnit|normalizeActionCardConfig|normalizeSavedConfigActionFields|renderActionCardLocalSettings|setActionCardStateOptions):/);
   });
 
@@ -658,7 +658,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware\)\)/);
   });
 
@@ -724,6 +724,18 @@ describe("browserless application contracts", () => {
     assert.match(entry, /c6Firmware = createC6FirmwareFeature/);
     assert.doesNotMatch(entry, /installC6FirmwareUiModule/);
     assert.doesNotMatch(globals, /\bvar (?:c6FirmwareUpdateKnownAvailable|syncC6FirmwareUi|setC6FirmwareCurrentVersion|setC6FirmwareLatestVersion|setC6FirmwareUpdateAvailable):/);
+  });
+
+  test("owns Clock Bar behavior without application globals", () => {
+    const clockBar = fs.readFileSync(path.join(ROOT, "src/webserver/application/clock_bar_state.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(clockBar, /export interface ClockBarFeature/);
+    assert.match(clockBar, /createClockBarFeature/);
+    assert.doesNotMatch(clockBar, /GlobalDescriptors|(?:live|static)Global/);
+    assert.match(entry, /clockBarState = createClockBarFeature/);
+    assert.doesNotMatch(entry, /installClockBarStateModule/);
+    assert.doesNotMatch(globals, /\bvar (?:clockBarVisibleInPreview|temperatureUnitSymbol|applyClockBarTemperatureEntities|syncClockBarUi|setClockBarItemVisible):/);
   });
 
   test("removes the ambient DOM registry", () => {

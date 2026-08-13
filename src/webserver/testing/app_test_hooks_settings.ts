@@ -18,7 +18,8 @@ import type { EnvironmentStateFeature } from "../application/environment_state";
 import type { ScreensaverTimeoutFeature } from "../application/screensaver_timeout";
 import type { FirmwareVersionFeature } from "../application/firmware_version_state";
 import type { FirmwareUpdateFeature } from "../application/firmware_update_state";
-export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature): GlobalDescriptors {
+import type { ClockBarFeature } from "../application/clock_bar_state";
+export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">): GlobalDescriptors {
     const { timezoneOptionsWithFallback, effectiveTimezoneOptionForWeb } = environment;
     const { supported: screensaverTimeoutSupported } = screensaverTimeout;
     const { set: setFirmwareVersion } = firmwareVersion;
@@ -36,6 +37,7 @@ export function installAppTestHooksSettings(defaultTimezoneOptions: () => string
         previousInfos: previousFirmwareInfos,
         infoForVersion: firmwareInfoForVersion,
     } = firmwareUpdate;
+    const { temperatureUnitSymbol } = clockBar;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("settings", {
             normalizeTemperatureUnit: normalizeTemperatureUnit,
