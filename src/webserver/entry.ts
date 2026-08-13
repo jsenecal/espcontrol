@@ -155,15 +155,15 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const cardEditorDraft = context.controllers.cardEditorDraft;
   const cardEditorValidation = context.controllers.cardEditorValidation;
   const previewPlacementController = context.controllers.previewPlacement;
-  installGlobals(installApiModule(nativePanelConfig, deviceApi, screensaverTimeout));
-  installGlobals(installFirmwareUpdatePostApiModule());
+  installGlobals(installApiModule(nativePanelConfig, deviceApi, context.controllers.entityState, screensaverTimeout));
+  installGlobals(installFirmwareUpdatePostApiModule(context.controllers.entityState));
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion, firmwareUpdate, c6Firmware));
-  installGlobals(installArtworkPostApiModule());
-  installGlobals(installScreenSchedulePostApiModule());
-  installGlobals(installClockBarPostApiModule());
+  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState));
+  installGlobals(installArtworkPostApiModule(context.controllers.entityState));
+  installGlobals(installScreenSchedulePostApiModule(context.controllers.entityState));
+  installGlobals(installClockBarPostApiModule(context.controllers.entityState));
   installGlobals(installControlsModule());
   installGlobals(installControlsShellModule(context.runtime));
   const settingsUiFeature = context.controllers.settingsUi;
@@ -346,6 +346,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.controllers.firmwareVersion,
     context.controllers.firmwareUpdate,
     context.controllers.clockBarState,
+    context.controllers.entityState,
   ));
 }
 
@@ -422,7 +423,7 @@ function composeApplicationContext(): ApplicationContext {
     showBanner: (message, level) => showBanner(message, level),
     delay: (callback, milliseconds) => dom.schedule(callback, milliseconds),
   });
-  const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime, layout);
+  const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime, layout, entityState);
   const cards = createCardRegistry();
   const configurationOptions = createConfigSensorOptionsFeature(cards);
   const mediaConfigurationOptions = createConfigMediaOptionsFeature(layout.config);

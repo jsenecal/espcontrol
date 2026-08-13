@@ -7,7 +7,11 @@ import {
     scheduleSensorActivationOption,
 } from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installScreenSchedulePostApiModule(): GlobalDescriptors {
+import type { EntityStateFeature } from "./entity_state";
+export function installScreenSchedulePostApiModule(
+    entityState: Pick<EntityStateFeature, "entityName" | "entityObjectIds">,
+): GlobalDescriptors {
+    const { entityName, entityObjectIds } = entityState;
     // ── Screen Schedule Post API ──────────────────────────────────────────
     var SCREEN_SCHEDULE_UNAVAILABLE: any = "Screen schedule is not available on this firmware. Update the device firmware, then reload this page.";
     var SCREEN_SCHEDULE_TRIGGER_UNAVAILABLE: any = "The schedule trigger setting is not available on this firmware. Update the device firmware, then reload this page.";

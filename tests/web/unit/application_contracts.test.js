@@ -52,6 +52,28 @@ describe("browserless application contracts", () => {
     assert.match(source, /export type EntityStateFeature/);
   });
 
+  test("injects entity state into API and persistence modules", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const modules = [
+      "api.ts",
+      "firmware_update_post_api.ts",
+      "artwork_post_api.ts",
+      "screen_schedule_post_api.ts",
+      "clock_bar_post_api.ts",
+      "config_post_api.ts",
+      "state_loader_api.ts",
+    ];
+    for (const fileName of modules) {
+      const source = fs.readFileSync(path.join(ROOT, "src/webserver/application", fileName), "utf8");
+      assert.match(source, /Pick<EntityStateFeature,/i, `${fileName} should declare its entity dependency`);
+    }
+    assert.match(entry, /installApiModule\(nativePanelConfig, deviceApi, context\.controllers\.entityState, screensaverTimeout\)/);
+    assert.match(entry, /installFirmwareUpdatePostApiModule\(context\.controllers\.entityState\)/);
+    assert.match(entry, /installArtworkPostApiModule\(context\.controllers\.entityState\)/);
+    assert.match(entry, /installScreenSchedulePostApiModule\(context\.controllers\.entityState\)/);
+    assert.match(entry, /installClockBarPostApiModule\(context\.controllers\.entityState\)/);
+  });
+
   test("imports the browser core service without ambient application names", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
@@ -66,7 +88,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
     assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState\)/);
-    assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
+    assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout, entityState\)/);
   });
 
   test("injects the device ID without an application global", () => {
@@ -653,7 +675,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const persistence = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_post_api.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
-    assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
+    assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout, entityState\)/);
     assert.match(entry, /installAppEventsModule\([\s\S]*reconnectController, sseHandlerFactory, context\.runtime, context\.controllers\.pageTitle/);
     assert.match(persistence, /runtime\.pendingSliderSubpageMigrations/);
     assert.doesNotMatch(runtime, /"(?:orderReceived|migrationTimer|sliderMigrationTimer|pendingSliderSubpageMigrations)"/);

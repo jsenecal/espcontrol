@@ -1,5 +1,9 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installFirmwareUpdatePostApiModule(): GlobalDescriptors {
+import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { EntityStateFeature } from "./entity_state";
+export function installFirmwareUpdatePostApiModule(
+    entityState: Pick<EntityStateFeature, "rememberedPostUrls" | "entityName" | "entityObjectIds" | "entityLookupNames" | "uniquePush">,
+): GlobalDescriptors {
+    const { rememberedPostUrls, entityName, entityObjectIds, entityLookupNames, uniquePush } = entityState;
     // ── Firmware Update Post API ──────────────────────────────────────────
     function postFirmwareUpdateInstall(this: any) {
         var urls: any = [];

@@ -15,7 +15,9 @@ import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
 import type { FirmwareVersionFeature } from "./firmware_version_state";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { C6FirmwareFeature } from "./c6_firmware_ui";
-export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, c6Firmware: C6FirmwareFeature): GlobalDescriptors {
+import type { EntityStateFeature } from "./entity_state";
+export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, c6Firmware: C6FirmwareFeature, entityState: Pick<EntityStateFeature, "entityStateItems" | "entityStateItemsForSlots" | "entityLookupNames" | "rememberEntityPostPath" | "entityName" | "entityObjectIds">): GlobalDescriptors {
+    const { entityStateItems, entityStateItemsForSlots, entityLookupNames, rememberEntityPostPath, entityName, entityObjectIds } = entityState;
     const { applyState: applyScreensaverTimeoutState } = screensaverTimeout;
     const { render: renderFirmwareVersion, set: setFirmwareVersion } = firmwareVersion;
     const {
@@ -194,7 +196,7 @@ export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: App
         getJsonQuietly("/number/" + encodeURIComponent(entityName("screensaver_timeout")) + "?detail=all", applyScreensaverTimeoutState)
             .then(function (this: any, data?: any) {
             if (!data) {
-                getJsonQuietly("/number/" + encodeURIComponent(entityObjectIds("screensaver_timeout")[0]) + "?detail=all", applyScreensaverTimeoutState);
+                getJsonQuietly("/number/" + encodeURIComponent(entityObjectIds("screensaver_timeout")[0]!) + "?detail=all", applyScreensaverTimeoutState);
             }
         });
     }

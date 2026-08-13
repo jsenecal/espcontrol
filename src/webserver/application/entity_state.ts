@@ -351,32 +351,9 @@ export type EntityStateFeature = ReturnType<typeof createEntityStateFeature>;
 /** Temporary adapter for application modules that have not yet received EntityStateFeature directly. */
 export function entityStateCompatibilityGlobals(feature: EntityStateFeature): GlobalDescriptors {
     return {
-        "uniquePush": staticGlobal(feature.uniquePush),
-        "entityDef": staticGlobal(feature.entityDef),
         "entityName": staticGlobal(feature.entityName),
-        "entityNameForSlot": staticGlobal(feature.entityNameForSlot),
-        "entityObjectIds": staticGlobal(feature.entityObjectIds),
-        "entityLookupNames": staticGlobal(feature.entityLookupNames),
-        "entityStateItem": staticGlobal(feature.entityStateItem),
-        "entityStateItems": staticGlobal(feature.entityStateItems),
-        "entityStateItemsForSlots": staticGlobal(feature.entityStateItemsForSlots),
-        "esphomeObjectId": staticGlobal(feature.esphomeObjectId),
-        "parseEntityId": staticGlobal(feature.parseEntityId),
-        "parseHomeAssistantEntity": staticGlobal(feature.parseHomeAssistantEntity),
-        "titleFromEntityId": staticGlobal(feature.titleFromEntityId),
-        "rememberEntityName": staticGlobal(feature.rememberEntityName),
-        "rememberConfiguredButtonEntities": staticGlobal(feature.rememberConfiguredButtonEntities),
-        "rememberConfiguredEntities": staticGlobal(feature.rememberConfiguredEntities),
-        "optionLabelForEntity": staticGlobal(feature.optionLabelForEntity),
-        "entitySuggestions": staticGlobal(feature.entitySuggestions),
-        "ensureEntityDropdown": staticGlobal(feature.ensureEntityDropdown),
-        "closeEntityDropdown": staticGlobal(feature.closeEntityDropdown),
         "refreshEntityDatalist": staticGlobal(feature.refreshEntityDatalist),
-        "attachEntitySuggestions": staticGlobal(feature.attachEntitySuggestions),
         "entityInput": staticGlobal(feature.entityInput),
         "rememberEntityPostPath": staticGlobal(feature.rememberEntityPostPath),
-        "rememberedPostUrls": staticGlobal(feature.rememberedPostUrls),
-        "hasRememberedPostPath": staticGlobal(feature.hasRememberedPostPath),
-        "entityPostUrls": staticGlobal(feature.entityPostUrls),
     };
 }

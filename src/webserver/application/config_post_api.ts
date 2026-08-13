@@ -6,6 +6,7 @@ import type { NativePanelConfigController } from "../controllers/native_panel_co
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ApplicationLayoutState } from "./application_context";
+import type { EntityStateFeature } from "./entity_state";
 
 export interface ConfigPersistenceFeature {
     readonly globals: GlobalDescriptors;
@@ -18,7 +19,9 @@ export function createConfigPersistenceFeature(
     nativePanelConfig: NativePanelConfigController | null = null,
     runtime: UiRuntimeState,
     layout: ApplicationLayoutState,
+    entityState: Pick<EntityStateFeature, "entityNameForSlot" | "hasRememberedPostPath">,
 ): ConfigPersistenceFeature {
+    const { entityNameForSlot, hasRememberedPostPath } = entityState;
     let codec: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig"> | undefined;
     function connectCodec(value: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig">) {
         codec = value;
