@@ -2177,10 +2177,18 @@ inline void image_card_process_media_artwork(ImageCardCtx *ctx,
     if (!ctx->image_ready) image_card_set_loading_state(ctx, "Loading", true);
   }
   if (chosen.empty()) {
+    if (timeout_retry_exhausted && !ctx->image_ready) {
+      image_card_clear_media_artwork(ctx);
+      image_card_set_loading_state(ctx, "Unavailable", true);
+      image_card_log_diagnostics(ctx, "media-artwork-timeout-unavailable");
+      return;
+    }
     if (espcontrol::artwork::artwork_empty_selection_preserves_pending_refresh(
           true, ctx->media_artwork_trigger.pending) ||
         espcontrol::artwork::artwork_empty_selection_preserves_retry(
-          true, ctx->media_artwork_retry_mask) || timeout_retry_exhausted) {
+          true, ctx->media_artwork_retry_mask) ||
+        espcontrol::artwork::artwork_timeout_exhaustion_preserves_current(
+          timeout_retry_exhausted, ctx->image_ready)) {
       image_card_log_diagnostics(ctx, "media-artwork-pending-refresh-preserved");
       return;
     }
