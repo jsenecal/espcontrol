@@ -6,6 +6,7 @@ import type { UiRuntimeState } from "./state";
 import type { ApplicationLayoutState } from "./application_context";
 import type { EntityStateFeature } from "./entity_state";
 import type { ApplicationApiFeature } from "./api";
+import type { ButtonSettingsRenderQueueFeature } from "./button_settings_render_queue";
 
 export interface GridFeature {
     ctx(): any;
@@ -18,7 +19,7 @@ export interface GridFeature {
     resolveIcon(button?: any): string;
 }
 
-export function createGridFeature(codec: ConfigCodecFeature, runtime: UiRuntimeState, layout: ApplicationLayoutState, entityState: Pick<EntityStateFeature, "entityName">, requestApi: Pick<ApplicationApiFeature, "postText">): GridFeature {
+export function createGridFeature(codec: ConfigCodecFeature, runtime: UiRuntimeState, layout: ApplicationLayoutState, entityState: Pick<EntityStateFeature, "entityName">, requestApi: Pick<ApplicationApiFeature, "postText">, renderQueue: ButtonSettingsRenderQueueFeature): GridFeature {
     const { entityName } = entityState;
     const { getSubpage, saveSubpageConfig } = codec;
     // ── Context abstraction ────────────────────────────────────────────────
@@ -75,7 +76,7 @@ export function createGridFeature(codec: ConfigCodecFeature, runtime: UiRuntimeS
             return state.grid.indexOf(s) !== -1;
         });
         if (!skipRender)
-            scheduleRender();
+            renderQueue.schedule();
     }
     function serializeGrid(this: any, grid?: any) {
         return EspControlModel.serializeGridOrder(grid, state.sizes);

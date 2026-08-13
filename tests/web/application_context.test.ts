@@ -92,6 +92,7 @@ export function runApplicationContextTests(): void {
   const voiceServices = {} as any;
   const environment = {} as any;
   const iconPicker = {} as any;
+  const renderQueue = {} as any;
   const state = { grid: [] } as any;
   const runtime = {} as any;
   const core = {} as any;
@@ -164,6 +165,7 @@ export function runApplicationContextTests(): void {
     voiceServices,
     environment,
     iconPicker,
+    renderQueue,
     dom,
     cards,
   });
@@ -220,6 +222,7 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.cardEditorDraft, cardEditorDraft, "context retains editor draft ownership");
   equal(context.controllers.environment, environment, "context retains environment state ownership");
   equal(context.controllers.iconPicker, iconPicker, "context retains icon picker ownership");
+  equal(context.controllers.renderQueue, renderQueue, "context retains render queue ownership");
   equal(context.controllers.screenScheduleState, screenScheduleState, "context retains screen schedule state ownership");
   equal(context.controllers.screenRotation, screenRotation, "context retains screen rotation ownership");
   equal(context.controllers.screensaverTimeout, screensaverTimeout, "context retains screensaver timeout ownership");

@@ -4,8 +4,6 @@ declare global {
   var AUTOMATIC_BRIGHTNESS_UNAVAILABLE: any;
   var FAVICON_SVG: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
-  var _renderPending: any;
-  var _settingsDeferred: any;
   var _settingsUiFeature: any;
   var addBackButtonMenuItems: any;
   var addBulkCardMenuItems: any;
@@ -143,7 +141,6 @@ declare global {
   var resizeSlot: any;
   var resolveSpanPos: any;
   var resolveSpanPosition: any;
-  var scheduleRender: any;
   var segmentControl: any;
   var selectButton: any;
   var selectClockBarItem: any;

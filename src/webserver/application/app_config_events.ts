@@ -2,6 +2,7 @@ import { state } from "../state/app_instance";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { ApplicationLayoutState } from "./application_context";
+import type { ButtonSettingsRenderQueueFeature } from "./button_settings_render_queue";
 
 export interface ConfigEventPattern {
     readonly re: RegExp;
@@ -19,6 +20,7 @@ export function createAppConfigEventsFeature(
     configPersistence: ConfigPersistenceFeature,
     codec: ConfigCodecFeature,
     layout: ApplicationLayoutState,
+    renderQueue: ButtonSettingsRenderQueueFeature,
 ): AppConfigEventsFeature {
     const { parseButtonConfig, buttonConfigNeedsMigration, applySubpageRaw } = codec;
     // ── Config Event Handlers ─────────────────────────────────────────────
@@ -43,7 +45,7 @@ export function createAppConfigEventsFeature(
         b.options = parsed.options;
         if (migrateConfig)
             configPersistence.saveButtonConfig(slot);
-        scheduleRender();
+        renderQueue.schedule();
     }
     function applySubpageConfigStateEvent(this: any, slot?: any, key?: any, val?: any) {
         ensureSubpageRaw(slot)[key] = val || "";

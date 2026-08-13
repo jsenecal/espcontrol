@@ -8,6 +8,7 @@ import {
     cardContractPickerKey,
 } from "../generated/card_contract";
 import type { CardRegistry } from "../application/card_registry";
+import type { ButtonSettingsRenderQueueFeature } from "../application/button_settings_render_queue";
 import {
     SWITCH_CONFIRM_DEFAULT_NO,
     SWITCH_CONFIRM_DEFAULT_YES,
@@ -18,7 +19,7 @@ export interface CoverLikeCardRegistration {
     register(config: any): void;
 }
 
-export function createCoverLikeCardRegistration(registry: CardRegistry): CoverLikeCardRegistration {
+export function createCoverLikeCardRegistration(registry: CardRegistry, renderQueue: ButtonSettingsRenderQueueFeature): CoverLikeCardRegistration {
     function coverLikeModeValues(this: any, cardType?: any, optionName?: any, fallbackModes?: any) {
         var spec: any = cardContractOptionSpec(cardType, optionName);
         return spec && spec.values ? spec.values.slice() : fallbackModes.map(function (this: any, entry?: any) { return entry[0]; });
@@ -173,7 +174,7 @@ export function createCoverLikeCardRegistration(registry: CardRegistry): CoverLi
                             config.setLabelDisplayMode(button, value);
                             cardHelpers.saveField("options", button.options);
                             setLabelVisible(value);
-                            scheduleRender();
+                            renderQueue.schedule();
                         },
                     }),
                 });

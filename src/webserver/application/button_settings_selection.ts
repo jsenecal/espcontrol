@@ -6,7 +6,8 @@ import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { GridFeature } from "./grid";
-export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityInput">, shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton">, statusPreview: Pick<AppStatusPreviewFeature, "clockBarItemActive" | "clockBarItemLabel" | "clockBarItems" | "isClockBarTemperatureItem" | "updateClockBarItemUi">, grid: Pick<GridFeature, "ctx">): GlobalDescriptors {
+import type { ButtonSettingsRenderQueueFeature } from "./button_settings_render_queue";
+export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityInput">, shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton">, statusPreview: Pick<AppStatusPreviewFeature, "clockBarItemActive" | "clockBarItemLabel" | "clockBarItems" | "isClockBarTemperatureItem" | "updateClockBarItemUi">, grid: Pick<GridFeature, "ctx">, renderQueue: ButtonSettingsRenderQueueFeature): GlobalDescriptors {
     const { entityInput } = entityState;
     const { isConfigLocked, createActionButton } = shell;
     const els = runtime.els;
@@ -122,7 +123,7 @@ export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, cl
     }
     function closeSettings(this: any) {
         hideSettingsOverlay();
-        _settingsDeferred = false;
+        renderQueue.clearDeferred();
         state.settingsDraft = null;
         ctx().setSelected([]);
         state.clockBarSelectedItem = "";

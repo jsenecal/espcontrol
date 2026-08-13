@@ -10,9 +10,11 @@ import {
 import { escHtml, iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
+import type { ButtonSettingsRenderQueueFeature } from "../application/button_settings_render_queue";
 export function registerAlarmCardTypes(
     registry: CardRegistry,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
+    renderQueue: ButtonSettingsRenderQueueFeature,
 ): void {
     const {
         alarmBehaviorSpec,
@@ -201,7 +203,7 @@ export function registerAlarmCardTypes(
                 setAlarmVisibleActions(b, selected);
                 helpers.saveField("options", b.options);
                 syncInputs(alarmVisibleActions(b));
-                scheduleRender();
+                renderQueue.schedule();
             });
         }
         syncInputs(visible);
@@ -280,7 +282,7 @@ export function registerAlarmCardTypes(
                         setAlarmIconDisplayMode(button, value);
                         cardHelpers.saveField("options", button.options);
                         setIconVisible(value);
-                        scheduleRender();
+                        renderQueue.schedule();
                     },
                 }),
             });
@@ -293,7 +295,7 @@ export function registerAlarmCardTypes(
                         setAlarmLabelDisplayMode(button, value);
                         cardHelpers.saveField("options", button.options);
                         setLabelVisible(value);
-                        scheduleRender();
+                        renderQueue.schedule();
                     },
                 }),
             });

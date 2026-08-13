@@ -63,6 +63,7 @@ import type { ScreenSchedulePostApiFeature } from "./screen_schedule_post_api";
 import type { ClockBarPostApiFeature } from "./clock_bar_post_api";
 import type { PublicFirmwareInstallFeature } from "./public_firmware_install";
 import type { ButtonSettingsIconPickerFeature } from "./button_settings_icon_picker";
+import type { ButtonSettingsRenderQueueFeature } from "./button_settings_render_queue";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -159,6 +160,7 @@ export interface ApplicationContext {
     readonly voiceServices: VoiceServicesController;
     readonly environment: EnvironmentStateFeature;
     readonly iconPicker: ButtonSettingsIconPickerFeature;
+    readonly renderQueue: ButtonSettingsRenderQueueFeature;
   };
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
@@ -231,6 +233,7 @@ export interface ApplicationContextOptions {
   readonly voiceServices: VoiceServicesController;
   readonly environment: EnvironmentStateFeature;
   readonly iconPicker: ButtonSettingsIconPickerFeature;
+  readonly renderQueue: ButtonSettingsRenderQueueFeature;
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
 }
@@ -323,6 +326,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       voiceServices: options.voiceServices,
       environment: options.environment,
       iconPicker: options.iconPicker,
+      renderQueue: options.renderQueue,
     },
     dom: options.dom,
     cards: options.cards,

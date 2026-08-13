@@ -73,6 +73,7 @@ import type { ConfigDateTimeOptionsFeature } from "./config_date_time_options";
 import type { ApplicationLayoutState } from "./application_context";
 import type { ApplicationApiFeature } from "./api";
 import type { ConfigPersistenceFeature } from "./config_post_api";
+import type { ButtonSettingsRenderQueueFeature } from "./button_settings_render_queue";
 export function createConfigCodecFeature(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
@@ -88,6 +89,7 @@ export function createConfigCodecFeature(
     confirmationOptions: ConfigConfirmationOptionsFeature,
     layout: ApplicationLayoutState,
     configPersistence: Pick<ConfigPersistenceFeature, "saveSubpageEntity" | "scheduleSliderSubpageMigration">,
+    renderQueue: ButtonSettingsRenderQueueFeature,
 ) {
     const { saveSubpageEntity, scheduleSliderSubpageMigration } = configPersistence;
     let requestApi: Pick<ApplicationApiFeature, "postText"> | undefined;
@@ -897,7 +899,7 @@ export function createConfigCodecFeature(
         if (pending) {
             if (combined !== pending) {
                 if (state.editingSubpage === slot)
-                    scheduleRender();
+                    renderQueue.schedule();
                 return;
             }
             delete state.subpageSavePending[slot];
@@ -908,7 +910,7 @@ export function createConfigCodecFeature(
         if (state.editingSubpage === slot && localHasData) {
             var localSerialized: any = serializeSubpageConfig(local);
             if (combined !== localSerialized) {
-                scheduleRender();
+                renderQueue.schedule();
                 return;
             }
         }
@@ -925,7 +927,7 @@ export function createConfigCodecFeature(
             delete state.subpages[slot];
         }
         if (state.editingSubpage === slot) {
-            scheduleRender();
+            renderQueue.schedule();
         }
     }
     function getSubpage(this: any, homeSlot?: any) {

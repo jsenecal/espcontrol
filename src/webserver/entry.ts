@@ -62,7 +62,7 @@ import { installSettingsPageModule } from "./application/settings_page";
 import { installControlsFieldsModule } from "./application/controls_fields";
 import { installPreviewRenderModule } from "./application/preview_render";
 import { installButtonSettingsSelectionModule } from "./application/button_settings_selection";
-import { installButtonSettingsRenderQueueModule } from "./application/button_settings_render_queue";
+import { createButtonSettingsRenderQueueFeature } from "./application/button_settings_render_queue";
 import { createButtonSettingsIconPickerFeature } from "./application/button_settings_icon_picker";
 import { installButtonSettingsModule } from "./application/button_settings";
 import { installPreviewGridPlacementModule } from "./application/preview_grid_placement";
@@ -193,8 +193,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     shell: context.controllers.shell,
     grid: context.controllers.grid,
   }));
-  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.statusPreview, context.controllers.grid));
-  installGlobals(installButtonSettingsRenderQueueModule(context.runtime));
+  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.statusPreview, context.controllers.grid, context.controllers.renderQueue));
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence, context.cards,
     context.configuration.imageOptions,
@@ -270,15 +269,16 @@ function installApplicationCompatibility(context: ApplicationContext): void {
 
 function registerCards(context: ApplicationContext) {
   const registry = context.cards;
-  const coverLikeCards = createCoverLikeCardRegistration(registry);
+  const coverLikeCards = createCoverLikeCardRegistration(registry, context.controllers.renderQueue);
   registerActionCardTypes(registry, context.configuration.confirmationOptions, context.controllers.entityState);
-  registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm);
+  registerAlarmCardTypes(registry, context.configuration.accessClimateAlarm, context.controllers.renderQueue);
   registerCalendarCardTypes(registry, context.configuration.dateTimeOptions);
   registerClimateCardTypes(
     registry,
     context.configuration.modalTabs,
     context.configuration.accessClimateAlarm,
     context.controllers.clockBarState,
+    context.controllers.renderQueue,
   );
   registerClockCardTypes(registry, context.configuration.dateTimeOptions);
   registerDoorWindowCardTypes(registry, context.configuration.options);
@@ -456,6 +456,13 @@ function composeApplicationContext(): ApplicationContext {
   const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime, layout, entityState, shell);
   const cards = createCardRegistry();
   const iconPicker = createButtonSettingsIconPickerFeature(dom.document, () => renderPreview());
+  const renderQueue = createButtonSettingsRenderQueueFeature(runtime, {
+    document: dom.document,
+    requestFrame: (callback) => requestAnimationFrame(callback),
+    renderPreview: () => renderPreview(),
+    renderButtonSettings: () => renderButtonSettings(),
+    closeSettings: () => closeSettings(),
+  });
   const configurationOptions = createConfigSensorOptionsFeature(cards);
   const mediaConfigurationOptions = createConfigMediaOptionsFeature(layout.config);
   const imageConfigurationOptions = createConfigImageOptionsFeature({
@@ -512,6 +519,7 @@ function composeApplicationContext(): ApplicationContext {
     confirmationOptions,
     layout,
     configurationPersistence,
+    renderQueue,
   );
   configurationPersistence.connectCodec(configurationCodec);
   const cardEditorDraft = createCardEditorDraftController({
@@ -559,7 +567,7 @@ function composeApplicationContext(): ApplicationContext {
   const clockBarPostApi = createClockBarPostApiFeature(entityState, requestApi);
   configurationPersistence.connectRequestApi(requestApi);
   configurationCodec.connectRequestApi(requestApi);
-  const grid = createGridFeature(configurationCodec, runtime, layout, entityState, requestApi);
+  const grid = createGridFeature(configurationCodec, runtime, layout, entityState, requestApi, renderQueue);
   const gridMigration = createGridMigrationFeature(runtime, layout, {
     renderPreview: () => renderPreview(),
     renderButtonSettings: () => renderButtonSettings(),
@@ -601,7 +609,7 @@ function composeApplicationContext(): ApplicationContext {
     updateVoicePreview: () => statusPreview.updateVoicePreview(),
   });
   statusPreview = createAppStatusPreviewFeature(runtime, core, layout, environment, clockBarState);
-  const configEvents = createAppConfigEventsFeature(configurationPersistence, configurationCodec, layout);
+  const configEvents = createAppConfigEventsFeature(configurationPersistence, configurationCodec, layout, renderQueue);
   const stateEventHandlers = createAppStateEventHandlersFeature(
     runtime,
     core,
@@ -867,6 +875,7 @@ function composeApplicationContext(): ApplicationContext {
     voiceServices,
     environment,
     iconPicker,
+    renderQueue,
     dom,
     cards,
   });

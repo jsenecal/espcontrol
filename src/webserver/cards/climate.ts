@@ -12,11 +12,13 @@ import type { CardRegistry } from "../application/card_registry";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 import type { ClockBarFeature } from "../application/clock_bar_state";
+import type { ButtonSettingsRenderQueueFeature } from "../application/button_settings_render_queue";
 export function registerClimateCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">,
+    renderQueue: ButtonSettingsRenderQueueFeature,
 ): void {
     const { temperatureUnitSymbol } = clockBar;
     const {
@@ -150,7 +152,7 @@ export function registerClimateCardTypes(
                         setClimateNumberDisplayMode(button, value);
                         cardHelpers.saveField("options", button.options);
                         syncIconFields();
-                        scheduleRender();
+                        renderQueue.schedule();
                     },
                 }),
             });
@@ -162,7 +164,7 @@ export function registerClimateCardTypes(
                 field: "icon",
                 fallback: "Thermostat",
                 label: "Off Icon",
-                onChange: function (this: any) { scheduleRender(); },
+                onChange: function (this: any) { renderQueue.schedule(); },
             });
             helpers.renderCardIconPicker(iconFields, b, helpers, {
                 pickerIdSuffix: "climate-icon-on-picker",
@@ -170,7 +172,7 @@ export function registerClimateCardTypes(
                 field: "icon_on",
                 fallback: "Auto",
                 label: "On Icon",
-                onChange: function (this: any) { scheduleRender(); },
+                onChange: function (this: any) { renderQueue.schedule(); },
             });
             function syncIconFields(this: any) {
                 iconFields.classList.toggle("sp-visible", climateNumberDisplayMode(b) === "icon");
@@ -184,7 +186,7 @@ export function registerClimateCardTypes(
                         setClimateLabelDisplayMode(button, value);
                         cardHelpers.saveField("options", button.options);
                         syncLabelField();
-                        scheduleRender();
+                        renderQueue.schedule();
                     },
                 }),
             });
@@ -198,14 +200,14 @@ export function registerClimateCardTypes(
             function saveClimateAdvancedSettings(this: any) {
                 b.precision = climatePrecisionConfig(precision.value, minInp.value, maxInp.value);
                 helpers.saveField("precision", b.precision);
-                scheduleRender();
+                renderQueue.schedule();
             }
             precision.addEventListener("change", saveClimateAdvancedSettings);
             var stepField: any = helpers.selectField(CLIMATE_CARD_METADATA.temperatureStep.label, helpers.idPrefix + "climate-temperature-step", CLIMATE_CARD_METADATA.temperatureStep.options, climateTemperatureStep(b));
             stepField.select.addEventListener("change", function (this: any) {
                 setClimateTemperatureStep(b, stepField.select.value);
                 helpers.saveField("options", b.options);
-                scheduleRender();
+                renderQueue.schedule();
             });
             helpers.renderCardLargeNumbersToggle(cardSettings, b, helpers, CLIMATE_CARD_METADATA);
             panel.appendChild(cardSettingsDisclosure.panel);

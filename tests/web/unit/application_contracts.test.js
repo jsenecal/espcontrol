@@ -222,14 +222,14 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.equal(fs.existsSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts")), false);
     assert.doesNotMatch(globals, /\bvar (?:NUM_SLOTS|TOTAL_SLOTS|GRID_COLS|GRID_ROWS):/);
-    assert.match(entry, /grid = createGridFeature\(configurationCodec, runtime, layout, entityState, requestApi\)/);
+    assert.match(entry, /grid = createGridFeature\(configurationCodec, runtime, layout, entityState, requestApi, renderQueue\)/);
     assert.doesNotMatch(entry, /gridCompatibilityGlobals/);
     assert.doesNotMatch(grid, /GlobalDescriptors|staticGlobal|gridCompatibilityGlobals/);
     assert.doesNotMatch(globals, /\bvar (?:ctx|scheduleMainGridSave|cancelMainGridSave|applyButtonOrderValue|applyImportedButtonOrder|parseOrder|resolveIcon|serializeGrid|sizeClass|btnDisplayName):/);
     assert.match(grid, /export interface GridFeature/);
     assert.match(grid, /export function createGridFeature/);
     assert.doesNotMatch(entry, /installGridModule/);
-    assert.match(entry, /createAppConfigEventsFeature\(configurationPersistence, configurationCodec, layout\)/);
+    assert.match(entry, /createAppConfigEventsFeature\(configurationPersistence, configurationCodec, layout, renderQueue\)/);
     assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview, context\.controllers\.grid\)/);
     const previewGridConsumers = [
       "preview_render.ts",
@@ -514,7 +514,7 @@ describe("browserless application contracts", () => {
     const hooks = fs.readFileSync(path.join(ROOT, "src/webserver/testing/app_test_hooks_config.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerAlarmCardTypes\(registry, context\.configuration\.accessClimateAlarm\);/);
+    assert.match(entry, /registerAlarmCardTypes\(registry, context\.configuration\.accessClimateAlarm, context\.controllers\.renderQueue\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerAlarmCardTypes/);
     assert.match(hooks, /alarmBehaviorSpec,[\s\S]*alarmActionSpecs,/);
     assert.doesNotMatch(globals, /\bvar (?:ALARM_CARD_METADATA|ALARM_CONTROL_PANEL_VALUE|alarmCardTypeOptions|alarmCardTypeOptionsForSettings|alarmControlPanelValue|alarmIconIsGenerated|alarmLabelIsGenerated|alarmUsesDefaultIcon|renderAlarmCardTypeField|renderAlarmVisibleActionsField|setAlarmCardType):/);
@@ -761,7 +761,7 @@ describe("browserless application contracts", () => {
     assert.match(core, /serializeSubpageGrid: \(subpage: any\) => any/);
     assert.match(entry, /\(subpage\) => configurationCodec\.serializeSubpageGrid\(subpage\)/);
     assert.match(entry, /configurationPersistence\.connectCodec\(configurationCodec\)/);
-    assert.match(entry, /createAppConfigEventsFeature\(configurationPersistence, configurationCodec, layout\)/);
+    assert.match(entry, /createAppConfigEventsFeature\(configurationPersistence, configurationCodec, layout, renderQueue\)/);
     assert.doesNotMatch(entry, /configuration\.codec\.globals/);
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar (?:normalizeButtonConfig|serializeButtonConfig|parseSubpageConfig|serializeSubpageConfig|getSubpage|bindTextPost):/);
@@ -894,7 +894,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /ControlsShellFeature/, `${file} should declare its shell dependency`);
     }
     assert.match(entry, /installControlsFieldsModule\(context\.cards, context\.configuration\.options, context\.controllers\.shell, context\.controllers\.requestApi\)/);
-    assert.match(entry, /installButtonSettingsSelectionModule\(context\.runtime, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.statusPreview, context\.controllers\.grid\)/);
+    assert.match(entry, /installButtonSettingsSelectionModule\(context\.runtime, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.statusPreview, context\.controllers\.grid, context\.controllers\.renderQueue\)/);
   });
 
   test("injects the UI shell into preview, persistence, backup, and startup modules", () => {
@@ -949,9 +949,13 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.match(loader, /runtime\.eventSource\.close\(\)/);
     assert.match(settings, /runtime\.isSettingsOpen\(\)/);
-    assert.match(entry, /installButtonSettingsRenderQueueModule\(context\.runtime\)/);
+    assert.match(settings, /export function createButtonSettingsRenderQueueFeature/);
+    assert.doesNotMatch(settings, /GlobalDescriptors|staticGlobal|liveGlobal|installButtonSettingsRenderQueueModule/);
+    assert.match(entry, /createButtonSettingsRenderQueueFeature\(runtime, \{/);
+    assert.match(entry, /context\.controllers\.renderQueue/);
+    assert.doesNotMatch(entry, /installButtonSettingsRenderQueueModule/);
     assert.doesNotMatch(runtime, /"(?:_eventSource|isSettingsFocused|isSettingsOpen)"/);
-    assert.doesNotMatch(globals, /\bvar (?:_eventSource|isSettingsFocused|isSettingsOpen):/);
+    assert.doesNotMatch(globals, /\bvar (?:_eventSource|isSettingsFocused|isSettingsOpen|_renderPending|_settingsDeferred|scheduleRender):/);
   });
 
   test("injects settings DOM references", () => {
