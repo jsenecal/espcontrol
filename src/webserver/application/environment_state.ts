@@ -3,15 +3,17 @@ import { AUTO_TIMEZONE_OPTION, FALLBACK_TIMEZONE_OPTION } from "../state/app_sta
 import { normalizeLanguage } from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { VoiceServicesController } from "../features/voice_services_controller";
+import type { ApplicationLayoutState } from "./application_context";
 
 export function installEnvironmentStateModule(
     voiceServicesController: VoiceServicesController,
     defaultTimezoneOptions: () => string[],
+    layout: ApplicationLayoutState,
 ): GlobalDescriptors {
     // ── Environment State ──────────────────────────────────────────────────
     var voiceServicesControllerInstance: VoiceServicesController = voiceServicesController;
     function voiceServicesSupported(this: any) {
-        return !!(CFG.features && CFG.features.voiceServices);
+        return !!(layout.config.features && layout.config.features.voiceServices);
     }
     function voiceServicesState(this: any) {
         return {

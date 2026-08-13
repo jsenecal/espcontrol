@@ -2,6 +2,7 @@ import { state } from "../state/app_instance";
 import { ENTITY_CATALOG } from "../generated/entity_catalog";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
+import type { ApplicationLayoutState } from "./application_context";
 import {
     FIRMWARE_VERSION_METADATA_PATH,
     firmwareInfoFromPublicManifest,
@@ -10,7 +11,7 @@ import {
     publicFirmwareManifestUrl,
     publicFirmwareVersionsUrl,
 } from "./firmware_metadata";
-export function installStateLoaderApiModule(runtime: UiRuntimeState): GlobalDescriptors {
+export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState): GlobalDescriptors {
     // ── State Loader API ──────────────────────────────────────────────────
     function eventStreamEnabled(this: any) {
         try {
@@ -26,16 +27,16 @@ export function installStateLoaderApiModule(runtime: UiRuntimeState): GlobalDesc
     }
     function settingsStateEntities(this: any) {
         var items: any = entityStateItems(ENTITY_CATALOG.groups.settings);
-        if (CFG.features && CFG.features.screenRotation) {
+        if (layout.config.features && layout.config.features.screenRotation) {
             items = items.concat(entityStateItems(ENTITY_CATALOG.groups.settings_optional));
         }
-        if (CFG.features && CFG.features.voiceServices) {
+        if (layout.config.features && layout.config.features.voiceServices) {
             items = items.concat(entityStateItems(ENTITY_CATALOG.groups.settings_voice));
         }
-        if (CFG.features && CFG.features.battery) {
+        if (layout.config.features && layout.config.features.battery) {
             items = items.concat(entityStateItems(ENTITY_CATALOG.groups.settings_battery));
         }
-        if (CFG.features && CFG.features.alarmDelayAudio) {
+        if (layout.config.features && layout.config.features.alarmDelayAudio) {
             items = items.concat(entityStateItems(ENTITY_CATALOG.groups.settings_alarm_audio));
         }
         return items;

@@ -17,6 +17,7 @@ import type { CoverArtScreensaverController } from "../features/cover_art_screen
 import type { MediaPlaybackController } from "../features/media_playback_controller";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
+import type { ApplicationLayoutState } from "./application_context";
 
 export interface SettingsPageHelpersControllers {
     readonly settingsUiFeature: SettingsUiFeature;
@@ -26,6 +27,7 @@ export interface SettingsPageHelpersControllers {
     readonly mediaPlayback: MediaPlaybackController;
     readonly codec: Pick<ConfigCodecFeature, "bindTextPost">;
     readonly runtime: UiRuntimeState;
+    readonly layout: ApplicationLayoutState;
 }
 
 export function installSettingsPageHelpersModule(
@@ -144,7 +146,7 @@ export function installSettingsPageHelpersModule(
             els.setAlarmDelayFinalCountdown.value = String(uiState.finalCountdown);
     }
     function buildAlarmDelayAudioSettingsCard(this: any) {
-        if (!(CFG.features && CFG.features.alarmDelayAudio))
+        if (!(controllers.layout.config.features && controllers.layout.config.features.alarmDelayAudio))
             return null;
         var body: any = document.createElement("div");
         var master: any = toggleRow("Alarm Delay Audio", "sp-set-alarm-delay-audio", state.alarmDelayAudioOn);
@@ -257,7 +259,7 @@ export function installSettingsPageHelpersModule(
         return makeCollapsibleCard("Alarm Audio", body, true);
     }
     function coverArtTrackOverlayDurationSupported(this: any) {
-        return !!(CFG && CFG.coverArtSquareOverlay);
+        return !!controllers.layout.config.coverArtSquareOverlay;
     }
     function infoPanel(this: any, id?: any, text?: any) {
         return _settingsUiFeature.infoPanel(id, text);

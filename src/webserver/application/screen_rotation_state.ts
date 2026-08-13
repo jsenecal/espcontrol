@@ -3,7 +3,8 @@ import * as EspControlModel from "../model";
 import { uniqueOptions } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
-export function installScreenRotationStateModule(runtime: UiRuntimeState): GlobalDescriptors {
+import type { ApplicationLayoutState } from "./application_context";
+export function installScreenRotationStateModule(runtime: UiRuntimeState, layout: ApplicationLayoutState): GlobalDescriptors {
     const els = runtime.els;
     // ── Screen Rotation State ──────────────────────────────────────────────
     var SCREEN_ROTATION_STARTUP_FALLBACK_MS: any = 1200;
@@ -28,11 +29,11 @@ export function installScreenRotationStateModule(runtime: UiRuntimeState): Globa
         els.setScreenRotation.value = state.screenRotation;
     }
     function displayScreenRotation(this: any, value?: any) {
-        var labels: any = CFG.features && CFG.features.screenRotationDisplayLabels;
+        var labels: any = layout.config.features && layout.config.features.screenRotationDisplayLabels;
         value = String(value == null ? "" : value);
         if (labels && Object.prototype.hasOwnProperty.call(labels, value))
             return labels[value];
-        var offset: any = (CFG.features && parseInt(CFG.features.screenRotationDisplayOffset, 10)) || 0;
+        var offset: any = (layout.config.features && parseInt(String(layout.config.features.screenRotationDisplayOffset || 0), 10)) || 0;
         var n: any = parseInt(value, 10);
         if (!isFinite(n))
             return value;
@@ -57,7 +58,7 @@ export function installScreenRotationStateModule(runtime: UiRuntimeState): Globa
         select.appendChild(o);
     }
     function screenRotationStartupRequired(this: any) {
-        return !!(CFG.features && CFG.features.screenRotation);
+        return !!(layout.config.features && layout.config.features.screenRotation);
     }
     function gridPreviewBlockedByRotationStartup(this: any) {
         return screenRotationStartupRequired() && !state.screenRotationInitialReady;

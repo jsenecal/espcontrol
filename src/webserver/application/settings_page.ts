@@ -11,7 +11,8 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { CoreFeature } from "./core";
-export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">): GlobalDescriptors {
+import type { ApplicationLayoutState } from "./application_context";
+export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState): GlobalDescriptors {
     const { bindTextPost } = codec;
     const { syncPreviewOrientation } = core;
     const els = runtime.els;
@@ -239,7 +240,7 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
             els.voiceServicesCard = voiceServicesCard;
         }
         var batteryStatusCard: any = null;
-        if (CFG.features && CFG.features.battery) {
+        if (layout.config.features && layout.config.features.battery) {
             var batteryStatusBody: any = document.createElement("div");
             var batteryStatus: any = toggleRow("Enable battery support", "sp-set-battery-status", state.batteryStatusOn);
             batteryStatusBody.appendChild(batteryStatus.row);
@@ -257,7 +258,7 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
         }
         var alarmDelayAudioCard: any = buildAlarmDelayAudioSettingsCard();
         var rotationCard: any = null;
-        if (CFG.features && CFG.features.screenRotation) {
+        if (layout.config.features && layout.config.features.screenRotation) {
             var rotationBody: any = document.createElement("div");
             var rotField: any = document.createElement("div");
             rotField.className = "sp-field";

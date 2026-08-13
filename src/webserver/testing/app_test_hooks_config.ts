@@ -31,6 +31,7 @@ import type { ConfigConfirmationOptionsFeature } from "../application/config_con
 import type { ConfigCodecFeature } from "../application/config_codec";
 import type { LightCardRegistration } from "../cards/light_temperature";
 import type { CoreFeature } from "../application/core";
+import type { ApplicationLayoutState } from "../application/application_context";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 import { pushDefaultIcon, pushDefaultIconOn } from "../cards/push";
@@ -56,6 +57,7 @@ export function installAppTestHooksConfig(
     codec: ConfigCodecFeature,
     lightCards: LightCardRegistration,
     core: Pick<CoreFeature, "subpageStateDisplayMode">,
+    layout: ApplicationLayoutState,
 ): GlobalDescriptors {
     const { subpageStateDisplayMode } = core;
     const {
@@ -472,10 +474,10 @@ export function installAppTestHooksConfig(
                 return clipboardEntriesFromCardTransfer(envelope, !!targetIsSubpage);
             },
             buttonTypePickerKeysForInfoOnly: function (this: any, enabled?: any, selectedTypeKey?: any) {
-                var oldInfoOnly: any = CFG.infoOnly;
-                CFG.infoOnly = !!enabled;
+                var oldInfoOnly: any = layout.config.infoOnly;
+                (layout.config as any).infoOnly = !!enabled;
                 var keys: any = buttonTypePickerKeys(false, selectedTypeKey);
-                CFG.infoOnly = oldInfoOnly;
+                (layout.config as any).infoOnly = oldInfoOnly;
                 return keys;
             },
             buttonTypePickerOptionsFor: function (this: any, isSub?: any, selectedTypeKey?: any) {

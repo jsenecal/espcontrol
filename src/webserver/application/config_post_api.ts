@@ -5,6 +5,7 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
+import type { ApplicationLayoutState } from "./application_context";
 
 export interface ConfigPersistenceFeature {
     readonly globals: GlobalDescriptors;
@@ -16,6 +17,7 @@ export interface ConfigPersistenceFeature {
 export function createConfigPersistenceFeature(
     nativePanelConfig: NativePanelConfigController | null = null,
     runtime: UiRuntimeState,
+    layout: ApplicationLayoutState,
 ): ConfigPersistenceFeature {
     let codec: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig"> | undefined;
     function connectCodec(value: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig">) {
@@ -38,7 +40,7 @@ export function createConfigPersistenceFeature(
     }
     function subpageEntityKeys(this: any) {
         var keys: any = ENTITY_CATALOG.groups.subpage_slot || [];
-        var count: any = (CFG.features && CFG.features.subpageConfigChunks) || keys.length;
+        var count: any = (layout.config.features && layout.config.features.subpageConfigChunks) || keys.length;
         count = Math.max(1, Math.min(keys.length, parseInt(count, 10) || keys.length));
         return keys.slice(0, count);
     }

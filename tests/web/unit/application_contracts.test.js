@@ -35,6 +35,16 @@ describe("browserless application contracts", () => {
     }
   });
 
+  test("injects device configuration without the CFG application global", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const compatibility = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts"), "utf8");
+    assert.doesNotMatch(globals, /\bvar CFG:/);
+    assert.doesNotMatch(compatibility, /\bCFG:/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout\)/);
+    assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
+  });
+
   test("registers migrated card families through the typed registry", () => {
     const migratedCards = [
       ["sensor", "registerSensorCardTypes"],
@@ -541,7 +551,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const persistence = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_post_api.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
-    assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime\)/);
+    assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
     assert.match(entry, /installAppEventsModule\([\s\S]*reconnectController, sseHandlerFactory, context\.runtime, context\.controllers\.pageTitle/);
     assert.match(persistence, /runtime\.pendingSliderSubpageMigrations/);
     assert.doesNotMatch(runtime, /"(?:orderReceived|migrationTimer|sliderMigrationTimer|pendingSliderSubpageMigrations)"/);
@@ -575,7 +585,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime\)\)/);
   });
 

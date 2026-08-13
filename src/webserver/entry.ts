@@ -150,8 +150,9 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installEnvironmentStateModule(
     voiceServicesController,
     () => defaultTimezoneOptionsForDevice(context.device.profile),
+    context.layout,
   ));
-  installGlobals(installScreenRotationStateModule(context.runtime));
+  installGlobals(installScreenRotationStateModule(context.runtime, context.layout));
   const screenScheduleController = context.controllers.screenSchedule;
   installGlobals(installScreenScheduleStateModule(screenScheduleController, context.runtime));
   installGlobals(installNtpStateModule(context.runtime));
@@ -178,7 +179,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installPublicFirmwareInstallModule(deviceApi));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installStateLoaderApiModule(context.runtime));
+  installGlobals(installStateLoaderApiModule(context.runtime, context.layout));
   installGlobals(installArtworkPostApiModule());
   installGlobals(installScreenSchedulePostApiModule());
   installGlobals(installClockBarPostApiModule());
@@ -197,10 +198,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     mediaPlayback: mediaPlaybackController,
     codec: context.configuration.codec,
     runtime: context.runtime,
+    layout: context.layout,
   }));
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -345,6 +347,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.configuration.codec,
     lightCards,
     context.core,
+    context.layout,
   ));
   installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core));
   installGlobals(installAppTestHooksBackup());
@@ -389,7 +392,7 @@ function composeApplicationContext(): ApplicationContext {
     showBanner: (message, level) => showBanner(message, level),
     delay: (callback, milliseconds) => dom.schedule(callback, milliseconds),
   });
-  const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime);
+  const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime, layout);
   const cards = createCardRegistry();
   const configurationOptions = createConfigSensorOptionsFeature(cards);
   const mediaConfigurationOptions = createConfigMediaOptionsFeature(layout.config);

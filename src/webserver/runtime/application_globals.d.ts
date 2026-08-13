@@ -3,7 +3,6 @@ export {};
 declare global {
   var AUTOMATIC_BRIGHTNESS_UNAVAILABLE: any;
   var BRIGHTNESS_TIME_UNAVAILABLE: any;
-  var CFG: any;
   var CLOCK_BAR_NIGHT_MODE_UNAVAILABLE: any;
   var CLOCK_BAR_TIME_UNAVAILABLE: any;
   var CLOCK_BAR_UNAVAILABLE: any;
