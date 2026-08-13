@@ -175,10 +175,15 @@ constexpr bool artwork_empty_selection_preserves_retry(
 
 constexpr uint8_t artwork_timeout_retry_mask(uint8_t current_retry_mask,
                                              uint8_t missing_mask,
-                                             bool refresh_pending) {
-  return refresh_pending
+                                             bool replacement_refresh_scheduled) {
+  return replacement_refresh_scheduled
            ? 0
            : static_cast<uint8_t>(current_retry_mask | missing_mask);
+}
+
+constexpr bool artwork_pending_refresh_needs_reschedule(
+    bool refresh_pending, bool timer_scheduled) {
+  return refresh_pending && !timer_scheduled;
 }
 
 // Every active attribute-read batch needs a bounded deadline, including a

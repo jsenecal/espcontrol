@@ -2131,14 +2131,27 @@ inline void image_card_process_media_artwork(ImageCardCtx *ctx,
     return;
   }
   if (response_window_expired) {
+    const bool replacement_refresh_scheduled =
+      ctx->media_artwork_trigger.pending &&
+      ctx->media_artwork_trigger_timer != nullptr;
     ctx->media_artwork_retry_mask = espcontrol::artwork::artwork_timeout_retry_mask(
       ctx->media_artwork_retry_mask,
       ctx->media_artwork_refresh.missing_mask(),
-      ctx->media_artwork_trigger.pending);
-    if (ctx->media_artwork_trigger.pending) ctx->next_picture_retry_ms = 0;
+      replacement_refresh_scheduled);
+    if (replacement_refresh_scheduled) ctx->next_picture_retry_ms = 0;
   }
   ctx->media_artwork_refresh.finish();
   ctx->media_artwork_remote_refresh_pending = false;
+  if (espcontrol::artwork::artwork_pending_refresh_needs_reschedule(
+        ctx->media_artwork_trigger.pending,
+        ctx->media_artwork_trigger_timer != nullptr)) {
+    const bool force_refresh = ctx->media_artwork_trigger.forced;
+    ctx->media_artwork_retry_mask = 0;
+    ctx->next_picture_retry_ms = 0;
+    image_card_schedule_media_artwork_refresh(ctx, force_refresh);
+    image_card_log_diagnostics(ctx, "media-artwork-pending-refresh-rescheduled");
+    return;
+  }
   if (ctx->media_artwork_retry_mask != 0) {
     image_card_schedule_picture_retry(
       ctx,
