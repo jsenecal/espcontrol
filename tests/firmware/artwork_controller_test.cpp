@@ -17,6 +17,12 @@ using espcontrol::artwork::artwork_picture_response_clears_retry;
 using espcontrol::artwork::artwork_batch_waits_for_companion;
 using espcontrol::artwork::artwork_batch_needs_response_timer;
 using espcontrol::artwork::artwork_empty_selection_preserves_pending_refresh;
+using espcontrol::artwork::artwork_empty_selection_preserves_retry;
+using espcontrol::artwork::artwork_timeout_retry_mask;
+using espcontrol::artwork::artwork_pending_refresh_needs_reschedule;
+using espcontrol::artwork::artwork_timeout_retry_allowed;
+using espcontrol::artwork::artwork_timeout_exhaustion_preserves_current;
+using espcontrol::artwork::artwork_metadata_refresh_clears_retry;
 using espcontrol::artwork::artwork_refresh_forced;
 using espcontrol::artwork::artwork_response_needs_processing;
 using espcontrol::artwork::artwork_selection_needs_download;
@@ -97,6 +103,28 @@ int main() {
   assert(artwork_empty_selection_preserves_pending_refresh(true, true));
   assert(!artwork_empty_selection_preserves_pending_refresh(true, false));
   assert(!artwork_empty_selection_preserves_pending_refresh(false, true));
+  assert(artwork_empty_selection_preserves_retry(true, ARTWORK_SOURCE_REMOTE));
+  assert(!artwork_empty_selection_preserves_retry(true, 0));
+  assert(!artwork_empty_selection_preserves_retry(false, ARTWORK_SOURCE_REMOTE));
+  assert(artwork_timeout_retry_mask(0, ARTWORK_SOURCE_REMOTE, false) ==
+         ARTWORK_SOURCE_REMOTE);
+  assert(artwork_timeout_retry_mask(ARTWORK_SOURCE_LOCAL,
+                                    ARTWORK_SOURCE_REMOTE, false) ==
+         ARTWORK_SOURCE_BOTH);
+  assert(artwork_timeout_retry_mask(ARTWORK_SOURCE_LOCAL,
+                                    ARTWORK_SOURCE_REMOTE, true) == 0);
+  assert(artwork_pending_refresh_needs_reschedule(true, false));
+  assert(!artwork_pending_refresh_needs_reschedule(true, true));
+  assert(!artwork_pending_refresh_needs_reschedule(false, false));
+  assert(artwork_timeout_retry_allowed(0, 3));
+  assert(artwork_timeout_retry_allowed(2, 3));
+  assert(!artwork_timeout_retry_allowed(3, 3));
+  assert(artwork_timeout_exhaustion_preserves_current(true, true));
+  assert(!artwork_timeout_exhaustion_preserves_current(true, false));
+  assert(!artwork_timeout_exhaustion_preserves_current(false, true));
+  assert(artwork_metadata_refresh_clears_retry(ARTWORK_SOURCE_REMOTE));
+  assert(artwork_metadata_refresh_clears_retry(ARTWORK_SOURCE_BOTH));
+  assert(!artwork_metadata_refresh_clears_retry(0));
   assert(artwork_batch_needs_response_timer(true, false));
   assert(!artwork_batch_needs_response_timer(true, true));
   assert(!artwork_batch_needs_response_timer(false, false));
@@ -185,8 +213,18 @@ int main() {
   // companion must not replace the selected artwork mid-download.
   const uint32_t timed_out_read = batch.begin(ARTWORK_SOURCE_BOTH, false);
   assert(batch.receive(timed_out_read, false));
+  assert(batch.missing_mask() == ARTWORK_SOURCE_LOCAL);
   assert(batch.finish());
   assert(!batch.receive(timed_out_read, true));
+
+  // A queued provider that never invokes its callback remains eligible for a
+  // bounded retry instead of being treated as an authoritative empty result.
+  const uint32_t stalled_read = batch.begin(ARTWORK_SOURCE_BOTH, false);
+  assert(stalled_read != timed_out_read);
+  assert(batch.missing_mask() == ARTWORK_SOURCE_BOTH);
+  assert(batch.receive(stalled_read, true));
+  assert(batch.missing_mask() == ARTWORK_SOURCE_REMOTE);
+  assert(batch.finish());
 
   // Partial retry reads track only the failed source and complete after that
   // one response, preserving the existing source as the fallback.

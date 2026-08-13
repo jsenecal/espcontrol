@@ -84,6 +84,10 @@ struct RefreshBatch {
            (this->received_mask & this->expected_mask) == this->expected_mask;
   }
 
+  uint8_t missing_mask() const {
+    return this->expected_mask & static_cast<uint8_t>(~this->received_mask);
+  }
+
   bool active() const { return this->expected_mask != 0; }
 
   bool finish() {
@@ -162,6 +166,38 @@ constexpr bool artwork_batch_waits_for_companion(bool batch_complete,
 constexpr bool artwork_empty_selection_preserves_pending_refresh(
     bool selection_empty, bool refresh_pending) {
   return selection_empty && refresh_pending;
+}
+
+constexpr bool artwork_empty_selection_preserves_retry(
+    bool selection_empty, uint8_t retry_mask) {
+  return selection_empty && retry_mask != 0;
+}
+
+constexpr uint8_t artwork_timeout_retry_mask(uint8_t current_retry_mask,
+                                             uint8_t missing_mask,
+                                             bool replacement_refresh_scheduled) {
+  return replacement_refresh_scheduled
+           ? 0
+           : static_cast<uint8_t>(current_retry_mask | missing_mask);
+}
+
+constexpr bool artwork_pending_refresh_needs_reschedule(
+    bool refresh_pending, bool timer_scheduled) {
+  return refresh_pending && !timer_scheduled;
+}
+
+constexpr bool artwork_timeout_retry_allowed(uint8_t attempts,
+                                             uint8_t max_attempts) {
+  return attempts < max_attempts;
+}
+
+constexpr bool artwork_timeout_exhaustion_preserves_current(
+    bool timeout_retry_exhausted, bool image_ready) {
+  return timeout_retry_exhausted && image_ready;
+}
+
+constexpr bool artwork_metadata_refresh_clears_retry(uint8_t retry_mask) {
+  return retry_mask != 0;
 }
 
 // Every active attribute-read batch needs a bounded deadline, including a
