@@ -26,7 +26,7 @@ import { createClockBarFeature, type ClockBarFeature } from "./application/clock
 import { createFirmwareUpdateFeature, type FirmwareUpdateFeature } from "./application/firmware_update_state";
 import { createScreensaverTimeoutFeature } from "./application/screensaver_timeout";
 import { createC6FirmwareFeature, type C6FirmwareFeature } from "./application/c6_firmware_ui";
-import { installGridModule } from "./application/grid";
+import { createGridFeature, gridCompatibilityGlobals } from "./application/grid";
 import {
   createApplicationApiFeature,
   type ApplicationApiFeature,
@@ -149,7 +149,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const c6Firmware = context.controllers.c6Firmware;
   const clockBarState = context.controllers.clockBarState;
   const clockBarController = context.controllers.clockBar;
-  installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout, context.controllers.entityState, context.controllers.requestApi));
+  installGlobals(gridCompatibilityGlobals(context.controllers.grid));
   const deviceApi = context.api;
   const nativePanelConfig = context.configuration.native;
   const configPersistence = context.configuration.persistence;
@@ -549,6 +549,7 @@ function composeApplicationContext(): ApplicationContext {
   );
   configurationPersistence.connectRequestApi(requestApi);
   configurationCodec.connectRequestApi(requestApi);
+  const grid = createGridFeature(configurationCodec, runtime, layout, entityState, requestApi);
   const gridMigration = createGridMigrationFeature(runtime, layout, {
     renderPreview: () => renderPreview(),
     renderButtonSettings: () => renderButtonSettings(),
@@ -815,6 +816,7 @@ function composeApplicationContext(): ApplicationContext {
     stateEventHandlers,
     appEvents,
     statusPreview,
+    grid,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,

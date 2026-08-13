@@ -56,6 +56,7 @@ import type { AppConfigEventsFeature } from "./app_config_events";
 import type { AppStateEventHandlersFeature } from "./app_state_event_handlers";
 import type { AppEventsFeature } from "./app_events";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
+import type { GridFeature } from "./grid";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -127,6 +128,7 @@ export interface ApplicationContext {
     readonly stateEventHandlers: AppStateEventHandlersFeature;
     readonly appEvents: AppEventsFeature;
     readonly statusPreview: AppStatusPreviewFeature;
+    readonly grid: GridFeature;
     readonly alarmDelayAudio: AlarmDelayAudioController;
     readonly cardEditorDraft: CardEditorDraftController;
     readonly cardEditorSave: CardEditorSaveController;
@@ -192,6 +194,7 @@ export interface ApplicationContextOptions {
   readonly stateEventHandlers: AppStateEventHandlersFeature;
   readonly appEvents: AppEventsFeature;
   readonly statusPreview: AppStatusPreviewFeature;
+  readonly grid: GridFeature;
   readonly alarmDelayAudio: AlarmDelayAudioController;
   readonly cardEditorDraft: CardEditorDraftController;
   readonly cardEditorSave: CardEditorSaveController;
@@ -277,6 +280,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       stateEventHandlers: options.stateEventHandlers,
       appEvents: options.appEvents,
       statusPreview: options.statusPreview,
+      grid: options.grid,
       alarmDelayAudio: options.alarmDelayAudio,
       cardEditorDraft: options.cardEditorDraft,
       cardEditorSave: options.cardEditorSave,

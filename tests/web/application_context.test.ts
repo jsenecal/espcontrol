@@ -74,6 +74,7 @@ export function runApplicationContextTests(): void {
   const stateEventHandlers = {} as any;
   const appEvents = {} as any;
   const statusPreview = {} as any;
+  const grid = {} as any;
   const coverArtScreensaver = {} as any;
   const mediaPlayback = {} as any;
   const pageTitle = {} as any;
@@ -138,6 +139,7 @@ export function runApplicationContextTests(): void {
     stateEventHandlers,
     appEvents,
     statusPreview,
+    grid,
     coverArtScreensaver,
     mediaPlayback,
     pageTitle,
@@ -169,6 +171,7 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.stateEventHandlers, stateEventHandlers, "context owns state event handling");
   equal(context.controllers.appEvents, appEvents, "context owns event-stream reconnect behavior");
   equal(context.controllers.statusPreview, statusPreview, "context owns status and connectivity preview behavior");
+  equal(context.controllers.grid, grid, "context owns grid and card-order behavior");
   equal(context.layout.numSlots, 12, "context initializes slot count");
   equal(context.layout.totalSlots, 12, "context initializes total slot count");
   equal(context.layout.gridCols, 4, "context initializes grid columns");

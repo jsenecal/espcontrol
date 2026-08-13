@@ -1,13 +1,48 @@
 import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
 import { domainIcons as DOMAIN_ICONS, iconSlug } from "./ui_primitives";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ApplicationLayoutState } from "./application_context";
 import type { EntityStateFeature } from "./entity_state";
 import type { ApplicationApiFeature } from "./api";
-export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeState, layout: ApplicationLayoutState, entityState: Pick<EntityStateFeature, "entityName">, requestApi: Pick<ApplicationApiFeature, "postText">): GlobalDescriptors {
+
+export interface GridFeature {
+    readonly CARD_SIZE_SINGLE: number;
+    readonly CARD_SIZE_TALL: number;
+    readonly CARD_SIZE_WIDE: number;
+    readonly CARD_SIZE_LARGE: number;
+    readonly CARD_SIZE_EXTRA_TALL: number;
+    readonly CARD_SIZE_EXTRA_WIDE: number;
+    readonly CARD_SIZE_EXTRA_LARGE: number;
+    readonly CARD_SIZE_MAX_WIDE: number;
+    readonly CARD_SIZE_MAX_TALL: number;
+    readonly CARD_SIZE_PORTRAIT_LARGE: number;
+    readonly CARD_SIZE_LANDSCAPE_LARGE: number;
+    ctx(): any;
+    scheduleMainGridSave(): void;
+    cancelMainGridSave(): void;
+    sizeFromToken(token?: any): any;
+    sizeToken(size?: any): any;
+    sizeRowSpan(size?: any): any;
+    sizeColSpan(size?: any): any;
+    cardSizeClass(size?: any): any;
+    sizeClass(size?: any): string;
+    coveredCells(position?: any, size?: any, maxSlots?: any, includeOrigin?: any): any;
+    sizeFitsAt(position?: any, size?: any, maxSlots?: any): any;
+    markSpannedCells(grid?: any, position?: any, size?: any, maxSlots?: any): void;
+    parseOrder(value?: any): any;
+    applyButtonOrderValue(value?: any, skipRender?: any): void;
+    applySpans(grid?: any, sizes?: any, maxSlots?: any): void;
+    serializeGrid(grid?: any): string;
+    applyImportedButtonOrder(order?: any, importedSizes?: any): string;
+    clearSpans(grid?: any, maxSlots?: any): void;
+    resolveIcon(button?: any): string;
+    btnDisplayName(button?: any): string;
+}
+
+export function createGridFeature(codec: ConfigCodecFeature, runtime: UiRuntimeState, layout: ApplicationLayoutState, entityState: Pick<EntityStateFeature, "entityName">, requestApi: Pick<ApplicationApiFeature, "postText">): GridFeature {
     const { entityName } = entityState;
     const { getSubpage, saveSubpageConfig } = codec;
     // ── Context abstraction ────────────────────────────────────────────────
@@ -47,17 +82,6 @@ export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeS
         };
     }
     // ── Grid helpers ───────────────────────────────────────────────────────
-    var CARD_SIZE_SINGLE: any = EspControlModel.CARD_SIZE_SINGLE;
-    var CARD_SIZE_TALL: any = EspControlModel.CARD_SIZE_TALL;
-    var CARD_SIZE_WIDE: any = EspControlModel.CARD_SIZE_WIDE;
-    var CARD_SIZE_LARGE: any = EspControlModel.CARD_SIZE_LARGE;
-    var CARD_SIZE_EXTRA_TALL: any = EspControlModel.CARD_SIZE_EXTRA_TALL;
-    var CARD_SIZE_EXTRA_WIDE: any = EspControlModel.CARD_SIZE_EXTRA_WIDE;
-    var CARD_SIZE_EXTRA_LARGE: any = EspControlModel.CARD_SIZE_EXTRA_LARGE;
-    var CARD_SIZE_MAX_WIDE: any = EspControlModel.CARD_SIZE_MAX_WIDE;
-    var CARD_SIZE_MAX_TALL: any = EspControlModel.CARD_SIZE_MAX_TALL;
-    var CARD_SIZE_PORTRAIT_LARGE: any = EspControlModel.CARD_SIZE_PORTRAIT_LARGE;
-    var CARD_SIZE_LANDSCAPE_LARGE: any = EspControlModel.CARD_SIZE_LANDSCAPE_LARGE;
     function sizeFromToken(this: any, token?: any) {
         return EspControlModel.sizeFromToken(token);
     }
@@ -127,36 +151,40 @@ export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeS
         return b.label || b.entity || "Configure";
     }
     return {
-        "ctx": staticGlobal(ctx),
-        "scheduleMainGridSave": staticGlobal(scheduleMainGridSave),
-        "cancelMainGridSave": staticGlobal(cancelMainGridSave),
-        "CARD_SIZE_SINGLE": liveGlobal(() => CARD_SIZE_SINGLE, (value?: any) => { CARD_SIZE_SINGLE = value; }),
-        "CARD_SIZE_TALL": liveGlobal(() => CARD_SIZE_TALL, (value?: any) => { CARD_SIZE_TALL = value; }),
-        "CARD_SIZE_WIDE": liveGlobal(() => CARD_SIZE_WIDE, (value?: any) => { CARD_SIZE_WIDE = value; }),
-        "CARD_SIZE_LARGE": liveGlobal(() => CARD_SIZE_LARGE, (value?: any) => { CARD_SIZE_LARGE = value; }),
-        "CARD_SIZE_EXTRA_TALL": liveGlobal(() => CARD_SIZE_EXTRA_TALL, (value?: any) => { CARD_SIZE_EXTRA_TALL = value; }),
-        "CARD_SIZE_EXTRA_WIDE": liveGlobal(() => CARD_SIZE_EXTRA_WIDE, (value?: any) => { CARD_SIZE_EXTRA_WIDE = value; }),
-        "CARD_SIZE_EXTRA_LARGE": liveGlobal(() => CARD_SIZE_EXTRA_LARGE, (value?: any) => { CARD_SIZE_EXTRA_LARGE = value; }),
-        "CARD_SIZE_MAX_WIDE": liveGlobal(() => CARD_SIZE_MAX_WIDE, (value?: any) => { CARD_SIZE_MAX_WIDE = value; }),
-        "CARD_SIZE_MAX_TALL": liveGlobal(() => CARD_SIZE_MAX_TALL, (value?: any) => { CARD_SIZE_MAX_TALL = value; }),
-        "CARD_SIZE_PORTRAIT_LARGE": liveGlobal(() => CARD_SIZE_PORTRAIT_LARGE, (value?: any) => { CARD_SIZE_PORTRAIT_LARGE = value; }),
-        "CARD_SIZE_LANDSCAPE_LARGE": liveGlobal(() => CARD_SIZE_LANDSCAPE_LARGE, (value?: any) => { CARD_SIZE_LANDSCAPE_LARGE = value; }),
-        "sizeFromToken": staticGlobal(sizeFromToken),
-        "sizeToken": staticGlobal(sizeToken),
-        "sizeRowSpan": staticGlobal(sizeRowSpan),
-        "sizeColSpan": staticGlobal(sizeColSpan),
-        "cardSizeClass": staticGlobal(cardSizeClass),
-        "sizeClass": staticGlobal(sizeClass),
-        "coveredCells": staticGlobal(coveredCells),
-        "sizeFitsAt": staticGlobal(sizeFitsAt),
-        "markSpannedCells": staticGlobal(markSpannedCells),
-        "parseOrder": staticGlobal(parseOrder),
-        "applyButtonOrderValue": staticGlobal(applyButtonOrderValue),
-        "applySpans": staticGlobal(applySpans),
-        "serializeGrid": staticGlobal(serializeGrid),
-        "applyImportedButtonOrder": staticGlobal(applyImportedButtonOrder),
-        "clearSpans": staticGlobal(clearSpans),
-        "resolveIcon": staticGlobal(resolveIcon),
-        "btnDisplayName": staticGlobal(btnDisplayName),
+        ctx,
+        scheduleMainGridSave,
+        cancelMainGridSave,
+        CARD_SIZE_SINGLE: EspControlModel.CARD_SIZE_SINGLE,
+        CARD_SIZE_TALL: EspControlModel.CARD_SIZE_TALL,
+        CARD_SIZE_WIDE: EspControlModel.CARD_SIZE_WIDE,
+        CARD_SIZE_LARGE: EspControlModel.CARD_SIZE_LARGE,
+        CARD_SIZE_EXTRA_TALL: EspControlModel.CARD_SIZE_EXTRA_TALL,
+        CARD_SIZE_EXTRA_WIDE: EspControlModel.CARD_SIZE_EXTRA_WIDE,
+        CARD_SIZE_EXTRA_LARGE: EspControlModel.CARD_SIZE_EXTRA_LARGE,
+        CARD_SIZE_MAX_WIDE: EspControlModel.CARD_SIZE_MAX_WIDE,
+        CARD_SIZE_MAX_TALL: EspControlModel.CARD_SIZE_MAX_TALL,
+        CARD_SIZE_PORTRAIT_LARGE: EspControlModel.CARD_SIZE_PORTRAIT_LARGE,
+        CARD_SIZE_LANDSCAPE_LARGE: EspControlModel.CARD_SIZE_LANDSCAPE_LARGE,
+        sizeFromToken,
+        sizeToken,
+        sizeRowSpan,
+        sizeColSpan,
+        cardSizeClass,
+        sizeClass,
+        coveredCells,
+        sizeFitsAt,
+        markSpannedCells,
+        parseOrder,
+        applyButtonOrderValue,
+        applySpans,
+        serializeGrid,
+        applyImportedButtonOrder,
+        clearSpans,
+        resolveIcon,
+        btnDisplayName,
     };
+}
+
+export function gridCompatibilityGlobals(feature: GridFeature): GlobalDescriptors {
+    return Object.fromEntries(Object.entries(feature).map(([name, value]) => [name, staticGlobal(value)]));
 }
