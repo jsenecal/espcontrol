@@ -184,11 +184,12 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     clockBar: clockBarState,
     entityState: context.controllers.entityState,
     shell: context.controllers.shell,
+    requestApi: context.controllers.requestApi,
   }));
-  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState, context.controllers.entityState));
+  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState, context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell));
-  installGlobals(installControlsFieldsModule(context.cards, context.configuration.options, context.controllers.shell));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi));
+  installGlobals(installControlsFieldsModule(context.cards, context.configuration.options, context.controllers.shell, context.controllers.requestApi));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
     layout: context.layout,
@@ -256,7 +257,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
-  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell));
+  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState, context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
@@ -552,6 +553,7 @@ function composeApplicationContext(): ApplicationContext {
     shell,
   );
   configurationPersistence.connectRequestApi(requestApi);
+  configurationCodec.connectRequestApi(requestApi);
   const clockBar = createClockBarController();
   clockBarState = createClockBarFeature(clockBar, runtime, core, environment, {
     hideSettingsOverlay: () => hideSettingsOverlay(),

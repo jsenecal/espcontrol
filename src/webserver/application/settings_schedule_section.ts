@@ -5,7 +5,8 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 import type { EntityStateFeature } from "./entity_state";
-export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, schedule: ScreenScheduleStateFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">): GlobalDescriptors {
+import type { ApplicationApiFeature } from "./api";
+export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, schedule: ScreenScheduleStateFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, requestApi: Pick<ApplicationApiFeature, "postText">): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
     const { bindTextPost } = codec;
     const els = runtime.els;
@@ -147,7 +148,7 @@ export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeat
         clockOptions.appendChild(fieldLabel("Clock Text Colour"));
         var clockTextColor: any = colorField("sp-set-schedule-clock-text-color", state.scheduleClockTextColor, function (this: any, hex?: any) {
             state.scheduleClockTextColor = normalizeHexColor(hex, "FFFFFF");
-            postText(entityName("screen_schedule_clock_text_color"), state.scheduleClockTextColor);
+            requestApi.postText(entityName("screen_schedule_clock_text_color"), state.scheduleClockTextColor);
         });
         clockOptions.appendChild(clockTextColor);
         scheduleActions.appendChild(clockOptions);

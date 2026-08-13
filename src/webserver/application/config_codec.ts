@@ -71,6 +71,7 @@ import type { ConfigRobotCardOptionsFeature } from "./config_robot_card_options"
 import type { ConfigLockOptionsFeature } from "./config_lock_options";
 import type { ConfigDateTimeOptionsFeature } from "./config_date_time_options";
 import type { ApplicationLayoutState } from "./application_context";
+import type { ApplicationApiFeature } from "./api";
 export function createConfigCodecFeature(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
@@ -86,6 +87,15 @@ export function createConfigCodecFeature(
     confirmationOptions: ConfigConfirmationOptionsFeature,
     layout: ApplicationLayoutState,
 ) {
+    let requestApi: Pick<ApplicationApiFeature, "postText"> | undefined;
+    function connectRequestApi(value: Pick<ApplicationApiFeature, "postText">) {
+        requestApi = value;
+    }
+    function requests(): Pick<ApplicationApiFeature, "postText"> {
+        if (!requestApi)
+            throw new Error("Configuration codec used before the application API was connected");
+        return requestApi;
+    }
     const {
         sensorCardLocalSource: SENSOR_CARD_LOCAL_SENSOR,
         sensorCardIsLocal,
@@ -981,7 +991,7 @@ export function createConfigCodecFeature(
             if (opts && opts.post)
                 opts.post(this.value);
             else
-                postText(postName, this.value);
+                requests().postText(postName, this.value);
             if (opts && opts.rerender)
                 renderPreview();
         });
@@ -1045,6 +1055,7 @@ export function createConfigCodecFeature(
         saveSubpageConfig,
         subpageFirstFreeSlot,
         bindTextPost,
+        connectRequestApi,
     };
     return feature;
 }

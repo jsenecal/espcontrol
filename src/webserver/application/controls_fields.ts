@@ -5,6 +5,7 @@ import { escHtml, iconSlug } from "./ui_primitives";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
 import type { ControlsShellFeature } from "./controls_shell";
+import type { ApplicationApiFeature } from "./api";
 import {
     SENSOR_LARGE_NUMBERS_OPTION,
     largeNumbersExplicitlyDisabled,
@@ -13,6 +14,7 @@ export function installControlsFieldsModule(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
     shell: Pick<ControlsShellFeature, "createDisclosureChevron">,
+    requestApi: Pick<ApplicationApiFeature, "postNumber">,
 ): GlobalDescriptors {
     const { createDisclosureChevron } = shell;
     const {
@@ -538,7 +540,7 @@ export function installControlsFieldsModule(
             if (typeof postName === "function")
                 postName(this.value);
             else if (postName)
-                postNumber(postName, this.value);
+                requestApi.postNumber(postName, this.value);
         });
         row.appendChild(range);
         row.appendChild(val);

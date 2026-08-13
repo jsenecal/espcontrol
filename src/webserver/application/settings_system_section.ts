@@ -12,6 +12,7 @@ import type { FirmwareVersionFeature } from "./firmware_version_state";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { ControlsShellFeature } from "./controls_shell";
+import type { ApplicationApiFeature } from "./api";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;
@@ -25,6 +26,7 @@ export function installSettingsSystemSectionModule(
     firmwareUpdate: FirmwareUpdateFeature,
     c6Firmware: C6FirmwareFeature,
     shell: Pick<ControlsShellFeature, "createActionButton">,
+    requestApi: Pick<ApplicationApiFeature, "getJsonQuietly" | "postFirmwareAutoUpdate" | "postFirmwareUpdateFrequency" | "postC6FirmwareAutoUpdate">,
 ): GlobalDescriptors {
     const { createActionButton } = shell;
     const els = runtime.els;
@@ -120,10 +122,10 @@ export function installSettingsSystemSectionModule(
             state.firmwareChecking = true;
             renderFirmwareUpdateStatus();
             postFirmwareUpdateCheck();
-            getJsonQuietly(publicFirmwareManifestUrl(), function (this: any, d?: any) {
+            requestApi.getJsonQuietly(publicFirmwareManifestUrl(), function (this: any, d?: any) {
                 setPublicFirmwareInfo(firmwareInfoFromPublicManifest(d));
             });
-            getJsonQuietly(publicFirmwareVersionsUrl(), function (this: any, d?: any) {
+            requestApi.getJsonQuietly(publicFirmwareVersionsUrl(), function (this: any, d?: any) {
                 setPublicFirmwareVersions(firmwareInfosFromPublicVersions(d));
             });
             setTimeout(function (this: any) {
@@ -156,7 +158,7 @@ export function installSettingsSystemSectionModule(
                 return;
             }
             state.autoUpdate = this.checked;
-            postFirmwareAutoUpdate(state.autoUpdate);
+            requestApi.postFirmwareAutoUpdate(state.autoUpdate);
             syncFirmwareUpdateUi();
         });
         els.setAutoUpdateRow = autoUpdateToggle.row;
@@ -179,7 +181,7 @@ export function installSettingsSystemSectionModule(
             if (!firmwareUpdateControlsVisible())
                 return;
             state.updateFrequency = this.value;
-            postFirmwareUpdateFrequency(state.updateFrequency);
+            requestApi.postFirmwareUpdateFrequency(state.updateFrequency);
         });
         freqWrap.appendChild(freqSelect);
         autoUpdateBody.appendChild(freqWrap);
@@ -221,7 +223,7 @@ export function installSettingsSystemSectionModule(
                 return;
             }
             state.c6FirmwareAutoUpdate = this.checked;
-            postC6FirmwareAutoUpdate(state.c6FirmwareAutoUpdate);
+            requestApi.postC6FirmwareAutoUpdate(state.c6FirmwareAutoUpdate);
             syncC6FirmwareUi();
         });
         wifiFirmwareBody.appendChild(c6AutoUpdateToggle.row);
