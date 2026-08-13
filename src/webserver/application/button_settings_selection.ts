@@ -26,10 +26,12 @@ export interface ButtonSettingsSelectionDependencies {
     readonly fields: Pick<ControlsFieldsFeature, "fieldLabel" | "toggleRow">;
     readonly renderPreview: () => void;
     readonly renderButtonSettings: (force?: boolean) => void;
+    readonly showSelectionMenu: (event?: any) => void;
+    readonly contextMenuContains: (target?: any) => boolean;
 }
 
 export function createButtonSettingsSelectionFeature(runtime: UiRuntimeState, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityInput">, shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton">, statusPreview: Pick<AppStatusPreviewFeature, "clockBarItemActive" | "clockBarItemLabel" | "clockBarItems" | "isClockBarTemperatureItem" | "updateClockBarItemUi">, grid: Pick<GridFeature, "ctx">, renderQueue: ButtonSettingsRenderQueueFeature, dependencies: ButtonSettingsSelectionDependencies): ButtonSettingsSelectionFeature {
-    const { document, fields: { fieldLabel, toggleRow }, renderPreview, renderButtonSettings } = dependencies;
+    const { document, fields: { fieldLabel, toggleRow }, renderPreview, renderButtonSettings, showSelectionMenu } = dependencies;
     const { entityInput } = entityState;
     const { isConfigLocked, createActionButton } = shell;
     const els = runtime.els;
@@ -169,7 +171,7 @@ export function createButtonSettingsSelectionFeature(runtime: UiRuntimeState, cl
             (els.topbar && els.topbar.contains(target)) ||
             (els.selectionBar && els.selectionBar.contains(target)) ||
             (els.settingsOverlay && els.settingsOverlay.contains(target)) ||
-            (ctxMenu && ctxMenu.contains(target)) ||
+            dependencies.contextMenuContains(target) ||
             (target.closest && target.closest(".sp-ctx-menu")));
     }
     function handleDocumentSelectionMouseDown(this: any, e?: any) {

@@ -7,10 +7,12 @@ import type { ControlsShellFeature } from "./controls_shell";
 import type { AppEventsFeature } from "./app_events";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
+import type { PreviewContextMenuFeature } from "./preview_context_menu";
+import type { PreviewInteractionsFeature } from "./preview_interactions";
 
 declare const __ESPCONTROL_EMBEDDED_MDI_STYLES__: string;
 
-export function installAppModule(pageTitle: AppTitleFeature, webStyles: string, core: Pick<CoreFeature, "syncPreviewOrientation">, screenRotation: ScreenRotationFeature, clockBar: ClockBarFeature, shell: Pick<ControlsShellFeature, "buildUI" | "syncTabChrome">, appEvents: Pick<AppEventsFeature, "connect">, statusPreview: Pick<AppStatusPreviewFeature, "updateClock">, selection: Pick<ButtonSettingsSelectionFeature, "handleDocumentSelectionMouseDown">): GlobalDescriptors {
+export function installAppModule(pageTitle: AppTitleFeature, webStyles: string, core: Pick<CoreFeature, "syncPreviewOrientation">, screenRotation: ScreenRotationFeature, clockBar: ClockBarFeature, shell: Pick<ControlsShellFeature, "buildUI" | "syncTabChrome">, appEvents: Pick<AppEventsFeature, "connect">, statusPreview: Pick<AppStatusPreviewFeature, "updateClock">, selection: Pick<ButtonSettingsSelectionFeature, "handleDocumentSelectionMouseDown">, contextMenu: Pick<PreviewContextMenuFeature, "hide">, interactions: Pick<PreviewInteractionsFeature, "setup">): GlobalDescriptors {
     const { buildUI, syncTabChrome } = shell;
     const { syncPreviewOrientation } = core;
     const { startInitialCheck: startInitialScreenRotationCheck } = screenRotation;
@@ -70,17 +72,17 @@ export function installAppModule(pageTitle: AppTitleFeature, webStyles: string, 
         buildUI();
         addSupportButton();
         syncClockBarUi();
-        setupPreviewEvents();
+        interactions.setup();
         renderPreview();
         renderButtonSettings();
         appEvents.connect();
         statusPreview.updateClock();
-        document.addEventListener("click", hideContextMenu);
+        document.addEventListener("click", contextMenu.hide);
         document.addEventListener("mousedown", selection.handleDocumentSelectionMouseDown);
-        document.addEventListener("scroll", hideContextMenu, true);
+        document.addEventListener("scroll", contextMenu.hide, true);
         document.addEventListener("keydown", function (this: any, e?: any) {
             if (e.key === "Escape")
-                hideContextMenu();
+                contextMenu.hide();
         });
     }
     return {

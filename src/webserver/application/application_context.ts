@@ -69,6 +69,8 @@ import type { ButtonSettingsSelectionFeature } from "./button_settings_selection
 import type { PreviewRenderFeature } from "./preview_render";
 import type { PreviewGridPlacementFeature } from "./preview_grid_placement";
 import type { PreviewClipboardFeature } from "./preview_clipboard";
+import type { PreviewContextMenuFeature } from "./preview_context_menu";
+import type { PreviewInteractionsFeature } from "./preview_interactions";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -171,6 +173,8 @@ export interface ApplicationContext {
     readonly preview: PreviewRenderFeature;
     readonly placement: PreviewGridPlacementFeature;
     readonly clipboard: PreviewClipboardFeature;
+    readonly contextMenu: PreviewContextMenuFeature;
+    readonly interactions: PreviewInteractionsFeature;
   };
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
@@ -249,6 +253,8 @@ export interface ApplicationContextOptions {
   readonly preview: PreviewRenderFeature;
   readonly placement: PreviewGridPlacementFeature;
   readonly clipboard: PreviewClipboardFeature;
+  readonly contextMenu: PreviewContextMenuFeature;
+  readonly interactions: PreviewInteractionsFeature;
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
 }
@@ -347,6 +353,8 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       preview: options.preview,
       placement: options.placement,
       clipboard: options.clipboard,
+      contextMenu: options.contextMenu,
+      interactions: options.interactions,
     },
     dom: options.dom,
     cards: options.cards,

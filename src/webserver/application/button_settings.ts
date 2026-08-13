@@ -20,6 +20,7 @@ import type { GridFeature } from "./grid";
 import type { ButtonSettingsIconPickerFeature } from "./button_settings_icon_picker";
 import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
 import type { PreviewRenderFeature } from "./preview_render";
+import type { PreviewInteractionsFeature } from "./preview_interactions";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
@@ -38,6 +39,7 @@ export function installButtonSettingsModule(
     iconPicker: ButtonSettingsIconPickerFeature,
     selection: Pick<ButtonSettingsSelectionFeature, "closeSettings" | "hideSettingsOverlay">,
     preview: Pick<PreviewRenderFeature, "defaultTypeForPicker" | "pickerOptions" | "registryValue">,
+    interactions: Pick<PreviewInteractionsFeature, "deleteSlot" | "emptyButtonConfig">,
 ): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
     const { isConfigLocked, createActionButton, showBanner } = shell;
@@ -45,6 +47,7 @@ export function installButtonSettingsModule(
     const { ctx, serializeGrid } = grid;
     const { closeSettings, hideSettingsOverlay } = selection;
     const { defaultTypeForPicker: defaultButtonTypeForPicker, pickerOptions: buttonTypePickerOptionList, registryValue: buttonTypeRegistryValue } = preview;
+    const { deleteSlot, emptyButtonConfig } = interactions;
     const {
         imageSlotCapacity,
         imageCardCountWithCandidate,

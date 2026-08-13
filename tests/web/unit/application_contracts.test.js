@@ -959,6 +959,24 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:buildClipboardEntry|clipboardEntriesFromCardTransfer|copyButtons|copySlot|cutButtons|cutSlot|pasteButton|pasteSubpageButton|showCopyCardCode|showPasteCardCode):/);
   });
 
+  test("composes preview menus and interactions without compatibility globals", () => {
+    const menu = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_context_menu.ts"), "utf8");
+    const interactions = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_interactions.ts"), "utf8");
+    const app = fs.readFileSync(path.join(ROOT, "src/webserver/application/app.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(menu, /export function createPreviewContextMenuFeature/);
+    assert.match(interactions, /export function createPreviewInteractionsFeature/);
+    assert.doesNotMatch(menu, /GlobalDescriptors|staticGlobal|liveGlobal|installPreviewContextMenuModule/);
+    assert.doesNotMatch(interactions, /GlobalDescriptors|staticGlobal|liveGlobal|installPreviewInteractionsModule/);
+    assert.match(app, /interactions\.setup\(\)/);
+    assert.match(app, /contextMenu\.hide/);
+    assert.match(entry, /contextMenu = createPreviewContextMenuFeature\(\{/);
+    assert.match(entry, /interactions = createPreviewInteractionsFeature\(\{/);
+    assert.doesNotMatch(entry, /installPreviewContextMenuModule|installPreviewInteractionsModule/);
+    assert.doesNotMatch(globals, /\bvar (?:addBackButtonMenuItems|addBulkCardMenuItems|addClockBarMenuItems|addCtxDivider|addCtxItem|addCtxSubmenu|addSingleCardMenuItems|addSlot|addSubItem|addSubpageSlot|beginNewCardDraft|cardSizeMenuOptions|clearPlaceholder|clearTextSelection|ctxMenu|deleteButtons|deleteSlot|duplicateButton|duplicateSubpageButton|emptyButtonConfig|firstFreeCell|firstFreeSlot|handleBtnClick|hideContextMenu|newCardDraftKey|positionMenu|resizeSlot|selectButton|setupPreviewEvents|showBackContextMenu|showClockBarContextMenu|showContextMenu|showEmptySlotMenu|showSelectionMenu):/);
+  });
+
   test("injects the UI shell into preview, persistence, backup, and startup modules", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     for (const file of [

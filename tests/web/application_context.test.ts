@@ -98,6 +98,8 @@ export function runApplicationContextTests(): void {
   const preview = {} as any;
   const placement = {} as any;
   const clipboard = {} as any;
+  const contextMenu = {} as any;
+  const interactions = {} as any;
   const state = { grid: [] } as any;
   const runtime = {} as any;
   const core = {} as any;
@@ -176,6 +178,8 @@ export function runApplicationContextTests(): void {
     preview,
     placement,
     clipboard,
+    contextMenu,
+    interactions,
     dom,
     cards,
   });
@@ -238,6 +242,8 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.preview, preview, "context retains preview rendering ownership");
   equal(context.controllers.placement, placement, "context retains preview placement ownership");
   equal(context.controllers.clipboard, clipboard, "context retains preview clipboard ownership");
+  equal(context.controllers.contextMenu, contextMenu, "context retains preview context-menu ownership");
+  equal(context.controllers.interactions, interactions, "context retains preview interaction ownership");
   equal(context.controllers.screenScheduleState, screenScheduleState, "context retains screen schedule state ownership");
   equal(context.controllers.screenRotation, screenRotation, "context retains screen rotation ownership");
   equal(context.controllers.screensaverTimeout, screensaverTimeout, "context retains screensaver timeout ownership");

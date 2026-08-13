@@ -66,9 +66,9 @@ import { createButtonSettingsRenderQueueFeature } from "./application/button_set
 import { createButtonSettingsIconPickerFeature } from "./application/button_settings_icon_picker";
 import { installButtonSettingsModule } from "./application/button_settings";
 import { createPreviewGridPlacementFeature } from "./application/preview_grid_placement";
-import { installPreviewContextMenuModule } from "./application/preview_context_menu";
+import { createPreviewContextMenuFeature, type PreviewContextMenuFeature } from "./application/preview_context_menu";
 import { createPreviewClipboardFeature } from "./application/preview_clipboard";
-import { installPreviewInteractionsModule } from "./application/preview_interactions";
+import { createPreviewInteractionsFeature, type PreviewInteractionsFeature } from "./application/preview_interactions";
 import { createCardEditorDraftController } from "./features/card_editor_draft_controller";
 import { createCardEditorValidationController } from "./features/card_editor_validation_controller";
 import { createCardEditorSaveController } from "./features/card_editor_save_controller";
@@ -197,36 +197,8 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.controllers.iconPicker,
     context.controllers.selection,
     context.controllers.preview,
+    context.controllers.interactions,
   ));
-  installGlobals(installPreviewContextMenuModule({
-    document: context.dom.document,
-    window: context.dom.window,
-    layout: context.layout,
-    cards: context.cards,
-    codec: context.configuration.codec,
-    clockBar: clockBarState,
-    shell: context.controllers.shell,
-    statusPreview: context.controllers.statusPreview,
-    grid: context.controllers.grid,
-    selection: context.controllers.selection,
-    preview: context.controllers.preview,
-    clipboard: context.controllers.clipboard,
-  }));
-  installGlobals(installPreviewInteractionsModule({
-    cardEditorDraft,
-    configPersistence,
-    layout: context.layout,
-    window: context.dom.window,
-    imageOptions: context.configuration.imageOptions,
-    codec: context.configuration.codec,
-    runtime: context.runtime,
-    entityState: context.controllers.entityState,
-    shell: context.controllers.shell,
-    requestApi: context.controllers.requestApi,
-    grid: context.controllers.grid,
-    selection: context.controllers.selection,
-    placement: context.controllers.placement,
-  }));
   const backupUiFeature = context.backup.application;
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
@@ -242,6 +214,8 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.controllers.appEvents,
     context.controllers.statusPreview,
     context.controllers.selection,
+    context.controllers.contextMenu,
+    context.controllers.interactions,
   ));
 }
 
@@ -320,6 +294,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.configuration.persistence,
     context.controllers.preview,
     context.controllers.clipboard,
+    context.controllers.contextMenu,
   ));
   installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion, context.controllers.statusPreview, context.controllers.grid));
   installGlobals(installAppTestHooksBackup(context.layout, context.backup.contract, context.backup.application));
@@ -371,6 +346,8 @@ function composeApplicationContext(): ApplicationContext {
   let appEvents: AppEventsFeature;
   let selection: ButtonSettingsSelectionFeature;
   let preview: PreviewRenderFeature;
+  let contextMenu: PreviewContextMenuFeature;
+  let interactions: PreviewInteractionsFeature;
   const shell = createControlsShellFeature(runtime, {
     document: dom.document,
     state: AppInstance.state,
@@ -380,9 +357,9 @@ function composeApplicationContext(): ApplicationContext {
     closeSettings: () => { selection.closeSettings(); },
     postButtonPress: (name) => requestApi.postButtonPress(name),
     waitForReboot: () => { stateLoader.waitForReboot(); },
-    hideContextMenu: () => { hideContextMenu(); },
+    hideContextMenu: () => { contextMenu.hide(); },
     hideSettingsOverlay: () => { selection.hideSettingsOverlay(); },
-    clearPlaceholder: () => { clearPlaceholder(); },
+    clearPlaceholder: () => { interactions.clearPlaceholder(); },
     updatePreviewHint: () => { selection.updatePreviewHint(); },
     renderPreview: () => { renderPreview(); },
   });
@@ -611,6 +588,8 @@ function composeApplicationContext(): ApplicationContext {
       fields,
       renderPreview: () => preview.render(),
       renderButtonSettings: (force) => renderButtonSettings(force),
+      showSelectionMenu: (event) => contextMenu.showSelection(event),
+      contextMenuContains: (target) => contextMenu.contains(target),
     },
   );
   preview = createPreviewRenderFeature({
@@ -639,6 +618,51 @@ function composeApplicationContext(): ApplicationContext {
     grid,
     preview,
     placement,
+    deleteSlot: (slot) => interactions.deleteSlot(slot),
+    deleteButtons: (slots) => interactions.deleteButtons(slots),
+    emptyButtonConfig: () => interactions.emptyButtonConfig(),
+  });
+  contextMenu = createPreviewContextMenuFeature({
+    document: dom.document,
+    window: dom.window,
+    layout,
+    cards,
+    codec: configurationCodec,
+    clockBar: clockBarState,
+    shell,
+    statusPreview,
+    grid,
+    selection,
+    preview,
+    clipboard,
+    renderPreview: () => preview.render(),
+    renderButtonSettings: () => renderButtonSettings(),
+    openCardSettings: (slot) => openCardSettings(slot),
+    openVoiceServicesSettings: () => openVoiceServicesSettings(),
+    addSlot: (position) => interactions.addSlot(position),
+    addSubpageSlot: (position) => interactions.addSubpageSlot(position),
+    duplicateButton: (slot) => interactions.duplicateButton(slot),
+    duplicateSubpageButton: (slot) => interactions.duplicateSubpageButton(slot),
+    deleteSlot: (slot) => interactions.deleteSlot(slot),
+    deleteButtons: (slots) => interactions.deleteButtons(slots),
+  });
+  interactions = createPreviewInteractionsFeature({
+    cardEditorDraft,
+    configPersistence: configurationPersistence,
+    layout,
+    window: dom.window,
+    imageOptions: imageConfigurationOptions,
+    codec: configurationCodec,
+    runtime,
+    entityState,
+    shell,
+    requestApi,
+    grid,
+    selection,
+    placement,
+    contextMenu,
+    renderPreview: () => preview.render(),
+    renderButtonSettings: (force) => renderButtonSettings(force),
   });
   const configEvents = createAppConfigEventsFeature(configurationPersistence, configurationCodec, layout, renderQueue);
   const stateEventHandlers = createAppStateEventHandlersFeature(
@@ -912,6 +936,8 @@ function composeApplicationContext(): ApplicationContext {
     preview,
     placement,
     clipboard,
+    contextMenu,
+    interactions,
     dom,
     cards,
   });

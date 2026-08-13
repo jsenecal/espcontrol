@@ -1,7 +1,6 @@
 import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
 import { coveredCells } from "../model/grid";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardEditorDraftController } from "../features/card_editor_draft_controller";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { ApplicationLayoutState } from "./application_context";
@@ -14,6 +13,7 @@ import type { ApplicationApiFeature } from "./api";
 import type { GridFeature } from "./grid";
 import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
 import type { PreviewGridPlacementFeature } from "./preview_grid_placement";
+import type { PreviewContextMenuFeature } from "./preview_context_menu";
 export interface PreviewInteractionsDependencies {
     readonly cardEditorDraft: CardEditorDraftController;
     readonly configPersistence: ConfigPersistenceFeature;
@@ -28,10 +28,25 @@ export interface PreviewInteractionsDependencies {
     readonly grid: Pick<GridFeature, "ctx" | "serializeGrid">;
     readonly selection: Pick<ButtonSettingsSelectionFeature, "hideSettingsOverlay" | "selectClockBarItem">;
     readonly placement: Pick<PreviewGridPlacementFeature, "findDuplicatePlacement" | "getCellFromEvent" | "moveSelectedToCell" | "moveToCell" | "placeSlotAt">;
+    readonly contextMenu: PreviewContextMenuFeature;
+    readonly renderPreview: () => void;
+    readonly renderButtonSettings: (force?: boolean) => void;
 }
-export function installPreviewInteractionsModule(
+export interface PreviewInteractionsFeature {
+    clearPlaceholder(): void;
+    setup(): void;
+    addSlot(position?: any): void;
+    addSubpageSlot(position?: any): void;
+    duplicateButton(slot?: any): void;
+    duplicateSubpageButton(slot?: any): void;
+    deleteSlot(slot?: any): void;
+    deleteButtons(slots?: any): void;
+    emptyButtonConfig(): any;
+}
+
+export function createPreviewInteractionsFeature(
     dependencies: PreviewInteractionsDependencies,
-): GlobalDescriptors {
+): PreviewInteractionsFeature {
     const cardEditorDraftController = dependencies.cardEditorDraft;
     const configPersistence = dependencies.configPersistence;
     const window = dependencies.window;
@@ -41,6 +56,8 @@ export function installPreviewInteractionsModule(
     const { ctx, serializeGrid } = dependencies.grid;
     const { hideSettingsOverlay, selectClockBarItem } = dependencies.selection;
     const { findDuplicatePlacement, getCellFromEvent, moveSelectedToCell, moveToCell, placeSlotAt } = dependencies.placement;
+    const { renderPreview, renderButtonSettings } = dependencies;
+    const { showClockBar, showEmpty, showCard, showBack } = dependencies.contextMenu;
     const els = runtime.els;
     const {
         isImageCard,
@@ -108,7 +125,7 @@ export function installPreviewInteractionsModule(
                     return;
                 e.preventDefault();
                 e.stopPropagation();
-                showClockBarContextMenu(e, target.getAttribute("data-clockbar-item"));
+                showClockBar(e, target.getAttribute("data-clockbar-item"));
             });
         }
         function isBackExitTarget(this: any, e?: any, target?: any) {
@@ -170,7 +187,7 @@ export function installPreviewInteractionsModule(
                 if (state.clipboard) {
                     e.preventDefault();
                     e.stopPropagation();
-                    showEmptySlotMenu(e, pos);
+                    showEmpty(e, pos);
                 }
                 else {
                     addSlot(pos);
@@ -191,13 +208,13 @@ export function installPreviewInteractionsModule(
             var c: any = ctx();
             var slot: any = c.grid[pos];
             if (slot > 0) {
-                showContextMenu(e, slot);
+                showCard(e, slot);
             }
             else if (slot === -2) {
-                showBackContextMenu(e);
+                showBack(e);
             }
             else if (slot === 0) {
-                showEmptySlotMenu(e, pos);
+                showEmpty(e, pos);
             }
         });
         // Drag delegation
@@ -631,21 +648,14 @@ export function installPreviewInteractionsModule(
         renderButtonSettings();
     }
     return {
-        "clearPlaceholder": staticGlobal(clearPlaceholder),
-        "clearTextSelection": staticGlobal(clearTextSelection),
-        "setupPreviewEvents": staticGlobal(setupPreviewEvents),
-        "handleBtnClick": staticGlobal(handleBtnClick),
-        "selectButton": staticGlobal(selectButton),
-        "firstFreeSlot": staticGlobal(firstFreeSlot),
-        "firstFreeCell": staticGlobal(firstFreeCell),
-        "emptyButtonConfig": staticGlobal(emptyButtonConfig),
-        "newCardDraftKey": staticGlobal(newCardDraftKey),
-        "beginNewCardDraft": staticGlobal(beginNewCardDraft),
-        "addSlot": staticGlobal(addSlot),
-        "addSubpageSlot": staticGlobal(addSubpageSlot),
-        "duplicateButton": staticGlobal(duplicateButton),
-        "duplicateSubpageButton": staticGlobal(duplicateSubpageButton),
-        "deleteSlot": staticGlobal(deleteSlot),
-        "deleteButtons": staticGlobal(deleteButtons),
+        clearPlaceholder,
+        setup: setupPreviewEvents,
+        addSlot,
+        addSubpageSlot,
+        duplicateButton,
+        duplicateSubpageButton,
+        deleteSlot,
+        deleteButtons,
+        emptyButtonConfig,
     };
 }

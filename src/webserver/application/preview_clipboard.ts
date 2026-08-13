@@ -29,6 +29,9 @@ export interface PreviewClipboardDependencies {
     readonly grid: Pick<GridFeature, "ctx" | "serializeGrid">;
     readonly preview: Pick<PreviewRenderFeature, "configDisabled" | "registryValue">;
     readonly placement: Pick<PreviewGridPlacementFeature, "findDuplicatePlacement" | "placeOrderedGridEntries" | "placeSlotAt">;
+    readonly deleteSlot: (slot: number) => void;
+    readonly deleteButtons: (slots: number[]) => void;
+    readonly emptyButtonConfig: () => any;
 }
 export interface PreviewClipboardFeature {
     buildEntry(slot?: any): any;
@@ -49,6 +52,7 @@ export function createPreviewClipboardFeature(
     const configPersistence = dependencies.configPersistence;
     const { configDisabled: buttonConfigDisabledForDevice, registryValue: buttonTypeRegistryValue } = dependencies.preview;
     const { findDuplicatePlacement, placeOrderedGridEntries, placeSlotAt } = dependencies.placement;
+    const { deleteSlot, deleteButtons, emptyButtonConfig } = dependencies;
     const document = dependencies.document;
     const { entityName } = dependencies.entityState;
     const { isConfigLocked, showBanner, createActionButton } = dependencies.shell;

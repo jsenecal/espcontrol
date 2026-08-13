@@ -13,7 +13,6 @@ import {
     CARD_SIZE_WIDE,
 } from "../model/grid";
 import { mdiIcon } from "./ui_primitives";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { clampMenuPosition } from "../features/preview";
 import { resizeGridSlot } from "../features/preview_grid";
 import type { ApplicationLayoutState } from "./application_context";
@@ -39,8 +38,29 @@ export interface PreviewContextMenuDependencies {
     readonly selection: Pick<ButtonSettingsSelectionFeature, "hideSettingsOverlay" | "openClockBarTemperatureSettings">;
     readonly preview: Pick<PreviewRenderFeature, "registryValue">;
     readonly clipboard: Pick<PreviewClipboardFeature, "copyButtons" | "copySlot" | "cutButtons" | "cutSlot" | "pasteButton" | "pasteSubpageButton" | "showCopyCode" | "showPasteCode">;
+    readonly renderPreview: () => void;
+    readonly renderButtonSettings: () => void;
+    readonly openCardSettings: (slot: number) => void;
+    readonly openVoiceServicesSettings: () => void;
+    readonly addSlot: (position: number) => void;
+    readonly addSubpageSlot: (position: number) => void;
+    readonly duplicateButton: (slot: number) => void;
+    readonly duplicateSubpageButton: (slot: number) => void;
+    readonly deleteSlot: (slot: number) => void;
+    readonly deleteButtons: (slots: number[]) => void;
 }
-export function installPreviewContextMenuModule(dependencies: PreviewContextMenuDependencies): GlobalDescriptors {
+export interface PreviewContextMenuFeature {
+    hide(): void;
+    contains(target?: any): boolean;
+    cardSizeOptions(slot?: any, context?: any): any[];
+    showSelection(event?: any): void;
+    showClockBar(event?: any, item?: any): void;
+    showCard(event?: any, slot?: any): void;
+    showBack(event?: any): void;
+    showEmpty(event?: any, position?: any): void;
+}
+
+export function createPreviewContextMenuFeature(dependencies: PreviewContextMenuDependencies): PreviewContextMenuFeature {
     const document = dependencies.document;
     const window = dependencies.window;
     const { isConfigLocked } = dependencies.shell;
@@ -50,6 +70,7 @@ export function installPreviewContextMenuModule(dependencies: PreviewContextMenu
     const { hideSettingsOverlay, openClockBarTemperatureSettings } = dependencies.selection;
     const { registryValue: buttonTypeRegistryValue } = dependencies.preview;
     const { copyButtons, copySlot, cutButtons, cutSlot, pasteButton, pasteSubpageButton, showCopyCode: showCopyCardCode, showPasteCode: showPasteCardCode } = dependencies.clipboard;
+    const { renderPreview, renderButtonSettings, openCardSettings, openVoiceServicesSettings, addSlot, addSubpageSlot, duplicateButton, duplicateSubpageButton, deleteSlot, deleteButtons } = dependencies;
     const {
         cardRequiresSquareSize,
         cardSupportsMaxSize,
@@ -364,23 +385,13 @@ export function installPreviewContextMenuModule(dependencies: PreviewContextMenu
         ctxMenu = null;
     }
     return {
-        "ctxMenu": liveGlobal(() => ctxMenu, (value?: any) => { ctxMenu = value; }),
-        "positionMenu": staticGlobal(positionMenu),
-        "addCtxItem": staticGlobal(addCtxItem),
-        "addCtxDivider": staticGlobal(addCtxDivider),
-        "addCtxSubmenu": staticGlobal(addCtxSubmenu),
-        "addSubItem": staticGlobal(addSubItem),
-        "resizeSlot": staticGlobal(resizeSlot),
-        "addBulkCardMenuItems": staticGlobal(addBulkCardMenuItems),
-        "cardSizeMenuOptions": staticGlobal(cardSizeMenuOptions),
-        "addSingleCardMenuItems": staticGlobal(addSingleCardMenuItems),
-        "addClockBarMenuItems": staticGlobal(addClockBarMenuItems),
-        "showSelectionMenu": staticGlobal(showSelectionMenu),
-        "showClockBarContextMenu": staticGlobal(showClockBarContextMenu),
-        "showContextMenu": staticGlobal(showContextMenu),
-        "showBackContextMenu": staticGlobal(showBackContextMenu),
-        "addBackButtonMenuItems": staticGlobal(addBackButtonMenuItems),
-        "showEmptySlotMenu": staticGlobal(showEmptySlotMenu),
-        "hideContextMenu": staticGlobal(hideContextMenu),
+        hide: hideContextMenu,
+        contains: (target) => !!(ctxMenu && ctxMenu.contains(target)),
+        cardSizeOptions: cardSizeMenuOptions,
+        showSelection: showSelectionMenu,
+        showClockBar: showClockBarContextMenu,
+        showCard: showContextMenu,
+        showBack: showBackContextMenu,
+        showEmpty: showEmptySlotMenu,
     };
 }
