@@ -13,6 +13,7 @@ import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
+import type { StateLoaderFeature } from "./state_loader_api";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;
@@ -27,6 +28,7 @@ export function installSettingsSystemSectionModule(
     c6Firmware: C6FirmwareFeature,
     shell: Pick<ControlsShellFeature, "createActionButton">,
     requestApi: Pick<ApplicationApiFeature, "getJsonQuietly" | "postFirmwareAutoUpdate" | "postFirmwareUpdateFrequency" | "postC6FirmwareAutoUpdate">,
+    stateLoader: Pick<StateLoaderFeature, "refreshFirmwareVersion">,
 ): GlobalDescriptors {
     const { createActionButton } = shell;
     const els = runtime.els;
@@ -130,7 +132,7 @@ export function installSettingsSystemSectionModule(
             });
             setTimeout(function (this: any) {
                 state.firmwareChecking = false;
-                refreshFirmwareVersion();
+                stateLoader.refreshFirmwareVersion();
                 renderFirmwareUpdateStatus();
             }, 10000);
         });
@@ -241,7 +243,7 @@ export function installSettingsSystemSectionModule(
                 syncC6FirmwareUi();
                 postC6FirmwareUpdateInstall();
                 setTimeout(function (this: any) {
-                    refreshFirmwareVersion();
+                    stateLoader.refreshFirmwareVersion();
                 }, 5000);
                 return;
             }
@@ -250,7 +252,7 @@ export function installSettingsSystemSectionModule(
             postC6FirmwareUpdateCheck();
             setTimeout(function (this: any) {
                 state.c6FirmwareChecking = false;
-                refreshFirmwareVersion();
+                stateLoader.refreshFirmwareVersion();
                 syncC6FirmwareUi();
             }, 10000);
         });
@@ -309,7 +311,7 @@ export function installSettingsSystemSectionModule(
         syncFirmwareVersionSelect();
         syncFirmwareUpdateUi();
         syncC6FirmwareUi();
-        refreshFirmwareVersion();
+        stateLoader.refreshFirmwareVersion();
         var homeAssistantSettingsBody: any = document.createElement("div");
         var haProtocolField: any = document.createElement("div");
         haProtocolField.className = "sp-field";

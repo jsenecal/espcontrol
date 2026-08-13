@@ -48,7 +48,7 @@ import { createConfigAccessClimateAlarmOptionsFeature } from "./application/conf
 import { createConfigCodecFeature } from "./application/config_codec";
 import { createNativePanelConfigMigrationController } from "./application/native_panel_config_migration";
 import { createConfigPersistenceFeature } from "./application/config_post_api";
-import { createStateLoaderFeature, stateLoaderCompatibilityGlobals, type StateLoaderFeature } from "./application/state_loader_api";
+import { createStateLoaderFeature, type StateLoaderFeature } from "./application/state_loader_api";
 import { installArtworkPostApiModule } from "./application/artwork_post_api";
 import { installScreenSchedulePostApiModule } from "./application/screen_schedule_post_api";
 import { installClockBarPostApiModule } from "./application/clock_bar_post_api";
@@ -160,7 +160,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell, context.controllers.requestApi));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(stateLoaderCompatibilityGlobals(context.controllers.stateLoader));
   installGlobals(installArtworkPostApiModule(context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installScreenSchedulePostApiModule(context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installClockBarPostApiModule(context.controllers.entityState, context.controllers.requestApi));
@@ -255,7 +254,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
-  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi));
+  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState, context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
@@ -266,7 +265,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const reconnectController = context.controllers.reconnect;
   if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
   installGlobals(installAppEventsModule(
-    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState, context.controllers.shell,
+    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState, context.controllers.shell, context.controllers.stateLoader,
   ));
   installGlobals(installAppModule(
     context.controllers.pageTitle,

@@ -1,6 +1,5 @@
 import { state } from "../state/app_instance";
 import { ENTITY_CATALOG } from "../generated/entity_catalog";
-import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 import type { ApplicationLayoutState } from "./application_context";
 import {
@@ -243,19 +242,5 @@ export function createStateLoaderFeature(runtime: UiRuntimeState, layout: Applic
         refreshFirmwareVersion,
         refreshScreensaverTimeout,
         waitForReboot,
-    };
-}
-
-export function stateLoaderCompatibilityGlobals(feature: StateLoaderFeature): GlobalDescriptors {
-    return {
-        "eventStreamEnabled": staticGlobal(feature.eventStreamEnabled),
-        "cardStateEntities": staticGlobal(feature.cardStateEntities),
-        "settingsStateEntities": staticGlobal(feature.settingsStateEntities),
-        "subpageStateEntities": staticGlobal(feature.subpageStateEntities),
-        "loadStateItems": staticGlobal(feature.loadStateItems),
-        "loadInitialState": staticGlobal(feature.loadInitialState),
-        "refreshFirmwareVersion": staticGlobal(feature.refreshFirmwareVersion),
-        "refreshScreensaverTimeout": staticGlobal(feature.refreshScreensaverTimeout),
-        "waitForReboot": staticGlobal(feature.waitForReboot),
     };
 }

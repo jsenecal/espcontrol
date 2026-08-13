@@ -28,6 +28,7 @@ import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
+import type { StateLoaderFeature } from "./state_loader_api";
 
 export function installAppEventsModule(
     reconnectController: ReconnectController<unknown>,
@@ -39,6 +40,7 @@ export function installAppEventsModule(
     c6Firmware: C6FirmwareFeature,
     entityState: Pick<EntityStateFeature, "rememberEntityPostPath">,
     shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">,
+    stateLoader: Pick<StateLoaderFeature, "refreshFirmwareVersion" | "refreshScreensaverTimeout">,
 ): GlobalDescriptors {
     const { rememberEntityPostPath } = entityState;
     const { setConfigLocked, showBanner } = shell;
@@ -67,8 +69,8 @@ export function installAppEventsModule(
             runtime.migrationTimer = setTimeout(scheduleMigration, 5000);
             clearTimeout(runtime.sliderMigrationTimer as any);
             runtime.pendingSliderSubpageMigrations = {};
-            refreshFirmwareVersion();
-            refreshScreensaverTimeout();
+            stateLoader.refreshFirmwareVersion();
+            stateLoader.refreshScreensaverTimeout();
         }
         function handleDisconnected(this: any) {
             setConfigLocked(true, "Reconnecting to device\u2026");

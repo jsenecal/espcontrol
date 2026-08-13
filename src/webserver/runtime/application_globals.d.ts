@@ -79,7 +79,6 @@ declare global {
   var cardMetadataValue: any;
   var cardSensorPreviewHtml: any;
   var cardSizeMenuOptions: any;
-  var cardStateEntities: any;
   var cardTypePickerDetails: any;
   var cardTypePickerOptions: any;
   var clampMenuPosition: any;
@@ -137,7 +136,6 @@ declare global {
   var emptyButtonConfig: any;
   var ensurePublicFirmwareOtaUrl: any;
   var ensureSubpageRaw: any;
-  var eventStreamEnabled: any;
   var exportConfig: any;
   var failPublicFirmwareUpload: any;
   var fieldLabel: any;
@@ -167,8 +165,6 @@ declare global {
   var installPublicFirmwareViaWebOta: any;
   var isClockBarTemperatureItem: any;
   var isSelectionControlTarget: any;
-  var loadInitialState: any;
-  var loadStateItems: any;
   var makeCollapsibleCard: any;
   var markCardPrimaryField: any;
   var moveSelectedGridEntries: any;
@@ -240,8 +236,6 @@ declare global {
   var previewHtmlValue: any;
   var previewValue: any;
   var publicFirmwareOtaFilename: any;
-  var refreshFirmwareVersion: any;
-  var refreshScreensaverTimeout: any;
   var registerEspControlTestHookGroup: any;
   var registryValue: any;
   var renderBackButtonSettings: any;
@@ -280,7 +274,6 @@ declare global {
   var serializeGrid: any;
   var setFavicon: any;
   var setViewportMeta: any;
-  var settingsStateEntities: any;
   var settingsStatusHeader: any;
   var setupPreviewEvents: any;
   var showBackContextMenu: any;
@@ -294,7 +287,6 @@ declare global {
   var statusBadge: any;
   var subpageChunkShouldPost: any;
   var subpageEntityKeys: any;
-  var subpageStateEntities: any;
   var swapGridCell: any;
   var syncCardLargeNumbersToggle: any;
   var syncClockBarItemElement: any;
@@ -325,6 +317,5 @@ declare global {
   var syncAlarmDelayAudioUi: any;
   var buildAlarmDelayAudioSettingsCard: any;
   var waitForFirmwareRestart: any;
-  var waitForReboot: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
 }

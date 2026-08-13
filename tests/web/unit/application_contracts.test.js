@@ -89,12 +89,15 @@ describe("browserless application contracts", () => {
   test("owns initial-state loading and reconnect through the application context", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const loader = fs.readFileSync(path.join(ROOT, "src/webserver/application/state_loader_api.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.match(loader, /export interface StateLoaderFeature/);
     assert.match(loader, /export function createStateLoaderFeature/);
     assert.match(entry, /stateLoader = createStateLoaderFeature\(/);
     assert.match(entry, /eventStreamEnabled: stateLoader\.eventStreamEnabled/);
     assert.match(entry, /stateLoader\.loadInitialState\(handleState, markConnected\)/);
-    assert.doesNotMatch(entry, /installStateLoaderApiModule/);
+    assert.doesNotMatch(entry, /installStateLoaderApiModule|stateLoaderCompatibilityGlobals/);
+    assert.doesNotMatch(loader, /stateLoaderCompatibilityGlobals|GlobalDescriptors/);
+    assert.doesNotMatch(globals, /\bvar (?:cardStateEntities|eventStreamEnabled|loadInitialState|loadStateItems|refreshFirmwareVersion|refreshScreensaverTimeout|settingsStateEntities|subpageStateEntities|waitForReboot):/);
   });
 
   test("imports the browser core service without ambient application names", () => {
@@ -795,7 +798,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi\)/);
-    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell, context\.controllers\.requestApi\)\)/);
+    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.stateLoader\)\)/);
   });
 
   test("injects display-state DOM references", () => {
