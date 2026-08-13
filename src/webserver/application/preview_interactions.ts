@@ -12,6 +12,7 @@ import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { GridFeature } from "./grid";
+import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
 export interface PreviewInteractionsDependencies {
     readonly cardEditorDraft: CardEditorDraftController;
     readonly configPersistence: ConfigPersistenceFeature;
@@ -24,6 +25,7 @@ export interface PreviewInteractionsDependencies {
     readonly shell: Pick<ControlsShellFeature, "isConfigLocked">;
     readonly requestApi: Pick<ApplicationApiFeature, "postText">;
     readonly grid: Pick<GridFeature, "ctx" | "serializeGrid">;
+    readonly selection: Pick<ButtonSettingsSelectionFeature, "hideSettingsOverlay" | "selectClockBarItem">;
 }
 export function installPreviewInteractionsModule(
     dependencies: PreviewInteractionsDependencies,
@@ -35,6 +37,7 @@ export function installPreviewInteractionsModule(
     const { entityName } = dependencies.entityState;
     const { isConfigLocked } = dependencies.shell;
     const { ctx, serializeGrid } = dependencies.grid;
+    const { hideSettingsOverlay, selectClockBarItem } = dependencies.selection;
     const els = runtime.els;
     const {
         isImageCard,

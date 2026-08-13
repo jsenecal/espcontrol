@@ -1,5 +1,4 @@
 import { state } from "../state/app_instance";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
@@ -7,7 +6,30 @@ import type { ControlsShellFeature } from "./controls_shell";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { GridFeature } from "./grid";
 import type { ButtonSettingsRenderQueueFeature } from "./button_settings_render_queue";
-export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityInput">, shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton">, statusPreview: Pick<AppStatusPreviewFeature, "clockBarItemActive" | "clockBarItemLabel" | "clockBarItems" | "isClockBarTemperatureItem" | "updateClockBarItemUi">, grid: Pick<GridFeature, "ctx">, renderQueue: ButtonSettingsRenderQueueFeature): GlobalDescriptors {
+import type { ControlsFieldsFeature } from "./controls_fields";
+
+export interface ButtonSettingsSelectionFeature {
+    hideSettingsOverlay(): void;
+    updatePreviewHint(context?: any): void;
+    renderSelectionBar(context?: any): void;
+    closeSettings(): void;
+    clearCardSelection(): void;
+    isSelectionControlTarget(target?: any): boolean;
+    handleDocumentSelectionMouseDown(event?: any): void;
+    openSelectedCardSettings(): void;
+    selectClockBarItem(item?: any): void;
+    openClockBarTemperatureSettings(): void;
+}
+
+export interface ButtonSettingsSelectionDependencies {
+    readonly document: Document;
+    readonly fields: Pick<ControlsFieldsFeature, "fieldLabel" | "toggleRow">;
+    readonly renderPreview: () => void;
+    readonly renderButtonSettings: (force?: boolean) => void;
+}
+
+export function createButtonSettingsSelectionFeature(runtime: UiRuntimeState, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityInput">, shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton">, statusPreview: Pick<AppStatusPreviewFeature, "clockBarItemActive" | "clockBarItemLabel" | "clockBarItems" | "isClockBarTemperatureItem" | "updateClockBarItemUi">, grid: Pick<GridFeature, "ctx">, renderQueue: ButtonSettingsRenderQueueFeature, dependencies: ButtonSettingsSelectionDependencies): ButtonSettingsSelectionFeature {
+    const { document, fields: { fieldLabel, toggleRow }, renderPreview, renderButtonSettings } = dependencies;
     const { entityInput } = entityState;
     const { isConfigLocked, createActionButton } = shell;
     const els = runtime.els;
@@ -228,16 +250,15 @@ export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, cl
         entityInp.focus();
     }
     return {
-        "hideSettingsOverlay": staticGlobal(hideSettingsOverlay),
-        "updatePreviewHint": staticGlobal(updatePreviewHint),
-        "renderClockBarSelectionBar": staticGlobal(renderClockBarSelectionBar),
-        "renderSelectionBar": staticGlobal(renderSelectionBar),
-        "closeSettings": staticGlobal(closeSettings),
-        "clearCardSelection": staticGlobal(clearCardSelection),
-        "isSelectionControlTarget": staticGlobal(isSelectionControlTarget),
-        "handleDocumentSelectionMouseDown": staticGlobal(handleDocumentSelectionMouseDown),
-        "openSelectedCardSettings": staticGlobal(openSelectedCardSettings),
-        "selectClockBarItem": staticGlobal(selectClockBarItem),
-        "openClockBarTemperatureSettings": staticGlobal(openClockBarTemperatureSettings),
+        hideSettingsOverlay,
+        updatePreviewHint,
+        renderSelectionBar,
+        closeSettings,
+        clearCardSelection,
+        isSelectionControlTarget,
+        handleDocumentSelectionMouseDown,
+        openSelectedCardSettings,
+        selectClockBarItem,
+        openClockBarTemperatureSettings,
     };
 }

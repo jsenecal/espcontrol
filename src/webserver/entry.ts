@@ -59,9 +59,9 @@ import { installSettingsScheduleSectionModule } from "./application/settings_sch
 import { installSettingsCoverArtSectionModule } from "./application/settings_cover_art_section";
 import { installSettingsSystemSectionModule } from "./application/settings_system_section";
 import { installSettingsPageModule } from "./application/settings_page";
-import { installControlsFieldsModule } from "./application/controls_fields";
+import { createControlsFieldsFeature } from "./application/controls_fields";
 import { installPreviewRenderModule } from "./application/preview_render";
-import { installButtonSettingsSelectionModule } from "./application/button_settings_selection";
+import { createButtonSettingsSelectionFeature, type ButtonSettingsSelectionFeature } from "./application/button_settings_selection";
 import { createButtonSettingsRenderQueueFeature } from "./application/button_settings_render_queue";
 import { createButtonSettingsIconPickerFeature } from "./application/button_settings_icon_picker";
 import { installButtonSettingsModule } from "./application/button_settings";
@@ -181,7 +181,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState, context.controllers.entityState, context.controllers.requestApi, context.controllers.schedulePostApi));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState, context.controllers.statusPreview, context.controllers.artworkPostApi));
   installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi, context.controllers.statusPreview, context.controllers.artworkPostApi, context.controllers.schedulePostApi, context.controllers.clockBarPostApi));
-  installGlobals(installControlsFieldsModule(context.cards, context.configuration.options, context.controllers.shell, context.controllers.requestApi));
+  installGlobals(context.controllers.fields.globals);
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
     layout: context.layout,
@@ -192,8 +192,8 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     screenRotation,
     shell: context.controllers.shell,
     grid: context.controllers.grid,
+    selection: context.controllers.selection,
   }));
-  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.statusPreview, context.controllers.grid, context.controllers.renderQueue));
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence, context.cards,
     context.configuration.imageOptions,
@@ -206,6 +206,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.controllers.requestApi,
     context.controllers.grid,
     context.controllers.iconPicker,
+    context.controllers.selection,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,
@@ -223,6 +224,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     shell: context.controllers.shell,
     statusPreview: context.controllers.statusPreview,
     grid: context.controllers.grid,
+    selection: context.controllers.selection,
   }));
   installGlobals(installPreviewClipboardModule({
     configPersistence,
@@ -249,6 +251,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     shell: context.controllers.shell,
     requestApi: context.controllers.requestApi,
     grid: context.controllers.grid,
+    selection: context.controllers.selection,
   }));
   const backupUiFeature = context.backup.application;
   installGlobals(installSettingsSystemSectionModule({
@@ -264,6 +267,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.controllers.shell,
     context.controllers.appEvents,
     context.controllers.statusPreview,
+    context.controllers.selection,
   ));
 }
 
@@ -310,7 +314,7 @@ function registerCards(context: ApplicationContext) {
   registerScreenLockCardTypes(registry);
   registerSensorCardTypes(registry, context.configuration.options);
   registerSliderCardTypes(registry, context.configuration.modalTabs, lightCards);
-  registerSubpageCardTypes(registry, context.configuration.codec, context.core);
+  registerSubpageCardTypes(registry, context.configuration.codec, context.core, context.controllers.selection);
   registerSwitchCardTypes(registry, context.configuration.confirmationOptions, lightCards);
   registerTimezoneCardTypes(registry, context.configuration.dateTimeOptions, context.dom.document);
   registerVacuumCardTypes(registry, context.configuration.robotOptions);
@@ -389,19 +393,20 @@ function composeApplicationContext(): ApplicationContext {
   let requestApi: ApplicationApiFeature;
   let stateLoader: StateLoaderFeature;
   let appEvents: AppEventsFeature;
+  let selection: ButtonSettingsSelectionFeature;
   const shell = createControlsShellFeature(runtime, {
     document: dom.document,
     state: AppInstance.state,
     schedule: dom.schedule,
     cancelSchedule: (handle) => { dom.window.clearTimeout(handle); },
     buildSettingsPage: (parent) => { buildSettingsPage(parent); },
-    closeSettings: () => { closeSettings(); },
+    closeSettings: () => { selection.closeSettings(); },
     postButtonPress: (name) => requestApi.postButtonPress(name),
     waitForReboot: () => { stateLoader.waitForReboot(); },
     hideContextMenu: () => { hideContextMenu(); },
-    hideSettingsOverlay: () => { hideSettingsOverlay(); },
+    hideSettingsOverlay: () => { selection.hideSettingsOverlay(); },
     clearPlaceholder: () => { clearPlaceholder(); },
-    updatePreviewHint: () => { updatePreviewHint(); },
+    updatePreviewHint: () => { selection.updatePreviewHint(); },
     renderPreview: () => { renderPreview(); },
   });
   let confirmationOptions: ReturnType<typeof createConfigConfirmationOptionsFeature>;
@@ -461,7 +466,7 @@ function composeApplicationContext(): ApplicationContext {
     requestFrame: (callback) => requestAnimationFrame(callback),
     renderPreview: () => renderPreview(),
     renderButtonSettings: () => renderButtonSettings(),
-    closeSettings: () => closeSettings(),
+    closeSettings: () => selection.closeSettings(),
   });
   const configurationOptions = createConfigSensorOptionsFeature(cards);
   const mediaConfigurationOptions = createConfigMediaOptionsFeature(layout.config);
@@ -568,6 +573,7 @@ function composeApplicationContext(): ApplicationContext {
   configurationPersistence.connectRequestApi(requestApi);
   configurationCodec.connectRequestApi(requestApi);
   const grid = createGridFeature(configurationCodec, runtime, layout, entityState, requestApi, renderQueue);
+  const fields = createControlsFieldsFeature(cards, configurationOptions, shell, requestApi);
   const gridMigration = createGridMigrationFeature(runtime, layout, {
     renderPreview: () => renderPreview(),
     renderButtonSettings: () => renderButtonSettings(),
@@ -591,7 +597,7 @@ function composeApplicationContext(): ApplicationContext {
   );
   const clockBar = createClockBarController();
   clockBarState = createClockBarFeature(clockBar, runtime, core, environment, {
-    hideSettingsOverlay: () => hideSettingsOverlay(),
+    hideSettingsOverlay: () => selection.hideSettingsOverlay(),
     timezoneId: (value) => statusPreview.getTzId(value),
     postTemperatureEntities: (value) => clockBarPostApi.postClockBarTemperatureEntities(value),
     postSwitch: (name, value) => requestApi.postSwitch(name, value),
@@ -604,11 +610,26 @@ function composeApplicationContext(): ApplicationContext {
     postTime: (value) => clockBarPostApi.postClockBarTime(value),
     postVoiceServices: (value) => clockBarPostApi.postVoiceServices(value),
     postNetworkStatus: (value) => clockBarPostApi.postNetworkStatusIcon(value),
-    renderSelectionBar: () => renderSelectionBar(grid.ctx()),
+    renderSelectionBar: () => selection.renderSelectionBar(grid.ctx()),
     updateNetworkPreview: () => statusPreview.updateNetworkPreview(),
     updateVoicePreview: () => statusPreview.updateVoicePreview(),
   });
   statusPreview = createAppStatusPreviewFeature(runtime, core, layout, environment, clockBarState);
+  selection = createButtonSettingsSelectionFeature(
+    runtime,
+    clockBarState,
+    entityState,
+    shell,
+    statusPreview,
+    grid,
+    renderQueue,
+    {
+      document: dom.document,
+      fields,
+      renderPreview: () => renderPreview(),
+      renderButtonSettings: (force) => renderButtonSettings(force),
+    },
+  );
   const configEvents = createAppConfigEventsFeature(configurationPersistence, configurationCodec, layout, renderQueue);
   const stateEventHandlers = createAppStateEventHandlersFeature(
     runtime,
@@ -876,6 +897,8 @@ function composeApplicationContext(): ApplicationContext {
     environment,
     iconPicker,
     renderQueue,
+    fields,
+    selection,
     dom,
     cards,
   });

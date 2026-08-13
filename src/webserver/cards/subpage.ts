@@ -4,6 +4,7 @@ import { escHtml, iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigCodecFeature } from "../application/config_codec";
 import type { CoreFeature } from "../application/core";
+import type { ButtonSettingsSelectionFeature } from "../application/button_settings_selection";
 import { SUBPAGE_KIND_OPTION } from "../application/config_option_core";
 import {
     applySubpagePresetConfig,
@@ -17,6 +18,7 @@ export function registerSubpageCardTypes(
     registry: CardRegistry,
     codec: ConfigCodecFeature,
     core: Pick<CoreFeature, "subpageStateDisplayMode">,
+    selection: Pick<ButtonSettingsSelectionFeature, "closeSettings">,
 ): void {
     const { enterSubpage } = codec;
     const { subpageStateDisplayMode } = core;
@@ -360,7 +362,7 @@ export function registerSubpageCardTypes(
         var configBtn: any = document.createElement("button");
         configBtn.className = "sp-action-btn sp-edit-subpage-btn";
         configBtn.textContent = "Edit Subpage";
-        configBtn.addEventListener("click", function (this: any) { closeSettings(); enterSubpage(slot); });
+        configBtn.addEventListener("click", function (this: any) { selection.closeSettings(); enterSubpage(slot); });
         panel.appendChild(configBtn);
     }
 }

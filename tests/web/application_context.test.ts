@@ -93,6 +93,8 @@ export function runApplicationContextTests(): void {
   const environment = {} as any;
   const iconPicker = {} as any;
   const renderQueue = {} as any;
+  const fields = {} as any;
+  const selection = {} as any;
   const state = { grid: [] } as any;
   const runtime = {} as any;
   const core = {} as any;
@@ -166,6 +168,8 @@ export function runApplicationContextTests(): void {
     environment,
     iconPicker,
     renderQueue,
+    fields,
+    selection,
     dom,
     cards,
   });
@@ -223,6 +227,8 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.environment, environment, "context retains environment state ownership");
   equal(context.controllers.iconPicker, iconPicker, "context retains icon picker ownership");
   equal(context.controllers.renderQueue, renderQueue, "context retains render queue ownership");
+  equal(context.controllers.fields, fields, "context retains shared field ownership");
+  equal(context.controllers.selection, selection, "context retains card selection ownership");
   equal(context.controllers.screenScheduleState, screenScheduleState, "context retains screen schedule state ownership");
   equal(context.controllers.screenRotation, screenRotation, "context retains screen rotation ownership");
   equal(context.controllers.screensaverTimeout, screensaverTimeout, "context retains screensaver timeout ownership");

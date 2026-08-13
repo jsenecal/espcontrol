@@ -10,12 +10,18 @@ import {
     SENSOR_LARGE_NUMBERS_OPTION,
     largeNumbersExplicitlyDisabled,
 } from "./config_option_core";
-export function installControlsFieldsModule(
+export interface ControlsFieldsFeature {
+    readonly globals: GlobalDescriptors;
+    fieldLabel(text?: any, forId?: any): any;
+    toggleRow(label?: any, id?: any, checked?: any): any;
+}
+
+export function createControlsFieldsFeature(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
     shell: Pick<ControlsShellFeature, "createDisclosureChevron">,
     requestApi: Pick<ApplicationApiFeature, "postNumber">,
-): GlobalDescriptors {
+): ControlsFieldsFeature {
     const { createDisclosureChevron } = shell;
     const {
         cardLargeNumbersSupported,
@@ -547,7 +553,7 @@ export function installControlsFieldsModule(
         wrap.appendChild(row);
         return { wrap: wrap, range: range, val: val };
     }
-    return {
+    const globals: GlobalDescriptors = {
         "makeCollapsibleCard": staticGlobal(makeCollapsibleCard),
         "fieldLabel": staticGlobal(fieldLabel),
         "textInput": staticGlobal(textInput),
@@ -588,4 +594,5 @@ export function installControlsFieldsModule(
         "condField": staticGlobal(condField),
         "createRangeSlider": staticGlobal(createRangeSlider),
     };
+    return { globals, fieldLabel, toggleRow };
 }

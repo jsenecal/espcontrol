@@ -6,10 +6,11 @@ import type { ClockBarFeature } from "./clock_bar_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { AppEventsFeature } from "./app_events";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
+import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
 
 declare const __ESPCONTROL_EMBEDDED_MDI_STYLES__: string;
 
-export function installAppModule(pageTitle: AppTitleFeature, webStyles: string, core: Pick<CoreFeature, "syncPreviewOrientation">, screenRotation: ScreenRotationFeature, clockBar: ClockBarFeature, shell: Pick<ControlsShellFeature, "buildUI" | "syncTabChrome">, appEvents: Pick<AppEventsFeature, "connect">, statusPreview: Pick<AppStatusPreviewFeature, "updateClock">): GlobalDescriptors {
+export function installAppModule(pageTitle: AppTitleFeature, webStyles: string, core: Pick<CoreFeature, "syncPreviewOrientation">, screenRotation: ScreenRotationFeature, clockBar: ClockBarFeature, shell: Pick<ControlsShellFeature, "buildUI" | "syncTabChrome">, appEvents: Pick<AppEventsFeature, "connect">, statusPreview: Pick<AppStatusPreviewFeature, "updateClock">, selection: Pick<ButtonSettingsSelectionFeature, "handleDocumentSelectionMouseDown">): GlobalDescriptors {
     const { buildUI, syncTabChrome } = shell;
     const { syncPreviewOrientation } = core;
     const { startInitialCheck: startInitialScreenRotationCheck } = screenRotation;
@@ -75,7 +76,7 @@ export function installAppModule(pageTitle: AppTitleFeature, webStyles: string, 
         appEvents.connect();
         statusPreview.updateClock();
         document.addEventListener("click", hideContextMenu);
-        document.addEventListener("mousedown", handleDocumentSelectionMouseDown);
+        document.addEventListener("mousedown", selection.handleDocumentSelectionMouseDown);
         document.addEventListener("scroll", hideContextMenu, true);
         document.addEventListener("keydown", function (this: any, e?: any) {
             if (e.key === "Escape")

@@ -18,6 +18,7 @@ import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { GridFeature } from "./grid";
 import type { ButtonSettingsIconPickerFeature } from "./button_settings_icon_picker";
+import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
@@ -34,11 +35,13 @@ export function installButtonSettingsModule(
     requestApi: Pick<ApplicationApiFeature, "postText">,
     grid: Pick<GridFeature, "ctx" | "serializeGrid">,
     iconPicker: ButtonSettingsIconPickerFeature,
+    selection: Pick<ButtonSettingsSelectionFeature, "closeSettings" | "hideSettingsOverlay">,
 ): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
     const { isConfigLocked, createActionButton, showBanner } = shell;
     const els = runtime.els;
     const { ctx, serializeGrid } = grid;
+    const { closeSettings, hideSettingsOverlay } = selection;
     const {
         imageSlotCapacity,
         imageCardCountWithCandidate,

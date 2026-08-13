@@ -23,6 +23,7 @@ import type { ClockBarFeature } from "./clock_bar_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { GridFeature } from "./grid";
+import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
 export interface PreviewContextMenuDependencies {
     readonly document: Document;
     readonly window: Window;
@@ -33,6 +34,7 @@ export interface PreviewContextMenuDependencies {
     readonly shell: Pick<ControlsShellFeature, "isConfigLocked">;
     readonly statusPreview: Pick<AppStatusPreviewFeature, "clockBarItemActive" | "clockBarItemLabel" | "clockBarItems" | "isClockBarTemperatureItem" | "updateClockBarItemUi">;
     readonly grid: Pick<GridFeature, "ctx" | "scheduleMainGridSave">;
+    readonly selection: Pick<ButtonSettingsSelectionFeature, "hideSettingsOverlay" | "openClockBarTemperatureSettings">;
 }
 export function installPreviewContextMenuModule(dependencies: PreviewContextMenuDependencies): GlobalDescriptors {
     const document = dependencies.document;
@@ -41,6 +43,7 @@ export function installPreviewContextMenuModule(dependencies: PreviewContextMenu
     const { setItemVisible: setClockBarItemVisible } = dependencies.clockBar;
     const { clockBarItemActive, clockBarItemLabel, clockBarItems, isClockBarTemperatureItem, updateClockBarItemUi } = dependencies.statusPreview;
     const { ctx, scheduleMainGridSave } = dependencies.grid;
+    const { hideSettingsOverlay, openClockBarTemperatureSettings } = dependencies.selection;
     const {
         cardRequiresSquareSize,
         cardSupportsMaxSize,

@@ -64,6 +64,8 @@ import type { ClockBarPostApiFeature } from "./clock_bar_post_api";
 import type { PublicFirmwareInstallFeature } from "./public_firmware_install";
 import type { ButtonSettingsIconPickerFeature } from "./button_settings_icon_picker";
 import type { ButtonSettingsRenderQueueFeature } from "./button_settings_render_queue";
+import type { ControlsFieldsFeature } from "./controls_fields";
+import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -161,6 +163,8 @@ export interface ApplicationContext {
     readonly environment: EnvironmentStateFeature;
     readonly iconPicker: ButtonSettingsIconPickerFeature;
     readonly renderQueue: ButtonSettingsRenderQueueFeature;
+    readonly fields: ControlsFieldsFeature;
+    readonly selection: ButtonSettingsSelectionFeature;
   };
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
@@ -234,6 +238,8 @@ export interface ApplicationContextOptions {
   readonly environment: EnvironmentStateFeature;
   readonly iconPicker: ButtonSettingsIconPickerFeature;
   readonly renderQueue: ButtonSettingsRenderQueueFeature;
+  readonly fields: ControlsFieldsFeature;
+  readonly selection: ButtonSettingsSelectionFeature;
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
 }
@@ -327,6 +333,8 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       environment: options.environment,
       iconPicker: options.iconPicker,
       renderQueue: options.renderQueue,
+      fields: options.fields,
+      selection: options.selection,
     },
     dom: options.dom,
     cards: options.cards,

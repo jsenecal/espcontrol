@@ -242,7 +242,7 @@ describe("browserless application contracts", () => {
     for (const source of [buttonSettings, backup, stateHandlers, previewHooks, ...previewGridConsumers]) {
       assert.match(source, /GridFeature/);
     }
-    assert.match(entry, /renderSelectionBar: \(\) => renderSelectionBar\(grid\.ctx\(\)\)/);
+    assert.match(entry, /renderSelectionBar: \(\) => selection\.renderSelectionBar\(grid\.ctx\(\)\)/);
     assert.match(entry, /createAppStateEventHandlersFeature\([\s\S]*statusPreview,[\s\S]*grid/);
     assert.match(entry, /createAppBackupFeature\(\{[\s\S]*statusPreview,[\s\S]*grid/);
   });
@@ -551,7 +551,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/subpage.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerSubpageCardTypes\(registry, context\.configuration\.codec, context\.core\);/);
+    assert.match(entry, /registerSubpageCardTypes\(registry, context\.configuration\.codec, context\.core, context\.controllers\.selection\);/);
     assert.match(card, /core: Pick<CoreFeature, "subpageStateDisplayMode">/);
     assert.match(card, /const \{ subpageStateDisplayMode \} = core;/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerSubpageCardTypes/);
@@ -893,8 +893,22 @@ describe("browserless application contracts", () => {
       const source = fs.readFileSync(path.join(ROOT, "src/webserver/application", file), "utf8");
       assert.match(source, /ControlsShellFeature/, `${file} should declare its shell dependency`);
     }
-    assert.match(entry, /installControlsFieldsModule\(context\.cards, context\.configuration\.options, context\.controllers\.shell, context\.controllers\.requestApi\)/);
-    assert.match(entry, /installButtonSettingsSelectionModule\(context\.runtime, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.statusPreview, context\.controllers\.grid, context\.controllers\.renderQueue\)/);
+    assert.match(entry, /createControlsFieldsFeature\(cards, configurationOptions, shell, requestApi\)/);
+    assert.match(entry, /createButtonSettingsSelectionFeature\(/);
+    assert.doesNotMatch(entry, /installButtonSettingsSelectionModule/);
+  });
+
+  test("composes card selection without compatibility globals", () => {
+    const selection = fs.readFileSync(path.join(ROOT, "src/webserver/application/button_settings_selection.ts"), "utf8");
+    const context = fs.readFileSync(path.join(ROOT, "src/webserver/application/application_context.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(selection, /export function createButtonSettingsSelectionFeature/);
+    assert.match(selection, /fields: Pick<ControlsFieldsFeature/);
+    assert.doesNotMatch(selection, /GlobalDescriptors|staticGlobal|liveGlobal|installButtonSettingsSelectionModule/);
+    assert.match(context, /readonly selection: ButtonSettingsSelectionFeature/);
+    assert.match(entry, /selection = createButtonSettingsSelectionFeature\(/);
+    assert.doesNotMatch(globals, /\bvar (?:clearCardSelection|closeSettings|handleDocumentSelectionMouseDown|hideSettingsOverlay|isSelectionControlTarget|openClockBarTemperatureSettings|openSelectedCardSettings|renderClockBarSelectionBar|renderSelectionBar|selectClockBarItem|updatePreviewHint):/);
   });
 
   test("injects the UI shell into preview, persistence, backup, and startup modules", () => {
