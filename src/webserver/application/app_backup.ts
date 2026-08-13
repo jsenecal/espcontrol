@@ -342,6 +342,12 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                     if (nativeSubpageValue)
                         nativeDocument.subpages[Number(nativeSubpageKey)] = nativeSubpageValue;
                 }
+                var backedUpNativeConfig: any = backupPlan.config.native_config;
+                if (backedUpNativeConfig &&
+                    backedUpNativeConfig.device_profile === controllers.layout.deviceId) {
+                    nativeDocument = EspControlModel.decodePanelConfig(
+                        EspControlModel.decodePanelConfigBackupPayload(backedUpNativeConfig));
+                }
                 function queueLegacyLayoutRestore() {
                     postText(entityName("button_on_color"), backupPlan.config.button_on_color);
                     for (var legacyButtonIndex: any = 0; legacyButtonIndex < controllers.layout.numSlots; legacyButtonIndex++)
@@ -353,8 +359,9 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                 var nativeRestore: any = controllers.nativePanelConfig
                     ? controllers.nativePanelConfig.writeDocument(nativeDocument)
                     : null;
+                var nativeRestoreCompletion: any = null;
                 if (nativeRestore) {
-                    requestApi.postQueue = requestApi.postQueue.then(function () { return nativeRestore; }).then(function (result: any) {
+                    nativeRestoreCompletion = requestApi.postQueue.then(function () { return nativeRestore; }).then(function (result: any) {
                         if (result === "legacy-fallback") {
                             queueLegacyLayoutRestore();
                         }
@@ -363,6 +370,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                         }
                         return result;
                     });
+                    requestApi.postQueue = nativeRestoreCompletion;
                 }
                 else {
                     queueLegacyLayoutRestore();
@@ -608,6 +616,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                 renderPreview();
                 renderButtonSettings();
                 switchTab("screen");
+                return nativeRestoreCompletion;
                 }
                 backupRestoreController.restore(data, {
                     device: controllers.layout.deviceId,

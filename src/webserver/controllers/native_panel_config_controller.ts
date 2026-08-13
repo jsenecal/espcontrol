@@ -66,14 +66,24 @@ export class NativePanelConfigController {
     return result;
   }
 
-  async waitForDiscovery(attempts = 0): Promise<boolean | "legacy-fallback"> {
+  async waitForDiscovery(attempts = 0): Promise<boolean | "legacy-fallback" | "failed"> {
     if (this.legacyFallback_) return "legacy-fallback";
+    if (this.client_?.confirmedUnsupported()) {
+      this.legacyFallback_ = true;
+      return "legacy-fallback";
+    }
     const supported = await this.begin();
     if (supported) {
       this.legacyFallback_ = false;
       return true;
     }
-    if (!this.client_?.retryable()) return false;
+    if (this.client_?.confirmedUnsupported()) {
+      // Discovery has completed and confirmed that the native contract is not
+      // available. Callers can now safely use the legacy entity path.
+      this.legacyFallback_ = true;
+      return "legacy-fallback";
+    }
+    if (!this.client_?.retryable()) return "failed";
     if (attempts >= this.maxDiscoveryRetries_) {
       // Older firmware never exposes the native endpoints. Preserve this
       // capped decision so queued saves use their legacy paths immediately.
@@ -87,20 +97,15 @@ export class NativePanelConfigController {
   schedule(update: NativePanelConfigUpdate): Promise<NativePanelConfigSaveOutcome> | null {
     const client = this.client_;
     if (!client) return null;
-    if (!this.supported() && !client.retryable()) {
-      // A restarting panel can serve the editor before deferred endpoints are ready.
-      void this.begin();
-      return null;
-    }
     const save = this.saveQueue_
       .then(async () => this.supported() || await this.waitForDiscovery())
-      .then(async (supported) => supported === "legacy-fallback"
+      .then(async (supported) => supported === "legacy-fallback" || supported === "failed"
         ? supported
         : supported ? client.save(update) : "unsupported" as const)
       .then(async (result) => {
         if (result !== "unsupported" || !client.retryable()) return result;
         const supported = await this.waitForDiscovery();
-        if (supported === "legacy-fallback") return supported;
+        if (supported === "legacy-fallback" || supported === "failed") return supported;
         return supported ? client.save(update) : result;
       })
       .then((result) => this.report(result), () => this.report("failed"));
@@ -132,7 +137,7 @@ export class NativePanelConfigController {
   }
 
   writeDocument(document: PanelConfigDocument): Promise<NativePanelConfigSaveOutcome> | null {
-    if (!this.client_ || !this.supported()) return null;
+    if (!this.client_) return null;
     return this.schedule((current) => {
       if (current.deviceProfile !== document.deviceProfile) {
         throw new Error("The backup targets a different device profile.");

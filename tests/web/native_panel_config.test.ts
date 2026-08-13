@@ -5,6 +5,7 @@ import {
   type NativePanelConfigResponse,
 } from "../../src/webserver/features/native_panel_config";
 import { createNativePanelConfigMigrationController } from "../../src/webserver/application/native_panel_config_migration";
+import { NativePanelConfigController } from "../../src/webserver/controllers/native_panel_config_controller";
 import { decodePanelConfig, encodePanelConfig, type PanelConfigDocument } from "../../src/webserver/model";
 
 interface MigrationFixture {
@@ -107,6 +108,51 @@ export async function runNativePanelConfigTests(migrationFixture?: MigrationFixt
     json: async () => ({ configuration: { read: false, write: false, document_versions: [] } }),
   }));
   equal(await legacyClient.save((current) => current), "unsupported", "legacy firmware stays on the entity path");
+  equal(legacyClient.confirmedUnsupported(), true,
+    "a valid capabilities response can confirm that native configuration is unsupported");
+
+  let confirmedLegacyRequests = 0;
+  const confirmedLegacyClient = createNativePanelConfigClient(async () => {
+    confirmedLegacyRequests += 1;
+    if (confirmedLegacyRequests > 1) throw new Error("confirmed legacy discovery should be reused");
+    return {
+      ...response(200),
+      json: async () => ({ configuration: { read: false, write: false, document_versions: [] } }),
+    };
+  });
+
+  let discoveryAttempts = 0;
+  const recoveringDiscoveryClient = createNativePanelConfigClient(async (path, request) => {
+    if (path === "/api/v1/capabilities" && discoveryAttempts++ === 0)
+      throw new Error("temporary network failure");
+    if (path === "/api/v1/capabilities") return response(200);
+    if (request?.method === "PUT") return response(204);
+    return response(200, document, "\"7a\"");
+  });
+  equal(await recoveringDiscoveryClient.discover(), false,
+    "a failed capabilities request does not claim native support");
+  equal(recoveringDiscoveryClient.confirmedUnsupported(), false,
+    "a failed capabilities request is not mistaken for older firmware");
+  equal(await recoveringDiscoveryClient.save((current) => current), "saved",
+    "native configuration discovery can recover after a temporary failure");
+
+  const malformedCapabilitiesClient = createNativePanelConfigClient(async () => ({
+    ...response(200),
+    json: async () => ({}),
+  }));
+  equal(await malformedCapabilitiesClient.discover(), false,
+    "a capabilities object without a configuration contract is rejected");
+  equal(malformedCapabilitiesClient.confirmedUnsupported(), false,
+    "a malformed capabilities object is not mistaken for older firmware");
+
+  const malformedVersionClient = createNativePanelConfigClient(async () => ({
+    ...response(200),
+    json: async () => ({ configuration: { read: true, write: true, document_versions: ["1"] } }),
+  }));
+  equal(await malformedVersionClient.discover(), false,
+    "a non-numeric document version is rejected");
+  equal(malformedVersionClient.confirmedUnsupported(), false,
+    "a malformed version list is not mistaken for older firmware");
 
   let nativeInitializationComplete = false;
   const reconnectingClient = createNativePanelConfigClient(async (path, request) => {
@@ -155,8 +201,93 @@ export async function runNativePanelConfigTests(migrationFixture?: MigrationFixt
     });
   };
   try {
+    const confirmedLegacyController = new NativePanelConfigController({
+      fetch: null,
+      deviceProfile: () => "panel-a",
+      slotCount: () => 2,
+      entityName: (name: string) => name,
+      entityNameForSlot: (name: string, slot: number) => `${name}_${slot}`,
+      normalizeHexColor: (value: string) => value,
+      showBanner: () => undefined,
+      delay: (callback: () => void) => { callback(); return 0 as any; },
+    });
+    confirmedLegacyController.client = confirmedLegacyClient;
+    equal(await confirmedLegacyController.begin(), false,
+      "controller setup records a confirmed older-firmware response");
+    equal(await confirmedLegacyController.writeDocument(decodePanelConfig(document)), "legacy-fallback",
+      "a confirmed older-firmware result is reused without another capabilities request");
+    equal(confirmedLegacyRequests, 1,
+      "confirmed older firmware is discovered only once");
+
+    let rejectInitialDiscovery: ((reason?: unknown) => void) | undefined;
+    let recoveringControllerCapabilityRequests = 0;
+    setGlobal("fetch", async (path: string, request?: NativePanelConfigRequest) => {
+      if (path === "/api/v1/capabilities" && recoveringControllerCapabilityRequests++ === 0) {
+        return new Promise<NativePanelConfigResponse>((_resolve, reject) => {
+          rejectInitialDiscovery = reject;
+        });
+      }
+      if (path === "/api/v1/capabilities") return response(200);
+      if (request?.method === "PUT") return response(204);
+      return response(200, document, "\"8a\"");
+    });
+    const recoveringController = createNativePanelConfigMigrationController({
+      deviceProfile: () => "panel-a",
+      slotCount: () => 2,
+      entityName: (name: string) => name,
+      entityNameForSlot: (name: string, slot: number) => `${name}_${slot}`,
+      normalizeHexColor: (value: string) => value,
+      showBanner: () => undefined,
+      delay: (callback: () => void) => { callback(); return 0 as any; },
+    });
+    const failedDiscoveryRestore = recoveringController.writeDocument(decodePanelConfig(document));
+    if (!failedDiscoveryRestore) throw new Error("failed discovery restore was not queued");
+    if (!rejectInitialDiscovery) throw new Error("failing capability discovery did not start");
+    rejectInitialDiscovery(new Error("temporary network failure"));
+    equal(await failedDiscoveryRestore, "failed",
+      "a discovery error reports a failed native restore instead of using readable legacy fields");
+    equal(recoveringController.legacyFallback, false,
+      "a discovery error does not permanently latch older-firmware mode");
+    equal(await recoveringController.writeDocument(decodePanelConfig(document)), "saved",
+      "a later native restore recovers after the capability request succeeds");
+
+    let resolveInitialDiscovery: ((value: NativePanelConfigResponse) => void) | undefined;
+    let initialDiscoverySaves = 0;
+    setGlobal("fetch", async (path: string, request?: NativePanelConfigRequest) => {
+      if (path === "/api/v1/capabilities") {
+        return new Promise<NativePanelConfigResponse>((resolve) => {
+          resolveInitialDiscovery = resolve;
+        });
+      }
+      if (request?.method === "PUT") {
+        initialDiscoverySaves += 1;
+        return response(204);
+      }
+      return response(200, document, "\"9a\"");
+    });
+    const discoveringController = createNativePanelConfigMigrationController({
+      deviceProfile: () => "panel-a",
+      slotCount: () => 2,
+      entityName: (name: string) => name,
+      entityNameForSlot: (name: string, slot: number) => `${name}_${slot}`,
+      normalizeHexColor: (value: string) => value,
+      showBanner: () => undefined,
+      delay: (callback: () => void) => { callback(); return 0 as any; },
+    });
+    const initialDiscoveryRestore = discoveringController.writeDocument(decodePanelConfig(document));
+    if (!initialDiscoveryRestore) throw new Error("initial discovery restore was not queued");
+    equal(initialDiscoverySaves, 0,
+      "a restore does not fall back or write before initial capability discovery finishes");
+    if (!resolveInitialDiscovery) throw new Error("initial capability discovery did not start");
+    resolveInitialDiscovery(response(200));
+    equal(await initialDiscoveryRestore, "saved",
+      "a backup restore queued during initial discovery uses native configuration");
+    equal(initialDiscoverySaves, 1,
+      "a restore queued during initial discovery writes the native document once");
+
     let capabilityRequests = 0;
     let nativeSaves = 0;
+    const savedDocuments: PanelConfigDocument[] = [];
     setGlobal("fetch", async (path: string, request?: NativePanelConfigRequest) => {
       if (path === "/api/v1/capabilities") {
         capabilityRequests += 1;
@@ -166,6 +297,7 @@ export async function runNativePanelConfigTests(migrationFixture?: MigrationFixt
       }
       if (request?.method === "PUT") {
         nativeSaves += 1;
+        savedDocuments.push(decodePanelConfig(new Uint8Array(request.body!)));
         return response(204);
       }
       return response(200, document, "\"10\"");
@@ -182,12 +314,21 @@ export async function runNativePanelConfigTests(migrationFixture?: MigrationFixt
     });
     await Promise.resolve();
     await Promise.resolve();
+    const deferredBackupDocument = decodePanelConfig(document);
+    const deferredBackup = {
+      ...deferredBackupDocument,
+      settings: { ...deferredBackupDocument.settings, future_native_setting: "preserved" },
+    };
+    equal(await controller.writeDocument(deferredBackup), "saved",
+      "a backup restore waits for deferred native setup instead of losing native-only settings");
+    equal(savedDocuments[0]?.settings.future_native_setting, "preserved",
+      "deferred backup restore writes the exact native document");
     equal(await controller.writeText("button_order", "1,2"), "saved",
       "an edit waits for deferred native setup instead of writing a stale legacy shadow");
     equal(capabilityRequests, 2,
       "a deferred edit retries capability discovery after the temporary 404");
-    equal(nativeSaves, 1,
-      "a deferred edit is written once the native configuration endpoint is ready");
+    equal(nativeSaves, 2,
+      "deferred backup restore and edit are written once the native endpoint is ready");
 
     controller.maxDiscoveryRetries = 0;
     let permanentlyMissingCapabilityRequests = 0;
