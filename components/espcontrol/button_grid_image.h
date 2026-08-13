@@ -63,7 +63,7 @@ struct ImageCardCtx {
   int width_compensation_percent = 100;
   int media_artwork_width_compensation_percent = 100;
   bool active = false;
-  bool callbacks_bound = false;
+  esphome::artwork_image::ArtworkImage *callbacks_bound_image = nullptr;
   bool requested_once = false;
   bool image_ready = false;
   bool download_active = false;
@@ -793,14 +793,20 @@ inline void image_card_handle_modal_download_error(ImageCardCtx *ctx) {
 }
 
 inline void image_card_bind_callbacks(ImageCardCtx *ctx) {
-  if (!ctx || !ctx->image || ctx->callbacks_bound) return;
-  ctx->callbacks_bound = true;
-  ctx->image->add_on_finished_callback([ctx](bool) {
-    image_card_apply_downloaded(ctx);
-  });
-  ctx->image->add_on_error_callback([ctx]() {
-    image_card_handle_download_error(ctx);
-  });
+  if (!ctx || !ctx->image) return;
+  auto *bound_image = ctx->image;
+  bool image_changed = ctx->callbacks_bound_image != bound_image;
+  if (image_changed || !bound_image->has_on_finished_callbacks()) {
+    bound_image->add_on_finished_callback([ctx, bound_image](bool) {
+      if (ctx->image == bound_image) image_card_apply_downloaded(ctx);
+    });
+  }
+  if (image_changed || !bound_image->has_on_error_callbacks()) {
+    bound_image->add_on_error_callback([ctx, bound_image]() {
+      if (ctx->image == bound_image) image_card_handle_download_error(ctx);
+    });
+  }
+  ctx->callbacks_bound_image = bound_image;
 }
 
 inline void image_card_bind_modal_callbacks(
