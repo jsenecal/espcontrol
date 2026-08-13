@@ -28,10 +28,11 @@ export interface ButtonSettingsSelectionDependencies {
     readonly renderButtonSettings: (force?: boolean) => void;
     readonly showSelectionMenu: (event?: any) => void;
     readonly contextMenuContains: (target?: any) => boolean;
+    readonly openVoiceServicesSettings: () => void;
 }
 
 export function createButtonSettingsSelectionFeature(runtime: UiRuntimeState, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityInput">, shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton">, statusPreview: Pick<AppStatusPreviewFeature, "clockBarItemActive" | "clockBarItemLabel" | "clockBarItems" | "isClockBarTemperatureItem" | "updateClockBarItemUi">, grid: Pick<GridFeature, "ctx">, renderQueue: ButtonSettingsRenderQueueFeature, dependencies: ButtonSettingsSelectionDependencies): ButtonSettingsSelectionFeature {
-    const { document, fields: { fieldLabel, toggleRow }, renderPreview, renderButtonSettings, showSelectionMenu } = dependencies;
+    const { document, fields: { fieldLabel, toggleRow }, renderPreview, renderButtonSettings, showSelectionMenu, openVoiceServicesSettings } = dependencies;
     const { entityInput } = entityState;
     const { isConfigLocked, createActionButton } = shell;
     const els = runtime.els;

@@ -1,6 +1,5 @@
 import { state } from "../state/app_instance";
 import { normalizeHomeAssistantArtworkPort, normalizeHomeAssistantArtworkProtocol } from "../model/settings";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 import {
     firmwareInfoFromPublicManifest,
@@ -18,13 +17,18 @@ import type { FirmwareUpdatePostApiFeature } from "./firmware_update_post_api";
 import type { ArtworkPostApiFeature } from "./artwork_post_api";
 import type { PublicFirmwareInstallFeature } from "./public_firmware_install";
 import type { ControlsFieldsFeature } from "./controls_fields";
+import type { SettingsPageHelpersFeature } from "./settings_page_helpers";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;
     importBackup(): void;
 }
 
-export function installSettingsSystemSectionModule(
+export interface SettingsSystemSectionFeature {
+    buildSystemSettingsCards(...args: any[]): any;
+}
+
+export function createSettingsSystemSectionFeature(
     actions: SettingsSystemSectionActions,
     runtime: UiRuntimeState,
     firmwareVersion: FirmwareVersionFeature,
@@ -37,8 +41,10 @@ export function installSettingsSystemSectionModule(
     artworkPostApi: Pick<ArtworkPostApiFeature, "postHomeAssistantArtworkPort" | "postHomeAssistantArtworkProtocol">,
     publicFirmwareInstall: Pick<PublicFirmwareInstallFeature, "installPublicFirmwareViaWebOta">,
     fields: Pick<ControlsFieldsFeature, "fieldLabel" | "makeCollapsibleCard" | "toggleRow">,
-): GlobalDescriptors {
+    helpers: Pick<SettingsPageHelpersFeature, "disclosureBadge" | "inlineDisclosure" | "statusBadge">,
+): SettingsSystemSectionFeature {
     const { fieldLabel, makeCollapsibleCard, toggleRow } = fields;
+    const { disclosureBadge, inlineDisclosure, statusBadge } = helpers;
     const { createActionButton } = shell;
     const els = runtime.els;
     const { render: renderFirmwareVersion } = firmwareVersion;
@@ -379,6 +385,6 @@ export function installSettingsSystemSectionModule(
         };
     }
     return {
-        "buildSystemSettingsCards": staticGlobal(buildSystemSettingsCards),
+        buildSystemSettingsCards,
     };
 }

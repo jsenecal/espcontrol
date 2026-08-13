@@ -14,6 +14,7 @@ import { escHtml, iconSlug } from "../application/ui_primitives";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigMediaOptionsFeature } from "../application/config_media_options";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
+import type { SettingsUiFeature } from "../features/settings";
 import {
     MEDIA_COVER_ART_OPTION,
     MEDIA_PLAYLIST_CONTENT_TYPE_OPTION,
@@ -23,8 +24,10 @@ export function registerMediaCardTypes(
     mediaOptions: ConfigMediaOptionsFeature,
     deviceId: string,
     fields: ControlsFieldsFeature,
+    settingsUi: Pick<SettingsUiFeature, "infoPanel">,
 ): void {
     const { cardBadgeLabelHtml, cardLargeNumbersActiveForCardSize, cardSensorPreviewHtml } = fields;
+    const { infoPanel } = settingsUi;
     const {
         mediaBehaviorSpec,
         mediaCoverArtCardsSupported,

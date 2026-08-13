@@ -177,7 +177,7 @@ describe("browserless application contracts", () => {
     }
     const ntp = fs.readFileSync(path.join(ROOT, "src/webserver/application/ntp_state.ts"), "utf8");
     assert.match(ntp, /syncNtpServerUi\(runtime: UiRuntimeState, syncInput:/);
-    assert.match(entry, /statusPreview: context\.controllers\.statusPreview/);
+    assert.match(entry, /settingsHelpers = createSettingsPageHelpersFeature\([\s\S]*statusPreview,/);
     assert.match(entry, /createAppBackupFeature\([\s\S]*requestApi,[\s\S]*statusPreview/);
   });
 
@@ -194,7 +194,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview, context\.controllers\.artworkPostApi, context\.controllers\.schedulePostApi, context\.controllers\.clockBarPostApi, context\.controllers\.fields\)/);
+    assert.match(entry, /settingsPage = createSettingsPageFeature\([\s\S]*configurationCodec, runtime, core, layout, environment/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout, entityState, shell\)/);
   });
 
@@ -493,7 +493,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/slider.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs, lightCards, fields\);/);
+    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs, lightCards, fields, context\.controllers\.settingsUi\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerSliderCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:renderCoverControlTabSettings|sliderCardMetadata|sliderTypeFactory):/);
   });
@@ -539,7 +539,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.match(options, /mediaPlaylistSourceDefinitions/);
-    assert.match(entry, /registerMediaCardTypes\(registry, context\.configuration\.mediaOptions, context\.device\.id, fields\);/);
+    assert.match(entry, /registerMediaCardTypes\(registry, context\.configuration\.mediaOptions, context\.device\.id, fields, context\.controllers\.settingsUi\);/);
     assert.match(card, /deviceId: string/);
     assert.doesNotMatch(card, /\bDEVICE_ID\b/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerMediaCardTypes/);
@@ -579,7 +579,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(light, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.match(entry, /const lightCards = registerLightTemperatureCardTypes\(registry, context\.configuration\.modalTabs, fields\);/);
-    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs, lightCards, fields\);/);
+    assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs, lightCards, fields, context\.controllers\.settingsUi\);/);
     assert.match(entry, /registerSwitchCardTypes\(registry, context\.configuration\.confirmationOptions, lightCards, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerLightTemperatureCardTypes/);
     assert.match(slider, /lightCards: LightCardRegistration/);
@@ -733,7 +733,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /ConfigCodecFeature/, `${relativePath} should declare its codec dependency`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /codec: context\.configuration\.codec/);
+    assert.match(entry, /codec: configurationCodec/);
     assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview, context\.controllers\.grid\)/);
   });
 
@@ -1020,7 +1020,7 @@ describe("browserless application contracts", () => {
     assert.match(interactions, /readonly runtime: UiRuntimeState/);
     assert.match(shell, /createControlsShellFeature\([\s\S]*runtime: UiRuntimeState/);
     assert.doesNotMatch(entry, /controlsShellCompatibilityGlobals/);
-    assert.match(entry, /runtime: context\.runtime/);
+    assert.match(entry, /runtime,/);
     assert.doesNotMatch(runtime, /"(?:dragSrcPos|didDrag|previewPlaceholder|previewDropIdx|dragRafPending|dragSrcEl|dragIsSubpage|dragEnterCount)"/);
     assert.doesNotMatch(globals, /\bvar (?:dragSrcPos|didDrag|previewPlaceholder|previewDropIdx|dragRafPending|dragSrcEl|dragIsSubpage|dragEnterCount):/);
   });
@@ -1068,9 +1068,18 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview, context\.controllers\.artworkPostApi, context\.controllers\.schedulePostApi, context\.controllers\.clockBarPostApi, context\.controllers\.fields\)/);
-    assert.match(entry, /installSettingsScheduleSectionModule\(context\.configuration\.codec, context\.runtime, screenScheduleState, context\.controllers\.entityState, context\.controllers\.requestApi, context\.controllers\.schedulePostApi, context\.controllers\.fields\)/);
-    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.stateLoader, context\.controllers\.firmwarePostApi, context\.controllers\.artworkPostApi, context\.controllers\.publicFirmwareInstall, context\.controllers\.fields\)\)/);
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(entry, /settingsHelpers = createSettingsPageHelpersFeature\(/);
+    assert.match(entry, /const scheduleSection = createSettingsScheduleSectionFeature\(/);
+    assert.match(entry, /const coverArtSection = createSettingsCoverArtSectionFeature\(/);
+    assert.match(entry, /const systemSection = createSettingsSystemSectionFeature\(/);
+    assert.match(entry, /settingsPage = createSettingsPageFeature\(/);
+    assert.doesNotMatch(entry, /installSettings(?:PageHelpers|ScheduleSection|CoverArtSection|SystemSection|Page)Module/);
+    for (const moduleName of modules) {
+      const source = fs.readFileSync(path.join(ROOT, "src/webserver/application", moduleName), "utf8");
+      assert.doesNotMatch(source, /GlobalDescriptors|staticGlobal|liveGlobal/);
+    }
+    assert.doesNotMatch(globals, /\bvar (?:appendSettingsSection|buildCoverArtSettingsCard|buildScreenScheduleSettingsCard|buildSettingsPage|buildSystemSettingsCards|openVoiceServicesSettings|syncAlarmDelayAudioUi|syncClockScreensaverControls|syncCoverArtScreensaverUi|syncMediaPlayerSleepPreventionUi):/);
   });
 
   test("injects display-state DOM references", () => {

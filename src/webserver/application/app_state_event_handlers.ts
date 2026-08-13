@@ -45,6 +45,7 @@ import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { GridFeature } from "./grid";
+import type { SettingsPageHelpersFeature } from "./settings_page_helpers";
 
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
@@ -67,7 +68,9 @@ export function createAppStateEventHandlersFeature(
     clockBar: ClockBarFeature,
     statusPreview: Pick<AppStatusPreviewFeature, "appendTimezoneOption" | "normalizeNetworkTransport" | "normalizeWifiStrengthPercent" | "syncInput" | "updateClock" | "updateClockBarItemUi" | "updateNetworkPreview" | "updateSunInfo" | "updateTempPreview">,
     grid: Pick<GridFeature, "applyButtonOrderValue">,
+    settingsHelpers: Pick<SettingsPageHelpersFeature, "syncAlarmDelayAudioUi" | "syncClockScreensaverControls" | "syncCoverArtScreensaverUi" | "syncMediaPlayerSleepPreventionUi">,
 ): AppStateEventHandlersFeature {
+    const { syncAlarmDelayAudioUi, syncClockScreensaverControls, syncCoverArtScreensaverUi, syncMediaPlayerSleepPreventionUi } = settingsHelpers;
     const { syncPreviewOrientation } = core;
     const els = runtime.els;
     const { timezoneOptionsWithFallback, isHomeAssistantAutoTimezone } = environment;

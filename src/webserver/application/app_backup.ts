@@ -47,6 +47,7 @@ import type { ScreenSchedulePostApiFeature } from "./screen_schedule_post_api";
 import type { ClockBarPostApiFeature } from "./clock_bar_post_api";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { BackupContractFeature } from "./backup_contract";
+import type { SettingsPageHelpersFeature } from "./settings_page_helpers";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -74,6 +75,7 @@ export interface AppBackupControllers {
     readonly artworkPostApi: ArtworkPostApiFeature;
     readonly schedulePostApi: ScreenSchedulePostApiFeature;
     readonly clockBarPostApi: ClockBarPostApiFeature;
+    readonly settingsHelpers: Pick<SettingsPageHelpersFeature, "syncAlarmDelayAudioUi" | "syncClockScreensaverControls" | "syncCoverArtScreensaverUi" | "syncMediaPlayerSleepPreventionUi">;
 }
 
 export interface AppBackupFeature {
@@ -85,6 +87,7 @@ export interface AppBackupFeature {
 }
 
 export function createAppBackupFeature(controllers: AppBackupControllers): AppBackupFeature {
+    const { syncAlarmDelayAudioUi, syncClockScreensaverControls, syncCoverArtScreensaverUi, syncMediaPlayerSleepPreventionUi } = controllers.settingsHelpers;
     const { saveButtonConfig, saveSubpageEntity } = controllers.configPersistence;
     const { createBackupConfig, normalizeButtonConfig: backupNormalizeButtonConfig } = controllers.backupContract;
     const { entityName } = controllers.entityState;

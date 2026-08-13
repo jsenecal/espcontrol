@@ -18,13 +18,16 @@ import {
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 import type { LightCardRegistration } from "./light_temperature";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
+import type { SettingsUiFeature } from "../features/settings";
 export function registerSliderCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
     lightCards: LightCardRegistration,
     fields: ControlsFieldsFeature,
+    settingsUi: Pick<SettingsUiFeature, "inlineDisclosure">,
 ): void {
     const { cardBadgeLabelHtml } = fields;
+    const { inlineDisclosure } = settingsUi;
     const { renderControlTypeField: renderLightControlTypeField } = lightCards;
     const {
         coverControlTabDefinitions,

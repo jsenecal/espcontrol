@@ -54,11 +54,11 @@ import { createArtworkPostApiFeature } from "./application/artwork_post_api";
 import { createScreenSchedulePostApiFeature } from "./application/screen_schedule_post_api";
 import { createClockBarPostApiFeature } from "./application/clock_bar_post_api";
 import { createControlsShellFeature } from "./application/controls_shell";
-import { installSettingsPageHelpersModule } from "./application/settings_page_helpers";
-import { installSettingsScheduleSectionModule } from "./application/settings_schedule_section";
-import { installSettingsCoverArtSectionModule } from "./application/settings_cover_art_section";
-import { installSettingsSystemSectionModule } from "./application/settings_system_section";
-import { installSettingsPageModule } from "./application/settings_page";
+import { createSettingsPageHelpersFeature, type SettingsPageHelpersFeature } from "./application/settings_page_helpers";
+import { createSettingsScheduleSectionFeature } from "./application/settings_schedule_section";
+import { createSettingsCoverArtSectionFeature } from "./application/settings_cover_art_section";
+import { createSettingsSystemSectionFeature } from "./application/settings_system_section";
+import { createSettingsPageFeature, type SettingsPageFeature } from "./application/settings_page";
 import { createControlsFieldsFeature, type ControlsFieldsFeature } from "./application/controls_fields";
 import { createPreviewRenderFeature, type PreviewRenderFeature } from "./application/preview_render";
 import { createButtonSettingsSelectionFeature, type ButtonSettingsSelectionFeature } from "./application/button_settings_selection";
@@ -141,47 +141,12 @@ const startupState = globalThis as typeof globalThis & {
 
 function installApplicationCompatibility(context: ApplicationContext): void {
   const screenRotation = context.controllers.screenRotation;
-  const screenScheduleState = context.controllers.screenScheduleState;
-  const screensaverTimeout = context.controllers.screensaverTimeout;
-  const appearance = context.controllers.appearance;
-  const firmwareVersion = context.controllers.firmwareVersion;
-  const firmwareUpdate = context.controllers.firmwareUpdate;
-  const c6Firmware = context.controllers.c6Firmware;
   const clockBarState = context.controllers.clockBarState;
-  const clockBarController = context.controllers.clockBar;
-  const deviceApi = context.api;
-  const nativePanelConfig = context.configuration.native;
   const configPersistence = context.configuration.persistence;
   const cardEditorDraft = context.controllers.cardEditorDraft;
   const cardEditorValidation = context.controllers.cardEditorValidation;
   const previewPlacementController = context.controllers.previewPlacement;
   const cardEditorSave = context.controllers.cardEditorSave;
-  const settingsUiFeature = context.controllers.settingsUi;
-  const alarmDelayAudioController = context.controllers.alarmDelayAudio;
-  const screensaverController = context.controllers.screensaver;
-  const coverArtScreensaverController = context.controllers.coverArtScreensaver;
-  const mediaPlaybackController = context.controllers.mediaPlayback;
-  installGlobals(installSettingsPageHelpersModule({
-    settingsUiFeature,
-    alarmDelayAudio: alarmDelayAudioController,
-    screensaver: screensaverController,
-    coverArtScreensaver: coverArtScreensaverController,
-    mediaPlayback: mediaPlaybackController,
-    codec: context.configuration.codec,
-    runtime: context.runtime,
-    layout: context.layout,
-    screenScheduleState,
-    clockBar: clockBarState,
-    entityState: context.controllers.entityState,
-    shell: context.controllers.shell,
-    requestApi: context.controllers.requestApi,
-    statusPreview: context.controllers.statusPreview,
-    clockBarPostApi: context.controllers.clockBarPostApi,
-    fields: context.controllers.fields,
-  }));
-  installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState, context.controllers.entityState, context.controllers.requestApi, context.controllers.schedulePostApi, context.controllers.fields));
-  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState, context.controllers.statusPreview, context.controllers.artworkPostApi, context.controllers.fields));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi, context.controllers.statusPreview, context.controllers.artworkPostApi, context.controllers.schedulePostApi, context.controllers.clockBarPostApi, context.controllers.fields));
   installGlobals(context.controllers.preview.globals);
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence, context.cards,
@@ -200,11 +165,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.controllers.interactions,
     context.controllers.fields,
   ));
-  const backupUiFeature = context.backup.application;
-  installGlobals(installSettingsSystemSectionModule({
-    exportBackup: backupUiFeature.exportConfig,
-    importBackup: backupUiFeature.importConfig,
-  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader, context.controllers.firmwarePostApi, context.controllers.artworkPostApi, context.controllers.publicFirmwareInstall, context.controllers.fields));
   installGlobals(installAppModule(
     context.controllers.pageTitle,
     createWebStyles(context.layout.config.dragAnimation),
@@ -261,12 +221,12 @@ function registerCards(context: ApplicationContext) {
   registerLawnMowerCardTypes(registry, context.configuration.robotOptions, fields);
   const lightCards = registerLightTemperatureCardTypes(registry, context.configuration.modalTabs, fields);
   registerLockCardTypes(registry, context.configuration.lockOptions, fields);
-  registerMediaCardTypes(registry, context.configuration.mediaOptions, context.device.id, fields);
+  registerMediaCardTypes(registry, context.configuration.mediaOptions, context.device.id, fields, context.controllers.settingsUi);
   registerPresenceCardTypes(registry, context.configuration.options, fields);
   registerPushCardTypes(registry, fields);
   registerScreenLockCardTypes(registry, fields);
   registerSensorCardTypes(registry, context.configuration.options, fields);
-  registerSliderCardTypes(registry, context.configuration.modalTabs, lightCards, fields);
+  registerSliderCardTypes(registry, context.configuration.modalTabs, lightCards, fields, context.controllers.settingsUi);
   registerSubpageCardTypes(registry, context.configuration.codec, context.core, context.controllers.selection, fields);
   registerSwitchCardTypes(registry, context.configuration.confirmationOptions, lightCards, fields);
   registerTimezoneCardTypes(registry, context.configuration.dateTimeOptions, context.dom.document, fields);
@@ -355,12 +315,14 @@ function composeApplicationContext(): ApplicationContext {
   let contextMenu: PreviewContextMenuFeature;
   let interactions: PreviewInteractionsFeature;
   let fields: ControlsFieldsFeature;
+  let settingsHelpers: SettingsPageHelpersFeature;
+  let settingsPage: SettingsPageFeature;
   const shell = createControlsShellFeature(runtime, {
     document: dom.document,
     state: AppInstance.state,
     schedule: dom.schedule,
     cancelSchedule: (handle) => { dom.window.clearTimeout(handle); },
-    buildSettingsPage: (parent) => { buildSettingsPage(parent); },
+    buildSettingsPage: (parent) => { settingsPage.buildSettingsPage(parent); },
     closeSettings: () => { selection.closeSettings(); },
     postButtonPress: (name) => requestApi.postButtonPress(name),
     waitForReboot: () => { stateLoader.waitForReboot(); },
@@ -515,7 +477,7 @@ function composeApplicationContext(): ApplicationContext {
     screenSchedule,
     runtime,
     {
-      syncClockScreensaverControls: () => syncClockScreensaverControls(),
+      syncClockScreensaverControls: () => settingsHelpers.syncClockScreensaverControls(),
       updateSunInfo: () => statusPreview.updateSunInfo(),
     },
   );
@@ -582,6 +544,44 @@ function composeApplicationContext(): ApplicationContext {
     updateVoicePreview: () => statusPreview.updateVoicePreview(),
   });
   statusPreview = createAppStatusPreviewFeature(runtime, core, layout, environment, clockBarState);
+  const settingsUi = createSettingsUiFeature({
+    document: dom.document,
+    textSpan: (text, className) => textSpan(text, className),
+    createDisclosureChevron: shell.createDisclosureChevron,
+  });
+  const alarmDelayAudio = createAlarmDelayAudioController({
+    announcement: (value, fallback) => Model.normalizeAlarmDelayAnnouncement(value, fallback),
+    beepVolume: (value) => Model.normalizeAlarmDelayBeepVolume(value),
+    finalCountdown: (value) => Model.normalizeAlarmDelayFinalCountdown(value),
+  });
+  const screensaver = createScreensaverController({
+    action: (value) => Model.normalizeScreensaverAction(value),
+    dimBrightness: (value) => Model.normalizeScreensaverDimmedBrightness(value),
+    clockBrightness: (value, fallback) => Model.normalizeClockBrightness(value, fallback),
+  });
+  const coverArtScreensaver = createCoverArtScreensaverController({
+    delay: (value) => Model.normalizeCoverArtDelay(value),
+    trackOverlayDuration: (value) => parseFloat(String(value)) || 0,
+  });
+  const mediaPlayback = createMediaPlaybackController();
+  settingsHelpers = createSettingsPageHelpersFeature({
+    settingsUiFeature: settingsUi,
+    alarmDelayAudio,
+    screensaver,
+    coverArtScreensaver,
+    mediaPlayback,
+    codec: configurationCodec,
+    runtime,
+    layout,
+    screenScheduleState,
+    clockBar: clockBarState,
+    entityState,
+    shell,
+    requestApi,
+    statusPreview,
+    clockBarPostApi,
+    fields,
+  });
   selection = createButtonSettingsSelectionFeature(
     runtime,
     clockBarState,
@@ -597,6 +597,7 @@ function composeApplicationContext(): ApplicationContext {
       renderButtonSettings: (force) => renderButtonSettings(force),
       showSelectionMenu: (event) => contextMenu.showSelection(event),
       contextMenuContains: (target) => contextMenu.contains(target),
+      openVoiceServicesSettings: () => settingsHelpers.openVoiceServicesSettings(),
     },
   );
   preview = createPreviewRenderFeature({
@@ -645,7 +646,7 @@ function composeApplicationContext(): ApplicationContext {
     renderPreview: () => preview.render(),
     renderButtonSettings: () => renderButtonSettings(),
     openCardSettings: (slot) => openCardSettings(slot),
-    openVoiceServicesSettings: () => openVoiceServicesSettings(),
+    openVoiceServicesSettings: () => settingsHelpers.openVoiceServicesSettings(),
     addSlot: (position) => interactions.addSlot(position),
     addSubpageSlot: (position) => interactions.addSubpageSlot(position),
     duplicateButton: (slot) => interactions.duplicateButton(slot),
@@ -686,27 +687,8 @@ function composeApplicationContext(): ApplicationContext {
     clockBarState,
     statusPreview,
     grid,
+    settingsHelpers,
   );
-  const settingsUi = createSettingsUiFeature({
-    document: dom.document,
-    textSpan: (text, className) => textSpan(text, className),
-    createDisclosureChevron: shell.createDisclosureChevron,
-  });
-  const alarmDelayAudio = createAlarmDelayAudioController({
-    announcement: (value, fallback) => Model.normalizeAlarmDelayAnnouncement(value, fallback),
-    beepVolume: (value) => Model.normalizeAlarmDelayBeepVolume(value),
-    finalCountdown: (value) => Model.normalizeAlarmDelayFinalCountdown(value),
-  });
-  const screensaver = createScreensaverController({
-    action: (value) => Model.normalizeScreensaverAction(value),
-    dimBrightness: (value) => Model.normalizeScreensaverDimmedBrightness(value),
-    clockBrightness: (value, fallback) => Model.normalizeClockBrightness(value, fallback),
-  });
-  const coverArtScreensaver = createCoverArtScreensaverController({
-    delay: (value) => Model.normalizeCoverArtDelay(value),
-    trackOverlayDuration: (value) => parseFloat(String(value)) || 0,
-  });
-  const mediaPlayback = createMediaPlaybackController();
   const backupModel = createBackupFeature({
     deviceId: layout.deviceId,
     gridCols: layout.gridCols,
@@ -837,6 +819,7 @@ function composeApplicationContext(): ApplicationContext {
     artworkPostApi,
     schedulePostApi,
     clockBarPostApi,
+    settingsHelpers,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: stateLoader.eventStreamEnabled,
@@ -868,6 +851,27 @@ function composeApplicationContext(): ApplicationContext {
     shell,
     requestApi,
     appEvents,
+  );
+  const scheduleSection = createSettingsScheduleSectionFeature(
+    configurationCodec, runtime, screenScheduleState, entityState, requestApi,
+    schedulePostApi, fields, settingsHelpers,
+  );
+  const coverArtSection = createSettingsCoverArtSectionFeature(
+    configurationCodec, runtime, entityState, statusPreview, artworkPostApi,
+    fields, settingsHelpers, coverArtScreensaver, mediaPlayback,
+  );
+  const systemSection = createSettingsSystemSectionFeature({
+    exportBackup: backupApplication.exportConfig,
+    importBackup: backupApplication.importConfig,
+  }, runtime, firmwareVersion, firmwareUpdate, c6Firmware, shell, requestApi,
+  stateLoader, firmwarePostApi, artworkPostApi, publicFirmwareInstall, fields,
+  settingsHelpers);
+  settingsPage = createSettingsPageFeature(
+    configurationCodec, runtime, core, layout, environment, screenScheduleState,
+    screensaverTimeout, screenRotation, appearance, clockBarState, entityState,
+    shell, requestApi, statusPreview, artworkPostApi, schedulePostApi,
+    clockBarPostApi, fields, settingsHelpers, scheduleSection, coverArtSection,
+    systemSection,
   );
   requestApi.connectReconnect(appEvents.connect);
   return createApplicationContext({

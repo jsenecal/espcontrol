@@ -1,6 +1,5 @@
 import { state } from "../state/app_instance";
 import { normalizeHexColor } from "../model/settings";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
@@ -8,7 +7,14 @@ import type { EntityStateFeature } from "./entity_state";
 import type { ApplicationApiFeature } from "./api";
 import type { ScreenSchedulePostApiFeature } from "./screen_schedule_post_api";
 import type { ControlsFieldsFeature } from "./controls_fields";
-export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, schedule: ScreenScheduleStateFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, requestApi: Pick<ApplicationApiFeature, "postText">, schedulePostApi: ScreenSchedulePostApiFeature, fields: Pick<ControlsFieldsFeature, "colorField" | "condField" | "createRangeSlider" | "fieldLabel" | "makeCollapsibleCard" | "segmentControl" | "selectField">): GlobalDescriptors {
+import type { SettingsPageHelpersFeature } from "./settings_page_helpers";
+
+export interface SettingsScheduleSectionFeature {
+    buildScreenScheduleSettingsCard(...args: any[]): any;
+}
+
+export function createSettingsScheduleSectionFeature(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, schedule: ScreenScheduleStateFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, requestApi: Pick<ApplicationApiFeature, "postText">, schedulePostApi: ScreenSchedulePostApiFeature, fields: Pick<ControlsFieldsFeature, "colorField" | "condField" | "createRangeSlider" | "fieldLabel" | "makeCollapsibleCard" | "segmentControl" | "selectField">, helpers: Pick<SettingsPageHelpersFeature, "createHourSelect" | "infoPanel" | "statusBadge">): SettingsScheduleSectionFeature {
+    const { createHourSelect, infoPanel, statusBadge } = helpers;
     const { colorField, condField, createRangeSlider, fieldLabel, makeCollapsibleCard, segmentControl, selectField } = fields;
     const { entityName, entityInput } = entityState;
     const { bindTextPost } = codec;
@@ -188,6 +194,6 @@ export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeat
         return scheduleCard;
     }
     return {
-        "buildScreenScheduleSettingsCard": staticGlobal(buildScreenScheduleSettingsCard),
+        buildScreenScheduleSettingsCard,
     };
 }
