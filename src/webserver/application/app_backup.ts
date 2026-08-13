@@ -30,6 +30,10 @@ import type { PanelConfigDocument } from "../model";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { CoreFeature } from "./core";
+import { syncLanguageSelect } from "./language_state";
+import { hasCustomNtpServers, syncNtpServerUi } from "./ntp_state";
+import { syncIdleUi } from "./idle_state";
+import { getActiveScreensaverMode } from "./screensaver_state";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -408,13 +412,13 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                     syncFirmwareUpdateUi();
                     if (els.setTimezone)
                         els.setTimezone.value = state.timezone;
-                    syncLanguageSelect();
+                    syncLanguageSelect(controllers.runtime);
                     if (els.setClockFormat)
                         els.setClockFormat.value = state.clockFormat;
-                    syncNtpServerUi();
+                    syncNtpServerUi(controllers.runtime);
                     syncClockScreensaverControls();
                     syncScreensaverTimeoutUi();
-                    syncIdleUi();
+                    syncIdleUi(controllers.runtime);
                     if (els.setScreenRotation)
                         els.setScreenRotation.value = state.screenRotation;
                     syncPreviewOrientation();

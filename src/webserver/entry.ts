@@ -16,15 +16,10 @@ import {
 import { createCardRegistry } from "./application/card_registry";
 import { createWebStyles } from "./application/styles";
 import { createUiRuntimeState } from "./application/state";
-import { installLanguageStateModule } from "./application/language_state";
 import { installEnvironmentStateModule } from "./application/environment_state";
 import { installScreenRotationStateModule } from "./application/screen_rotation_state";
 import { installScreenScheduleStateModule } from "./application/screen_schedule_state";
-import { installNtpStateModule } from "./application/ntp_state";
 import { installAppearanceStateModule } from "./application/appearance_state";
-import { installIdleStateModule } from "./application/idle_state";
-import { installArtworkStateModule } from "./application/artwork_state";
-import { installScreensaverStateModule } from "./application/screensaver_state";
 import { installFirmwareVersionStateModule } from "./application/firmware_version_state";
 import { installEntityStateModule } from "./application/entity_state";
 import { installClockBarStateModule } from "./application/clock_bar_state";
@@ -143,7 +138,6 @@ const startupState = globalThis as typeof globalThis & {
 };
 
 function installApplicationCompatibility(context: ApplicationContext): void {
-  installGlobals(installLanguageStateModule(context.runtime));
   const voiceServicesController = context.controllers.voiceServices;
   installGlobals(installEnvironmentStateModule(
     voiceServicesController,
@@ -153,11 +147,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installScreenRotationStateModule(context.runtime, context.layout));
   const screenScheduleController = context.controllers.screenSchedule;
   installGlobals(installScreenScheduleStateModule(screenScheduleController, context.runtime));
-  installGlobals(installNtpStateModule(context.runtime));
   installGlobals(installAppearanceStateModule(context.runtime));
-  installGlobals(installIdleStateModule(context.runtime));
-  installGlobals(installArtworkStateModule());
-  installGlobals(installScreensaverStateModule());
   installGlobals(installFirmwareVersionStateModule(context.runtime));
   installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout));
   const clockBarController = context.controllers.clockBar;

@@ -31,6 +31,10 @@ import {
 import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 import type { CoreFeature } from "./core";
+import { languageOptionsWithFallback, syncLanguageSelect } from "./language_state";
+import { hasCustomNtpServers, syncNtpServerUi } from "./ntp_state";
+import { syncIdleUi } from "./idle_state";
+import { getActiveScreensaverMode } from "./screensaver_state";
 
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
@@ -166,7 +170,7 @@ export function installAppStateEventHandlersModule(
             },
             "number-home_screen_timeout": function (this: any, val?: any) {
                 state.homeScreenTimeout = parseFloat(val) || 0;
-                syncIdleUi();
+                syncIdleUi(runtime);
             },
             "switch-screen_saver__clock": function (this: any, val?: any, d?: any) {
                 state.clockScreensaverOn = d.value === true || val === "ON";
@@ -396,7 +400,7 @@ export function installAppStateEventHandlersModule(
                 if (d.option && Array.isArray(d.option)) {
                     state.languageOptions = languageOptionsWithFallback(d.option, state.language);
                 }
-                syncLanguageSelect();
+                syncLanguageSelect(runtime);
                 renderPreview();
             },
             "select-screen__clock_format": function (this: any, val?: any, d?: any) {
@@ -420,17 +424,17 @@ export function installAppStateEventHandlersModule(
             "text-screen__ntp_server_1": function (this: any, val?: any) {
                 state.ntpServer1 = normalizeNtpServer(val, NTP_SERVER_DEFAULTS[0]);
                 state.customNtpServers = state.customNtpServers || hasCustomNtpServers();
-                syncNtpServerUi();
+                syncNtpServerUi(runtime);
             },
             "text-screen__ntp_server_2": function (this: any, val?: any) {
                 state.ntpServer2 = normalizeNtpServer(val, NTP_SERVER_DEFAULTS[1]);
                 state.customNtpServers = state.customNtpServers || hasCustomNtpServers();
-                syncNtpServerUi();
+                syncNtpServerUi(runtime);
             },
             "text-screen__ntp_server_3": function (this: any, val?: any) {
                 state.ntpServer3 = normalizeNtpServer(val, NTP_SERVER_DEFAULTS[2]);
                 state.customNtpServers = state.customNtpServers || hasCustomNtpServers();
-                syncNtpServerUi();
+                syncNtpServerUi(runtime);
             },
             "select-screen__rotation": function (this: any, val?: any, d?: any) {
                 state.screenRotation = normalizeScreenRotation(d.value || val || state.screenRotation);

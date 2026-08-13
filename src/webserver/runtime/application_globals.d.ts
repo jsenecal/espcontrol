@@ -51,7 +51,6 @@ declare global {
   var addSubpageSlot: any;
   var addSupportButton: any;
   var allScreenRotationOptions: any;
-  var appendLanguageOption: any;
   var appendScreenRotationOption: any;
   var appendSettingsSection: any;
   var appendTimezoneOption: any;
@@ -228,7 +227,6 @@ declare global {
   var formatGmtOffset: any;
   var formatHour: any;
   var formatTimezoneOption: any;
-  var getActiveScreensaverMode: any;
   var getCellFromEvent: any;
   var getJsonFirst: any;
   var getJsonQuietly: any;
@@ -238,7 +236,6 @@ declare global {
   var groupCardSettingsFields: any;
   var handleBtnClick: any;
   var handleDocumentSelectionMouseDown: any;
-  var hasCustomNtpServers: any;
   var hasRememberedPostPath: any;
   var hideContextMenu: any;
   var hideSettingsOverlay: any;
@@ -256,8 +253,6 @@ declare global {
   var isConfigLocked: any;
   var isHomeAssistantAutoTimezone: any;
   var isSelectionControlTarget: any;
-  var languageLabel: any;
-  var languageOptionsWithFallback: any;
   var latestFirmwareInfo: any;
   var latestFirmwareInfoFromState: any;
   var latestFirmwareInstallAction: any;
@@ -409,7 +404,6 @@ declare global {
   var renderPreview: any;
   var renderSelectionBar: any;
   var resetAppearanceColors: any;
-  var resetNtpServersToDefaults: any;
   var resetPostQueueError: any;
   var resizeSlot: any;
   var scheduleMainGridSave: any;
@@ -486,11 +480,8 @@ declare global {
   var syncFirmwareUpdateUi: any;
   var syncFirmwareCardBadge: any;
   var syncFirmwareVersionSelect: any;
-  var syncIdleUi: any;
   var syncInput: any;
-  var syncLanguageSelect: any;
   var syncMediaPlayerSleepPreventionUi: any;
-  var syncNtpServerUi: any;
   var syncOptionalClockBrightness: any;
   var syncScreenRotationSelect: any;
   var syncScreenScheduleUi: any;

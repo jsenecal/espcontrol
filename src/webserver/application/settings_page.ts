@@ -12,6 +12,10 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { CoreFeature } from "./core";
 import type { ApplicationLayoutState } from "./application_context";
+import { appendLanguageOption, languageOptionsWithFallback } from "./language_state";
+import { hasCustomNtpServers, resetNtpServersToDefaults, syncNtpServerUi } from "./ntp_state";
+import { syncIdleUi } from "./idle_state";
+import { getActiveScreensaverMode } from "./screensaver_state";
 export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState): GlobalDescriptors {
     const { bindTextPost } = codec;
     const { syncPreviewOrientation } = core;
@@ -172,7 +176,7 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
                 postText(entityName("screen_ntp_server_2"), state.ntpServer2);
                 postText(entityName("screen_ntp_server_3"), state.ntpServer3);
             }
-            syncNtpServerUi();
+            syncNtpServerUi(runtime);
         });
         var ntpList: any = document.createElement("div");
         ntpList.className = "sp-field-stack";
@@ -185,7 +189,7 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
                 this.value = value;
                 state[stateKey] = value;
                 state.customNtpServers = true;
-                syncNtpServerUi();
+                syncNtpServerUi(runtime);
                 postText(postName, value);
             });
             input.addEventListener("keydown", function (this: any, e?: any) {
@@ -199,7 +203,7 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
         els.setNtpServer2 = addNtpServerInput("sp-set-ntp-server-2", "ntpServer2", entityName("screen_ntp_server_2"), NTP_SERVER_DEFAULTS[1], "NTP Server 2");
         els.setNtpServer3 = addNtpServerInput("sp-set-ntp-server-3", "ntpServer3", entityName("screen_ntp_server_3"), NTP_SERVER_DEFAULTS[2], "NTP Server 3");
         ntpField.appendChild(ntpList);
-        syncNtpServerUi();
+        syncNtpServerUi(runtime);
         clockBody.appendChild(ntpField);
         var timeSettingsCard: any = makeCollapsibleCard("Time", clockBody, true);
         var clockBarBody: any = document.createElement("div");
@@ -434,14 +438,14 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
         });
         hsSelect.addEventListener("change", function (this: any) {
             state.homeScreenTimeout = parseFloat(this.value) || 0;
-            syncIdleUi();
+            syncIdleUi(runtime);
             postHomeScreenTimeout(this.value);
         });
         idleBody.appendChild(hsSelect);
         els.setHSTimeout = hsSelect;
         var idleBadge: any = statusBadge("Idle on");
         els.setIdleBadge = idleBadge;
-        syncIdleUi();
+        syncIdleUi(runtime);
         var idleCard: any = makeCollapsibleCard("Idle", idleBody, true, idleBadge);
         var systemSettingsCards: any = buildSystemSettingsCards();
         appendSettingsSection(config, "Display", [

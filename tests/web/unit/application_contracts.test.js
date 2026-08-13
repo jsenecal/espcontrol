@@ -60,6 +60,20 @@ describe("browserless application contracts", () => {
     assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout\)/);
   });
 
+  test("imports shared settings state helpers without application globals", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const settings = fs.readFileSync(path.join(ROOT, "src/webserver/application/settings_page.ts"), "utf8");
+    const handlers = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_state_event_handlers.ts"), "utf8");
+    const backup = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_backup.ts"), "utf8");
+    assert.doesNotMatch(entry, /install(?:Language|Ntp|Idle|Artwork|Screensaver)StateModule/);
+    assert.equal(fs.existsSync(path.join(ROOT, "src/webserver/application/artwork_state.ts")), false);
+    for (const source of [settings, handlers, backup]) {
+      assert.match(source, /from "\.\/(?:language|ntp|idle|screensaver)_state"/);
+    }
+    assert.doesNotMatch(globals, /\bvar (?:appendLanguageOption|getActiveScreensaverMode|hasCustomNtpServers|languageLabel|languageOptionsWithFallback|resetNtpServersToDefaults|syncIdleUi|syncLanguageSelect|syncNtpServerUi):/);
+  });
+
   test("registers migrated card families through the typed registry", () => {
     const migratedCards = [
       ["sensor", "registerSensorCardTypes"],
