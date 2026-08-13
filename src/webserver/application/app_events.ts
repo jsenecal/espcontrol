@@ -29,6 +29,7 @@ import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { StateLoaderFeature } from "./state_loader_api";
+import type { GridMigrationFeature } from "./grid_migration";
 
 export function installAppEventsModule(
     reconnectController: ReconnectController<unknown>,
@@ -41,6 +42,7 @@ export function installAppEventsModule(
     entityState: Pick<EntityStateFeature, "rememberEntityPostPath">,
     shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">,
     stateLoader: Pick<StateLoaderFeature, "refreshFirmwareVersion" | "refreshScreensaverTimeout">,
+    gridMigration: Pick<GridMigrationFeature, "schedule">,
 ): GlobalDescriptors {
     const { rememberEntityPostPath } = entityState;
     const { setConfigLocked, showBanner } = shell;
@@ -66,7 +68,7 @@ export function installAppEventsModule(
                 btn.textContent = "Apply Configuration";
             });
             clearTimeout(runtime.migrationTimer as any);
-            runtime.migrationTimer = setTimeout(scheduleMigration, 5000);
+            runtime.migrationTimer = setTimeout(gridMigration.schedule, 5000);
             clearTimeout(runtime.sliderMigrationTimer as any);
             runtime.pendingSliderSubpageMigrations = {};
             stateLoader.refreshFirmwareVersion();

@@ -6,10 +6,7 @@ import type { CoreFeature } from "./core";
 import type { ApplicationLayoutState } from "./application_context";
 import type { EnvironmentStateFeature } from "./environment_state";
 import type { ClockBarFeature } from "./clock_bar_state";
-import type { EntityStateFeature } from "./entity_state";
-import type { ApplicationApiFeature } from "./api";
-export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityName">, requestApi: Pick<ApplicationApiFeature, "postText">): GlobalDescriptors {
-    const { entityName } = entityState;
+export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, clockBar: ClockBarFeature): GlobalDescriptors {
     const { now: webserverNow } = core;
     const { isHomeAssistantAutoTimezone, effectiveTimezoneOptionForWeb, voiceServicesUiState } = environment;
     const els = runtime.els;
@@ -258,34 +255,6 @@ export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: Cor
         if (el && document.activeElement !== el)
             el.value = val;
     }
-    function gridHasAny(this: any) {
-        for (var i: any = 0; i < layout.numSlots; i++) {
-            if ((state.grid[i] ?? 0) > 0)
-                return true;
-        }
-        return false;
-    }
-    function scheduleMigration(this: any) {
-        if (runtime.orderReceived || gridHasAny())
-            return;
-        clearTimeout(runtime.migrationTimer as any);
-        runtime.migrationTimer = setTimeout(function (this: any) {
-            if (runtime.orderReceived || gridHasAny())
-                return;
-            var pos: any = 0;
-            for (var i: any = 0; i < layout.numSlots; i++) {
-                if (state.buttons[i]?.entity && pos < layout.numSlots) {
-                    state.grid[pos] = i + 1;
-                    pos++;
-                }
-            }
-            if (pos > 0) {
-                renderPreview();
-                renderButtonSettings();
-                requestApi.postText(entityName("button_order"), serializeGrid(state.grid));
-            }
-        }, 2000);
-    }
     function updateSunInfo(this: any) {
         var el: any = els.sunInfo;
         if (!el)
@@ -385,8 +354,6 @@ export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: Cor
         "syncClockBarItemElement": staticGlobal(syncClockBarItemElement),
         "updateClockBarItemUi": staticGlobal(updateClockBarItemUi),
         "syncInput": staticGlobal(syncInput),
-        "gridHasAny": staticGlobal(gridHasAny),
-        "scheduleMigration": staticGlobal(scheduleMigration),
         "updateSunInfo": staticGlobal(updateSunInfo),
         "updateTempPreview": staticGlobal(updateTempPreview),
         "normalizeNetworkTransport": staticGlobal(normalizeNetworkTransport),

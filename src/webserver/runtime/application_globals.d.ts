@@ -148,7 +148,6 @@ declare global {
   var formatTimezoneOption: any;
   var getCellFromEvent: any;
   var getTzId: any;
-  var gridHasAny: any;
   var groupCardSettingsFields: any;
   var handleBtnClick: any;
   var handleDocumentSelectionMouseDown: any;
@@ -264,7 +263,6 @@ declare global {
   var saveButtonConfig: any;
   var saveSubpageEntity: any;
   var saveSubpageEntityLegacy: any;
-  var scheduleMigration: any;
   var scheduleRender: any;
   var scheduleSliderSubpageMigration: any;
   var segmentControl: any;

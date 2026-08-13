@@ -17,10 +17,10 @@ import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
+import type { GridMigrationFeature } from "./grid_migration";
 export interface StateLoaderDependencies {
     readonly subpageEntityKeys: () => string[];
     readonly connectEvents: () => void;
-    readonly scheduleMigration: () => void;
 }
 
 export interface StateLoaderFeature {
@@ -35,7 +35,7 @@ export interface StateLoaderFeature {
     waitForReboot(): void;
 }
 
-export function createStateLoaderFeature(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, c6Firmware: C6FirmwareFeature, entityState: Pick<EntityStateFeature, "entityStateItems" | "entityStateItemsForSlots" | "entityLookupNames" | "rememberEntityPostPath" | "entityName" | "entityObjectIds">, shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">, requestApi: Pick<ApplicationApiFeature, "getJsonQuietly" | "getJsonFirst" | "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">, dependencies: StateLoaderDependencies): StateLoaderFeature {
+export function createStateLoaderFeature(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, c6Firmware: C6FirmwareFeature, entityState: Pick<EntityStateFeature, "entityStateItems" | "entityStateItemsForSlots" | "entityLookupNames" | "rememberEntityPostPath" | "entityName" | "entityObjectIds">, shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">, requestApi: Pick<ApplicationApiFeature, "getJsonQuietly" | "getJsonFirst" | "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">, gridMigration: Pick<GridMigrationFeature, "schedule">, dependencies: StateLoaderDependencies): StateLoaderFeature {
     const { entityStateItems, entityStateItemsForSlots, entityLookupNames, rememberEntityPostPath, entityName, entityObjectIds } = entityState;
     const { setConfigLocked, showBanner } = shell;
     const { getJsonQuietly, getJsonFirst, entityDetailPath, entityDetailPaths, entityInitialDetail } = requestApi;
@@ -126,7 +126,7 @@ export function createStateLoaderFeature(runtime: UiRuntimeState, layout: Applic
             if (onLoaded)
                 onLoaded();
             clearTimeout(runtime.migrationTimer as any);
-            runtime.migrationTimer = setTimeout(dependencies.scheduleMigration, 5000);
+            runtime.migrationTimer = setTimeout(gridMigration.schedule, 5000);
             clearTimeout(runtime.sliderMigrationTimer as any);
             runtime.pendingSliderSubpageMigrations = {};
             loadStateItems(settingsStateEntities(), handleState, 2).then(function (this: any) {

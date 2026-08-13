@@ -51,6 +51,7 @@ import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { StateLoaderFeature } from "./state_loader_api";
+import type { GridMigrationFeature } from "./grid_migration";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -117,6 +118,7 @@ export interface ApplicationContext {
     readonly shell: ControlsShellFeature;
     readonly requestApi: ApplicationApiFeature;
     readonly stateLoader: StateLoaderFeature;
+    readonly gridMigration: GridMigrationFeature;
     readonly alarmDelayAudio: AlarmDelayAudioController;
     readonly cardEditorDraft: CardEditorDraftController;
     readonly cardEditorSave: CardEditorSaveController;
@@ -177,6 +179,7 @@ export interface ApplicationContextOptions {
   readonly shell: ControlsShellFeature;
   readonly requestApi: ApplicationApiFeature;
   readonly stateLoader: StateLoaderFeature;
+  readonly gridMigration: GridMigrationFeature;
   readonly alarmDelayAudio: AlarmDelayAudioController;
   readonly cardEditorDraft: CardEditorDraftController;
   readonly cardEditorSave: CardEditorSaveController;
@@ -257,6 +260,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       shell: options.shell,
       requestApi: options.requestApi,
       stateLoader: options.stateLoader,
+      gridMigration: options.gridMigration,
       alarmDelayAudio: options.alarmDelayAudio,
       cardEditorDraft: options.cardEditorDraft,
       cardEditorSave: options.cardEditorSave,

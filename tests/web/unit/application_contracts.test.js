@@ -100,6 +100,20 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:cardStateEntities|eventStreamEnabled|loadInitialState|loadStateItems|refreshFirmwareVersion|refreshScreensaverTimeout|settingsStateEntities|subpageStateEntities|waitForReboot):/);
   });
 
+  test("owns legacy grid migration without application globals", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const migration = fs.readFileSync(path.join(ROOT, "src/webserver/application/grid_migration.ts"), "utf8");
+    const statusPreview = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_status_preview.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(migration, /export interface GridMigrationFeature/);
+    assert.match(migration, /export function createGridMigrationFeature/);
+    assert.match(entry, /gridMigration = createGridMigrationFeature\(/);
+    assert.match(entry, /context\.controllers\.stateLoader, context\.controllers\.gridMigration/);
+    assert.match(entry, /requestApi,[\s\S]*gridMigration,[\s\S]*subpageEntityKeys:/);
+    assert.doesNotMatch(statusPreview, /\b(?:gridHasAny|scheduleMigration)\b/);
+    assert.doesNotMatch(globals, /\bvar (?:gridHasAny|scheduleMigration):/);
+  });
+
   test("imports the browser core service without ambient application names", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");

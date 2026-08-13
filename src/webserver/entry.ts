@@ -49,6 +49,7 @@ import { createConfigCodecFeature } from "./application/config_codec";
 import { createNativePanelConfigMigrationController } from "./application/native_panel_config_migration";
 import { createConfigPersistenceFeature } from "./application/config_post_api";
 import { createStateLoaderFeature, type StateLoaderFeature } from "./application/state_loader_api";
+import { createGridMigrationFeature } from "./application/grid_migration";
 import { installArtworkPostApiModule } from "./application/artwork_post_api";
 import { installScreenSchedulePostApiModule } from "./application/screen_schedule_post_api";
 import { installClockBarPostApiModule } from "./application/clock_bar_post_api";
@@ -256,7 +257,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     importBackup: backupUiFeature.importConfig,
   }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader));
   installGlobals(backupUiFeature.globals);
-  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState, context.controllers.entityState, context.controllers.requestApi));
+  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
   installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, firmwareVersion, firmwareUpdate, c6Firmware, clockBarState, (factory) => {
@@ -265,7 +266,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const reconnectController = context.controllers.reconnect;
   if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
   installGlobals(installAppEventsModule(
-    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState, context.controllers.shell, context.controllers.stateLoader,
+    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState, context.controllers.shell, context.controllers.stateLoader, context.controllers.gridMigration,
   ));
   installGlobals(installAppModule(
     context.controllers.pageTitle,
@@ -553,6 +554,11 @@ function composeApplicationContext(): ApplicationContext {
   );
   configurationPersistence.connectRequestApi(requestApi);
   configurationCodec.connectRequestApi(requestApi);
+  const gridMigration = createGridMigrationFeature(runtime, layout, {
+    renderPreview: () => renderPreview(),
+    renderButtonSettings: () => renderButtonSettings(),
+    postOrder: (value) => { void requestApi.postText(entityState.entityName("button_order"), value); },
+  });
   stateLoader = createStateLoaderFeature(
     runtime,
     layout,
@@ -563,10 +569,10 @@ function composeApplicationContext(): ApplicationContext {
     entityState,
     shell,
     requestApi,
+    gridMigration,
     {
       subpageEntityKeys: configurationPersistence.subpageEntityKeys,
       connectEvents: () => connectEvents(),
-      scheduleMigration: () => scheduleMigration(),
     },
   );
   const clockBar = createClockBarController();
@@ -777,6 +783,7 @@ function composeApplicationContext(): ApplicationContext {
     shell,
     requestApi,
     stateLoader,
+    gridMigration,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,
