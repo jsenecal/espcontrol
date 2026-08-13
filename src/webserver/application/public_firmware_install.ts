@@ -12,6 +12,7 @@ import {
 
 export function installPublicFirmwareInstallModule(
     deviceApi: DeviceApi,
+    deviceId: string,
 ): GlobalDescriptors {
     // ── Public Firmware Web OTA ────────────────────────────────────────────
     function ensurePublicFirmwareOtaUrl(this: any, info?: any) {
@@ -37,7 +38,7 @@ export function installPublicFirmwareInstallModule(
     }
     function publicFirmwareOtaFilename(this: any, info?: any) {
         return info && info.ota_filename ? info.ota_filename :
-            (state.firmwareOtaFilename || (DEVICE_ID + ".ota.bin"));
+            (state.firmwareOtaFilename || (deviceId + ".ota.bin"));
     }
     function installPublicFirmwareViaWebOta(this: any, info?: any) {
         info = info || selectedFirmwareInfo();

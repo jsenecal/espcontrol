@@ -3,7 +3,7 @@ import { firmwareVersionsSame, isSpecificFirmwareVersion } from "./firmware_meta
 import { escHtml } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
-export function installFirmwareUpdateStateModule(runtime: UiRuntimeState): GlobalDescriptors {
+export function installFirmwareUpdateStateModule(runtime: UiRuntimeState, deviceId: string): GlobalDescriptors {
     const els = runtime.els;
     // ── Firmware Update State ─────────────────────────────────────────────
     var firmwareInstallRefreshTimer: any = null;
@@ -39,7 +39,7 @@ export function installFirmwareUpdateStateModule(runtime: UiRuntimeState): Globa
             latest_version: state.firmwareLatestVersion,
             release_url: state.firmwareReleaseUrl,
             ota_url: state.firmwareOtaUrl,
-            ota_filename: state.firmwareOtaFilename || (DEVICE_ID + ".ota.bin"),
+            ota_filename: state.firmwareOtaFilename || (deviceId + ".ota.bin"),
             ota_md5: state.firmwareOtaMd5,
         };
     }

@@ -9,7 +9,6 @@ declare global {
   var _screenScheduleController: any;
   var screenScheduleControllerState: any;
   var applyScreenScheduleControllerState: any;
-  var DEVICE_ID: any;
   var FAVICON_SVG: any;
   var FIRMWARE_CHECKING_VERSION_LABEL: any;
   var FIRMWARE_DEV_VERSION_LABEL: any;

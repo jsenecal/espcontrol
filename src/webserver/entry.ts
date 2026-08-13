@@ -164,7 +164,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installEntityStateModule(context.configuration.confirmationOptions));
   const clockBarController = context.controllers.clockBar;
   installGlobals(installClockBarStateModule(clockBarController, context.runtime, context.core));
-  installGlobals(installFirmwareUpdateStateModule(context.runtime));
+  installGlobals(installFirmwareUpdateStateModule(context.runtime, context.device.id));
   installGlobals(installScreensaverTimeoutModule(context.runtime));
   installGlobals(installC6FirmwareUiModule(context.runtime));
   installGlobals(installGridModule(context.configuration.codec, context.runtime));
@@ -176,7 +176,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const previewPlacementController = context.controllers.previewPlacement;
   installGlobals(installApiModule(nativePanelConfig, deviceApi));
   installGlobals(installFirmwareUpdatePostApiModule());
-  installGlobals(installPublicFirmwareInstallModule(deviceApi));
+  installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
   installGlobals(installStateLoaderApiModule(context.runtime, context.layout));

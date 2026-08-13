@@ -45,6 +45,18 @@ describe("browserless application contracts", () => {
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
   });
 
+  test("injects the device ID without an application global", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const compatibility = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts"), "utf8");
+    const migration = fs.readFileSync(path.join(ROOT, "src/webserver/application/native_panel_config_migration.ts"), "utf8");
+    assert.doesNotMatch(globals, /\bvar DEVICE_ID:/);
+    assert.doesNotMatch(compatibility, /\bDEVICE_ID:/);
+    assert.doesNotMatch(migration, /\bDEVICE_ID\b|\bNUM_SLOTS\b|dependencies\?/);
+    assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime, context\.device\.id\)/);
+    assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id\)/);
+  });
+
   test("registers migrated card families through the typed registry", () => {
     const migratedCards = [
       ["sensor", "registerSensorCardTypes"],
@@ -602,7 +614,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /installScreenScheduleStateModule\(screenScheduleController, context\.runtime\)/);
-    assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime\)/);
+    assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime, context\.device\.id\)/);
   });
 
   test("removes the ambient DOM registry", () => {
