@@ -26,13 +26,15 @@ import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
-export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, screenRotation: ScreenRotationFeature, appearance: AppearanceFeature, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, shell: Pick<ControlsShellFeature, "createActionButton" | "buildApplyBar">, requestApi: Pick<ApplicationApiFeature, "postText" | "postSelect" | "postScreensaverMode" | "postScreensaverTimeout" | "postHomeScreenTimeout">, statusPreview: Pick<AppStatusPreviewFeature, "appendTimezoneOption" | "syncInput" | "updateClock" | "updateSunInfo" | "updateTempPreview">): GlobalDescriptors {
+import type { ArtworkPostApiFeature } from "./artwork_post_api";
+export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, screenRotation: ScreenRotationFeature, appearance: AppearanceFeature, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, shell: Pick<ControlsShellFeature, "createActionButton" | "buildApplyBar">, requestApi: Pick<ApplicationApiFeature, "postText" | "postSelect" | "postScreensaverMode" | "postScreensaverTimeout" | "postHomeScreenTimeout">, statusPreview: Pick<AppStatusPreviewFeature, "appendTimezoneOption" | "syncInput" | "updateClock" | "updateSunInfo" | "updateTempPreview">, artworkPostApi: Pick<ArtworkPostApiFeature, "postPresenceSensorEntity">): GlobalDescriptors {
     const { createActionButton, buildApplyBar } = shell;
     const { entityName, entityInput } = entityState;
     const { postText, postSelect, postScreensaverMode, postScreensaverTimeout, postHomeScreenTimeout } = requestApi;
     const { bindTextPost } = codec;
     const { appendTimezoneOption, syncInput, updateClock, updateSunInfo, updateTempPreview } = statusPreview;
     const { syncPreviewOrientation } = core;
+    const { postPresenceSensorEntity } = artworkPostApi;
     const els = runtime.els;
     const { timezoneOptionsWithFallback, voiceServicesUiState, setVoiceServicesEnabled } = environment;
     const { syncUi: syncScreenScheduleUi } = schedule;

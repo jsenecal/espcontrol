@@ -85,9 +85,6 @@ declare global {
   var condField: any;
   var copyButtons: any;
   var copySlot: any;
-  var coverArtDelayPostUrls: any;
-  var coverArtHideExternalInputPostUrls: any;
-  var coverArtTrackOverlayDurationPostUrls: any;
   var coverArtTrackOverlayDurationSupported: any;
   var createBackupConfig: any;
   var createClipboardEntry: any;
@@ -129,7 +126,6 @@ declare global {
   var handleDocumentSelectionMouseDown: any;
   var hideContextMenu: any;
   var hideSettingsOverlay: any;
-  var homeAssistantArtworkPortPostUrls: any;
   var importConfig: any;
   var infoOnlyCardVisible: any;
   var infoPanel: any;
@@ -171,20 +167,8 @@ declare global {
   var postClockBrightnessDay: any;
   var postClockBrightnessNight: any;
   var postClockScreensaver: any;
-  var postCoverArtConditions: any;
-  var postCoverArtDelay: any;
-  var postCoverArtHideExternalInput: any;
-  var postCoverArtMediaPlayerEntity: any;
-  var postCoverArtSecondaryMediaPlayerEntity: any;
-  var postCoverArtScreensaver: any;
-  var postCoverArtTrackOverlayDuration: any;
-  var postHomeAssistantArtworkPort: any;
-  var postHomeAssistantArtworkProtocol: any;
-  var postMediaPlayerSleepPrevention: any;
-  var postMediaPlayerSleepPreventionEntity: any;
   var postNetworkStatusIcon: any;
   var postBatteryStatus: any;
-  var postPresenceSensorEntity: any;
   var postScreenScheduleClockBrightness: any;
   var postScreenScheduleDimmedBrightness: any;
   var postScreenScheduleEnabled: any;

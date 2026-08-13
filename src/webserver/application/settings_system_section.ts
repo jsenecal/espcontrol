@@ -15,6 +15,7 @@ import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { StateLoaderFeature } from "./state_loader_api";
 import type { FirmwareUpdatePostApiFeature } from "./firmware_update_post_api";
+import type { ArtworkPostApiFeature } from "./artwork_post_api";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;
@@ -31,6 +32,7 @@ export function installSettingsSystemSectionModule(
     requestApi: Pick<ApplicationApiFeature, "getJsonQuietly" | "postFirmwareAutoUpdate" | "postFirmwareUpdateFrequency" | "postC6FirmwareAutoUpdate">,
     stateLoader: Pick<StateLoaderFeature, "refreshFirmwareVersion">,
     firmwarePostApi: FirmwareUpdatePostApiFeature,
+    artworkPostApi: Pick<ArtworkPostApiFeature, "postHomeAssistantArtworkPort" | "postHomeAssistantArtworkProtocol">,
 ): GlobalDescriptors {
     const { createActionButton } = shell;
     const els = runtime.els;
@@ -57,6 +59,7 @@ export function installSettingsSystemSectionModule(
         postC6FirmwareUpdateInstall,
         postC6FirmwareUpdateCheck,
     } = firmwarePostApi;
+    const { postHomeAssistantArtworkPort, postHomeAssistantArtworkProtocol } = artworkPostApi;
     // ── Settings System Section ────────────────────────────────────────
     function buildSystemSettingsCards(this: any) {
         var backupBody: any = document.createElement("div");

@@ -50,7 +50,7 @@ import { createNativePanelConfigMigrationController } from "./application/native
 import { createConfigPersistenceFeature } from "./application/config_post_api";
 import { createStateLoaderFeature, type StateLoaderFeature } from "./application/state_loader_api";
 import { createGridMigrationFeature } from "./application/grid_migration";
-import { installArtworkPostApiModule } from "./application/artwork_post_api";
+import { createArtworkPostApiFeature } from "./application/artwork_post_api";
 import { installScreenSchedulePostApiModule } from "./application/screen_schedule_post_api";
 import { installClockBarPostApiModule } from "./application/clock_bar_post_api";
 import { createControlsShellFeature } from "./application/controls_shell";
@@ -158,7 +158,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell, context.controllers.requestApi, context.controllers.appEvents));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installArtworkPostApiModule(context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installScreenSchedulePostApiModule(context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installClockBarPostApiModule(context.controllers.entityState, context.controllers.requestApi));
   const settingsUiFeature = context.controllers.settingsUi;
@@ -183,8 +182,8 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     statusPreview: context.controllers.statusPreview,
   }));
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState, context.controllers.entityState, context.controllers.requestApi));
-  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState, context.controllers.statusPreview));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi, context.controllers.statusPreview));
+  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState, context.controllers.statusPreview, context.controllers.artworkPostApi));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi, context.controllers.statusPreview, context.controllers.artworkPostApi));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options, context.controllers.shell, context.controllers.requestApi));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -260,7 +259,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
-  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader, context.controllers.firmwarePostApi));
+  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader, context.controllers.firmwarePostApi, context.controllers.artworkPostApi));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppModule(
     context.controllers.pageTitle,
@@ -358,6 +357,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.controllers.entityState,
     context.controllers.requestApi,
     context.controllers.statusPreview,
+    context.controllers.artworkPostApi,
   ));
 }
 
@@ -553,6 +553,7 @@ function composeApplicationContext(): ApplicationContext {
     shell,
   );
   firmwarePostApi = createFirmwareUpdatePostApiFeature(entityState, requestApi);
+  const artworkPostApi = createArtworkPostApiFeature(entityState, requestApi);
   configurationPersistence.connectRequestApi(requestApi);
   configurationCodec.connectRequestApi(requestApi);
   const grid = createGridFeature(configurationCodec, runtime, layout, entityState, requestApi);
@@ -757,6 +758,7 @@ function composeApplicationContext(): ApplicationContext {
     requestApi,
     statusPreview,
     grid,
+    artworkPostApi,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: stateLoader.eventStreamEnabled,
@@ -814,6 +816,7 @@ function composeApplicationContext(): ApplicationContext {
     firmwareVersion,
     firmwareUpdate,
     firmwarePostApi,
+    artworkPostApi,
     c6Firmware,
     clockBarState,
     entityState,

@@ -4,11 +4,23 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { EntityStateFeature } from "./entity_state";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
-export function installSettingsCoverArtSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, statusPreview: Pick<AppStatusPreviewFeature, "syncInput">): GlobalDescriptors {
+import type { ArtworkPostApiFeature } from "./artwork_post_api";
+export function installSettingsCoverArtSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, statusPreview: Pick<AppStatusPreviewFeature, "syncInput">, artworkPostApi: ArtworkPostApiFeature): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
     const { bindTextPost } = codec;
     const { syncInput } = statusPreview;
     const els = runtime.els;
+    const {
+        postMediaPlayerSleepPrevention,
+        postMediaPlayerSleepPreventionEntity,
+        postCoverArtScreensaver,
+        postCoverArtMediaPlayerEntity,
+        postCoverArtSecondaryMediaPlayerEntity,
+        postCoverArtConditions,
+        postCoverArtHideExternalInput,
+        postCoverArtDelay,
+        postCoverArtTrackOverlayDuration,
+    } = artworkPostApi;
     // ── Settings Cover Art Section ─────────────────────────────────────
     function buildCoverArtSettingsCard(this: any) {
         var coverArtBody: any = document.createElement("div");

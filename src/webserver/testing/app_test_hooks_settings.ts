@@ -22,7 +22,8 @@ import type { ClockBarFeature } from "../application/clock_bar_state";
 import type { EntityStateFeature } from "../application/entity_state";
 import type { ApplicationApiFeature } from "../application/api";
 import type { AppStatusPreviewFeature } from "../application/app_status_preview";
-export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">, entityState: Pick<EntityStateFeature, "entityLookupNames">, requestApi: Pick<ApplicationApiFeature, "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">, statusPreview: Pick<AppStatusPreviewFeature, "normalizeNetworkTransport">): GlobalDescriptors {
+import type { ArtworkPostApiFeature } from "../application/artwork_post_api";
+export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">, entityState: Pick<EntityStateFeature, "entityLookupNames">, requestApi: Pick<ApplicationApiFeature, "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">, statusPreview: Pick<AppStatusPreviewFeature, "normalizeNetworkTransport">, artworkPostApi: Pick<ArtworkPostApiFeature, "coverArtHideExternalInputPostUrls" | "coverArtDelayPostUrls" | "coverArtTrackOverlayDurationPostUrls" | "homeAssistantArtworkPortPostUrls">): GlobalDescriptors {
     const { timezoneOptionsWithFallback, effectiveTimezoneOptionForWeb } = environment;
     const { supported: screensaverTimeoutSupported } = screensaverTimeout;
     const { set: setFirmwareVersion } = firmwareVersion;
@@ -42,6 +43,7 @@ export function installAppTestHooksSettings(defaultTimezoneOptions: () => string
     } = firmwareUpdate;
     const { temperatureUnitSymbol } = clockBar;
     const { entityLookupNames } = entityState;
+    const { coverArtHideExternalInputPostUrls, coverArtDelayPostUrls, coverArtTrackOverlayDurationPostUrls, homeAssistantArtworkPortPostUrls } = artworkPostApi;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("settings", {
             normalizeTemperatureUnit: normalizeTemperatureUnit,

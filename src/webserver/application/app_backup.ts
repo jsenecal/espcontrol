@@ -43,6 +43,7 @@ import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { GridFeature } from "./grid";
+import type { ArtworkPostApiFeature } from "./artwork_post_api";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -65,6 +66,7 @@ export interface AppBackupControllers {
     readonly requestApi: ApplicationApiFeature;
     readonly statusPreview: Pick<AppStatusPreviewFeature, "syncInput" | "updateTempPreview">;
     readonly grid: Pick<GridFeature, "applyImportedButtonOrder" | "cancelMainGridSave" | "serializeGrid">;
+    readonly artworkPostApi: ArtworkPostApiFeature;
 }
 
 export interface AppBackupFeature {
@@ -79,6 +81,20 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
     const requestApi = controllers.requestApi;
     const { syncInput, updateTempPreview } = controllers.statusPreview;
     const { applyImportedButtonOrder, cancelMainGridSave, serializeGrid } = controllers.grid;
+    const {
+        postPresenceSensorEntity,
+        postMediaPlayerSleepPrevention,
+        postMediaPlayerSleepPreventionEntity,
+        postCoverArtScreensaver,
+        postCoverArtMediaPlayerEntity,
+        postCoverArtSecondaryMediaPlayerEntity,
+        postCoverArtConditions,
+        postCoverArtDelay,
+        postCoverArtTrackOverlayDuration,
+        postCoverArtHideExternalInput,
+        postHomeAssistantArtworkProtocol,
+        postHomeAssistantArtworkPort,
+    } = controllers.artworkPostApi;
     const {
         postText,
         postSwitch,

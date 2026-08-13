@@ -58,6 +58,7 @@ import type { AppEventsFeature } from "./app_events";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { GridFeature } from "./grid";
 import type { FirmwareUpdatePostApiFeature } from "./firmware_update_post_api";
+import type { ArtworkPostApiFeature } from "./artwork_post_api";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -119,6 +120,7 @@ export interface ApplicationContext {
     readonly firmwareVersion: FirmwareVersionFeature;
     readonly firmwareUpdate: FirmwareUpdateFeature;
     readonly firmwarePostApi: FirmwareUpdatePostApiFeature;
+    readonly artworkPostApi: ArtworkPostApiFeature;
     readonly c6Firmware: C6FirmwareFeature;
     readonly clockBarState: ClockBarFeature;
     readonly entityState: EntityStateFeature;
@@ -186,6 +188,7 @@ export interface ApplicationContextOptions {
   readonly firmwareVersion: FirmwareVersionFeature;
   readonly firmwareUpdate: FirmwareUpdateFeature;
   readonly firmwarePostApi: FirmwareUpdatePostApiFeature;
+  readonly artworkPostApi: ArtworkPostApiFeature;
   readonly c6Firmware: C6FirmwareFeature;
   readonly clockBarState: ClockBarFeature;
   readonly entityState: EntityStateFeature;
@@ -273,6 +276,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       firmwareVersion: options.firmwareVersion,
       firmwareUpdate: options.firmwareUpdate,
       firmwarePostApi: options.firmwarePostApi,
+      artworkPostApi: options.artworkPostApi,
       c6Firmware: options.c6Firmware,
       clockBarState: options.clockBarState,
       entityState: options.entityState,
