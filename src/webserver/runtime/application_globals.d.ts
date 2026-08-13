@@ -164,8 +164,6 @@ declare global {
   var postDisplayBacklightBrightness: any;
   var postBrightnessDawnTime: any;
   var postBrightnessDuskTime: any;
-  var postC6FirmwareUpdateCheck: any;
-  var postC6FirmwareUpdateInstall: any;
   var postClockBar: any;
   var postClockBarNightMode: any;
   var postClockBarTemperatureEntities: any;
@@ -180,8 +178,6 @@ declare global {
   var postCoverArtSecondaryMediaPlayerEntity: any;
   var postCoverArtScreensaver: any;
   var postCoverArtTrackOverlayDuration: any;
-  var postFirmwareUpdateCheck: any;
-  var postFirmwareUpdateInstall: any;
   var postHomeAssistantArtworkPort: any;
   var postHomeAssistantArtworkProtocol: any;
   var postMediaPlayerSleepPrevention: any;

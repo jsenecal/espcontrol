@@ -80,7 +80,11 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /installApiModule|applicationApiCompatibilityGlobals/);
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar (?:_postQueue|_postQueueHadError|post|postText|postSwitch|getJsonQuietly|entityDetailPath):/);
-    assert.match(entry, /installFirmwareUpdatePostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
+    const firmwarePosts = fs.readFileSync(path.join(ROOT, "src/webserver/application/firmware_update_post_api.ts"), "utf8");
+    assert.match(entry, /firmwarePostApi = createFirmwareUpdatePostApiFeature\(entityState, requestApi\)/);
+    assert.doesNotMatch(entry, /installFirmwareUpdatePostApiModule/);
+    assert.doesNotMatch(firmwarePosts, /GlobalDescriptors|staticGlobal|installFirmwareUpdatePostApiModule/);
+    assert.doesNotMatch(globals, /\bvar (?:postFirmwareUpdateInstall|postFirmwareUpdateCheck|postC6FirmwareUpdateInstall|postC6FirmwareUpdateCheck):/);
     assert.match(entry, /installArtworkPostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
     assert.match(entry, /installScreenSchedulePostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
     assert.match(entry, /installClockBarPostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
@@ -888,7 +892,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview\)/);
-    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.stateLoader\)\)/);
+    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.stateLoader, context\.controllers\.firmwarePostApi\)\)/);
   });
 
   test("injects display-state DOM references", () => {

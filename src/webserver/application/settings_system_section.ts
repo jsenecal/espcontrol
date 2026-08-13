@@ -14,6 +14,7 @@ import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { StateLoaderFeature } from "./state_loader_api";
+import type { FirmwareUpdatePostApiFeature } from "./firmware_update_post_api";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;
@@ -29,6 +30,7 @@ export function installSettingsSystemSectionModule(
     shell: Pick<ControlsShellFeature, "createActionButton">,
     requestApi: Pick<ApplicationApiFeature, "getJsonQuietly" | "postFirmwareAutoUpdate" | "postFirmwareUpdateFrequency" | "postC6FirmwareAutoUpdate">,
     stateLoader: Pick<StateLoaderFeature, "refreshFirmwareVersion">,
+    firmwarePostApi: FirmwareUpdatePostApiFeature,
 ): GlobalDescriptors {
     const { createActionButton } = shell;
     const els = runtime.els;
@@ -49,6 +51,12 @@ export function installSettingsSystemSectionModule(
         syncVersionSelect: syncFirmwareVersionSelect,
     } = firmwareUpdate;
     const { updateKnownAvailable: c6FirmwareUpdateKnownAvailable, syncUi: syncC6FirmwareUi } = c6Firmware;
+    const {
+        postFirmwareUpdateInstall,
+        postFirmwareUpdateCheck,
+        postC6FirmwareUpdateInstall,
+        postC6FirmwareUpdateCheck,
+    } = firmwarePostApi;
     // ── Settings System Section ────────────────────────────────────────
     function buildSystemSettingsCards(this: any) {
         var backupBody: any = document.createElement("div");

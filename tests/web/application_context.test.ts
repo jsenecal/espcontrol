@@ -75,6 +75,7 @@ export function runApplicationContextTests(): void {
   const appEvents = {} as any;
   const statusPreview = {} as any;
   const grid = {} as any;
+  const firmwarePostApi = {} as any;
   const coverArtScreensaver = {} as any;
   const mediaPlayback = {} as any;
   const pageTitle = {} as any;
@@ -122,6 +123,7 @@ export function runApplicationContextTests(): void {
     appearance,
     firmwareVersion,
     firmwareUpdate,
+    firmwarePostApi,
     c6Firmware,
     alarmDelayAudio,
     cardEditorDraft,
@@ -160,6 +162,7 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.appearance, appearance, "context owns appearance behavior");
   equal(context.controllers.firmwareVersion, firmwareVersion, "context owns firmware version behavior");
   equal(context.controllers.firmwareUpdate, firmwareUpdate, "context owns firmware update behavior");
+  equal(context.controllers.firmwarePostApi, firmwarePostApi, "context owns firmware update posting behavior");
   equal(context.controllers.c6Firmware, c6Firmware, "context owns C6 firmware behavior");
   equal(context.controllers.clockBarState, clockBarState, "context owns Clock Bar behavior");
   equal(context.controllers.entityState, entityState, "context owns entity lookup and post-path behavior");

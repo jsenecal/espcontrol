@@ -31,7 +31,7 @@ import {
   createApplicationApiFeature,
   type ApplicationApiFeature,
 } from "./application/api";
-import { installFirmwareUpdatePostApiModule } from "./application/firmware_update_post_api";
+import { createFirmwareUpdatePostApiFeature, type FirmwareUpdatePostApiFeature } from "./application/firmware_update_post_api";
 import { installPublicFirmwareInstallModule } from "./application/public_firmware_install";
 import { createConfigMediaOptionsFeature } from "./application/config_media_options";
 import { createConfigImageOptionsFeature } from "./application/config_image_options";
@@ -155,7 +155,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const cardEditorDraft = context.controllers.cardEditorDraft;
   const cardEditorValidation = context.controllers.cardEditorValidation;
   const previewPlacementController = context.controllers.previewPlacement;
-  installGlobals(installFirmwareUpdatePostApiModule(context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell, context.controllers.requestApi, context.controllers.appEvents));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
@@ -261,7 +260,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
-  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader));
+  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader, context.controllers.firmwarePostApi));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppModule(
     context.controllers.pageTitle,
@@ -426,6 +425,7 @@ function composeApplicationContext(): ApplicationContext {
     postOnColor: (value) => requestApi.postText(entityState.entityName("button_on_color"), value),
   });
   let firmwareUpdate: FirmwareUpdateFeature;
+  let firmwarePostApi: FirmwareUpdatePostApiFeature;
   let c6Firmware: C6FirmwareFeature;
   const firmwareVersion = createFirmwareVersionFeature(runtime, {
     syncVersionSelect: () => firmwareUpdate.syncVersionSelect(),
@@ -433,7 +433,7 @@ function composeApplicationContext(): ApplicationContext {
     stopInstallRefreshIfComplete: () => firmwareUpdate.stopInstallRefreshIfComplete(),
   });
   firmwareUpdate = createFirmwareUpdateFeature(runtime, layout.deviceId, firmwareVersion, {
-    postInstall: () => postFirmwareUpdateInstall(),
+    postInstall: () => firmwarePostApi.postFirmwareUpdateInstall(),
     refreshVersion: () => stateLoader.refreshFirmwareVersion(),
     installViaWebOta: (info) => { void installPublicFirmwareViaWebOta(info); },
     c6UpdateKnownAvailable: () => c6Firmware.updateKnownAvailable(),
@@ -552,6 +552,7 @@ function composeApplicationContext(): ApplicationContext {
     screensaverTimeout,
     shell,
   );
+  firmwarePostApi = createFirmwareUpdatePostApiFeature(entityState, requestApi);
   configurationPersistence.connectRequestApi(requestApi);
   configurationCodec.connectRequestApi(requestApi);
   const grid = createGridFeature(configurationCodec, runtime, layout, entityState, requestApi);
@@ -812,6 +813,7 @@ function composeApplicationContext(): ApplicationContext {
     appearance,
     firmwareVersion,
     firmwareUpdate,
+    firmwarePostApi,
     c6Firmware,
     clockBarState,
     entityState,

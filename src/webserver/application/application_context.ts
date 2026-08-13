@@ -57,6 +57,7 @@ import type { AppStateEventHandlersFeature } from "./app_state_event_handlers";
 import type { AppEventsFeature } from "./app_events";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { GridFeature } from "./grid";
+import type { FirmwareUpdatePostApiFeature } from "./firmware_update_post_api";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -117,6 +118,7 @@ export interface ApplicationContext {
     readonly appearance: AppearanceFeature;
     readonly firmwareVersion: FirmwareVersionFeature;
     readonly firmwareUpdate: FirmwareUpdateFeature;
+    readonly firmwarePostApi: FirmwareUpdatePostApiFeature;
     readonly c6Firmware: C6FirmwareFeature;
     readonly clockBarState: ClockBarFeature;
     readonly entityState: EntityStateFeature;
@@ -183,6 +185,7 @@ export interface ApplicationContextOptions {
   readonly appearance: AppearanceFeature;
   readonly firmwareVersion: FirmwareVersionFeature;
   readonly firmwareUpdate: FirmwareUpdateFeature;
+  readonly firmwarePostApi: FirmwareUpdatePostApiFeature;
   readonly c6Firmware: C6FirmwareFeature;
   readonly clockBarState: ClockBarFeature;
   readonly entityState: EntityStateFeature;
@@ -269,6 +272,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       appearance: options.appearance,
       firmwareVersion: options.firmwareVersion,
       firmwareUpdate: options.firmwareUpdate,
+      firmwarePostApi: options.firmwarePostApi,
       c6Firmware: options.c6Firmware,
       clockBarState: options.clockBarState,
       entityState: options.entityState,
