@@ -38,6 +38,7 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { AppTitleFeature } from "./app_title";
 import type { CoreFeature } from "./core";
+import type { EnvironmentStateFeature } from "./environment_state";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -109,6 +110,7 @@ export interface ApplicationContext {
     readonly screensaver: ScreensaverController;
     readonly settingsUi: SettingsUiFeature;
     readonly voiceServices: VoiceServicesController;
+    readonly environment: EnvironmentStateFeature;
   };
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
@@ -156,6 +158,7 @@ export interface ApplicationContextOptions {
   readonly screensaver: ScreensaverController;
   readonly settingsUi: SettingsUiFeature;
   readonly voiceServices: VoiceServicesController;
+  readonly environment: EnvironmentStateFeature;
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
 }
@@ -223,6 +226,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       screensaver: options.screensaver,
       settingsUi: options.settingsUi,
       voiceServices: options.voiceServices,
+      environment: options.environment,
     },
     dom: options.dom,
     cards: options.cards,

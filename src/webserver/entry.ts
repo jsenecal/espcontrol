@@ -16,7 +16,7 @@ import {
 import { createCardRegistry } from "./application/card_registry";
 import { createWebStyles } from "./application/styles";
 import { createUiRuntimeState } from "./application/state";
-import { installEnvironmentStateModule } from "./application/environment_state";
+import { createEnvironmentStateFeature } from "./application/environment_state";
 import { installScreenRotationStateModule } from "./application/screen_rotation_state";
 import { installScreenScheduleStateModule } from "./application/screen_schedule_state";
 import { installAppearanceStateModule } from "./application/appearance_state";
@@ -138,12 +138,6 @@ const startupState = globalThis as typeof globalThis & {
 };
 
 function installApplicationCompatibility(context: ApplicationContext): void {
-  const voiceServicesController = context.controllers.voiceServices;
-  installGlobals(installEnvironmentStateModule(
-    voiceServicesController,
-    () => defaultTimezoneOptionsForDevice(context.device.profile),
-    context.layout,
-  ));
   installGlobals(installScreenRotationStateModule(context.runtime, context.layout));
   const screenScheduleController = context.controllers.screenSchedule;
   installGlobals(installScreenScheduleStateModule(screenScheduleController, context.runtime));
@@ -151,7 +145,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installFirmwareVersionStateModule(context.runtime));
   installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout));
   const clockBarController = context.controllers.clockBar;
-  installGlobals(installClockBarStateModule(clockBarController, context.runtime, context.core));
+  installGlobals(installClockBarStateModule(clockBarController, context.runtime, context.core, context.controllers.environment));
   installGlobals(installFirmwareUpdateStateModule(context.runtime, context.device.id));
   installGlobals(installScreensaverTimeoutModule(context.runtime));
   installGlobals(installC6FirmwareUiModule(context.runtime));
@@ -190,7 +184,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   }));
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -248,10 +242,10 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     importBackup: backupUiFeature.importConfig,
   }, context.runtime));
   installGlobals(backupUiFeature.globals);
-  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout));
+  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, (factory) => {
+  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, (factory) => {
     sseHandlerFactory = factory;
   }));
   const reconnectController = context.controllers.reconnect;
@@ -341,6 +335,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
   installGlobals(installAppTestHooksBackup(context.layout));
   installGlobals(installAppTestHooksSettings(
     () => defaultTimezoneOptionsForDevice(context.device.profile),
+    context.controllers.environment,
   ));
 }
 
@@ -371,6 +366,12 @@ function composeApplicationContext(): ApplicationContext {
     DeviceConfig.deviceConfig,
   );
   const runtime = createUiRuntimeState(layout, dom.document);
+  const voiceServices = createVoiceServicesController();
+  const environment = createEnvironmentStateFeature(
+    voiceServices,
+    () => defaultTimezoneOptionsForDevice(layout.config),
+    layout,
+  );
   const nativePanelConfig = createNativePanelConfigMigrationController({
     deviceProfile: () => layout.deviceId,
     slotCount: () => layout.numSlots,
@@ -411,11 +412,11 @@ function composeApplicationContext(): ApplicationContext {
     state: AppInstance.state,
     now: core.now,
     renderButtonSettings: () => renderButtonSettings(),
-    effectiveTimezoneOption: (value) => effectiveTimezoneOptionForWeb(value),
+    effectiveTimezoneOption: (value) => environment.effectiveTimezoneOptionForWeb(value),
     timezoneId: (value) => getTzId(value),
-    timezoneOptionsWithFallback: (options, selected) => timezoneOptionsWithFallback(options, selected),
+    timezoneOptionsWithFallback: (options, selected) => environment.timezoneOptionsWithFallback(options, selected),
     appendTimezoneOption: (select, option) => appendTimezoneOption(select, option),
-    monthNameForIndex: (index) => monthNameForIndex(index),
+    monthNameForIndex: (index) => environment.monthNameForIndex(index),
   });
   const modalTabOptions = createConfigModalTabOptionsFeature({
     document: dom.document,
@@ -452,7 +453,6 @@ function composeApplicationContext(): ApplicationContext {
   });
   const cardEditorValidation = createCardEditorValidationController();
   const previewPlacement = createPreviewPlacementController();
-  const voiceServices = createVoiceServicesController();
   const screenSchedule = createScreenScheduleController({
     trigger: (value, enabled) => Model.normalizeScheduleTrigger(value, enabled),
     sensorActivation: (value) => Model.normalizeScheduleSensorActivation(value),
@@ -651,6 +651,7 @@ function composeApplicationContext(): ApplicationContext {
     screensaver,
     settingsUi,
     voiceServices,
+    environment,
     dom,
     cards,
   });

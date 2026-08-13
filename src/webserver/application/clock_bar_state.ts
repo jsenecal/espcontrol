@@ -4,14 +4,17 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { ClockBarController } from "../features/clock_bar_controller";
 import type { UiRuntimeState } from "./state";
 import type { CoreFeature } from "./core";
+import type { EnvironmentStateFeature } from "./environment_state";
 
 export function installClockBarStateModule(
     clockBarController: ClockBarController,
     runtime: UiRuntimeState,
     core: Pick<CoreFeature, "syncPreviewGridTop">,
+    environment: EnvironmentStateFeature,
 ): GlobalDescriptors {
     const { syncPreviewGridTop } = core;
     const els = runtime.els;
+    const { effectiveTimezoneOptionForWeb, voiceServicesUiState, setVoiceServicesEnabled } = environment;
     // ── Clock Bar State ───────────────────────────────────────────────────
     var clockBarControllerInstance: ClockBarController = clockBarController;
     function clockBarControllerState(this: any) {
@@ -186,7 +189,7 @@ export function installClockBarStateModule(
             postClockBarTime(state.clockBarTimeOn);
         }
         else if (item === "voice" && voiceServicesUiState().clockBarItemVisible) {
-            applyVoiceServicesState(_voiceServicesController.setEnabled(voiceServicesState(), visible));
+            setVoiceServicesEnabled(visible);
             postVoiceServices(state.voiceServicesOn);
         }
         else if (item === "network") {

@@ -14,7 +14,9 @@ import {
     firmwareVersionsSame,
 } from "../application/firmware_metadata";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[]): GlobalDescriptors {
+import type { EnvironmentStateFeature } from "../application/environment_state";
+export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature): GlobalDescriptors {
+    const { timezoneOptionsWithFallback, effectiveTimezoneOptionForWeb } = environment;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("settings", {
             normalizeTemperatureUnit: normalizeTemperatureUnit,

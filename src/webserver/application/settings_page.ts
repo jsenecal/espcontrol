@@ -16,10 +16,12 @@ import { appendLanguageOption, languageOptionsWithFallback } from "./language_st
 import { hasCustomNtpServers, resetNtpServersToDefaults, syncNtpServerUi } from "./ntp_state";
 import { syncIdleUi } from "./idle_state";
 import { getActiveScreensaverMode } from "./screensaver_state";
-export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState): GlobalDescriptors {
+import type { EnvironmentStateFeature } from "./environment_state";
+export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature): GlobalDescriptors {
     const { bindTextPost } = codec;
     const { syncPreviewOrientation } = core;
     const els = runtime.els;
+    const { timezoneOptionsWithFallback, voiceServicesUiState, setVoiceServicesEnabled } = environment;
     // ── Settings Page ──────────────────────────────────────────────────────
     function buildSettingsPage(this: any, parent?: any) {
         var page: any = document.createElement("div");
@@ -236,7 +238,7 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
             voiceServicesBody.appendChild(voiceServices.row);
             els.setVoiceServicesToggle = voiceServices.input;
             voiceServices.input.addEventListener("change", function (this: any) {
-                applyVoiceServicesState(_voiceServicesController.setEnabled(voiceServicesState(), this.checked));
+                setVoiceServicesEnabled(this.checked);
                 syncClockBarUi();
                 postVoiceServices(state.voiceServicesOn);
             });

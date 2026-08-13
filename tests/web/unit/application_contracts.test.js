@@ -36,7 +36,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
   });
 
@@ -72,6 +72,17 @@ describe("browserless application contracts", () => {
       assert.match(source, /from "\.\/(?:language|ntp|idle|screensaver)_state"/);
     }
     assert.doesNotMatch(globals, /\bvar (?:appendLanguageOption|getActiveScreensaverMode|hasCustomNtpServers|languageLabel|languageOptionsWithFallback|resetNtpServersToDefaults|syncIdleUi|syncLanguageSelect|syncNtpServerUi):/);
+  });
+
+  test("owns environment and voice-services state without application globals", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const environment = fs.readFileSync(path.join(ROOT, "src/webserver/application/environment_state.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(entry, /createEnvironmentStateFeature\(/);
+    assert.doesNotMatch(entry, /installEnvironmentStateModule/);
+    assert.match(environment, /export interface EnvironmentStateFeature/);
+    assert.doesNotMatch(environment, /GlobalDescriptors|liveGlobal|staticGlobal/);
+    assert.doesNotMatch(globals, /\bvar (?:_voiceServicesController|voiceServicesSupported|voiceServicesState|applyVoiceServicesState|voiceServicesUiState|isHomeAssistantAutoTimezone|effectiveTimezoneOptionForWeb|timezoneOptionsWithFallback|monthNameForIndex):/);
   });
 
   test("registers migrated card families through the typed registry", () => {
@@ -614,7 +625,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime\)\)/);
   });
 

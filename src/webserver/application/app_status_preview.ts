@@ -4,12 +4,14 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { UiRuntimeState } from "./state";
 import type { CoreFeature } from "./core";
 import type { ApplicationLayoutState } from "./application_context";
-export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature, layout: ApplicationLayoutState): GlobalDescriptors {
+import type { EnvironmentStateFeature } from "./environment_state";
+export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature, layout: ApplicationLayoutState, environment: EnvironmentStateFeature): GlobalDescriptors {
     const { now: webserverNow } = core;
+    const { isHomeAssistantAutoTimezone, effectiveTimezoneOptionForWeb, voiceServicesUiState } = environment;
     const els = runtime.els;
     // ── Clock (minute-aligned) ─────────────────────────────────────────────
     function getTzId(this: any, tz?: any) {
-        if (typeof isHomeAssistantAutoTimezone === "function" && isHomeAssistantAutoTimezone(tz))
+        if (isHomeAssistantAutoTimezone(tz))
             return "UTC";
         var idx: any = tz.indexOf(" (");
         return idx > 0 ? tz.substring(0, idx) : tz;
@@ -46,7 +48,7 @@ export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: Cor
         }
     }
     function formatTimezoneOption(this: any, opt?: any) {
-        if (typeof isHomeAssistantAutoTimezone === "function" && isHomeAssistantAutoTimezone(opt))
+        if (isHomeAssistantAutoTimezone(opt))
             return opt;
         var tzId: any = getTzId(opt);
         var offset: any = timezoneOffsetMinutes(tzId, webserverNow());

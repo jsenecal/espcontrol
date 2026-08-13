@@ -152,15 +152,11 @@ declare global {
   var createRangeSlider: any;
   var _coverArtScreensaverController: any;
   var _mediaPlaybackController: any;
-  var _voiceServicesController: any;
   var _clockBarController: any;
   var clockBarControllerState: any;
   var setClockBarEnabled: any;
   var applyClockBarControllerState: any;
   var clockBarUiState: any;
-  var voiceServicesState: any;
-  var applyVoiceServicesState: any;
-  var voiceServicesUiState: any;
   var mediaPlaybackState: any;
   var applyMediaPlaybackState: any;
   var coverArtScreensaverState: any;
@@ -184,7 +180,6 @@ declare global {
   var displayScreenRotation: any;
   var duplicateButton: any;
   var duplicateSubpageButton: any;
-  var effectiveTimezoneOptionForWeb: any;
   var emptyButtonConfig: any;
   var ensureEntityDropdown: any;
   var ensurePublicFirmwareOtaUrl: any;
@@ -251,7 +246,6 @@ declare global {
   var installedFirmwareMatchesPublicRelease: any;
   var isClockBarTemperatureItem: any;
   var isConfigLocked: any;
-  var isHomeAssistantAutoTimezone: any;
   var isSelectionControlTarget: any;
   var latestFirmwareInfo: any;
   var latestFirmwareInfoFromState: any;
@@ -262,7 +256,6 @@ declare global {
   var loadStateItems: any;
   var makeCollapsibleCard: any;
   var markCardPrimaryField: any;
-  var monthNameForIndex: any;
   var moveSelectedGridEntries: any;
   var moveSelectedToCell: any;
   var moveToCell: any;
@@ -492,7 +485,6 @@ declare global {
   var temperatureUnitSymbol: any;
   var textInput: any;
   var timezoneOffsetMinutes: any;
-  var timezoneOptionsWithFallback: any;
   var timezonePrefersFahrenheit: any;
   var titleFromEntityId: any;
   var toggleRow: any;
@@ -515,7 +507,6 @@ declare global {
   var postAlarmDelayFinalCountdown: any;
   var syncAlarmDelayAudioUi: any;
   var buildAlarmDelayAudioSettingsCard: any;
-  var voiceServicesSupported: any;
   var waitForFirmwareRestart: any;
   var waitForReboot: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
