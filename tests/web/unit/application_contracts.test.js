@@ -203,7 +203,9 @@ describe("browserless application contracts", () => {
     assert.equal(fs.existsSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts")), false);
     assert.doesNotMatch(globals, /\bvar (?:NUM_SLOTS|TOTAL_SLOTS|GRID_COLS|GRID_ROWS):/);
     assert.match(entry, /grid = createGridFeature\(configurationCodec, runtime, layout, entityState, requestApi\)/);
-    assert.match(entry, /gridCompatibilityGlobals\(context\.controllers\.grid\)/);
+    assert.doesNotMatch(entry, /gridCompatibilityGlobals/);
+    assert.doesNotMatch(grid, /GlobalDescriptors|staticGlobal|gridCompatibilityGlobals/);
+    assert.doesNotMatch(globals, /\bvar (?:ctx|scheduleMainGridSave|cancelMainGridSave|applyButtonOrderValue|applyImportedButtonOrder|parseOrder|resolveIcon|serializeGrid|sizeClass|btnDisplayName):/);
     assert.match(grid, /export interface GridFeature/);
     assert.match(grid, /export function createGridFeature/);
     assert.doesNotMatch(entry, /installGridModule/);

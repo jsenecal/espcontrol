@@ -37,9 +37,7 @@ declare global {
   var addSubpageSlot: any;
   var addSupportButton: any;
   var appendSettingsSection: any;
-  var applyButtonOrderValue: any;
   var applyCardMetadataFields: any;
-  var applyImportedButtonOrder: any;
   var addNativeConfigToBackup: any;
   var backupEmptyButtonConfig: any;
   var backupExportFileDate: any;
@@ -49,7 +47,6 @@ declare global {
   var backupExportScreenSizeSlug: any;
   var backupNormalizeButtonConfig: any;
   var beginNewCardDraft: any;
-  var btnDisplayName: any;
   var buildClipboardEntry: any;
   var buildCoverArtSettingsCard: any;
   var buildScreenScheduleSettingsCard: any;
@@ -105,7 +102,6 @@ declare global {
   var applyCoverArtScreensaverState: any;
   var createScreensaverThenControls: any;
   var createTimeInput: any;
-  var ctx: any;
   var ctxMenu: any;
   var cutButtons: any;
   var cutSlot: any;
@@ -157,7 +153,6 @@ declare global {
   var openVoiceServicesSettings: any;
   var optionLabel: any;
   var optionValue: any;
-  var parseOrder: any;
   var pasteButton: any;
   var pasteSubpageButton: any;
   var placeOrderedGridEntries: any;
@@ -230,9 +225,6 @@ declare global {
   var renderPreview: any;
   var renderSelectionBar: any;
   var resizeSlot: any;
-  var scheduleMainGridSave: any;
-  var cancelMainGridSave: any;
-  var resolveIcon: any;
   var resolveSpanPos: any;
   var resolveSpanPosition: any;
   var saveButtonConfig: any;
@@ -244,7 +236,6 @@ declare global {
   var selectButton: any;
   var selectClockBarItem: any;
   var selectField: any;
-  var serializeGrid: any;
   var setFavicon: any;
   var setViewportMeta: any;
   var settingsStatusHeader: any;
@@ -256,7 +247,6 @@ declare global {
   var showCopyCardCode: any;
   var showPasteCardCode: any;
   var showSelectionMenu: any;
-  var sizeClass: any;
   var statusBadge: any;
   var subpageChunkShouldPost: any;
   var subpageEntityKeys: any;
