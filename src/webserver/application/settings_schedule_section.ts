@@ -6,10 +6,24 @@ import type { UiRuntimeState } from "./state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ApplicationApiFeature } from "./api";
-export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, schedule: ScreenScheduleStateFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, requestApi: Pick<ApplicationApiFeature, "postText">): GlobalDescriptors {
+import type { ScreenSchedulePostApiFeature } from "./screen_schedule_post_api";
+export function installSettingsScheduleSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, schedule: ScreenScheduleStateFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, requestApi: Pick<ApplicationApiFeature, "postText">, schedulePostApi: ScreenSchedulePostApiFeature): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
     const { bindTextPost } = codec;
     const els = runtime.els;
+    const {
+        postScreenScheduleEnabled,
+        postScreenScheduleTrigger,
+        postScreenScheduleSensorActivation,
+        postScreenScheduleSensorEntity,
+        postScreenScheduleOnHour,
+        postScreenScheduleOffHour,
+        postScreenScheduleMode,
+        postScreenScheduleWakeTimeout,
+        postScreenScheduleWakeBrightness,
+        postScreenScheduleDimmedBrightness,
+        postScreenScheduleClockBrightness,
+    } = schedulePostApi;
     const {
         controller: _screenScheduleController,
         controllerState: screenScheduleControllerState,

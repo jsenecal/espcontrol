@@ -44,6 +44,7 @@ import type { ApplicationApiFeature } from "./api";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { GridFeature } from "./grid";
 import type { ArtworkPostApiFeature } from "./artwork_post_api";
+import type { ScreenSchedulePostApiFeature } from "./screen_schedule_post_api";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -67,6 +68,7 @@ export interface AppBackupControllers {
     readonly statusPreview: Pick<AppStatusPreviewFeature, "syncInput" | "updateTempPreview">;
     readonly grid: Pick<GridFeature, "applyImportedButtonOrder" | "cancelMainGridSave" | "serializeGrid">;
     readonly artworkPostApi: ArtworkPostApiFeature;
+    readonly schedulePostApi: ScreenSchedulePostApiFeature;
 }
 
 export interface AppBackupFeature {
@@ -95,6 +97,23 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
         postHomeAssistantArtworkProtocol,
         postHomeAssistantArtworkPort,
     } = controllers.artworkPostApi;
+    const {
+        postBrightnessMode,
+        postDisplayBacklightBrightness,
+        postBrightnessDawnTime,
+        postBrightnessDuskTime,
+        postScreenScheduleEnabled,
+        postScreenScheduleTrigger,
+        postScreenScheduleSensorActivation,
+        postScreenScheduleSensorEntity,
+        postScreenScheduleOnHour,
+        postScreenScheduleOffHour,
+        postScreenScheduleMode,
+        postScreenScheduleWakeTimeout,
+        postScreenScheduleWakeBrightness,
+        postScreenScheduleDimmedBrightness,
+        postScreenScheduleClockBrightness,
+    } = controllers.schedulePostApi;
     const {
         postText,
         postSwitch,
