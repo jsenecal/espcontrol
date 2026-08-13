@@ -2368,6 +2368,12 @@ inline void image_card_schedule_media_artwork_refresh(ImageCardCtx *ctx,
 
 inline void image_card_refresh_media_artwork_on_metadata_change(ImageCardCtx *ctx) {
   if (!ctx || !ctx->active || !ctx->media_artwork) return;
+  if (espcontrol::artwork::artwork_metadata_refresh_clears_retry(
+        ctx->media_artwork_retry_mask)) {
+    ctx->media_artwork_retry_mask = 0;
+    ctx->media_artwork_timeout_retries = 0;
+    ctx->next_picture_retry_ms = 0;
+  }
   image_card_schedule_media_artwork_refresh(ctx, true);
 }
 

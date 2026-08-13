@@ -196,6 +196,10 @@ constexpr bool artwork_timeout_exhaustion_preserves_current(
   return timeout_retry_exhausted && image_ready;
 }
 
+constexpr bool artwork_metadata_refresh_clears_retry(uint8_t retry_mask) {
+  return retry_mask != 0;
+}
+
 // Every active attribute-read batch needs a bounded deadline, including a
 // retry generation whose provider never invokes the queued callback.
 constexpr bool artwork_batch_needs_response_timer(bool batch_active,

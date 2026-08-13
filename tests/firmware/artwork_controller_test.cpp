@@ -22,6 +22,7 @@ using espcontrol::artwork::artwork_timeout_retry_mask;
 using espcontrol::artwork::artwork_pending_refresh_needs_reschedule;
 using espcontrol::artwork::artwork_timeout_retry_allowed;
 using espcontrol::artwork::artwork_timeout_exhaustion_preserves_current;
+using espcontrol::artwork::artwork_metadata_refresh_clears_retry;
 using espcontrol::artwork::artwork_refresh_forced;
 using espcontrol::artwork::artwork_response_needs_processing;
 using espcontrol::artwork::artwork_selection_needs_download;
@@ -121,6 +122,9 @@ int main() {
   assert(artwork_timeout_exhaustion_preserves_current(true, true));
   assert(!artwork_timeout_exhaustion_preserves_current(true, false));
   assert(!artwork_timeout_exhaustion_preserves_current(false, true));
+  assert(artwork_metadata_refresh_clears_retry(ARTWORK_SOURCE_REMOTE));
+  assert(artwork_metadata_refresh_clears_retry(ARTWORK_SOURCE_BOTH));
+  assert(!artwork_metadata_refresh_clears_retry(0));
   assert(artwork_batch_needs_response_timer(true, false));
   assert(!artwork_batch_needs_response_timer(true, true));
   assert(!artwork_batch_needs_response_timer(false, false));
