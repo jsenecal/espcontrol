@@ -21,6 +21,7 @@ import type { ApplicationLayoutState } from "./application_context";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
+import type { ControlsShellFeature } from "./controls_shell";
 
 export interface SettingsPageHelpersControllers {
     readonly settingsUiFeature: SettingsUiFeature;
@@ -34,12 +35,14 @@ export interface SettingsPageHelpersControllers {
     readonly screenScheduleState: ScreenScheduleStateFeature;
     readonly clockBar: Pick<ClockBarFeature, "syncUi">;
     readonly entityState: Pick<EntityStateFeature, "entityInput">;
+    readonly shell: Pick<ControlsShellFeature, "isConfigLocked" | "switchTab">;
 }
 
 export function installSettingsPageHelpersModule(
     controllers: SettingsPageHelpersControllers,
 ): GlobalDescriptors {
     const { entityInput } = controllers.entityState;
+    const { isConfigLocked, switchTab } = controllers.shell;
     const { bindTextPost } = controllers.codec;
     const els = controllers.runtime.els;
     const { formatDuration, formatHour } = controllers.screenScheduleState;

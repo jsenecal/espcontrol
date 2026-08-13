@@ -23,7 +23,9 @@ import type { ScreenRotationFeature } from "./screen_rotation_state";
 import type { AppearanceFeature } from "./appearance_state";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
-export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, screenRotation: ScreenRotationFeature, appearance: AppearanceFeature, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">): GlobalDescriptors {
+import type { ControlsShellFeature } from "./controls_shell";
+export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, screenRotation: ScreenRotationFeature, appearance: AppearanceFeature, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, shell: Pick<ControlsShellFeature, "createActionButton" | "buildApplyBar">): GlobalDescriptors {
+    const { createActionButton, buildApplyBar } = shell;
     const { entityName, entityInput } = entityState;
     const { bindTextPost } = codec;
     const { syncPreviewOrientation } = core;

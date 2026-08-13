@@ -3,8 +3,10 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { UiRuntimeState } from "./state";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
-export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityInput">): GlobalDescriptors {
+import type { ControlsShellFeature } from "./controls_shell";
+export function installButtonSettingsSelectionModule(runtime: UiRuntimeState, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityInput">, shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton">): GlobalDescriptors {
     const { entityInput } = entityState;
+    const { isConfigLocked, createActionButton } = shell;
     const els = runtime.els;
     const {
         primaryTemperatureEntity: primaryClockBarTemperatureEntity,

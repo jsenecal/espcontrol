@@ -96,7 +96,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout, entityState\)/);
   });
 
@@ -688,6 +688,23 @@ describe("browserless application contracts", () => {
     assert.match(entry, /installAppEventsModule\([\s\S]*context\.controllers\.shell/);
   });
 
+  test("injects the UI shell into settings and card-editor modules", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    for (const file of [
+      "controls_fields.ts",
+      "settings_system_section.ts",
+      "settings_page.ts",
+      "settings_page_helpers.ts",
+      "button_settings.ts",
+      "button_settings_selection.ts",
+    ]) {
+      const source = fs.readFileSync(path.join(ROOT, "src/webserver/application", file), "utf8");
+      assert.match(source, /ControlsShellFeature/, `${file} should declare its shell dependency`);
+    }
+    assert.match(entry, /installControlsFieldsModule\(context\.cards, context\.configuration\.options, context\.controllers\.shell\)/);
+    assert.match(entry, /installButtonSettingsSelectionModule\(context\.runtime, clockBarState, context\.controllers\.entityState, context\.controllers\.shell\)/);
+  });
+
   test("injects preview drag state without ambient globals", () => {
     const interactions = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_interactions.ts"), "utf8");
     const shell = fs.readFileSync(path.join(ROOT, "src/webserver/application/controls_shell.ts"), "utf8");
@@ -741,8 +758,8 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState\)/);
-    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware\)\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell\)/);
+    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell\)\)/);
   });
 
   test("injects display-state DOM references", () => {

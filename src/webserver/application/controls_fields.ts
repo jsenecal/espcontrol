@@ -4,6 +4,7 @@ import { CARD_SIZE_LARGE, CARD_SIZE_SINGLE } from "../model/grid";
 import { escHtml, iconSlug } from "./ui_primitives";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigSensorOptionsFeature } from "./config_sensor_options";
+import type { ControlsShellFeature } from "./controls_shell";
 import {
     SENSOR_LARGE_NUMBERS_OPTION,
     largeNumbersExplicitlyDisabled,
@@ -11,7 +12,9 @@ import {
 export function installControlsFieldsModule(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
+    shell: Pick<ControlsShellFeature, "createDisclosureChevron">,
 ): GlobalDescriptors {
+    const { createDisclosureChevron } = shell;
     const {
         cardLargeNumbersSupported,
         cardLargeNumbersEnabled,

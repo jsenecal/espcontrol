@@ -11,6 +11,7 @@ import {
 import type { FirmwareVersionFeature } from "./firmware_version_state";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { C6FirmwareFeature } from "./c6_firmware_ui";
+import type { ControlsShellFeature } from "./controls_shell";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;
@@ -23,7 +24,9 @@ export function installSettingsSystemSectionModule(
     firmwareVersion: FirmwareVersionFeature,
     firmwareUpdate: FirmwareUpdateFeature,
     c6Firmware: C6FirmwareFeature,
+    shell: Pick<ControlsShellFeature, "createActionButton">,
 ): GlobalDescriptors {
+    const { createActionButton } = shell;
     const els = runtime.els;
     const { render: renderFirmwareVersion } = firmwareVersion;
     const {

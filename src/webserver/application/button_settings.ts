@@ -14,6 +14,7 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { ApplicationLayoutState } from "./application_context";
 import type { UiRuntimeState } from "./state";
 import type { EntityStateFeature } from "./entity_state";
+import type { ControlsShellFeature } from "./controls_shell";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
@@ -26,8 +27,10 @@ export function installButtonSettingsModule(
     layout: ApplicationLayoutState,
     runtime: UiRuntimeState,
     entityState: Pick<EntityStateFeature, "entityName" | "entityInput">,
+    shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton" | "showBanner">,
 ): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
+    const { isConfigLocked, createActionButton, showBanner } = shell;
     const els = runtime.els;
     const {
         imageSlotCapacity,

@@ -180,11 +180,12 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     screenScheduleState,
     clockBar: clockBarState,
     entityState: context.controllers.entityState,
+    shell: context.controllers.shell,
   }));
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState, context.controllers.entityState));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState));
-  installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell));
+  installGlobals(installControlsFieldsModule(context.cards, context.configuration.options, context.controllers.shell));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
     layout: context.layout,
@@ -194,7 +195,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     runtime: context.runtime,
     screenRotation,
   }));
-  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState));
+  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState, context.controllers.shell));
   installGlobals(installButtonSettingsRenderQueueModule(context.runtime));
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
@@ -205,6 +206,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.layout,
     context.runtime,
     context.controllers.entityState,
+    context.controllers.shell,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,
@@ -244,7 +246,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
-  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware));
+  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState, context.controllers.entityState));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
