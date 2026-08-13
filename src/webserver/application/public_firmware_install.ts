@@ -1,5 +1,4 @@
 import { state } from "../state/app_instance";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { DeviceApi } from "../api/device_api";
 import {
     firmwareInfoFromPublicManifest,
@@ -14,14 +13,22 @@ import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { AppEventsFeature } from "./app_events";
 
-export function installPublicFirmwareInstallModule(
+export interface PublicFirmwareInstallFeature {
+    ensurePublicFirmwareOtaUrl(info?: any): Promise<any>;
+    publicFirmwareOtaFilename(info?: any): string;
+    installPublicFirmwareViaWebOta(info?: any): Promise<any>;
+    waitForFirmwareRestart(): void;
+    failPublicFirmwareUpload(message?: any): void;
+}
+
+export function createPublicFirmwareInstallFeature(
     deviceApi: DeviceApi,
     deviceId: string,
     firmwareUpdate: FirmwareUpdateFeature,
     shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">,
     requestApi: Pick<ApplicationApiFeature, "getJsonQuietly">,
     appEvents: Pick<AppEventsFeature, "connect">,
-): GlobalDescriptors {
+): PublicFirmwareInstallFeature {
     const { setConfigLocked, showBanner } = shell;
     const {
         selectedInfo: selectedFirmwareInfo,
@@ -146,10 +153,10 @@ export function installPublicFirmwareInstallModule(
         showBanner(reason, "error");
     }
     return {
-        "ensurePublicFirmwareOtaUrl": staticGlobal(ensurePublicFirmwareOtaUrl),
-        "publicFirmwareOtaFilename": staticGlobal(publicFirmwareOtaFilename),
-        "installPublicFirmwareViaWebOta": staticGlobal(installPublicFirmwareViaWebOta),
-        "waitForFirmwareRestart": staticGlobal(waitForFirmwareRestart),
-        "failPublicFirmwareUpload": staticGlobal(failPublicFirmwareUpload),
+        ensurePublicFirmwareOtaUrl,
+        publicFirmwareOtaFilename,
+        installPublicFirmwareViaWebOta,
+        waitForFirmwareRestart,
+        failPublicFirmwareUpload,
     };
 }

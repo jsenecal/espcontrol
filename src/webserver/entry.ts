@@ -32,7 +32,7 @@ import {
   type ApplicationApiFeature,
 } from "./application/api";
 import { createFirmwareUpdatePostApiFeature, type FirmwareUpdatePostApiFeature } from "./application/firmware_update_post_api";
-import { installPublicFirmwareInstallModule } from "./application/public_firmware_install";
+import { createPublicFirmwareInstallFeature, type PublicFirmwareInstallFeature } from "./application/public_firmware_install";
 import { createConfigMediaOptionsFeature } from "./application/config_media_options";
 import { createConfigImageOptionsFeature } from "./application/config_image_options";
 import { createConfigWeatherOptionsFeature } from "./application/config_weather_options";
@@ -155,7 +155,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const cardEditorDraft = context.controllers.cardEditorDraft;
   const cardEditorValidation = context.controllers.cardEditorValidation;
   const previewPlacementController = context.controllers.previewPlacement;
-  installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell, context.controllers.requestApi, context.controllers.appEvents));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
   const settingsUiFeature = context.controllers.settingsUi;
@@ -258,7 +257,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
-  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader, context.controllers.firmwarePostApi, context.controllers.artworkPostApi));
+  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader, context.controllers.firmwarePostApi, context.controllers.artworkPostApi, context.controllers.publicFirmwareInstall));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppModule(
     context.controllers.pageTitle,
@@ -358,6 +357,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.controllers.statusPreview,
     context.controllers.artworkPostApi,
     context.controllers.clockBarPostApi,
+    context.controllers.publicFirmwareInstall,
   ));
 }
 
@@ -426,6 +426,7 @@ function composeApplicationContext(): ApplicationContext {
   });
   let firmwareUpdate: FirmwareUpdateFeature;
   let firmwarePostApi: FirmwareUpdatePostApiFeature;
+  let publicFirmwareInstall: PublicFirmwareInstallFeature;
   let c6Firmware: C6FirmwareFeature;
   const firmwareVersion = createFirmwareVersionFeature(runtime, {
     syncVersionSelect: () => firmwareUpdate.syncVersionSelect(),
@@ -435,7 +436,7 @@ function composeApplicationContext(): ApplicationContext {
   firmwareUpdate = createFirmwareUpdateFeature(runtime, layout.deviceId, firmwareVersion, {
     postInstall: () => firmwarePostApi.postFirmwareUpdateInstall(),
     refreshVersion: () => stateLoader.refreshFirmwareVersion(),
-    installViaWebOta: (info) => { void installPublicFirmwareViaWebOta(info); },
+    installViaWebOta: (info) => { void publicFirmwareInstall.installPublicFirmwareViaWebOta(info); },
     c6UpdateKnownAvailable: () => c6Firmware.updateKnownAvailable(),
   });
   c6Firmware = createC6FirmwareFeature(runtime, firmwareUpdate);
@@ -787,6 +788,14 @@ function composeApplicationContext(): ApplicationContext {
     stateLoader,
     gridMigration,
   );
+  publicFirmwareInstall = createPublicFirmwareInstallFeature(
+    deviceApi,
+    layout.deviceId,
+    firmwareUpdate,
+    shell,
+    requestApi,
+    appEvents,
+  );
   requestApi.connectReconnect(appEvents.connect);
   return createApplicationContext({
     layout,
@@ -823,6 +832,7 @@ function composeApplicationContext(): ApplicationContext {
     artworkPostApi,
     schedulePostApi,
     clockBarPostApi,
+    publicFirmwareInstall,
     c6Firmware,
     clockBarState,
     entityState,

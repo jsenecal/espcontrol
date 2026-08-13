@@ -95,9 +95,7 @@ declare global {
   var duplicateButton: any;
   var duplicateSubpageButton: any;
   var emptyButtonConfig: any;
-  var ensurePublicFirmwareOtaUrl: any;
   var exportConfig: any;
-  var failPublicFirmwareUpload: any;
   var fieldLabel: any;
   var fieldWithControl: any;
   var findDuplicatePlacement: any;
@@ -117,7 +115,6 @@ declare global {
   var initIconPicker: any;
   var disclosureBadge: any;
   var inlineDisclosure: any;
-  var installPublicFirmwareViaWebOta: any;
   var isSelectionControlTarget: any;
   var makeCollapsibleCard: any;
   var markCardPrimaryField: any;
@@ -142,7 +139,6 @@ declare global {
   var positionMenu: any;
   var previewHtmlValue: any;
   var previewValue: any;
-  var publicFirmwareOtaFilename: any;
   var registerEspControlTestHookGroup: any;
   var registryValue: any;
   var renderBackButtonSettings: any;
@@ -199,6 +195,5 @@ declare global {
   var vacuumUsesDefaultIcon: any;
   var syncAlarmDelayAudioUi: any;
   var buildAlarmDelayAudioSettingsCard: any;
-  var waitForFirmwareRestart: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
 }

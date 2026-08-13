@@ -205,7 +205,11 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar DEVICE_ID:/);
     assert.doesNotMatch(migration, /\bDEVICE_ID\b|\bNUM_SLOTS\b|dependencies\?/);
     assert.match(entry, /createFirmwareUpdateFeature\(runtime, layout\.deviceId, firmwareVersion/);
-    assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id, firmwareUpdate, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.appEvents\)/);
+    const publicFirmware = fs.readFileSync(path.join(ROOT, "src/webserver/application/public_firmware_install.ts"), "utf8");
+    assert.match(entry, /publicFirmwareInstall = createPublicFirmwareInstallFeature\([\s\S]*deviceApi,[\s\S]*layout\.deviceId,[\s\S]*firmwareUpdate,[\s\S]*shell,[\s\S]*requestApi,[\s\S]*appEvents/);
+    assert.doesNotMatch(entry, /installPublicFirmwareInstallModule/);
+    assert.doesNotMatch(publicFirmware, /GlobalDescriptors|staticGlobal|liveGlobal|installPublicFirmwareInstallModule/);
+    assert.doesNotMatch(globals, /\bvar (?:ensurePublicFirmwareOtaUrl|publicFirmwareOtaFilename|installPublicFirmwareViaWebOta|waitForFirmwareRestart|failPublicFirmwareUpload):/);
   });
 
   test("owns all slot and grid geometry without layout globals", () => {
@@ -905,7 +909,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview, context\.controllers\.artworkPostApi, context\.controllers\.schedulePostApi, context\.controllers\.clockBarPostApi\)/);
     assert.match(entry, /installSettingsScheduleSectionModule\(context\.configuration\.codec, context\.runtime, screenScheduleState, context\.controllers\.entityState, context\.controllers\.requestApi, context\.controllers\.schedulePostApi\)/);
-    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.stateLoader, context\.controllers\.firmwarePostApi, context\.controllers\.artworkPostApi\)\)/);
+    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.stateLoader, context\.controllers\.firmwarePostApi, context\.controllers\.artworkPostApi, context\.controllers\.publicFirmwareInstall\)\)/);
   });
 
   test("injects display-state DOM references", () => {
