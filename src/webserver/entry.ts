@@ -7,7 +7,6 @@ import { state } from "./state/app_instance";
 import { textSpan } from "./application/ui_primitives";
 import { installGlobals } from "./runtime/globals";
 import { createCoreFeature } from "./application/core";
-import { layoutCompatibilityDescriptors } from "./runtime/layout_compatibility";
 import {
   createApplicationContext,
   createApplicationLayoutState,
@@ -144,7 +143,6 @@ const startupState = globalThis as typeof globalThis & {
 };
 
 function installApplicationCompatibility(context: ApplicationContext): void {
-  installGlobals(layoutCompatibilityDescriptors(context.layout));
   installGlobals(installLanguageStateModule(context.runtime));
   const voiceServicesController = context.controllers.voiceServices;
   installGlobals(installEnvironmentStateModule(
@@ -161,13 +159,13 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installArtworkStateModule());
   installGlobals(installScreensaverStateModule());
   installGlobals(installFirmwareVersionStateModule(context.runtime));
-  installGlobals(installEntityStateModule(context.configuration.confirmationOptions));
+  installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout));
   const clockBarController = context.controllers.clockBar;
   installGlobals(installClockBarStateModule(clockBarController, context.runtime, context.core));
   installGlobals(installFirmwareUpdateStateModule(context.runtime, context.device.id));
   installGlobals(installScreensaverTimeoutModule(context.runtime));
   installGlobals(installC6FirmwareUiModule(context.runtime));
-  installGlobals(installGridModule(context.configuration.codec, context.runtime));
+  installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout));
   const deviceApi = context.api;
   const nativePanelConfig = context.configuration.native;
   const configPersistence = context.configuration.persistence;
@@ -260,8 +258,8 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     importBackup: backupUiFeature.importConfig,
   }, context.runtime));
   installGlobals(backupUiFeature.globals);
-  installGlobals(installAppStatusPreviewModule(context.runtime, context.core));
-  installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec));
+  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout));
+  installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
   installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, (factory) => {
     sseHandlerFactory = factory;
@@ -349,8 +347,8 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.core,
     context.layout,
   ));
-  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core));
-  installGlobals(installAppTestHooksBackup());
+  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout));
+  installGlobals(installAppTestHooksBackup(context.layout));
   installGlobals(installAppTestHooksSettings(
     () => defaultTimezoneOptionsForDevice(context.device.profile),
   ));
@@ -448,6 +446,7 @@ function composeApplicationContext(): ApplicationContext {
     modalTabOptions,
     accessClimateAlarmOptions,
     confirmationOptions,
+    layout,
   );
   configurationPersistence.connectCodec(configurationCodec);
   const cardEditorDraft = createCardEditorDraftController({

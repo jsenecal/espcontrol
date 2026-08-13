@@ -1,7 +1,8 @@
 import { state } from "../state/app_instance";
 import { BACKUP_CONFIG_VERSION, BACKUP_FORMAT } from "../model/backup";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
-export function installAppTestHooksBackup(): GlobalDescriptors {
+import type { ApplicationLayoutState } from "../application/application_context";
+export function installAppTestHooksBackup(layout: ApplicationLayoutState): GlobalDescriptors {
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("backup", {
             BACKUP_CONFIG_VERSION: BACKUP_CONFIG_VERSION,
@@ -20,13 +21,13 @@ export function installAppTestHooksBackup(): GlobalDescriptors {
                 }
             },
             planBackupImportForGridCols: function (this: any, data?: any, targetDevice?: any, gridCols?: any) {
-                var oldGridCols: any = GRID_COLS;
-                GRID_COLS = gridCols;
+                var oldGridCols: any = layout.gridCols;
+                layout.gridCols = gridCols;
                 try {
                     return planBackupImport(data, targetDevice);
                 }
                 finally {
-                    GRID_COLS = oldGridCols;
+                    layout.gridCols = oldGridCols;
                 }
             },
             backupExportFileName: backupExportFileName,

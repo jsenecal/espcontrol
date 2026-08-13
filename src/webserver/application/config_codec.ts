@@ -70,6 +70,7 @@ import type { ConfigWebhookOptionsFeature } from "./config_webhook_options";
 import type { ConfigRobotCardOptionsFeature } from "./config_robot_card_options";
 import type { ConfigLockOptionsFeature } from "./config_lock_options";
 import type { ConfigDateTimeOptionsFeature } from "./config_date_time_options";
+import type { ApplicationLayoutState } from "./application_context";
 export function createConfigCodecFeature(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
@@ -83,6 +84,7 @@ export function createConfigCodecFeature(
     modalTabs: ConfigModalTabOptionsFeature,
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
+    layout: ApplicationLayoutState,
 ) {
     const {
         sensorCardLocalSource: SENSOR_CARD_LOCAL_SENSOR,
@@ -161,10 +163,10 @@ export function createConfigCodecFeature(
         return !!(b && b.type === "image");
     }
     function cardSupportsPortraitLargeSize(this: any, b?: any) {
-        return (cardRequiresSquareSize(b) || cardSupportsMaxSize(b)) && GRID_ROWS >= 4 && GRID_COLS >= 3;
+        return (cardRequiresSquareSize(b) || cardSupportsMaxSize(b)) && layout.gridRows >= 4 && layout.gridCols >= 3;
     }
     function cardSupportsLandscapeLargeSize(this: any, b?: any) {
-        return cardSupportsMaxSize(b) && GRID_ROWS >= 3 && GRID_COLS >= 4;
+        return cardSupportsMaxSize(b) && layout.gridRows >= 3 && layout.gridCols >= 4;
     }
     function normalizeCardSizeForConfig(this: any, b?: any, size?: any) {
         size = size || CARD_SIZE_SINGLE;
@@ -925,7 +927,7 @@ export function createConfigCodecFeature(
         return subpage;
     }
     function buildSubpageGrid(this: any, sp?: any) {
-        var result: any = EspControlModel.buildSubpageGrid(sp, NUM_SLOTS, GRID_COLS);
+        var result: any = EspControlModel.buildSubpageGrid(sp, layout.numSlots, layout.gridCols);
         sp.grid = result.grid;
         sp.sizes = result.sizes;
         return sp.grid;

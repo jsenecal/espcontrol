@@ -7,11 +7,13 @@ import type { CardRegistry } from "../application/card_registry";
 import type { ConfigCodecFeature } from "../application/config_codec";
 import type { UiRuntimeState } from "../application/state";
 import type { CoreFeature } from "../application/core";
+import type { ApplicationLayoutState } from "../application/application_context";
 export function installAppTestHooksPreview(
     cardRegistry: CardRegistry,
     codec: ConfigCodecFeature,
     runtime: UiRuntimeState,
     core: Pick<CoreFeature, "mockNow" | "now" | "withMockNow" | "normalizeGridSpansForLayout" | "clockBarVisibleInPreview">,
+    layout: ApplicationLayoutState,
 ): GlobalDescriptors {
     const {
         mockNow: webserverMockNow,
@@ -88,13 +90,13 @@ export function installAppTestHooksPreview(
             importedButtonOrderFor: function (this: any, orderStr?: any, existingSizes?: any, gridCols?: any) {
                 var oldSizes: any = state.sizes;
                 var oldGrid: any = state.grid;
-                var oldGridCols: any = GRID_COLS;
+                var oldGridCols: any = layout.gridCols;
                 state.sizes = existingSizes || {};
                 state.grid = [];
-                for (var i: any = 0; i < NUM_SLOTS; i++)
+                for (var i: any = 0; i < layout.numSlots; i++)
                     state.grid.push(0);
                 if (gridCols)
-                    GRID_COLS = gridCols;
+                    layout.gridCols = gridCols;
                 try {
                     var normalizedOrder: any = applyImportedButtonOrder(orderStr, {});
                     var sizes: any = {};
@@ -103,7 +105,7 @@ export function installAppTestHooksPreview(
                     return { grid: state.grid.slice(), sizes: sizes, order: normalizedOrder };
                 }
                 finally {
-                    GRID_COLS = oldGridCols;
+                    layout.gridCols = oldGridCols;
                     state.sizes = oldSizes;
                     state.grid = oldGrid;
                 }
@@ -117,12 +119,12 @@ export function installAppTestHooksPreview(
                 return { order: normalizedOrder, persistedOrder: persistedOrder, sizes: parsed.sizes };
             },
             normalizeDeferredGridOrderForLayoutChange: function (this: any, orderStr?: any, toCols?: any) {
-                var oldGridCols: any = GRID_COLS;
+                var oldGridCols: any = layout.gridCols;
                 var oldGrid: any = state.grid;
                 var oldSizes: any = state.sizes;
                 var oldSelectedSlots: any = state.selectedSlots;
                 var oldOrderReceived: any = runtime.orderReceived;
-                GRID_COLS = toCols;
+                layout.gridCols = toCols;
                 state.grid = [];
                 state.sizes = {};
                 state.selectedSlots = [];
@@ -132,7 +134,7 @@ export function installAppTestHooksPreview(
                     persistedOrder = value;
                 });
                 var sizes: any = Object.assign({}, state.sizes);
-                GRID_COLS = oldGridCols;
+                layout.gridCols = oldGridCols;
                 state.grid = oldGrid;
                 state.sizes = oldSizes;
                 state.selectedSlots = oldSelectedSlots;
@@ -148,11 +150,11 @@ export function installAppTestHooksPreview(
                 return { changed: JSON.stringify(normalizedOrder) !== JSON.stringify(previousOrder), order: normalizedOrder };
             },
             normalizeLoadedSubpageOrderForLayout: function (this: any, order?: any, toCols?: any) {
-                var oldGridCols: any = GRID_COLS;
-                GRID_COLS = toCols;
+                var oldGridCols: any = layout.gridCols;
+                layout.gridCols = toCols;
                 var source: any = { order: order, buttons: [{}], sizes: {}, backLabel: "Back" };
                 var changed: any = buildSubpageGridAndNormalizeOrder(source);
-                GRID_COLS = oldGridCols;
+                layout.gridCols = oldGridCols;
                 return { changed: changed, order: source.order, sizes: source.sizes };
             },
         });

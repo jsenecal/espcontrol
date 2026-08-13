@@ -3,8 +3,6 @@ import {
   createApplicationLayoutState,
 } from "../../src/webserver/application/application_context";
 import { createCardRegistry } from "../../src/webserver/application/card_registry";
-import { createCoreFeature } from "../../src/webserver/application/core";
-import { layoutCompatibilityDescriptors } from "../../src/webserver/runtime/layout_compatibility";
 import { createConfigWeatherOptionsFeature } from "../../src/webserver/application/config_weather_options";
 import { createConfigWebhookOptionsFeature } from "../../src/webserver/application/config_webhook_options";
 import { createConfigInternalRelayOptionsFeature } from "../../src/webserver/application/config_internal_relay_options";
@@ -226,22 +224,4 @@ export function runApplicationContextTests(): void {
   equal(sensor.label, "Sensor", "registry preserves typed card metadata");
   equal(sensor.runtimeSpec != null, true, "registry attaches the generated runtime contract");
 
-  const compatibilityGlobals: Record<string, unknown> = {};
-  const testedCore = createCoreFeature(context.layout, () => "", runtime, {
-    state: { grid: [], subpages: {}, sizes: {}, screenRotation: "0" } as any,
-    document: { documentElement: { style: { setProperty() {}, removeProperty() {} } } } as any,
-    clockBarVisibleInPreview: () => false,
-    postButtonOrder() {},
-    saveSubpage() {},
-  });
-  Object.defineProperties(
-    compatibilityGlobals,
-    layoutCompatibilityDescriptors(context.layout),
-  );
-  compatibilityGlobals.GRID_COLS = 6;
-  compatibilityGlobals.GRID_ROWS = 2;
-  compatibilityGlobals.NUM_SLOTS = 10;
-  equal(context.layout.gridCols, 6, "legacy grid column writes update context state");
-  equal(context.layout.gridRows, 2, "legacy grid row writes update context state");
-  equal(context.layout.numSlots, 10, "legacy slot writes update context state");
 }

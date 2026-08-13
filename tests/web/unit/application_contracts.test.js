@@ -26,10 +26,7 @@ describe("browserless application contracts", () => {
   test("imports the browser core service without ambient application names", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
-    const compatibility = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts"), "utf8");
-    assert.match(entry, /layoutCompatibilityDescriptors\(context\.layout\)/);
-    assert.doesNotMatch(entry, /coreCompatibilityDescriptors/);
-    assert.doesNotMatch(compatibility, /CoreFeature|staticGlobal/);
+    assert.doesNotMatch(entry, /(?:core|layout)CompatibilityDescriptors/);
     for (const name of ["activeLayout", "isPortraitRotation", "normalizeGridSpansForLayout", "syncPreviewGridTop", "syncPreviewOrientation", "subpageStateDisplayMode", "webserverNow"]) {
       assert.doesNotMatch(globals, new RegExp(`\\bvar ${name}:`));
     }
@@ -38,9 +35,7 @@ describe("browserless application contracts", () => {
   test("injects device configuration without the CFG application global", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
-    const compatibility = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.doesNotMatch(compatibility, /\bCFG:/);
     assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
   });
@@ -48,13 +43,21 @@ describe("browserless application contracts", () => {
   test("injects the device ID without an application global", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
-    const compatibility = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts"), "utf8");
     const migration = fs.readFileSync(path.join(ROOT, "src/webserver/application/native_panel_config_migration.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar DEVICE_ID:/);
-    assert.doesNotMatch(compatibility, /\bDEVICE_ID:/);
     assert.doesNotMatch(migration, /\bDEVICE_ID\b|\bNUM_SLOTS\b|dependencies\?/);
     assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime, context\.device\.id\)/);
     assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id\)/);
+  });
+
+  test("owns all slot and grid geometry without layout globals", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.equal(fs.existsSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts")), false);
+    assert.doesNotMatch(globals, /\bvar (?:NUM_SLOTS|TOTAL_SLOTS|GRID_COLS|GRID_ROWS):/);
+    assert.match(entry, /installGridModule\(context\.configuration\.codec, context\.runtime, context\.layout\)/);
+    assert.match(entry, /installAppConfigEventsModule\(configPersistence, context\.configuration\.codec, context\.layout\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout\)/);
   });
 
   test("registers migrated card families through the typed registry", () => {
@@ -319,7 +322,7 @@ describe("browserless application contracts", () => {
     assert.match(options, /const actionCardActions/);
     assert.match(entry, /registerActionCardTypes\(registry, context\.configuration\.confirmationOptions\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerActionCardTypes/);
-    assert.match(entry, /installEntityStateModule\(context\.configuration\.confirmationOptions\)/);
+    assert.match(entry, /installEntityStateModule\(context\.configuration\.confirmationOptions, context\.layout\)/);
     assert.doesNotMatch(globals, /\bvar (?:ACTION_CARD_ACTIONS|ACTION_CARD_METADATA|actionCardInfo|actionCardIsLocal|actionCardIsOptionSelect|actionCardNeedsExtraValue|actionCardStateDisplayMode|actionCardStateEntity|actionCardStatePrecision|actionCardStateUnit|normalizeActionCardConfig|normalizeSavedConfigActionFields|renderActionCardLocalSettings|setActionCardStateOptions):/);
   });
 
@@ -486,7 +489,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /codec: context\.configuration\.codec/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout\)/);
   });
 
   test("injects the configuration codec into persistence and application services", () => {
@@ -513,7 +516,7 @@ describe("browserless application contracts", () => {
     assert.match(core, /serializeSubpageGrid: \(subpage: any\) => any/);
     assert.match(entry, /\(subpage\) => configurationCodec\.serializeSubpageGrid\(subpage\)/);
     assert.match(entry, /configurationPersistence\.connectCodec\(configurationCodec\)/);
-    assert.match(entry, /installAppConfigEventsModule\(configPersistence, context\.configuration\.codec\)/);
+    assert.match(entry, /installAppConfigEventsModule\(configPersistence, context\.configuration\.codec, context\.layout\)/);
     assert.doesNotMatch(entry, /configuration\.codec\.globals/);
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar (?:normalizeButtonConfig|serializeButtonConfig|parseSubpageConfig|serializeSubpageConfig|getSubpage|bindTextPost):/);

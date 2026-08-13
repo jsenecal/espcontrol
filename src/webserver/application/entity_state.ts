@@ -3,6 +3,7 @@ import { ENTITY_CATALOG } from "../generated/entity_catalog";
 import { entityStateKeys } from "../state/event_state";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
+import type { ApplicationLayoutState } from "./application_context";
 
 type EntityDefinition = {
     readonly domain?: string;
@@ -15,6 +16,7 @@ const entityDefinitions = ENTITY_CATALOG.entities as unknown as Readonly<Record<
 
 export function installEntityStateModule(
     confirmationOptions: ConfigConfirmationOptionsFeature,
+    layout: ApplicationLayoutState,
 ): GlobalDescriptors {
     const { actionCardStateEntity } = confirmationOptions;
     // ── Entity State Helpers ───────────────────────────────────────────────
@@ -49,7 +51,7 @@ export function installEntityStateModule(
     }
     function entityStateItemsForSlots(this: any, keys?: any) {
         var items: any = [];
-        for (var i: any = 1; i <= TOTAL_SLOTS; i++) {
+        for (var i: any = 1; i <= layout.totalSlots; i++) {
             keys.forEach(function (this: any, key?: any) {
                 items.push([entityDef(key).domain, entityNameForSlot(key, i)]);
             });

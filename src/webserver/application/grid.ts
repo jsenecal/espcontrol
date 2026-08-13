@@ -4,7 +4,8 @@ import { domainIcons as DOMAIN_ICONS, iconSlug } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
-export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeState): GlobalDescriptors {
+import type { ApplicationLayoutState } from "./application_context";
+export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeState, layout: ApplicationLayoutState): GlobalDescriptors {
     const { getSubpage, saveSubpageConfig } = codec;
     // ── Context abstraction ────────────────────────────────────────────────
     var mainGridSaveTimer: any = null;
@@ -24,7 +25,7 @@ export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeS
             var sp: any = getSubpage(state.editingSubpage);
             return {
                 grid: sp.grid, sizes: sp.sizes, buttons: sp.buttons,
-                maxSlots: NUM_SLOTS, selected: state.subpageSelectedSlots,
+                maxSlots: layout.numSlots, selected: state.subpageSelectedSlots,
                 isSub: true,
                 setSelected: function (this: any, s?: any) { state.subpageSelectedSlots = s; },
                 setLastClicked: function (this: any, s?: any) { state.subpageLastClicked = s; },
@@ -34,7 +35,7 @@ export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeS
         }
         return {
             grid: state.grid, sizes: state.sizes, buttons: state.buttons,
-            maxSlots: NUM_SLOTS, selected: state.selectedSlots,
+            maxSlots: layout.numSlots, selected: state.selectedSlots,
             isSub: false,
             setSelected: function (this: any, s?: any) { state.selectedSlots = s; },
             setLastClicked: function (this: any, s?: any) { state.lastClickedSlot = s; },
@@ -74,16 +75,16 @@ export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeS
         return className ? " " + className : "";
     }
     function coveredCells(this: any, pos?: any, size?: any, maxSlots?: any, includeOrigin?: any) {
-        return EspControlModel.coveredCells(pos, size, maxSlots, GRID_COLS, includeOrigin);
+        return EspControlModel.coveredCells(pos, size, maxSlots, layout.gridCols, includeOrigin);
     }
     function sizeFitsAt(this: any, pos?: any, size?: any, maxSlots?: any) {
-        return EspControlModel.sizeFitsAt(pos, size, maxSlots, GRID_COLS);
+        return EspControlModel.sizeFitsAt(pos, size, maxSlots, layout.gridCols);
     }
     function markSpannedCells(this: any, grid?: any, pos?: any, size?: any, maxSlots?: any) {
-        EspControlModel.markSpannedCells(grid, pos, size, maxSlots, GRID_COLS);
+        EspControlModel.markSpannedCells(grid, pos, size, maxSlots, layout.gridCols);
     }
     function parseOrder(this: any, str?: any) {
-        var parsed: any = EspControlModel.parseGridOrder(str, NUM_SLOTS, GRID_COLS, state.sizes);
+        var parsed: any = EspControlModel.parseGridOrder(str, layout.numSlots, layout.gridCols, state.sizes);
         state.sizes = parsed.sizes;
         return parsed.grid;
     }
@@ -98,7 +99,7 @@ export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeS
             scheduleRender();
     }
     function applySpans(this: any, grid?: any, sizes?: any, maxSlots?: any) {
-        EspControlModel.applySpans(grid, sizes, maxSlots, GRID_COLS);
+        EspControlModel.applySpans(grid, sizes, maxSlots, layout.gridCols);
     }
     function serializeGrid(this: any, grid?: any) {
         return EspControlModel.serializeGridOrder(grid, state.sizes);

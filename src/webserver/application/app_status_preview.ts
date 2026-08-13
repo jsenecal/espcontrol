@@ -3,7 +3,8 @@ import { normalizeBrightnessMode } from "../model/settings";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 import type { CoreFeature } from "./core";
-export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature): GlobalDescriptors {
+import type { ApplicationLayoutState } from "./application_context";
+export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature, layout: ApplicationLayoutState): GlobalDescriptors {
     const { now: webserverNow } = core;
     const els = runtime.els;
     // ── Clock (minute-aligned) ─────────────────────────────────────────────
@@ -246,7 +247,7 @@ export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: Cor
             el.value = val;
     }
     function gridHasAny(this: any) {
-        for (var i: any = 0; i < NUM_SLOTS; i++) {
+        for (var i: any = 0; i < layout.numSlots; i++) {
             if ((state.grid[i] ?? 0) > 0)
                 return true;
         }
@@ -260,8 +261,8 @@ export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: Cor
             if (runtime.orderReceived || gridHasAny())
                 return;
             var pos: any = 0;
-            for (var i: any = 0; i < NUM_SLOTS; i++) {
-                if (state.buttons[i]?.entity && pos < NUM_SLOTS) {
+            for (var i: any = 0; i < layout.numSlots; i++) {
+                if (state.buttons[i]?.entity && pos < layout.numSlots) {
                     state.grid[pos] = i + 1;
                     pos++;
                 }

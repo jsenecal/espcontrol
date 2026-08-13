@@ -252,6 +252,10 @@ export function installAppTestHooksConfig(
     } = codec;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("config", {
+            setGridDimensions: function (cols?: number, rows?: number) {
+                if (cols) layout.gridCols = cols;
+                if (rows) layout.gridRows = rows;
+            },
             parseButtonConfig: parseButtonConfig,
             serializeButtonConfig: serializeButtonConfig,
             cardContractSubpageTypeCode: cardContractSubpageTypeCode,
