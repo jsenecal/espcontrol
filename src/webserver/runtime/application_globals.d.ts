@@ -77,8 +77,6 @@ declare global {
   var buttonTypePickerOptionList: any;
   var buttonTypeRegistryValue: any;
   var buttonTypeVisibleInPicker: any;
-  var c6FirmwareUpdateKnownAvailable: any;
-  var c6FirmwareVersionLooksKnown: any;
   var canPlaceSlotAt: any;
   var cardBadgeLabelHtml: any;
   var cardBadgePreview: any;
@@ -159,7 +157,6 @@ declare global {
   var deleteButtons: any;
   var deleteSlot: any;
   var disclosureSection: any;
-  var displayC6FirmwareVersion: any;
   var duplicateButton: any;
   var duplicateSubpageButton: any;
   var emptyButtonConfig: any;
@@ -373,9 +370,6 @@ declare global {
   var selectField: any;
   var serializeClockBarTemperatureEntities: any;
   var serializeGrid: any;
-  var setC6FirmwareCurrentVersion: any;
-  var setC6FirmwareLatestVersion: any;
-  var setC6FirmwareUpdateAvailable: any;
   var setClockBarItemVisible: any;
   var setConfigLocked: any;
   var setFavicon: any;
@@ -399,7 +393,6 @@ declare global {
   var subpageStateEntities: any;
   var swapGridCell: any;
   var switchTab: any;
-  var syncC6FirmwareUi: any;
   var syncCardLargeNumbersToggle: any;
   var syncClockBarItemElement: any;
   var syncClockBarUi: any;

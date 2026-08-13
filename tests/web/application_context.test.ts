@@ -56,6 +56,7 @@ export function runApplicationContextTests(): void {
   const appearance = {} as any;
   const firmwareVersion = {} as any;
   const firmwareUpdate = {} as any;
+  const c6Firmware = {} as any;
   const reconnect = { connect() {} } as any;
   const alarmDelayAudio = {} as any;
   const cardEditorDraft = {} as any;
@@ -110,6 +111,7 @@ export function runApplicationContextTests(): void {
     appearance,
     firmwareVersion,
     firmwareUpdate,
+    c6Firmware,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,
@@ -136,6 +138,7 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.appearance, appearance, "context owns appearance behavior");
   equal(context.controllers.firmwareVersion, firmwareVersion, "context owns firmware version behavior");
   equal(context.controllers.firmwareUpdate, firmwareUpdate, "context owns firmware update behavior");
+  equal(context.controllers.c6Firmware, c6Firmware, "context owns C6 firmware behavior");
   equal(context.layout.numSlots, 12, "context initializes slot count");
   equal(context.layout.totalSlots, 12, "context initializes total slot count");
   equal(context.layout.gridCols, 4, "context initializes grid columns");

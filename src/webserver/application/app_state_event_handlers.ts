@@ -42,6 +42,7 @@ import type { ScreenRotationFeature } from "./screen_rotation_state";
 import type { AppearanceFeature } from "./appearance_state";
 import type { FirmwareVersionFeature } from "./firmware_version_state";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
+import type { C6FirmwareFeature } from "./c6_firmware_ui";
 
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
@@ -56,6 +57,7 @@ export function installAppStateEventHandlersModule(
     appearance: AppearanceFeature,
     firmwareVersion: FirmwareVersionFeature,
     firmwareUpdate: FirmwareUpdateFeature,
+    c6Firmware: C6FirmwareFeature,
     onCreateSseHandlers?: (factory: SseHandlerFactory) => void,
 ): GlobalDescriptors {
     const { syncPreviewOrientation } = core;
@@ -72,6 +74,12 @@ export function installAppStateEventHandlersModule(
     const { syncColorUi } = appearance;
     const { set: setFirmwareVersion } = firmwareVersion;
     const { syncUi: syncFirmwareUpdateUi, setInfo: setFirmwareUpdateInfo } = firmwareUpdate;
+    const {
+        setCurrentVersion: setC6FirmwareCurrentVersion,
+        setLatestVersion: setC6FirmwareLatestVersion,
+        setUpdateAvailable: setC6FirmwareUpdateAvailable,
+        syncUi: syncC6FirmwareUi,
+    } = c6Firmware;
     // ── State Event Handlers ──────────────────────────────────────────
     const createSseHandlers: SseHandlerFactory = () => {
         return {

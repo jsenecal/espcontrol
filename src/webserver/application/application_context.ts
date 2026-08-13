@@ -45,6 +45,7 @@ import type { ScreenRotationFeature } from "./screen_rotation_state";
 import type { AppearanceFeature } from "./appearance_state";
 import type { FirmwareVersionFeature } from "./firmware_version_state";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
+import type { C6FirmwareFeature } from "./c6_firmware_ui";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -105,6 +106,7 @@ export interface ApplicationContext {
     readonly appearance: AppearanceFeature;
     readonly firmwareVersion: FirmwareVersionFeature;
     readonly firmwareUpdate: FirmwareUpdateFeature;
+    readonly c6Firmware: C6FirmwareFeature;
     readonly alarmDelayAudio: AlarmDelayAudioController;
     readonly cardEditorDraft: CardEditorDraftController;
     readonly cardEditorSave: CardEditorSaveController;
@@ -159,6 +161,7 @@ export interface ApplicationContextOptions {
   readonly appearance: AppearanceFeature;
   readonly firmwareVersion: FirmwareVersionFeature;
   readonly firmwareUpdate: FirmwareUpdateFeature;
+  readonly c6Firmware: C6FirmwareFeature;
   readonly alarmDelayAudio: AlarmDelayAudioController;
   readonly cardEditorDraft: CardEditorDraftController;
   readonly cardEditorSave: CardEditorSaveController;
@@ -233,6 +236,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       appearance: options.appearance,
       firmwareVersion: options.firmwareVersion,
       firmwareUpdate: options.firmwareUpdate,
+      c6Firmware: options.c6Firmware,
       alarmDelayAudio: options.alarmDelayAudio,
       cardEditorDraft: options.cardEditorDraft,
       cardEditorSave: options.cardEditorSave,

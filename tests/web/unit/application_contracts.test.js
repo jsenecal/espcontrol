@@ -659,7 +659,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance\)/);
-    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate\)\)/);
+    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware\)\)/);
   });
 
   test("injects display-state DOM references", () => {
@@ -712,6 +712,18 @@ describe("browserless application contracts", () => {
     assert.match(entry, /firmwareUpdate = createFirmwareUpdateFeature/);
     assert.doesNotMatch(entry, /installFirmwareUpdateStateModule/);
     assert.doesNotMatch(globals, /\bvar (?:firmwareUpdateAvailable|latestFirmwareInstallAction|setFirmwareUpdateInfo|renderFirmwareUpdateStatus|syncFirmwareUpdateUi|startFirmwareInstallRefresh):/);
+  });
+
+  test("owns C6 firmware behavior without application globals", () => {
+    const c6Firmware = fs.readFileSync(path.join(ROOT, "src/webserver/application/c6_firmware_ui.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(c6Firmware, /export interface C6FirmwareFeature/);
+    assert.match(c6Firmware, /createC6FirmwareFeature/);
+    assert.doesNotMatch(c6Firmware, /GlobalDescriptors|(?:live|static)Global/);
+    assert.match(entry, /c6Firmware = createC6FirmwareFeature/);
+    assert.doesNotMatch(entry, /installC6FirmwareUiModule/);
+    assert.doesNotMatch(globals, /\bvar (?:c6FirmwareUpdateKnownAvailable|syncC6FirmwareUi|setC6FirmwareCurrentVersion|setC6FirmwareLatestVersion|setC6FirmwareUpdateAvailable):/);
   });
 
   test("removes the ambient DOM registry", () => {

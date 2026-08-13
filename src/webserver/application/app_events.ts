@@ -25,6 +25,7 @@ import type { UiRuntimeState } from "./state";
 import type { AppTitleFeature } from "./app_title";
 import type { FirmwareVersionFeature } from "./firmware_version_state";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
+import type { C6FirmwareFeature } from "./c6_firmware_ui";
 
 export function installAppEventsModule(
     reconnectController: ReconnectController<unknown>,
@@ -33,10 +34,17 @@ export function installAppEventsModule(
     pageTitle: AppTitleFeature,
     firmwareVersion: FirmwareVersionFeature,
     firmwareUpdate: FirmwareUpdateFeature,
+    c6Firmware: C6FirmwareFeature,
 ): GlobalDescriptors {
     const els = runtime.els;
     const { set: setFirmwareVersion } = firmwareVersion;
     const { setInfo: setFirmwareUpdateInfo, renderStatus: renderFirmwareUpdateStatus } = firmwareUpdate;
+    const {
+        setCurrentVersion: setC6FirmwareCurrentVersion,
+        setLatestVersion: setC6FirmwareLatestVersion,
+        setUpdateAvailable: setC6FirmwareUpdateAvailable,
+        syncUi: syncC6FirmwareUi,
+    } = c6Firmware;
     // ── SSE ────────────────────────────────────────────────────────────────
     function connectEvents(this: any) {
         function markConnected(this: any) {

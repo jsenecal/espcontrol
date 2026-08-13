@@ -25,7 +25,7 @@ import { installEntityStateModule } from "./application/entity_state";
 import { installClockBarStateModule } from "./application/clock_bar_state";
 import { createFirmwareUpdateFeature, type FirmwareUpdateFeature } from "./application/firmware_update_state";
 import { createScreensaverTimeoutFeature } from "./application/screensaver_timeout";
-import { installC6FirmwareUiModule } from "./application/c6_firmware_ui";
+import { createC6FirmwareFeature, type C6FirmwareFeature } from "./application/c6_firmware_ui";
 import { installGridModule } from "./application/grid";
 import { installApiModule } from "./application/api";
 import { installFirmwareUpdatePostApiModule } from "./application/firmware_update_post_api";
@@ -144,10 +144,10 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const appearance = context.controllers.appearance;
   const firmwareVersion = context.controllers.firmwareVersion;
   const firmwareUpdate = context.controllers.firmwareUpdate;
+  const c6Firmware = context.controllers.c6Firmware;
   installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout));
   const clockBarController = context.controllers.clockBar;
   installGlobals(installClockBarStateModule(clockBarController, context.runtime, context.core, context.controllers.environment));
-  installGlobals(installC6FirmwareUiModule(context.runtime, firmwareUpdate));
   installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout));
   const deviceApi = context.api;
   const nativePanelConfig = context.configuration.native;
@@ -160,7 +160,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion, firmwareUpdate));
+  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion, firmwareUpdate, c6Firmware));
   installGlobals(installArtworkPostApiModule());
   installGlobals(installScreenSchedulePostApiModule());
   installGlobals(installClockBarPostApiModule());
@@ -241,18 +241,18 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
-  }, context.runtime, firmwareVersion, firmwareUpdate));
+  }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, firmwareVersion, firmwareUpdate, (factory) => {
+  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, firmwareVersion, firmwareUpdate, c6Firmware, (factory) => {
     sseHandlerFactory = factory;
   }));
   const reconnectController = context.controllers.reconnect;
   if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
   installGlobals(installAppEventsModule(
-    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate,
+    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate, c6Firmware,
   ));
   installGlobals(installAppModule(
     context.controllers.pageTitle,
@@ -381,6 +381,7 @@ function composeApplicationContext(): ApplicationContext {
     postOnColor: (value) => postText(entityName("button_on_color"), value),
   });
   let firmwareUpdate: FirmwareUpdateFeature;
+  let c6Firmware: C6FirmwareFeature;
   const firmwareVersion = createFirmwareVersionFeature(runtime, {
     syncVersionSelect: () => firmwareUpdate.syncVersionSelect(),
     renderUpdateStatus: () => firmwareUpdate.renderStatus(),
@@ -390,8 +391,9 @@ function composeApplicationContext(): ApplicationContext {
     postInstall: () => postFirmwareUpdateInstall(),
     refreshVersion: () => refreshFirmwareVersion(),
     installViaWebOta: (info) => { void installPublicFirmwareViaWebOta(info); },
-    c6UpdateKnownAvailable: () => c6FirmwareUpdateKnownAvailable(),
+    c6UpdateKnownAvailable: () => c6Firmware.updateKnownAvailable(),
   });
+  c6Firmware = createC6FirmwareFeature(runtime, firmwareUpdate);
   const voiceServices = createVoiceServicesController();
   const environment = createEnvironmentStateFeature(
     voiceServices,
@@ -678,6 +680,7 @@ function composeApplicationContext(): ApplicationContext {
     appearance,
     firmwareVersion,
     firmwareUpdate,
+    c6Firmware,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,

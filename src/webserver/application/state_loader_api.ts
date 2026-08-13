@@ -14,7 +14,8 @@ import {
 import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
 import type { FirmwareVersionFeature } from "./firmware_version_state";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
-export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature): GlobalDescriptors {
+import type { C6FirmwareFeature } from "./c6_firmware_ui";
+export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, c6Firmware: C6FirmwareFeature): GlobalDescriptors {
     const { applyState: applyScreensaverTimeoutState } = screensaverTimeout;
     const { render: renderFirmwareVersion, set: setFirmwareVersion } = firmwareVersion;
     const {
@@ -24,6 +25,12 @@ export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: App
         syncUi: syncFirmwareUpdateUi,
         renderStatus: renderFirmwareUpdateStatus,
     } = firmwareUpdate;
+    const {
+        setCurrentVersion: setC6FirmwareCurrentVersion,
+        setLatestVersion: setC6FirmwareLatestVersion,
+        setUpdateAvailable: setC6FirmwareUpdateAvailable,
+        syncUi: syncC6FirmwareUi,
+    } = c6Firmware;
     // ── State Loader API ──────────────────────────────────────────────────
     function eventStreamEnabled(this: any) {
         try {

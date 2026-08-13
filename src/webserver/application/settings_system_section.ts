@@ -10,6 +10,7 @@ import {
 } from "./firmware_metadata";
 import type { FirmwareVersionFeature } from "./firmware_version_state";
 import type { FirmwareUpdateFeature } from "./firmware_update_state";
+import type { C6FirmwareFeature } from "./c6_firmware_ui";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;
@@ -21,6 +22,7 @@ export function installSettingsSystemSectionModule(
     runtime: UiRuntimeState,
     firmwareVersion: FirmwareVersionFeature,
     firmwareUpdate: FirmwareUpdateFeature,
+    c6Firmware: C6FirmwareFeature,
 ): GlobalDescriptors {
     const els = runtime.els;
     const { render: renderFirmwareVersion } = firmwareVersion;
@@ -39,6 +41,7 @@ export function installSettingsSystemSectionModule(
         selectedPreviousInfo: selectedPreviousFirmwareInfo,
         syncVersionSelect: syncFirmwareVersionSelect,
     } = firmwareUpdate;
+    const { updateKnownAvailable: c6FirmwareUpdateKnownAvailable, syncUi: syncC6FirmwareUi } = c6Firmware;
     // ── Settings System Section ────────────────────────────────────────
     function buildSystemSettingsCards(this: any) {
         var backupBody: any = document.createElement("div");
