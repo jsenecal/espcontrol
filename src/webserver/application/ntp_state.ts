@@ -12,7 +12,7 @@ export function resetNtpServersToDefaults() {
         state.ntpServer2 = NTP_SERVER_DEFAULTS[1];
         state.ntpServer3 = NTP_SERVER_DEFAULTS[2];
 }
-export function syncNtpServerUi(runtime: UiRuntimeState) {
+export function syncNtpServerUi(runtime: UiRuntimeState, syncInput: (element: any, value: any) => void) {
         const els = runtime.els;
         if (els.setCustomNtpServersToggle) {
             els.setCustomNtpServersToggle.checked = !!state.customNtpServers;

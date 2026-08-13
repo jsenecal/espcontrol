@@ -151,6 +151,18 @@ describe("browserless application contracts", () => {
     assert.match(handlers, /updateNetworkPreview,[\s\S]*updateSunInfo,[\s\S]*updateTempPreview,[\s\S]*\} = statusPreview/);
   });
 
+  test("injects status preview into settings and backup consumers", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    for (const relativePath of ["settings_page.ts", "settings_page_helpers.ts", "settings_cover_art_section.ts", "app_backup.ts"]) {
+      const source = fs.readFileSync(path.join(ROOT, "src/webserver/application", relativePath), "utf8");
+      assert.match(source, /AppStatusPreviewFeature/, `${relativePath} should declare its status-preview dependency`);
+    }
+    const ntp = fs.readFileSync(path.join(ROOT, "src/webserver/application/ntp_state.ts"), "utf8");
+    assert.match(ntp, /syncNtpServerUi\(runtime: UiRuntimeState, syncInput:/);
+    assert.match(entry, /statusPreview: context\.controllers\.statusPreview/);
+    assert.match(entry, /createAppBackupFeature\([\s\S]*requestApi,[\s\S]*statusPreview/);
+  });
+
   test("imports the browser core service without ambient application names", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
@@ -164,7 +176,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout, entityState, shell\)/);
   });
 
@@ -848,7 +860,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.statusPreview\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context\.controllers\.shell, context\.controllers\.requestApi, context\.controllers\.stateLoader\)\)/);
   });
 

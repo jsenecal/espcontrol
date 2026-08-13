@@ -182,10 +182,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     entityState: context.controllers.entityState,
     shell: context.controllers.shell,
     requestApi: context.controllers.requestApi,
+    statusPreview: context.controllers.statusPreview,
   }));
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState, context.controllers.entityState, context.controllers.requestApi));
-  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi));
+  installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime, context.controllers.entityState, context.controllers.statusPreview));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi, context.controllers.statusPreview));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options, context.controllers.shell, context.controllers.requestApi));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -745,6 +746,7 @@ function composeApplicationContext(): ApplicationContext {
     entityState,
     shell,
     requestApi,
+    statusPreview,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: stateLoader.eventStreamEnabled,

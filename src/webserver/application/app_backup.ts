@@ -41,6 +41,7 @@ import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
+import type { AppStatusPreviewFeature } from "./app_status_preview";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -61,6 +62,7 @@ export interface AppBackupControllers {
     readonly entityState: Pick<EntityStateFeature, "entityName">;
     readonly shell: Pick<ControlsShellFeature, "switchTab">;
     readonly requestApi: ApplicationApiFeature;
+    readonly statusPreview: Pick<AppStatusPreviewFeature, "syncInput" | "updateTempPreview">;
 }
 
 export interface AppBackupFeature {
@@ -73,6 +75,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
     const { entityName } = controllers.entityState;
     const { switchTab } = controllers.shell;
     const requestApi = controllers.requestApi;
+    const { syncInput, updateTempPreview } = controllers.statusPreview;
     const {
         postText,
         postSwitch,
@@ -457,7 +460,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                     syncLanguageSelect(controllers.runtime);
                     if (els.setClockFormat)
                         els.setClockFormat.value = state.clockFormat;
-                    syncNtpServerUi(controllers.runtime);
+                    syncNtpServerUi(controllers.runtime, syncInput);
                     syncClockScreensaverControls();
                     syncScreensaverTimeoutUi();
                     syncIdleUi(controllers.runtime);

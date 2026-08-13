@@ -481,17 +481,17 @@ export function createAppStateEventHandlersFeature(
             "text-screen__ntp_server_1": function (this: any, val?: any) {
                 state.ntpServer1 = normalizeNtpServer(val, NTP_SERVER_DEFAULTS[0]);
                 state.customNtpServers = state.customNtpServers || hasCustomNtpServers();
-                syncNtpServerUi(runtime);
+                syncNtpServerUi(runtime, syncInput);
             },
             "text-screen__ntp_server_2": function (this: any, val?: any) {
                 state.ntpServer2 = normalizeNtpServer(val, NTP_SERVER_DEFAULTS[1]);
                 state.customNtpServers = state.customNtpServers || hasCustomNtpServers();
-                syncNtpServerUi(runtime);
+                syncNtpServerUi(runtime, syncInput);
             },
             "text-screen__ntp_server_3": function (this: any, val?: any) {
                 state.ntpServer3 = normalizeNtpServer(val, NTP_SERVER_DEFAULTS[2]);
                 state.customNtpServers = state.customNtpServers || hasCustomNtpServers();
-                syncNtpServerUi(runtime);
+                syncNtpServerUi(runtime, syncInput);
             },
             "select-screen__rotation": function (this: any, val?: any, d?: any) {
                 state.screenRotation = normalizeScreenRotation(d.value || val || state.screenRotation);

@@ -23,6 +23,7 @@ import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
+import type { AppStatusPreviewFeature } from "./app_status_preview";
 
 export interface SettingsPageHelpersControllers {
     readonly settingsUiFeature: SettingsUiFeature;
@@ -38,6 +39,7 @@ export interface SettingsPageHelpersControllers {
     readonly entityState: Pick<EntityStateFeature, "entityInput">;
     readonly shell: Pick<ControlsShellFeature, "isConfigLocked" | "switchTab">;
     readonly requestApi: Pick<ApplicationApiFeature, "postScreensaverAction" | "postScreensaverDimmedBrightness" | "postScreensaverDimmedBrightnessDay" | "postScreensaverDimmedBrightnessNight" | "postSwitch">;
+    readonly statusPreview: Pick<AppStatusPreviewFeature, "syncInput">;
 }
 
 export function installSettingsPageHelpersModule(
@@ -46,6 +48,7 @@ export function installSettingsPageHelpersModule(
     const { entityInput } = controllers.entityState;
     const { isConfigLocked, switchTab } = controllers.shell;
     const { bindTextPost } = controllers.codec;
+    const { syncInput } = controllers.statusPreview;
     const {
         postScreensaverAction,
         postScreensaverDimmedBrightness,

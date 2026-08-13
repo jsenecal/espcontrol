@@ -3,9 +3,11 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { EntityStateFeature } from "./entity_state";
-export function installSettingsCoverArtSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">): GlobalDescriptors {
+import type { AppStatusPreviewFeature } from "./app_status_preview";
+export function installSettingsCoverArtSectionModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, statusPreview: Pick<AppStatusPreviewFeature, "syncInput">): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
     const { bindTextPost } = codec;
+    const { syncInput } = statusPreview;
     const els = runtime.els;
     // ── Settings Cover Art Section ─────────────────────────────────────
     function buildCoverArtSettingsCard(this: any) {

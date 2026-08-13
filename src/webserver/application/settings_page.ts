@@ -25,11 +25,13 @@ import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
-export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, screenRotation: ScreenRotationFeature, appearance: AppearanceFeature, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, shell: Pick<ControlsShellFeature, "createActionButton" | "buildApplyBar">, requestApi: Pick<ApplicationApiFeature, "postText" | "postSelect" | "postScreensaverMode" | "postScreensaverTimeout" | "postHomeScreenTimeout">): GlobalDescriptors {
+import type { AppStatusPreviewFeature } from "./app_status_preview";
+export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, screenRotation: ScreenRotationFeature, appearance: AppearanceFeature, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityName" | "entityInput">, shell: Pick<ControlsShellFeature, "createActionButton" | "buildApplyBar">, requestApi: Pick<ApplicationApiFeature, "postText" | "postSelect" | "postScreensaverMode" | "postScreensaverTimeout" | "postHomeScreenTimeout">, statusPreview: Pick<AppStatusPreviewFeature, "appendTimezoneOption" | "syncInput" | "updateClock" | "updateSunInfo" | "updateTempPreview">): GlobalDescriptors {
     const { createActionButton, buildApplyBar } = shell;
     const { entityName, entityInput } = entityState;
     const { postText, postSelect, postScreensaverMode, postScreensaverTimeout, postHomeScreenTimeout } = requestApi;
     const { bindTextPost } = codec;
+    const { appendTimezoneOption, syncInput, updateClock, updateSunInfo, updateTempPreview } = statusPreview;
     const { syncPreviewOrientation } = core;
     const els = runtime.els;
     const { timezoneOptionsWithFallback, voiceServicesUiState, setVoiceServicesEnabled } = environment;
@@ -201,7 +203,7 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
                 postText(entityName("screen_ntp_server_2"), state.ntpServer2);
                 postText(entityName("screen_ntp_server_3"), state.ntpServer3);
             }
-            syncNtpServerUi(runtime);
+            syncNtpServerUi(runtime, syncInput);
         });
         var ntpList: any = document.createElement("div");
         ntpList.className = "sp-field-stack";
@@ -214,7 +216,7 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
                 this.value = value;
                 state[stateKey] = value;
                 state.customNtpServers = true;
-                syncNtpServerUi(runtime);
+                syncNtpServerUi(runtime, syncInput);
                 postText(postName, value);
             });
             input.addEventListener("keydown", function (this: any, e?: any) {
@@ -228,7 +230,7 @@ export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindT
         els.setNtpServer2 = addNtpServerInput("sp-set-ntp-server-2", "ntpServer2", entityName("screen_ntp_server_2"), NTP_SERVER_DEFAULTS[1], "NTP Server 2");
         els.setNtpServer3 = addNtpServerInput("sp-set-ntp-server-3", "ntpServer3", entityName("screen_ntp_server_3"), NTP_SERVER_DEFAULTS[2], "NTP Server 3");
         ntpField.appendChild(ntpList);
-        syncNtpServerUi(runtime);
+        syncNtpServerUi(runtime, syncInput);
         clockBody.appendChild(ntpField);
         var timeSettingsCard: any = makeCollapsibleCard("Time", clockBody, true);
         var clockBarBody: any = document.createElement("div");
