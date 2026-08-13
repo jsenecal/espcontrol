@@ -784,6 +784,22 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:SUBPAGE_RAW_CHUNK_FIELDS|saveButtonConfig|saveSubpageEntity|saveSubpageEntityLegacy|scheduleSliderSubpageMigration|subpageChunkShouldPost|subpageEntityKeys):/);
   });
 
+  test("composes the backup contract without compatibility globals", () => {
+    const contract = fs.readFileSync(path.join(ROOT, "src/webserver/application/backup_contract.ts"), "utf8");
+    const backup = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_backup.ts"), "utf8");
+    const hooks = fs.readFileSync(path.join(ROOT, "src/webserver/testing/app_test_hooks_backup.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(contract, /export function createBackupContractFeature/);
+    assert.match(contract, /buttonConfigDisabledForDevice/);
+    assert.doesNotMatch(contract, /GlobalDescriptors|staticGlobal|liveGlobal|installBackupContractModule/);
+    assert.doesNotMatch(entry, /installGlobals\(installBackupContractModule/);
+    assert.match(entry, /createBackupContractFeature\(backupModel, configurationCodec, cards, layout\)/);
+    assert.match(backup, /readonly backupContract:/);
+    assert.match(hooks, /backup: BackupContractFeature/);
+    assert.doesNotMatch(globals, /\bvar (?:_backupFeature|backupEmptyButtonConfig|backupNormalizeButtonConfig|createBackupConfig|normalizeBackupConfig|planBackupImport):/);
+  });
+
   test("imports shared UI primitives without application globals", () => {
     const primitives = fs.readFileSync(path.join(ROOT, "src/webserver/application/ui_primitives.ts"), "utf8");
     const stateModule = fs.readFileSync(path.join(ROOT, "src/webserver/application/state.ts"), "utf8");

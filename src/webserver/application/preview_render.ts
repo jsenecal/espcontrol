@@ -3,6 +3,7 @@ import { WEB_UI_COLORS } from "../state/ui_tokens";
 import { escHtml } from "./ui_primitives";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
+    buttonConfigDisabledForDevice as isButtonConfigDisabledForDevice,
     cardTypePickerDetails,
     cardTypePickerOptions,
     defaultCardTypeForPicker,
@@ -49,12 +50,11 @@ export function installPreviewRenderModule(dependencies: PreviewRenderDependenci
         return disabled.indexOf(key || "") !== -1;
     }
     function buttonConfigDisabledForDevice(this: any, button?: any) {
-        var type: any = button && button.type || "";
-        if (buttonTypeDisabledForDevice(type))
-            return true;
-        var typeDef: any = dependencies.cards.definitions[type];
-        var pickerKey: any = typeDef && buttonTypeRegistryValue(typeDef, "pickerKey", "");
-        return !!pickerKey && buttonTypeDisabledForDevice(pickerKey);
+        return isButtonConfigDisabledForDevice(
+            dependencies.cards.definitions,
+            dependencies.layout.config.disabledCardTypes || [],
+            button,
+        );
     }
     function buttonTypeInfoOnlyVisible(this: any, key?: any) {
         return infoOnlyCardVisible(key || "", !!dependencies.layout.config.infoOnly);

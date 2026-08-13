@@ -47,6 +47,7 @@ import type { ArtworkPostApiFeature } from "./artwork_post_api";
 import type { ScreenSchedulePostApiFeature } from "./screen_schedule_post_api";
 import type { ClockBarPostApiFeature } from "./clock_bar_post_api";
 import type { ConfigPersistenceFeature } from "./config_post_api";
+import type { BackupContractFeature } from "./backup_contract";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -59,6 +60,7 @@ export interface AppBackupControllers {
     readonly nativePanelConfig?: NativePanelConfigController;
     readonly codec: ConfigCodecFeature;
     readonly configPersistence: Pick<ConfigPersistenceFeature, "saveButtonConfig" | "saveSubpageEntity">;
+    readonly backupContract: Pick<BackupContractFeature, "createBackupConfig" | "normalizeButtonConfig">;
     readonly runtime: UiRuntimeState;
     readonly core: Pick<CoreFeature, "syncPreviewOrientation">;
     readonly screenScheduleState: ScreenScheduleStateFeature;
@@ -83,6 +85,7 @@ export interface AppBackupFeature {
 
 export function createAppBackupFeature(controllers: AppBackupControllers): AppBackupFeature {
     const { saveButtonConfig, saveSubpageEntity } = controllers.configPersistence;
+    const { createBackupConfig, normalizeButtonConfig: backupNormalizeButtonConfig } = controllers.backupContract;
     const { entityName } = controllers.entityState;
     const { switchTab } = controllers.shell;
     const requestApi = controllers.requestApi;
@@ -282,7 +285,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
                 schedule_clock_brightness: normalizeScheduleClockBrightness(state.scheduleClockBrightness),
                 schedule_clock_text_color: normalizeHexColor(state.scheduleClockTextColor, "FFFFFF"),
             },
-        });
+        } as any);
         downloadBackupConfig(addNativeConfigToBackup(data));
     }
     function importConfig(this: any) {

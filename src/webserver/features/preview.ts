@@ -99,6 +99,18 @@ export function registryValue<T>(definition: Record<string, unknown> | null | un
   return value == null ? fallback : value as T;
 }
 
+export function buttonConfigDisabledForDevice(
+  definitions: Readonly<Record<string, CardTypeDefinition>>,
+  disabledCardTypes: readonly string[],
+  button: { readonly type?: string | null } | null | undefined,
+): boolean {
+  const type = button?.type || "";
+  if (disabledCardTypes.includes(type)) return true;
+  const definition = definitions[type] as Record<string, unknown> | undefined;
+  const pickerKey = registryValue(definition, "pickerKey", "");
+  return !!pickerKey && disabledCardTypes.includes(pickerKey);
+}
+
 export function infoOnlyCardVisible(key: string, infoOnly: boolean): boolean {
   return !infoOnly || INFO_ONLY_CARD_TYPES.has(key || "");
 }

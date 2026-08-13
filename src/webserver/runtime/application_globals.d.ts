@@ -4,7 +4,6 @@ declare global {
   var AUTOMATIC_BRIGHTNESS_UNAVAILABLE: any;
   var FAVICON_SVG: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
-  var _backupFeature: any;
   var _renderPending: any;
   var _settingsDeferred: any;
   var _settingsUiFeature: any;
@@ -22,13 +21,11 @@ declare global {
   var appendSettingsSection: any;
   var applyCardMetadataFields: any;
   var addNativeConfigToBackup: any;
-  var backupEmptyButtonConfig: any;
   var backupExportFileDate: any;
   var backupExportFileName: any;
   var normalizeImportedPanelSettings: any;
   var gridColsForImportedSettings: any;
   var backupExportScreenSizeSlug: any;
-  var backupNormalizeButtonConfig: any;
   var beginNewCardDraft: any;
   var buildClipboardEntry: any;
   var buildCoverArtSettingsCard: any;
@@ -69,7 +66,6 @@ declare global {
   var copyButtons: any;
   var copySlot: any;
   var coverArtTrackOverlayDurationSupported: any;
-  var createBackupConfig: any;
   var createClipboardEntry: any;
   var createEntityToggleSection: any;
   var createHourSelect: any;
@@ -121,7 +117,6 @@ declare global {
   var moveSelectedToCell: any;
   var moveToCell: any;
   var newCardDraftKey: any;
-  var normalizeBackupConfig: any;
   var normalizeVacuumMode: any;
   var openCardSettings: any;
   var openClockBarTemperatureSettings: any;
@@ -133,7 +128,6 @@ declare global {
   var pasteSubpageButton: any;
   var placeOrderedGridEntries: any;
   var placeSlotAt: any;
-  var planBackupImport: any;
   var planClipboardPaste: any;
   var positionMenu: any;
   var previewHtmlValue: any;

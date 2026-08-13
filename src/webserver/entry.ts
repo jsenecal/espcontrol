@@ -86,7 +86,7 @@ import { createBackupExportController } from "./features/backup_export_controlle
 import { createBackupFileController } from "./features/backup_file_controller";
 import { createBackupRestoreController } from "./features/backup_restore_controller";
 import { createBackupFeature } from "./features/backup";
-import { installBackupContractModule } from "./application/backup_contract";
+import { createBackupContractFeature } from "./application/backup_contract";
 import { createAppBackupFeature } from "./application/app_backup";
 import { createAppStatusPreviewFeature, type AppStatusPreviewFeature } from "./application/app_status_preview";
 import { createAppTitleFeature } from "./application/app_title";
@@ -251,7 +251,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     requestApi: context.controllers.requestApi,
     grid: context.controllers.grid,
   }));
-  installGlobals(installBackupContractModule(context.backup.contract, context.configuration.codec));
   const backupUiFeature = context.backup.application;
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
@@ -344,7 +343,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.configuration.persistence,
   ));
   installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion, context.controllers.statusPreview, context.controllers.grid));
-  installGlobals(installAppTestHooksBackup(context.layout));
+  installGlobals(installAppTestHooksBackup(context.layout, context.backup.contract));
   installGlobals(installAppTestHooksSettings(
     () => defaultTimezoneOptionsForDevice(context.device.profile),
     context.controllers.environment,
@@ -638,7 +637,7 @@ function composeApplicationContext(): ApplicationContext {
     trackOverlayDuration: (value) => parseFloat(String(value)) || 0,
   });
   const mediaPlayback = createMediaPlaybackController();
-  const backupContract = createBackupFeature({
+  const backupModel = createBackupFeature({
     deviceId: layout.deviceId,
     gridCols: layout.gridCols,
     numSlots: layout.numSlots,
@@ -650,6 +649,7 @@ function composeApplicationContext(): ApplicationContext {
       return subpage.grid || [];
     },
   });
+  const backupContract = createBackupContractFeature(backupModel, configurationCodec, cards, layout);
   const normalizeImportedPanelSettings = (settings: any) => {
     if (!settings) return null;
     return Model.normalizeBackupPanelSettings(settings, {
@@ -752,6 +752,7 @@ function composeApplicationContext(): ApplicationContext {
     nativePanelConfig,
     codec: configurationCodec,
     configPersistence: configurationPersistence,
+    backupContract,
     runtime,
     core,
     screenScheduleState,
