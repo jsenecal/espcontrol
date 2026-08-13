@@ -1,10 +1,10 @@
 import { state } from "../state/app_instance";
 import { BACKUP_CONFIG_VERSION, BACKUP_FORMAT } from "../model/backup";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { AppTestHookRegistrar } from "./app_test_hooks";
 import type { ApplicationLayoutState } from "../application/application_context";
 import type { BackupContractFeature } from "../application/backup_contract";
 import type { AppBackupFeature } from "../application/app_backup";
-export function installAppTestHooksBackup(layout: ApplicationLayoutState, backup: BackupContractFeature, application: AppBackupFeature): GlobalDescriptors {
+export function installAppTestHooksBackup(layout: ApplicationLayoutState, backup: BackupContractFeature, application: AppBackupFeature, registerEspControlTestHookGroup: AppTestHookRegistrar): void {
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("backup", {
             BACKUP_CONFIG_VERSION: BACKUP_CONFIG_VERSION,
@@ -35,5 +35,4 @@ export function installAppTestHooksBackup(layout: ApplicationLayoutState, backup
             backupExportFileName: application.backupExportFileName,
         });
     }
-    return {};
 }

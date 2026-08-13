@@ -31,6 +31,11 @@ export interface CardRegistry {
   register(key: string, definition: CardDefinition): CardDefinition;
 }
 
+export interface CardUiServices {
+    renderPreview(): void;
+    renderButtonSettings(force?: boolean): void;
+}
+
 const DEFAULT_DEFINITION: CardDefinition = {
   label: "Toggle",
   allowInSubpage: false,

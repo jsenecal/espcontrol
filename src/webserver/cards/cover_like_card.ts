@@ -7,7 +7,7 @@ import {
     cardContractHidden,
     cardContractPickerKey,
 } from "../generated/card_contract";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import type { ButtonSettingsRenderQueueFeature } from "../application/button_settings_render_queue";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
 import {
@@ -20,7 +20,8 @@ export interface CoverLikeCardRegistration {
     register(config: any): void;
 }
 
-export function createCoverLikeCardRegistration(registry: CardRegistry, renderQueue: ButtonSettingsRenderQueueFeature, fields: ControlsFieldsFeature): CoverLikeCardRegistration {
+export function createCoverLikeCardRegistration(registry: CardRegistry, renderQueue: ButtonSettingsRenderQueueFeature, fields: ControlsFieldsFeature, cardUi: CardUiServices): CoverLikeCardRegistration {
+    const { renderButtonSettings } = cardUi;
     const { cardBadgePreview, condField } = fields;
     function coverLikeModeValues(this: any, cardType?: any, optionName?: any, fallbackModes?: any) {
         var spec: any = cardContractOptionSpec(cardType, optionName);

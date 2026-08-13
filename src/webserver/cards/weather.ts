@@ -7,7 +7,7 @@ import {
     cardContractHidden,
     cardContractPickerKey,
 } from "../generated/card_contract";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import type { ConfigWeatherOptionsFeature } from "../application/config_weather_options";
 import type { ClockBarFeature } from "../application/clock_bar_state";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
@@ -22,7 +22,9 @@ export function registerWeatherCardTypes(
     weatherOptions: ConfigWeatherOptionsFeature,
     clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">,
     fields: ControlsFieldsFeature,
+    cardUi: CardUiServices,
 ): WeatherCardRegistration {
+    const { renderButtonSettings } = cardUi;
     const { cardBadgeLabelHtml, cardSensorPreviewHtml } = fields;
     const { temperatureUnitSymbol } = clockBar;
     const {

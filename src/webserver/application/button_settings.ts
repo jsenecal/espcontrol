@@ -2,7 +2,6 @@ import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
 import { applySpans, CARD_SIZE_SINGLE, clearSpans } from "../model/grid";
 import { iconSlug, mdiIcon, textSpan } from "./ui_primitives";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { CardEditorDraftController } from "../features/card_editor_draft_controller";
 import type { CardEditorValidationController } from "../features/card_editor_validation_controller";
 import type { CardEditorSaveController } from "../features/card_editor_save_controller";
@@ -22,7 +21,13 @@ import type { ButtonSettingsSelectionFeature } from "./button_settings_selection
 import type { PreviewRenderFeature } from "./preview_render";
 import type { PreviewInteractionsFeature } from "./preview_interactions";
 import type { ControlsFieldsFeature } from "./controls_fields";
-export function installButtonSettingsModule(
+export interface ButtonSettingsFeature {
+    openCardSettings(...args: any[]): any;
+    renderBackButtonSettings(...args: any[]): any;
+    render(...args: any[]): any;
+}
+
+export function createButtonSettingsFeature(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
     cardEditorSaveController: CardEditorSaveController,
@@ -39,16 +44,16 @@ export function installButtonSettingsModule(
     grid: Pick<GridFeature, "ctx" | "serializeGrid">,
     iconPicker: ButtonSettingsIconPickerFeature,
     selection: Pick<ButtonSettingsSelectionFeature, "closeSettings" | "hideSettingsOverlay">,
-    preview: Pick<PreviewRenderFeature, "defaultTypeForPicker" | "pickerOptions" | "registryValue">,
+    preview: Pick<PreviewRenderFeature, "defaultTypeForPicker" | "pickerOptions" | "registryValue" | "render">,
     interactions: Pick<PreviewInteractionsFeature, "deleteSlot" | "emptyButtonConfig">,
     fields: ControlsFieldsFeature,
-): GlobalDescriptors {
+): ButtonSettingsFeature {
     const { entityName, entityInput } = entityState;
     const { isConfigLocked, createActionButton, showBanner } = shell;
     const els = runtime.els;
     const { ctx, serializeGrid } = grid;
     const { closeSettings, hideSettingsOverlay } = selection;
-    const { defaultTypeForPicker: defaultButtonTypeForPicker, pickerOptions: buttonTypePickerOptionList, registryValue: buttonTypeRegistryValue } = preview;
+    const { defaultTypeForPicker: defaultButtonTypeForPicker, pickerOptions: buttonTypePickerOptionList, registryValue: buttonTypeRegistryValue, render: renderPreview } = preview;
     const { deleteSlot, emptyButtonConfig } = interactions;
     const {
         applyCardMetadataFields, condField, disclosureSection, fieldLabel, fieldWithControl,
@@ -775,8 +780,8 @@ export function installButtonSettingsModule(
         container.appendChild(panel);
     }
     return {
-        "openCardSettings": staticGlobal(openCardSettings),
-        "renderBackButtonSettings": staticGlobal(renderBackButtonSettings),
-        "renderButtonSettings": staticGlobal(renderButtonSettings),
+        openCardSettings,
+        renderBackButtonSettings,
+        render: renderButtonSettings,
     };
 }

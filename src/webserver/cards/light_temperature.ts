@@ -7,7 +7,7 @@ import {
     cardContractHidden,
     cardContractPickerKey,
 } from "../generated/card_contract";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
 export interface LightCardRegistration {
@@ -24,7 +24,9 @@ export function registerLightTemperatureCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
     fields: ControlsFieldsFeature,
+    cardUi: CardUiServices,
 ): LightCardRegistration {
+    const { renderButtonSettings } = cardUi;
     const { cardBadgePreview } = fields;
     const {
         lightControlTabDefinitions,

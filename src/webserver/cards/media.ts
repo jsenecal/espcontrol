@@ -11,7 +11,7 @@ import {
 } from "../generated/card_contract";
 import { WEB_UI_COLORS } from "../state/ui_tokens";
 import { escHtml, iconSlug } from "../application/ui_primitives";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import type { ConfigMediaOptionsFeature } from "../application/config_media_options";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
 import type { SettingsUiFeature } from "../features/settings";
@@ -25,7 +25,9 @@ export function registerMediaCardTypes(
     deviceId: string,
     fields: ControlsFieldsFeature,
     settingsUi: Pick<SettingsUiFeature, "infoPanel">,
+    cardUi: CardUiServices,
 ): void {
+    const { renderButtonSettings, renderPreview } = cardUi;
     const { cardBadgeLabelHtml, cardLargeNumbersActiveForCardSize, cardSensorPreviewHtml } = fields;
     const { infoPanel } = settingsUi;
     const {

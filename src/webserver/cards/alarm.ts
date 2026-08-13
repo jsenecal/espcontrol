@@ -8,7 +8,7 @@ import {
     cardContractPickerKey,
 } from "../generated/card_contract";
 import { escHtml, iconSlug } from "../application/ui_primitives";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import type { ConfigAccessClimateAlarmOptionsFeature } from "../application/config_access_climate_alarm_options";
 import type { ButtonSettingsRenderQueueFeature } from "../application/button_settings_render_queue";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
@@ -17,7 +17,9 @@ export function registerAlarmCardTypes(
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     renderQueue: ButtonSettingsRenderQueueFeature,
     fields: ControlsFieldsFeature,
+    cardUi: CardUiServices,
 ): void {
+    const { renderButtonSettings } = cardUi;
     const { condField } = fields;
     const {
         alarmBehaviorSpec,

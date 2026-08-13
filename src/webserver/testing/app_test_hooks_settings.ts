@@ -13,7 +13,7 @@ import {
     firmwareVersionFromMetadata,
     firmwareVersionsSame,
 } from "../application/firmware_metadata";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { AppTestHookRegistrar } from "./app_test_hooks";
 import type { EnvironmentStateFeature } from "../application/environment_state";
 import type { ScreensaverTimeoutFeature } from "../application/screensaver_timeout";
 import type { FirmwareVersionFeature } from "../application/firmware_version_state";
@@ -25,7 +25,7 @@ import type { AppStatusPreviewFeature } from "../application/app_status_preview"
 import type { ArtworkPostApiFeature } from "../application/artwork_post_api";
 import type { ClockBarPostApiFeature } from "../application/clock_bar_post_api";
 import type { PublicFirmwareInstallFeature } from "../application/public_firmware_install";
-export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">, entityState: Pick<EntityStateFeature, "entityLookupNames">, requestApi: Pick<ApplicationApiFeature, "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">, statusPreview: Pick<AppStatusPreviewFeature, "normalizeNetworkTransport">, artworkPostApi: Pick<ArtworkPostApiFeature, "coverArtHideExternalInputPostUrls" | "coverArtDelayPostUrls" | "coverArtTrackOverlayDurationPostUrls" | "homeAssistantArtworkPortPostUrls">, clockBarPostApi: Pick<ClockBarPostApiFeature, "voiceServicesPostUrls">, publicFirmwareInstall: Pick<PublicFirmwareInstallFeature, "failPublicFirmwareUpload">): GlobalDescriptors {
+export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">, entityState: Pick<EntityStateFeature, "entityLookupNames">, requestApi: Pick<ApplicationApiFeature, "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">, statusPreview: Pick<AppStatusPreviewFeature, "normalizeNetworkTransport">, artworkPostApi: Pick<ArtworkPostApiFeature, "coverArtHideExternalInputPostUrls" | "coverArtDelayPostUrls" | "coverArtTrackOverlayDurationPostUrls" | "homeAssistantArtworkPortPostUrls">, clockBarPostApi: Pick<ClockBarPostApiFeature, "voiceServicesPostUrls">, publicFirmwareInstall: Pick<PublicFirmwareInstallFeature, "failPublicFirmwareUpload">, registerEspControlTestHookGroup: AppTestHookRegistrar): void {
     const { timezoneOptionsWithFallback, effectiveTimezoneOptionForWeb } = environment;
     const { supported: screensaverTimeoutSupported } = screensaverTimeout;
     const { set: setFirmwareVersion } = firmwareVersion;
@@ -295,5 +295,4 @@ export function installAppTestHooksSettings(defaultTimezoneOptions: () => string
             },
         });
     }
-    return {};
 }

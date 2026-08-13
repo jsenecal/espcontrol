@@ -10,14 +10,16 @@ import {
     cardContractPickerKey,
 } from "../generated/card_contract";
 import { escHtml, iconSlug } from "../application/ui_primitives";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
 export function registerSensorCardTypes(
     registry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
     fields: ControlsFieldsFeature,
+    cardUi: CardUiServices,
 ): void {
+    const { renderButtonSettings } = cardUi;
     const { cardBadgeLabelHtml, cardSensorPreviewHtml, condField, toggleRow } = fields;
     const {
         sensorCardLocalSource: SENSOR_CARD_LOCAL_SENSOR,

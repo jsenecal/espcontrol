@@ -1,7 +1,6 @@
 import { state } from "../state/app_instance";
 import { WEB_UI_COLORS } from "../state/ui_tokens";
 import { escHtml } from "./ui_primitives";
-import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import {
     buttonConfigDisabledForDevice as isButtonConfigDisabledForDevice,
     cardTypePickerDetails,
@@ -33,7 +32,6 @@ export interface PreviewRenderDependencies {
     readonly selection: Pick<ButtonSettingsSelectionFeature, "renderSelectionBar" | "updatePreviewHint">;
 }
 export interface PreviewRenderFeature {
-    readonly globals: GlobalDescriptors;
     render(): void;
     registryValue(typeDefinition?: any, key?: any, fallback?: any): any;
     configDisabled(button?: any): boolean;
@@ -190,7 +188,6 @@ export function createPreviewRenderFeature(dependencies: PreviewRenderDependenci
         renderSelectionBar(c);
     }
     return {
-        globals: { "renderPreview": staticGlobal(renderPreview) },
         render: renderPreview,
         registryValue: buttonTypeRegistryValue,
         configDisabled: buttonConfigDisabledForDevice,

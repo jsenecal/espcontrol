@@ -2,7 +2,7 @@ import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
 import { normalizeLanguage, normalizeScreensaverAction, normalizeTemperatureUnit } from "../model/settings";
 import { escHtml } from "../application/ui_primitives";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { AppTestHookRegistrar } from "./app_test_hooks";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigCodecFeature } from "../application/config_codec";
 import type { UiRuntimeState } from "../application/state";
@@ -22,7 +22,8 @@ export function installAppTestHooksPreview(
     firmwareVersion: FirmwareVersionFeature,
     statusPreview: Pick<AppStatusPreviewFeature, "networkPreviewIconSlug">,
     grid: Pick<GridFeature, "applyImportedButtonOrder">,
-): GlobalDescriptors {
+    registerEspControlTestHookGroup: AppTestHookRegistrar,
+): void {
     const {
         mockNow: webserverMockNow,
         now: webserverNow,
@@ -169,5 +170,4 @@ export function installAppTestHooksPreview(
             },
         });
     }
-    return {};
 }

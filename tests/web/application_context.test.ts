@@ -100,6 +100,8 @@ export function runApplicationContextTests(): void {
   const clipboard = {} as any;
   const contextMenu = {} as any;
   const interactions = {} as any;
+  const buttonSettings = {} as any;
+  const app = {} as any;
   const state = { grid: [] } as any;
   const runtime = {} as any;
   const core = {} as any;
@@ -180,6 +182,8 @@ export function runApplicationContextTests(): void {
     clipboard,
     contextMenu,
     interactions,
+    buttonSettings,
+    app,
     dom,
     cards,
   });

@@ -90,7 +90,9 @@ export function createConfigCodecFeature(
     layout: ApplicationLayoutState,
     configPersistence: Pick<ConfigPersistenceFeature, "saveSubpageEntity" | "scheduleSliderSubpageMigration">,
     renderQueue: ButtonSettingsRenderQueueFeature,
+    rendering: { renderPreview(): void; renderButtonSettings(force?: boolean): void },
 ) {
+    const { renderPreview, renderButtonSettings } = rendering;
     const { saveSubpageEntity, scheduleSliderSubpageMigration } = configPersistence;
     let requestApi: Pick<ApplicationApiFeature, "postText"> | undefined;
     function connectRequestApi(value: Pick<ApplicationApiFeature, "postText">) {

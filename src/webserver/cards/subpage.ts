@@ -1,7 +1,7 @@
 import { state } from "../state/app_instance";
 import { setConfigOptionValue } from "../model/config_primitives";
 import { escHtml, iconSlug } from "../application/ui_primitives";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import type { ConfigCodecFeature } from "../application/config_codec";
 import type { CoreFeature } from "../application/core";
 import type { ButtonSettingsSelectionFeature } from "../application/button_settings_selection";
@@ -21,7 +21,9 @@ export function registerSubpageCardTypes(
     core: Pick<CoreFeature, "subpageStateDisplayMode">,
     selection: Pick<ButtonSettingsSelectionFeature, "closeSettings">,
     fields: ControlsFieldsFeature,
+    cardUi: CardUiServices,
 ): void {
+    const { renderButtonSettings } = cardUi;
     const { cardSensorPreviewHtml, condField } = fields;
     const { enterSubpage } = codec;
     const { subpageStateDisplayMode } = core;

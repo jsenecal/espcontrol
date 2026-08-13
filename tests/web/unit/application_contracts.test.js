@@ -162,7 +162,7 @@ describe("browserless application contracts", () => {
     const app = fs.readFileSync(path.join(ROOT, "src/webserver/application/app.ts"), "utf8");
     const handlers = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_state_event_handlers.ts"), "utf8");
     assert.match(entry, /createAppStateEventHandlersFeature\([\s\S]*clockBarState,[\s\S]*statusPreview/);
-    assert.match(entry, /context\.controllers\.appEvents,[\s\S]*context\.controllers\.statusPreview/);
+    assert.match(entry, /app = createAppFeature\([\s\S]*appEvents, statusPreview/);
     assert.match(entry, /timezoneId: \(value\) => statusPreview\.getTzId\(value\)/);
     assert.match(app, /statusPreview\.updateClock\(\)/);
     assert.match(handlers, /statusPreview: Pick<AppStatusPreviewFeature,/);
@@ -230,7 +230,7 @@ describe("browserless application contracts", () => {
     assert.match(grid, /export function createGridFeature/);
     assert.doesNotMatch(entry, /installGridModule/);
     assert.match(entry, /createAppConfigEventsFeature\(configurationPersistence, configurationCodec, layout, renderQueue\)/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview, context\.controllers\.grid\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview, context\.controllers\.grid, register\)/);
     const previewGridConsumers = [
       "preview_render.ts",
       "preview_grid_placement.ts",
@@ -331,7 +331,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /registry\.register\(/, `${relativePath} should use the typed card registry`);
       assert.doesNotMatch(source, /\bregisterButtonType\s*\(/, `${relativePath} should not read ambient registration state`);
       assert.match(entry, new RegExp(
-        `${registrationFunction}\\(\\s*registry(?:,\\s*(?:context\\.(?:configuration\\.[A-Za-z]+|controllers\\.[A-Za-z]+|core|device\\.id)|lightCards|fields))*[,]?\\s*\\)`,
+        `${registrationFunction}\\(\\s*registry(?:,\\s*(?:context\\.(?:configuration\\.[A-Za-z]+|controllers\\.[A-Za-z]+|core|device\\.id)|lightCards|fields|cardUi))*[,]?\\s*\\)`,
       ));
     }
   });
@@ -412,7 +412,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(weather, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|CFG)\b/);
     assert.doesNotMatch(forecast, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal|WEATHER_CARD_METADATA)\b/);
-    assert.match(entry, /const weatherCards = registerWeatherCardTypes\(registry, context\.configuration\.weatherOptions, context\.controllers\.clockBarState, fields\);/);
+    assert.match(entry, /const weatherCards = registerWeatherCardTypes\(registry, context\.configuration\.weatherOptions, context\.controllers\.clockBarState, fields, cardUi\);/);
     assert.match(entry, /registerWeatherForecastCardTypes\(registry, weatherCards, context\.controllers\.clockBarState, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerWeather/);
     assert.doesNotMatch(globals, /\bvar (?:WEATHER_CARD_METADATA|WEATHER_FORECAST_CARD_METADATA|normalizeWeatherCardMode|weatherCardDefaultForecastLabel|weatherCardIsForecastMode|weatherForecastCardsSupported|weatherModeOptionValues|weatherModeOptions):/);
@@ -423,7 +423,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/webhook.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerWebhookCardTypes\(registry, context\.configuration\.webhookOptions, fields\);/);
+    assert.match(entry, /registerWebhookCardTypes\(registry, context\.configuration\.webhookOptions, fields, cardUi\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerWebhookCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:WEBHOOK_CARD_METADATA|WEBHOOK_HEADERS_OPTION|WEBHOOK_METHODS|normalizeWebhookConfig|setWebhookHeaders|webhookHeaders|webhookMethod):/);
   });
@@ -458,8 +458,8 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(mower, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.doesNotMatch(vacuum, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerLawnMowerCardTypes\(registry, context\.configuration\.robotOptions, fields\);/);
-    assert.match(entry, /registerVacuumCardTypes\(registry, context\.configuration\.robotOptions, fields\);/);
+    assert.match(entry, /registerLawnMowerCardTypes\(registry, context\.configuration\.robotOptions, fields, cardUi\);/);
+    assert.match(entry, /registerVacuumCardTypes\(registry, context\.configuration\.robotOptions, fields, cardUi\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(register(?:LawnMower|Vacuum)CardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:LAWN_MOWER_CARD_METADATA|LAWN_MOWER_CARD_MODES|VACUUM_CARD_METADATA|VACUUM_CARD_MODES|lawnMowerModeBadgeIcon|lawnMowerModeDefaultIcon|lawnMowerModeValues|lawnMowerUsesDefaultIcon|normalizeLawnMowerConfig|normalizeLawnMowerMode|normalizeVacuumConfig|vacuumModeBadgeIcon|vacuumModeDefaultIcon|vacuumModeNeedsArea|vacuumModeValues):/);
   });
@@ -469,7 +469,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/lock.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerLockCardTypes\(registry, context\.configuration\.lockOptions, fields\);/);
+    assert.match(entry, /registerLockCardTypes\(registry, context\.configuration\.lockOptions, fields, cardUi\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerLockCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:LOCK_CARD_METADATA|lockCommandMode|lockModeDefaultIcon|lockModeDefaultLabel|lockModeOptionValues|lockUsesDefaultIcon|normalizeLockMode):/);
   });
@@ -503,7 +503,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/fan.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerFanCardTypes\(registry, context\.configuration\.modalTabs, fields\);/);
+    assert.match(entry, /registerFanCardTypes\(registry, context\.configuration\.modalTabs, fields, cardUi\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerFanCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:FAN_CARD_METADATA|FAN_CONTROL_TYPE_OPTIONS|fanControlBadgeIcon|fanControlDefaultIcon|fanTypeFactory|normalizeFanControlType|renderFanControlTabSettings|renderFanControlTypeField|setFanControlType):/);
   });
@@ -514,7 +514,7 @@ describe("browserless application contracts", () => {
     const hooks = fs.readFileSync(path.join(ROOT, "src/webserver/testing/app_test_hooks_config.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerAlarmCardTypes\(registry, context\.configuration\.accessClimateAlarm, context\.controllers\.renderQueue, fields\);/);
+    assert.match(entry, /registerAlarmCardTypes\(registry, context\.configuration\.accessClimateAlarm, context\.controllers\.renderQueue, fields, cardUi\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerAlarmCardTypes/);
     assert.match(hooks, /alarmBehaviorSpec,[\s\S]*alarmActionSpecs,/);
     assert.doesNotMatch(globals, /\bvar (?:ALARM_CARD_METADATA|ALARM_CONTROL_PANEL_VALUE|alarmCardTypeOptions|alarmCardTypeOptionsForSettings|alarmControlPanelValue|alarmIconIsGenerated|alarmLabelIsGenerated|alarmUsesDefaultIcon|renderAlarmCardTypeField|renderAlarmVisibleActionsField|setAlarmCardType):/);
@@ -527,7 +527,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.match(options, /sensorCardLocalSource = LOCAL_SENSOR_SOURCE/);
-    assert.match(entry, /registerSensorCardTypes\(registry, context\.configuration\.options, fields\);/);
+    assert.match(entry, /registerSensorCardTypes\(registry, context\.configuration\.options, fields, cardUi\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerSensorCardTypes/);
     assert.doesNotMatch(globals, /\bvar (?:SENSOR_CARD_LOCAL_SENSOR|SENSOR_CARD_METADATA|renderSensorLocalSettings|sensorCardIsLocal|sensorLocalPreview):/);
   });
@@ -539,7 +539,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.match(options, /mediaPlaylistSourceDefinitions/);
-    assert.match(entry, /registerMediaCardTypes\(registry, context\.configuration\.mediaOptions, context\.device\.id, fields, context\.controllers\.settingsUi\);/);
+    assert.match(entry, /registerMediaCardTypes\(registry, context\.configuration\.mediaOptions, context\.device\.id, fields, context\.controllers\.settingsUi, cardUi\);/);
     assert.match(card, /deviceId: string/);
     assert.doesNotMatch(card, /\bDEVICE_ID\b/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerMediaCardTypes/);
@@ -551,7 +551,7 @@ describe("browserless application contracts", () => {
     const card = fs.readFileSync(path.join(ROOT, "src/webserver/cards/subpage.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /registerSubpageCardTypes\(registry, context\.configuration\.codec, context\.core, context\.controllers\.selection, fields\);/);
+    assert.match(entry, /registerSubpageCardTypes\(registry, context\.configuration\.codec, context\.core, context\.controllers\.selection, fields, cardUi\);/);
     assert.match(card, /core: Pick<CoreFeature, "subpageStateDisplayMode">/);
     assert.match(card, /const \{ subpageStateDisplayMode \} = core;/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerSubpageCardTypes/);
@@ -565,7 +565,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(card, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
     assert.match(options, /const actionCardActions/);
-    assert.match(entry, /registerActionCardTypes\(registry, context\.configuration\.confirmationOptions, context\.controllers\.entityState, fields\);/);
+    assert.match(entry, /registerActionCardTypes\(registry, context\.configuration\.confirmationOptions, context\.controllers\.entityState, fields, cardUi\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerActionCardTypes/);
     assert.match(entry, /actionCardStateEntity: \(button\) => confirmationOptions\.actionCardStateEntity\(button\)/);
     assert.doesNotMatch(globals, /\bvar (?:ACTION_CARD_ACTIONS|ACTION_CARD_METADATA|actionCardInfo|actionCardIsLocal|actionCardIsOptionSelect|actionCardNeedsExtraValue|actionCardStateDisplayMode|actionCardStateEntity|actionCardStatePrecision|actionCardStateUnit|normalizeActionCardConfig|normalizeSavedConfigActionFields|renderActionCardLocalSettings|setActionCardStateOptions):/);
@@ -578,7 +578,7 @@ describe("browserless application contracts", () => {
     const switchCard = fs.readFileSync(path.join(ROOT, "src/webserver/cards/switch.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(light, /\b(?:GlobalDescriptors|staticGlobal|liveGlobal)\b/);
-    assert.match(entry, /const lightCards = registerLightTemperatureCardTypes\(registry, context\.configuration\.modalTabs, fields\);/);
+    assert.match(entry, /const lightCards = registerLightTemperatureCardTypes\(registry, context\.configuration\.modalTabs, fields, cardUi\);/);
     assert.match(entry, /registerSliderCardTypes\(registry, context\.configuration\.modalTabs, lightCards, fields, context\.controllers\.settingsUi\);/);
     assert.match(entry, /registerSwitchCardTypes\(registry, context\.configuration\.confirmationOptions, lightCards, fields\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerLightTemperatureCardTypes/);
@@ -734,7 +734,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /codec: configurationCodec/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview, context\.controllers\.grid\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview, context\.controllers\.grid, register\)/);
   });
 
   test("injects the configuration codec into persistence and application services", () => {
@@ -808,7 +808,7 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(backup, /GlobalDescriptors|staticGlobal|readonly globals|installAppBackupModule/);
     assert.doesNotMatch(entry, /backupUiFeature\.globals/);
     assert.match(hooks, /application: AppBackupFeature/);
-    assert.match(entry, /installAppTestHooksBackup\(context\.layout, context\.backup\.contract, context\.backup\.application\)/);
+    assert.match(entry, /installAppTestHooksBackup\(context\.layout, context\.backup\.contract, context\.backup\.application, register\)/);
     assert.doesNotMatch(globals, /\bvar (?:addNativeConfigToBackup|backupExportFileDate|backupExportFileName|normalizeImportedPanelSettings|gridColsForImportedSettings|backupExportScreenSizeSlug|downloadBackupConfig|exportConfig|importConfig):/);
   });
 
@@ -927,7 +927,7 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:clearCardSelection|closeSettings|handleDocumentSelectionMouseDown|hideSettingsOverlay|isSelectionControlTarget|openClockBarTemperatureSettings|openSelectedCardSettings|renderClockBarSelectionBar|renderSelectionBar|selectClockBarItem|updatePreviewHint):/);
   });
 
-  test("composes preview rendering with only its temporary render adapter", () => {
+  test("composes preview rendering without its temporary render adapter", () => {
     const preview = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_render.ts"), "utf8");
     const settings = fs.readFileSync(path.join(ROOT, "src/webserver/application/button_settings.ts"), "utf8");
     const clipboard = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_clipboard.ts"), "utf8");
@@ -935,13 +935,13 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.match(preview, /export function createPreviewRenderFeature/);
-    assert.match(preview, /globals: \{ "renderPreview": staticGlobal\(renderPreview\) \}/);
-    assert.doesNotMatch(preview, /liveGlobal|installPreviewRenderModule/);
+    assert.doesNotMatch(preview, /GlobalDescriptors|staticGlobal|liveGlobal|installPreviewRenderModule|readonly globals/);
     assert.match(settings, /preview: Pick<PreviewRenderFeature/);
     assert.match(clipboard, /preview: Pick<PreviewRenderFeature/);
     assert.match(hooks, /preview: Pick<PreviewRenderFeature/);
     assert.match(entry, /preview = createPreviewRenderFeature\(\{/);
-    assert.match(entry, /installGlobals\(context\.controllers\.preview\.globals\)/);
+    assert.doesNotMatch(entry, /context\.controllers\.preview\.globals/);
+    assert.doesNotMatch(globals, /\bvar renderPreview:/);
     assert.doesNotMatch(globals, /\bvar (?:buttonTypeDisabledForDevice|buttonConfigDisabledForDevice|buttonTypeInfoOnlyVisible|buttonTypePickerDetails|buttonTypePickerKeys|buttonTypePickerOptionList|buttonTypeRegistryValue|buttonTypeVisibleInPicker|defaultButtonTypeForPicker|previewHtmlValue):/);
   });
 
@@ -1008,7 +1008,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /ControlsShellFeature/, `${file} should declare its shell dependency`);
     }
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout, entityState, shell\)/);
-    assert.match(entry, /installAppModule\([\s\S]*context\.controllers\.shell/);
+    assert.match(entry, /app = createAppFeature\([\s\S]*clockBarState, shell/);
   });
 
   test("injects preview drag state without ambient globals", () => {
@@ -1196,7 +1196,7 @@ describe("browserless application contracts", () => {
     assert.match(styles, /export function createWebStyles\(dragAnimation: boolean\)/);
     assert.match(styles, /import \{ WEB_UI_COLORS \} from "\.\.\/state\/ui_tokens"/);
     assert.match(app, /style\.textContent = webStyles/);
-    assert.match(entry, /createWebStyles\(context\.layout\.config\.dragAnimation\)/);
+    assert.match(entry, /createWebStyles\(layout\.config\.dragAnimation\)/);
     assert.doesNotMatch(styles, /\bCFG\b/);
     assert.doesNotMatch(entry, /installStylesModule/);
     assert.doesNotMatch(globals, /\bvar WEB_STYLES:/);
@@ -1369,6 +1369,24 @@ describe("browserless application contracts", () => {
     for (const name of exportedValues) {
       assert.doesNotMatch(globals, new RegExp(`\\bvar ${name}:`), `${name} should not be ambient`);
     }
+  });
+
+  test("removes the application compatibility bootstrap and enforces the global allowlist", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const runtime = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/globals.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    const app = fs.readFileSync(path.join(ROOT, "src/webserver/application/app.ts"), "utf8");
+    const start = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_start.ts"), "utf8");
+    const settings = fs.readFileSync(path.join(ROOT, "src/webserver/application/button_settings.ts"), "utf8");
+    assert.doesNotMatch(entry, /installApplicationCompatibility|installGlobals|installAppModule|installButtonSettingsModule|installAppStartModule/);
+    assert.doesNotMatch(runtime, /GlobalDescriptors|installGlobals|staticGlobal|liveGlobal/);
+    assert.doesNotMatch(app, /GlobalDescriptors|installAppModule|staticGlobal|liveGlobal/);
+    assert.doesNotMatch(settings, /GlobalDescriptors|installButtonSettingsModule|staticGlobal|liveGlobal/);
+    assert.match(start, /startApp\(app:/);
+    assert.match(entry, /startApp\(context\.controllers\.app\)/);
+    const ambientNames = [...globals.matchAll(/\bvar\s+([A-Za-z_$][\w$]*):/g)].map((match) => match[1]);
+    assert.deepEqual(ambientNames, ["__ESPCONTROL_TEST_HOOKS__"]);
+    assert.match(entry, /if \(__ESPCONTROL_TEST_HOOKS_ENABLED__\) \{[\s\S]*installTestHooks\(context, lightCards\)/);
   });
 
   test("preserves settings normalization", () => {

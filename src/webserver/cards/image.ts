@@ -9,14 +9,16 @@ import {
 } from "../generated/card_contract";
 import { escHtml, iconSlug } from "../application/ui_primitives";
 import { WEB_UI_COLORS } from "../state/ui_tokens";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import type { ConfigImageOptionsFeature } from "../application/config_image_options";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
 export function registerImageCardTypes(
     registry: CardRegistry,
     imageOptions: ConfigImageOptionsFeature,
     fields: ControlsFieldsFeature,
+    cardUi: CardUiServices,
 ): void {
+    const { renderPreview } = cardUi;
     const { toggleRow } = fields;
     const {
         imageModalMode,

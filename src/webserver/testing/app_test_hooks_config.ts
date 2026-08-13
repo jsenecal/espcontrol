@@ -14,7 +14,7 @@ import {
     cardContractSubpageTypeCode,
     cardContractSubpageTypeFromCode,
 } from "../generated/card_contract";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import type { AppTestHookRegistrar } from "./app_test_hooks";
 import { infoOnlyCardVisible } from "../features/preview";
 import type { CardRegistry } from "../application/card_registry";
 import type { ConfigSensorOptionsFeature } from "../application/config_sensor_options";
@@ -68,7 +68,8 @@ export function installAppTestHooksConfig(
     clipboard: Pick<PreviewClipboardFeature, "entriesFromTransfer">,
     contextMenu: Pick<PreviewContextMenuFeature, "cardSizeOptions">,
     fields: Pick<ControlsFieldsFeature, "cardMetadataValue">,
-): GlobalDescriptors {
+    registerEspControlTestHookGroup: AppTestHookRegistrar,
+): void {
     const { subpageEntityKeys, subpageChunkShouldPost } = configPersistence;
     const { defaultTypeForPicker: defaultButtonTypeForPicker, pickerKeys: buttonTypePickerKeys, pickerOptions: buttonTypePickerOptionList, registryValue: buttonTypeRegistryValue, typeVisibleInPicker: buttonTypeVisibleInPicker } = preview;
     const { entriesFromTransfer: clipboardEntriesFromCardTransfer } = clipboard;
@@ -577,5 +578,4 @@ export function installAppTestHooksConfig(
             subpageConfigNeedsMigration: subpageConfigNeedsMigration,
         });
     }
-    return {};
 }

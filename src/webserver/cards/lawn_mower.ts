@@ -8,7 +8,7 @@ import {
     cardContractPickerKey,
 } from "../generated/card_contract";
 import { iconSlug } from "../application/ui_primitives";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import {
     applyEntityModeCardModeChange,
 } from "./entity_mode_card";
@@ -19,7 +19,9 @@ export function registerLawnMowerCardTypes(
     registry: CardRegistry,
     robotOptions: ConfigRobotCardOptionsFeature,
     fields: ControlsFieldsFeature,
+    cardUi: CardUiServices,
 ): void {
+    const { renderButtonSettings } = cardUi;
     const { cardBadgeLabelHtml } = fields;
     const {
         lawnMowerModes,

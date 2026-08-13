@@ -7,7 +7,7 @@ import {
     cardContractHidden,
     cardContractPickerKey,
 } from "../generated/card_contract";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import type { ConfigLockOptionsFeature } from "../application/config_lock_options";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
 
@@ -15,7 +15,9 @@ export function registerLockCardTypes(
     registry: CardRegistry,
     lockOptions: ConfigLockOptionsFeature,
     fields: ControlsFieldsFeature,
+    cardUi: CardUiServices,
 ): void {
+    const { renderButtonSettings } = cardUi;
     const { cardBadgePreview } = fields;
     const {
         lockCommandMode,

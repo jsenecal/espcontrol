@@ -1,6 +1,6 @@
 import { state } from "../state/app_instance";
 import { iconSlug } from "../application/ui_primitives";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import type { ConfigConfirmationOptionsFeature } from "../application/config_confirmation_options";
 import type { EntityStateFeature } from "../application/entity_state";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
@@ -13,7 +13,9 @@ export function registerActionCardTypes(
     confirmationOptions: ConfigConfirmationOptionsFeature,
     entityState: Pick<EntityStateFeature, "refreshEntityDatalist">,
     fields: ControlsFieldsFeature,
+    cardUi: CardUiServices,
 ): void {
+    const { renderButtonSettings } = cardUi;
     const { cardBadgeLabelHtml, cardLargeNumbersActiveForCardSize, cardSensorPreviewHtml, condField } = fields;
     const { refreshEntityDatalist } = entityState;
     const {

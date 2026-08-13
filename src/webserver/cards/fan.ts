@@ -1,12 +1,14 @@
 import { iconSlug } from "../application/ui_primitives";
-import type { CardRegistry } from "../application/card_registry";
+import type { CardRegistry, CardUiServices } from "../application/card_registry";
 import type { ConfigModalTabOptionsFeature } from "../application/config_modal_tab_options";
 import type { ControlsFieldsFeature } from "../application/controls_fields";
 export function registerFanCardTypes(
     registry: CardRegistry,
     modalTabs: ConfigModalTabOptionsFeature,
     fields: ControlsFieldsFeature,
+    cardUi: CardUiServices,
 ): void {
+    const { renderButtonSettings } = cardUi;
     const { cardBadgeLabelHtml } = fields;
     const {
         fanControlTabDefinitions,
