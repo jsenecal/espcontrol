@@ -5,10 +5,11 @@ import type { ScreenRotationFeature } from "./screen_rotation_state";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { AppEventsFeature } from "./app_events";
+import type { AppStatusPreviewFeature } from "./app_status_preview";
 
 declare const __ESPCONTROL_EMBEDDED_MDI_STYLES__: string;
 
-export function installAppModule(pageTitle: AppTitleFeature, webStyles: string, core: Pick<CoreFeature, "syncPreviewOrientation">, screenRotation: ScreenRotationFeature, clockBar: ClockBarFeature, shell: Pick<ControlsShellFeature, "buildUI" | "syncTabChrome">, appEvents: Pick<AppEventsFeature, "connect">): GlobalDescriptors {
+export function installAppModule(pageTitle: AppTitleFeature, webStyles: string, core: Pick<CoreFeature, "syncPreviewOrientation">, screenRotation: ScreenRotationFeature, clockBar: ClockBarFeature, shell: Pick<ControlsShellFeature, "buildUI" | "syncTabChrome">, appEvents: Pick<AppEventsFeature, "connect">, statusPreview: Pick<AppStatusPreviewFeature, "updateClock">): GlobalDescriptors {
     const { buildUI, syncTabChrome } = shell;
     const { syncPreviewOrientation } = core;
     const { startInitialCheck: startInitialScreenRotationCheck } = screenRotation;
@@ -72,7 +73,7 @@ export function installAppModule(pageTitle: AppTitleFeature, webStyles: string, 
         renderPreview();
         renderButtonSettings();
         appEvents.connect();
-        updateClock();
+        statusPreview.updateClock();
         document.addEventListener("click", hideContextMenu);
         document.addEventListener("mousedown", handleDocumentSelectionMouseDown);
         document.addEventListener("scroll", hideContextMenu, true);

@@ -88,7 +88,7 @@ import { createBackupRestoreController } from "./features/backup_restore_control
 import { createBackupFeature } from "./features/backup";
 import { installBackupContractModule } from "./application/backup_contract";
 import { createAppBackupFeature } from "./application/app_backup";
-import { appStatusPreviewCompatibilityGlobals, createAppStatusPreviewFeature } from "./application/app_status_preview";
+import { appStatusPreviewCompatibilityGlobals, createAppStatusPreviewFeature, type AppStatusPreviewFeature } from "./application/app_status_preview";
 import { createAppTitleFeature } from "./application/app_title";
 import { createAppConfigEventsFeature } from "./application/app_config_events";
 import { createAppStateEventHandlersFeature } from "./application/app_state_event_handlers";
@@ -265,6 +265,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     clockBarState,
     context.controllers.shell,
     context.controllers.appEvents,
+    context.controllers.statusPreview,
   ));
 }
 
@@ -401,6 +402,7 @@ function composeApplicationContext(): ApplicationContext {
   });
   let confirmationOptions: ReturnType<typeof createConfigConfirmationOptionsFeature>;
   let clockBarState: ClockBarFeature;
+  let statusPreview: AppStatusPreviewFeature;
   const entityState = createEntityStateFeature({
     actionCardStateEntity: (button) => confirmationOptions.actionCardStateEntity(button),
     totalSlots: () => layout.totalSlots,
@@ -477,9 +479,9 @@ function composeApplicationContext(): ApplicationContext {
     now: core.now,
     renderButtonSettings: () => renderButtonSettings(),
     effectiveTimezoneOption: (value) => environment.effectiveTimezoneOptionForWeb(value),
-    timezoneId: (value) => getTzId(value),
+    timezoneId: (value) => statusPreview.getTzId(value),
     timezoneOptionsWithFallback: (options, selected) => environment.timezoneOptionsWithFallback(options, selected),
-    appendTimezoneOption: (select, option) => appendTimezoneOption(select, option),
+    appendTimezoneOption: (select, option) => statusPreview.appendTimezoneOption(select, option),
     monthNameForIndex: (index) => environment.monthNameForIndex(index),
   });
   const modalTabOptions = createConfigModalTabOptionsFeature({
@@ -532,7 +534,7 @@ function composeApplicationContext(): ApplicationContext {
     runtime,
     {
       syncClockScreensaverControls: () => syncClockScreensaverControls(),
-      updateSunInfo: () => updateSunInfo(),
+      updateSunInfo: () => statusPreview.updateSunInfo(),
     },
   );
   const screensaverTimeout = createScreensaverTimeoutFeature(runtime, screenScheduleState);
@@ -569,23 +571,23 @@ function composeApplicationContext(): ApplicationContext {
   const clockBar = createClockBarController();
   clockBarState = createClockBarFeature(clockBar, runtime, core, environment, {
     hideSettingsOverlay: () => hideSettingsOverlay(),
-    timezoneId: (value) => getTzId(value),
+    timezoneId: (value) => statusPreview.getTzId(value),
     postTemperatureEntities: (value) => postClockBarTemperatureEntities(value),
     postSwitch: (name, value) => requestApi.postSwitch(name, value),
     entityName: (key) => entityState.entityName(key),
     postText: (name, value) => requestApi.postText(name, value),
-    updateTemperaturePreview: () => updateTempPreview(),
-    updateItemUi: () => updateClockBarItemUi(),
+    updateTemperaturePreview: () => statusPreview.updateTempPreview(),
+    updateItemUi: () => statusPreview.updateClockBarItemUi(),
     postTemperatureDegreeSymbol: (value) => postTemperatureDegreeSymbol(value),
-    isTemperatureItem: (item) => isClockBarTemperatureItem(item),
+    isTemperatureItem: (item) => statusPreview.isClockBarTemperatureItem(item),
     postTime: (value) => postClockBarTime(value),
     postVoiceServices: (value) => postVoiceServices(value),
     postNetworkStatus: (value) => postNetworkStatusIcon(value),
     renderSelectionBar: () => renderSelectionBar(ctx()),
-    updateNetworkPreview: () => updateNetworkPreview(),
-    updateVoicePreview: () => updateVoicePreview(),
+    updateNetworkPreview: () => statusPreview.updateNetworkPreview(),
+    updateVoicePreview: () => statusPreview.updateVoicePreview(),
   });
-  const statusPreview = createAppStatusPreviewFeature(runtime, core, layout, environment, clockBarState);
+  statusPreview = createAppStatusPreviewFeature(runtime, core, layout, environment, clockBarState);
   const configEvents = createAppConfigEventsFeature(configurationPersistence, configurationCodec, layout);
   const stateEventHandlers = createAppStateEventHandlersFeature(
     runtime,
@@ -599,6 +601,7 @@ function composeApplicationContext(): ApplicationContext {
     firmwareUpdate,
     c6Firmware,
     clockBarState,
+    statusPreview,
   );
   const settingsUi = createSettingsUiFeature({
     document: dom.document,

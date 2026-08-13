@@ -139,6 +139,18 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /installAppStatusPreviewModule/);
   });
 
+  test("injects status preview into core startup and state consumers", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const app = fs.readFileSync(path.join(ROOT, "src/webserver/application/app.ts"), "utf8");
+    const handlers = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_state_event_handlers.ts"), "utf8");
+    assert.match(entry, /createAppStateEventHandlersFeature\([\s\S]*clockBarState,[\s\S]*statusPreview/);
+    assert.match(entry, /context\.controllers\.appEvents,[\s\S]*context\.controllers\.statusPreview/);
+    assert.match(entry, /timezoneId: \(value\) => statusPreview\.getTzId\(value\)/);
+    assert.match(app, /statusPreview\.updateClock\(\)/);
+    assert.match(handlers, /statusPreview: Pick<AppStatusPreviewFeature,/);
+    assert.match(handlers, /updateNetworkPreview,[\s\S]*updateSunInfo,[\s\S]*updateTempPreview,[\s\S]*\} = statusPreview/);
+  });
+
   test("imports the browser core service without ambient application names", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
