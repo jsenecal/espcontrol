@@ -32,6 +32,7 @@ import type { ConfigCodecFeature } from "../application/config_codec";
 import type { LightCardRegistration } from "../cards/light_temperature";
 import type { CoreFeature } from "../application/core";
 import type { ApplicationLayoutState } from "../application/application_context";
+import type { ConfigPersistenceFeature } from "../application/config_post_api";
 import { cardContractOptionSupportedFor } from "../application/config_option_core";
 import { subpageKind } from "../application/config_subpage_options";
 import { pushDefaultIcon, pushDefaultIconOn } from "../cards/push";
@@ -58,7 +59,9 @@ export function installAppTestHooksConfig(
     lightCards: LightCardRegistration,
     core: Pick<CoreFeature, "subpageStateDisplayMode">,
     layout: ApplicationLayoutState,
+    configPersistence: Pick<ConfigPersistenceFeature, "subpageEntityKeys" | "subpageChunkShouldPost">,
 ): GlobalDescriptors {
+    const { subpageEntityKeys, subpageChunkShouldPost } = configPersistence;
     const { subpageStateDisplayMode } = core;
     const {
         sensorCardIsLocal,

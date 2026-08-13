@@ -72,6 +72,7 @@ import type { ConfigLockOptionsFeature } from "./config_lock_options";
 import type { ConfigDateTimeOptionsFeature } from "./config_date_time_options";
 import type { ApplicationLayoutState } from "./application_context";
 import type { ApplicationApiFeature } from "./api";
+import type { ConfigPersistenceFeature } from "./config_post_api";
 export function createConfigCodecFeature(
     cardRegistry: CardRegistry,
     sensorOptions: ConfigSensorOptionsFeature,
@@ -86,7 +87,9 @@ export function createConfigCodecFeature(
     accessOptions: ConfigAccessClimateAlarmOptionsFeature,
     confirmationOptions: ConfigConfirmationOptionsFeature,
     layout: ApplicationLayoutState,
+    configPersistence: Pick<ConfigPersistenceFeature, "saveSubpageEntity" | "scheduleSliderSubpageMigration">,
 ) {
+    const { saveSubpageEntity, scheduleSliderSubpageMigration } = configPersistence;
     let requestApi: Pick<ApplicationApiFeature, "postText"> | undefined;
     function connectRequestApi(value: Pick<ApplicationApiFeature, "postText">) {
         requestApi = value;

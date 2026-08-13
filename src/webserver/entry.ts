@@ -156,7 +156,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const cardEditorValidation = context.controllers.cardEditorValidation;
   const previewPlacementController = context.controllers.previewPlacement;
   const cardEditorSave = context.controllers.cardEditorSave;
-  installGlobals(configPersistence.globals);
   const settingsUiFeature = context.controllers.settingsUi;
   const alarmDelayAudioController = context.controllers.alarmDelayAudio;
   const screensaverController = context.controllers.screensaver;
@@ -342,6 +341,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     lightCards,
     context.core,
     context.layout,
+    context.configuration.persistence,
   ));
   installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion, context.controllers.statusPreview, context.controllers.grid));
   installGlobals(installAppTestHooksBackup(context.layout));
@@ -479,7 +479,7 @@ function composeApplicationContext(): ApplicationContext {
       document: dom.document,
       clockBarVisibleInPreview: () => clockBarState.visibleInPreview(),
       postButtonOrder: (value) => requestApi.postText(entityState.entityName("button_order"), value),
-      saveSubpage: (homeSlot) => saveSubpageEntity(homeSlot),
+      saveSubpage: (homeSlot) => configurationPersistence.saveSubpageEntity(Number(homeSlot)),
     },
   );
   const dateTimeConfigurationOptions = createConfigDateTimeOptionsFeature({
@@ -512,6 +512,7 @@ function composeApplicationContext(): ApplicationContext {
     accessClimateAlarmOptions,
     confirmationOptions,
     layout,
+    configurationPersistence,
   );
   configurationPersistence.connectCodec(configurationCodec);
   const cardEditorDraft = createCardEditorDraftController({
@@ -750,6 +751,7 @@ function composeApplicationContext(): ApplicationContext {
     gridColsForImportedSettings,
     nativePanelConfig,
     codec: configurationCodec,
+    configPersistence: configurationPersistence,
     runtime,
     core,
     screenScheduleState,

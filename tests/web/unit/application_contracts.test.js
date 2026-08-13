@@ -767,6 +767,23 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:normalizeButtonConfig|serializeButtonConfig|parseSubpageConfig|serializeSubpageConfig|getSubpage|bindTextPost):/);
   });
 
+  test("composes configuration persistence without compatibility globals", () => {
+    const persistence = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_post_api.ts"), "utf8");
+    const codec = fs.readFileSync(path.join(ROOT, "src/webserver/application/config_codec.ts"), "utf8");
+    const backup = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_backup.ts"), "utf8");
+    const hooks = fs.readFileSync(path.join(ROOT, "src/webserver/testing/app_test_hooks_config.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.doesNotMatch(persistence, /GlobalDescriptors|staticGlobal|liveGlobal|readonly globals/);
+    assert.doesNotMatch(entry, /configPersistence\.globals/);
+    assert.match(codec, /ConfigPersistenceFeature/);
+    assert.match(backup, /ConfigPersistenceFeature/);
+    assert.match(hooks, /ConfigPersistenceFeature/);
+    assert.match(entry, /createConfigCodecFeature\([\s\S]*configurationPersistence/);
+    assert.match(entry, /configPersistence: configurationPersistence/);
+    assert.doesNotMatch(globals, /\bvar (?:SUBPAGE_RAW_CHUNK_FIELDS|saveButtonConfig|saveSubpageEntity|saveSubpageEntityLegacy|scheduleSliderSubpageMigration|subpageChunkShouldPost|subpageEntityKeys):/);
+  });
+
   test("imports shared UI primitives without application globals", () => {
     const primitives = fs.readFileSync(path.join(ROOT, "src/webserver/application/ui_primitives.ts"), "utf8");
     const stateModule = fs.readFileSync(path.join(ROOT, "src/webserver/application/state.ts"), "utf8");

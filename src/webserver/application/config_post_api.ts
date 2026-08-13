@@ -1,7 +1,6 @@
 import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
 import { ENTITY_CATALOG } from "../generated/entity_catalog";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { NativePanelConfigController } from "../controllers/native_panel_config_controller";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
@@ -11,12 +10,13 @@ import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 
 export interface ConfigPersistenceFeature {
-    readonly globals: GlobalDescriptors;
     connectCodec(codec: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig">): void;
     connectRequestApi(requestApi: ApplicationApiFeature): void;
     subpageEntityKeys(): string[];
     saveButtonConfig(slot: number): void;
     saveSubpageEntity(slot: number): unknown;
+    subpageChunkShouldPost(slot?: any, keys?: any, chunks?: any, index?: any, previousPendingChunks?: any): boolean;
+    scheduleSliderSubpageMigration(slot?: any): void;
 }
 
 export function createConfigPersistenceFeature(
@@ -137,16 +137,9 @@ export function createConfigPersistenceFeature(
         connectCodec,
         connectRequestApi,
         subpageEntityKeys,
-        globals: {
-            "saveButtonConfig": staticGlobal(saveButtonConfig),
-            "subpageEntityKeys": staticGlobal(subpageEntityKeys),
-            "SUBPAGE_RAW_CHUNK_FIELDS": liveGlobal(() => SUBPAGE_RAW_CHUNK_FIELDS, (value?: any) => { SUBPAGE_RAW_CHUNK_FIELDS = value; }),
-            "subpageChunkShouldPost": staticGlobal(subpageChunkShouldPost),
-            "saveSubpageEntityLegacy": staticGlobal(saveSubpageEntityLegacy),
-            "saveSubpageEntity": staticGlobal(saveSubpageEntity),
-            "scheduleSliderSubpageMigration": staticGlobal(scheduleSliderSubpageMigration),
-        },
         saveButtonConfig: (slot) => saveButtonConfig(slot),
         saveSubpageEntity: (slot) => saveSubpageEntity(slot),
+        subpageChunkShouldPost,
+        scheduleSliderSubpageMigration,
     };
 }

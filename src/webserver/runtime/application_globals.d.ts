@@ -3,7 +3,6 @@ export {};
 declare global {
   var AUTOMATIC_BRIGHTNESS_UNAVAILABLE: any;
   var FAVICON_SVG: any;
-  var SUBPAGE_RAW_CHUNK_FIELDS: any;
   var __ESPCONTROL_TEST_HOOKS__: any;
   var _backupFeature: any;
   var _renderPending: any;
@@ -160,11 +159,7 @@ declare global {
   var resizeSlot: any;
   var resolveSpanPos: any;
   var resolveSpanPosition: any;
-  var saveButtonConfig: any;
-  var saveSubpageEntity: any;
-  var saveSubpageEntityLegacy: any;
   var scheduleRender: any;
-  var scheduleSliderSubpageMigration: any;
   var segmentControl: any;
   var selectButton: any;
   var selectClockBarItem: any;
@@ -181,8 +176,6 @@ declare global {
   var showPasteCardCode: any;
   var showSelectionMenu: any;
   var statusBadge: any;
-  var subpageChunkShouldPost: any;
-  var subpageEntityKeys: any;
   var swapGridCell: any;
   var syncCardLargeNumbersToggle: any;
   var syncClockScreensaverControls: any;
