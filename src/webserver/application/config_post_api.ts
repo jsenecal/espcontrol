@@ -8,10 +8,12 @@ import type { UiRuntimeState } from "./state";
 import type { ApplicationLayoutState } from "./application_context";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
+import type { ApplicationApiFeature } from "./api";
 
 export interface ConfigPersistenceFeature {
     readonly globals: GlobalDescriptors;
     connectCodec(codec: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig">): void;
+    connectRequestApi(requestApi: ApplicationApiFeature): void;
     saveButtonConfig(slot: number): void;
     saveSubpageEntity(slot: number): unknown;
 }
@@ -26,8 +28,17 @@ export function createConfigPersistenceFeature(
     const { entityNameForSlot, hasRememberedPostPath } = entityState;
     const { showBanner } = shell;
     let codec: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig"> | undefined;
+    let requestApi: ApplicationApiFeature | undefined;
     function connectCodec(value: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig">) {
         codec = value;
+    }
+    function connectRequestApi(value: ApplicationApiFeature) {
+        requestApi = value;
+    }
+    function requests(): ApplicationApiFeature {
+        if (!requestApi)
+            throw new Error("Configuration persistence used before the application API was connected");
+        return requestApi;
     }
     function serializeButtonConfig(button: any) {
         if (!codec)
@@ -42,7 +53,7 @@ export function createConfigPersistenceFeature(
     // ── Config Post API ───────────────────────────────────────────────────
     function saveButtonConfig(this: any, slot?: any) {
         var b: any = state.buttons[slot - 1];
-        postText(entityNameForSlot("button_config", slot), serializeButtonConfig(b));
+        requests().postText(entityNameForSlot("button_config", slot), serializeButtonConfig(b));
     }
     function subpageEntityKeys(this: any) {
         var keys: any = ENTITY_CATALOG.groups.subpage_slot || [];
@@ -76,9 +87,9 @@ export function createConfigPersistenceFeature(
             if (!subpageChunkShouldPost(slot, keys, chunks, ki, previousPendingChunks))
                 continue;
             if (direct)
-                directPosts.push(postTextLegacy(chunkName, chunk));
+                directPosts.push(requests().postTextLegacy(chunkName, chunk));
             else
-                postText(chunkName, chunk);
+                requests().postText(chunkName, chunk);
         }
         if (direct)
             return Promise.all(directPosts);
@@ -97,14 +108,15 @@ export function createConfigPersistenceFeature(
             : null;
         if (nativeSave) {
             state.subpageSavePending[slot] = full;
-            _postQueue = _postQueue.then(function () { return nativeSave; }).then(function (result: any) {
+            var api: any = requests();
+            api.postQueue = api.postQueue.then(function () { return nativeSave; }).then(function (result: any) {
                 if (result === "legacy-fallback")
                     return saveSubpageEntityLegacy(slot, full, true);
                 if (result !== "saved")
-                    _postQueueHadError = true;
+                    api.postQueueError = true;
                 return result;
             });
-            return _postQueue;
+            return api.postQueue;
         }
         saveSubpageEntityLegacy(slot, full);
     }
@@ -122,6 +134,7 @@ export function createConfigPersistenceFeature(
     }
     return {
         connectCodec,
+        connectRequestApi,
         globals: {
             "saveButtonConfig": staticGlobal(saveButtonConfig),
             "subpageEntityKeys": staticGlobal(subpageEntityKeys),

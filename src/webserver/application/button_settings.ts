@@ -15,6 +15,7 @@ import type { ApplicationLayoutState } from "./application_context";
 import type { UiRuntimeState } from "./state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
+import type { ApplicationApiFeature } from "./api";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
@@ -28,6 +29,7 @@ export function installButtonSettingsModule(
     runtime: UiRuntimeState,
     entityState: Pick<EntityStateFeature, "entityName" | "entityInput">,
     shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton" | "showBanner">,
+    requestApi: Pick<ApplicationApiFeature, "postText">,
 ): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
     const { isConfigLocked, createActionButton, showBanner } = shell;
@@ -311,7 +313,7 @@ export function installButtonSettingsModule(
             }
             else {
                 if (saved.saveGrid || sizeChanged)
-                    postText(entityName("button_order"), serializeGrid(state.grid));
+                    requestApi.postText(entityName("button_order"), serializeGrid(state.grid));
                 if (saved.saveButton)
                 configPersistence.saveButtonConfig(slot);
             }

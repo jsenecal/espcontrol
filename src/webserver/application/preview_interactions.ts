@@ -10,6 +10,7 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
+import type { ApplicationApiFeature } from "./api";
 export interface PreviewInteractionsDependencies {
     readonly cardEditorDraft: CardEditorDraftController;
     readonly configPersistence: ConfigPersistenceFeature;
@@ -20,6 +21,7 @@ export interface PreviewInteractionsDependencies {
     readonly runtime: UiRuntimeState;
     readonly entityState: Pick<EntityStateFeature, "entityName">;
     readonly shell: Pick<ControlsShellFeature, "isConfigLocked">;
+    readonly requestApi: Pick<ApplicationApiFeature, "postText">;
 }
 export function installPreviewInteractionsModule(
     dependencies: PreviewInteractionsDependencies,
@@ -457,7 +459,7 @@ export function installPreviewInteractionsModule(
         state.grid[pos] = slot;
         state.subpages[slot] = { order: [], buttons: [], grid: [], sizes: {} };
         buildSubpageGrid(state.subpages[slot]);
-        postText(entityName("button_order"), serializeGrid(state.grid));
+        dependencies.requestApi.postText(entityName("button_order"), serializeGrid(state.grid));
         configPersistence.saveButtonConfig(slot);
         configPersistence.saveSubpageEntity(slot);
         selectButton(slot);
@@ -499,7 +501,7 @@ export function installPreviewInteractionsModule(
             buildSubpageGrid(spCopy);
             state.subpages[newSlot] = spCopy;
         }
-        postText(entityName("button_order"), serializeGrid(state.grid));
+        dependencies.requestApi.postText(entityName("button_order"), serializeGrid(state.grid));
         configPersistence.saveButtonConfig(newSlot);
         configPersistence.saveSubpageEntity(newSlot);
         state.selectedSlots = [newSlot];
@@ -571,7 +573,7 @@ export function installPreviewInteractionsModule(
             saveSubpageConfig(state.editingSubpage);
         }
         else {
-            postText(entityName("button_order"), serializeGrid(state.grid));
+            dependencies.requestApi.postText(entityName("button_order"), serializeGrid(state.grid));
             state.buttons[slot - 1] = emptyButtonConfig();
             delete state.subpages[slot];
             configPersistence.saveButtonConfig(slot);
@@ -614,7 +616,7 @@ export function installPreviewInteractionsModule(
                 configPersistence.saveButtonConfig(slot);
                 configPersistence.saveSubpageEntity(slot);
             });
-            postText(entityName("button_order"), serializeGrid(state.grid));
+            dependencies.requestApi.postText(entityName("button_order"), serializeGrid(state.grid));
         }
         renderPreview();
         renderButtonSettings();

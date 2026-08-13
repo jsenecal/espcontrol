@@ -12,6 +12,7 @@ import { ACTION_CARD_LOCAL_ACTION } from "./config_action_contract";
 import type { ConfigCodecFeature } from "./config_codec";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
+import type { ApplicationApiFeature } from "./api";
 export interface PreviewClipboardDependencies {
     readonly configPersistence: ConfigPersistenceFeature;
     readonly document: Document;
@@ -22,6 +23,7 @@ export interface PreviewClipboardDependencies {
     readonly codec: ConfigCodecFeature;
     readonly entityState: Pick<EntityStateFeature, "entityName">;
     readonly shell: Pick<ControlsShellFeature, "isConfigLocked" | "showBanner" | "createActionButton">;
+    readonly requestApi: Pick<ApplicationApiFeature, "postText">;
 }
 export function installPreviewClipboardModule(
     dependencies: PreviewClipboardDependencies,
@@ -457,7 +459,7 @@ export function installPreviewClipboardModule(
                 configPersistence.saveButtonConfig(plan.slots[i]);
                 configPersistence.saveSubpageEntity(plan.slots[i]);
             }
-            postText(entityName("button_order"), serializeGrid(state.grid));
+            dependencies.requestApi.postText(entityName("button_order"), serializeGrid(state.grid));
             state.selectedSlots = [];
         }
         renderPreview();

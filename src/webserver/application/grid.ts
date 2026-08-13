@@ -6,7 +6,8 @@ import type { ConfigCodecFeature } from "./config_codec";
 import type { UiRuntimeState } from "./state";
 import type { ApplicationLayoutState } from "./application_context";
 import type { EntityStateFeature } from "./entity_state";
-export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeState, layout: ApplicationLayoutState, entityState: Pick<EntityStateFeature, "entityName">): GlobalDescriptors {
+import type { ApplicationApiFeature } from "./api";
+export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeState, layout: ApplicationLayoutState, entityState: Pick<EntityStateFeature, "entityName">, requestApi: Pick<ApplicationApiFeature, "postText">): GlobalDescriptors {
     const { entityName } = entityState;
     const { getSubpage, saveSubpageConfig } = codec;
     // ── Context abstraction ────────────────────────────────────────────────
@@ -15,7 +16,7 @@ export function installGridModule(codec: ConfigCodecFeature, runtime: UiRuntimeS
         clearTimeout(mainGridSaveTimer);
         mainGridSaveTimer = setTimeout(function () {
             mainGridSaveTimer = null;
-            postText(entityName("button_order"), serializeGrid(state.grid));
+            requestApi.postText(entityName("button_order"), serializeGrid(state.grid));
         }, 500);
     }
     function cancelMainGridSave(this: any) {

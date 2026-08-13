@@ -117,7 +117,7 @@ describe("browserless application contracts", () => {
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.equal(fs.existsSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts")), false);
     assert.doesNotMatch(globals, /\bvar (?:NUM_SLOTS|TOTAL_SLOTS|GRID_COLS|GRID_ROWS):/);
-    assert.match(entry, /installGridModule\(context\.configuration\.codec, context\.runtime, context\.layout, context\.controllers\.entityState\)/);
+    assert.match(entry, /installGridModule\(context\.configuration\.codec, context\.runtime, context\.layout, context\.controllers\.entityState, context\.controllers\.requestApi\)/);
     assert.match(entry, /installAppConfigEventsModule\(configPersistence, context\.configuration\.codec, context\.layout\)/);
     assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion\)/);
   });

@@ -150,7 +150,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const c6Firmware = context.controllers.c6Firmware;
   const clockBarState = context.controllers.clockBarState;
   const clockBarController = context.controllers.clockBar;
-  installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout, context.controllers.entityState));
+  installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout, context.controllers.entityState, context.controllers.requestApi));
   const deviceApi = context.api;
   const nativePanelConfig = context.configuration.native;
   const configPersistence = context.configuration.persistence;
@@ -211,6 +211,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.runtime,
     context.controllers.entityState,
     context.controllers.shell,
+    context.controllers.requestApi,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,
@@ -236,6 +237,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     codec: context.configuration.codec,
     entityState: context.controllers.entityState,
     shell: context.controllers.shell,
+    requestApi: context.controllers.requestApi,
   }));
   installGlobals(installPreviewInteractionsModule({
     cardEditorDraft,
@@ -247,6 +249,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     runtime: context.runtime,
     entityState: context.controllers.entityState,
     shell: context.controllers.shell,
+    requestApi: context.controllers.requestApi,
   }));
   installGlobals(installBackupContractModule(context.backup.contract, context.configuration.codec));
   const backupUiFeature = context.backup.application;
@@ -255,7 +258,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     importBackup: backupUiFeature.importConfig,
   }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell));
   installGlobals(backupUiFeature.globals);
-  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState, context.controllers.entityState));
+  installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment, clockBarState, context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
   installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, firmwareVersion, firmwareUpdate, c6Firmware, clockBarState, (factory) => {
@@ -548,6 +551,7 @@ function composeApplicationContext(): ApplicationContext {
     screensaverTimeout,
     shell,
   );
+  configurationPersistence.connectRequestApi(requestApi);
   const clockBar = createClockBarController();
   clockBarState = createClockBarFeature(clockBar, runtime, core, environment, {
     hideSettingsOverlay: () => hideSettingsOverlay(),

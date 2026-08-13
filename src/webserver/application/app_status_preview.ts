@@ -7,7 +7,8 @@ import type { ApplicationLayoutState } from "./application_context";
 import type { EnvironmentStateFeature } from "./environment_state";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
-export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityName">): GlobalDescriptors {
+import type { ApplicationApiFeature } from "./api";
+export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: CoreFeature, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, clockBar: ClockBarFeature, entityState: Pick<EntityStateFeature, "entityName">, requestApi: Pick<ApplicationApiFeature, "postText">): GlobalDescriptors {
     const { entityName } = entityState;
     const { now: webserverNow } = core;
     const { isHomeAssistantAutoTimezone, effectiveTimezoneOptionForWeb, voiceServicesUiState } = environment;
@@ -281,7 +282,7 @@ export function installAppStatusPreviewModule(runtime: UiRuntimeState, core: Cor
             if (pos > 0) {
                 renderPreview();
                 renderButtonSettings();
-                postText(entityName("button_order"), serializeGrid(state.grid));
+                requestApi.postText(entityName("button_order"), serializeGrid(state.grid));
             }
         }, 2000);
     }
