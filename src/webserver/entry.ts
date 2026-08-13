@@ -67,7 +67,7 @@ import { createButtonSettingsIconPickerFeature } from "./application/button_sett
 import { installButtonSettingsModule } from "./application/button_settings";
 import { createPreviewGridPlacementFeature } from "./application/preview_grid_placement";
 import { installPreviewContextMenuModule } from "./application/preview_context_menu";
-import { installPreviewClipboardModule } from "./application/preview_clipboard";
+import { createPreviewClipboardFeature } from "./application/preview_clipboard";
 import { installPreviewInteractionsModule } from "./application/preview_interactions";
 import { createCardEditorDraftController } from "./features/card_editor_draft_controller";
 import { createCardEditorValidationController } from "./features/card_editor_validation_controller";
@@ -210,21 +210,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     grid: context.controllers.grid,
     selection: context.controllers.selection,
     preview: context.controllers.preview,
-  }));
-  installGlobals(installPreviewClipboardModule({
-    configPersistence,
-    document: context.dom.document,
-    layout: context.layout,
-    cards: context.cards,
-    imageOptions: context.configuration.imageOptions,
-    sensorOptions: context.configuration.options,
-    codec: context.configuration.codec,
-    entityState: context.controllers.entityState,
-    shell: context.controllers.shell,
-    requestApi: context.controllers.requestApi,
-    grid: context.controllers.grid,
-    preview: context.controllers.preview,
-    placement: context.controllers.placement,
+    clipboard: context.controllers.clipboard,
   }));
   installGlobals(installPreviewInteractionsModule({
     cardEditorDraft,
@@ -333,6 +319,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.layout,
     context.configuration.persistence,
     context.controllers.preview,
+    context.controllers.clipboard,
   ));
   installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion, context.controllers.statusPreview, context.controllers.grid));
   installGlobals(installAppTestHooksBackup(context.layout, context.backup.contract, context.backup.application));
@@ -638,6 +625,21 @@ function composeApplicationContext(): ApplicationContext {
     grid,
     selection,
   });
+  const clipboard = createPreviewClipboardFeature({
+    configPersistence: configurationPersistence,
+    document: dom.document,
+    layout,
+    cards,
+    imageOptions: imageConfigurationOptions,
+    sensorOptions: configurationOptions,
+    codec: configurationCodec,
+    entityState,
+    shell,
+    requestApi,
+    grid,
+    preview,
+    placement,
+  });
   const configEvents = createAppConfigEventsFeature(configurationPersistence, configurationCodec, layout, renderQueue);
   const stateEventHandlers = createAppStateEventHandlersFeature(
     runtime,
@@ -909,6 +911,7 @@ function composeApplicationContext(): ApplicationContext {
     selection,
     preview,
     placement,
+    clipboard,
     dom,
     cards,
   });

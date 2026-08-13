@@ -19,12 +19,10 @@ declare global {
   var appendSettingsSection: any;
   var applyCardMetadataFields: any;
   var beginNewCardDraft: any;
-  var buildClipboardEntry: any;
   var buildCoverArtSettingsCard: any;
   var buildScreenScheduleSettingsCard: any;
   var buildSettingsPage: any;
   var buildSystemSettingsCards: any;
-  var clipboardEntriesFromCardTransfer: any;
   var cardBadgeLabelHtml: any;
   var cardBadgePreview: any;
   var cardIconHtml: any;
@@ -44,8 +42,6 @@ declare global {
   var closestGridCell: any;
   var colorField: any;
   var condField: any;
-  var copyButtons: any;
-  var copySlot: any;
   var coverArtTrackOverlayDurationSupported: any;
   var createClipboardEntry: any;
   var createEntityToggleSection: any;
@@ -60,8 +56,6 @@ declare global {
   var createScreensaverThenControls: any;
   var createTimeInput: any;
   var ctxMenu: any;
-  var cutButtons: any;
-  var cutSlot: any;
   var defaultCardTypeForPicker: any;
   var deleteButtons: any;
   var deleteSlot: any;
@@ -90,8 +84,6 @@ declare global {
   var openVoiceServicesSettings: any;
   var optionLabel: any;
   var optionValue: any;
-  var pasteButton: any;
-  var pasteSubpageButton: any;
   var planClipboardPaste: any;
   var positionMenu: any;
   var previewValue: any;
@@ -124,8 +116,6 @@ declare global {
   var showClockBarContextMenu: any;
   var showContextMenu: any;
   var showEmptySlotMenu: any;
-  var showCopyCardCode: any;
-  var showPasteCardCode: any;
   var showSelectionMenu: any;
   var statusBadge: any;
   var swapGridCell: any;

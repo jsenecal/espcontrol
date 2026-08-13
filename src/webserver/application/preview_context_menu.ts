@@ -25,6 +25,7 @@ import type { AppStatusPreviewFeature } from "./app_status_preview";
 import type { GridFeature } from "./grid";
 import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
 import type { PreviewRenderFeature } from "./preview_render";
+import type { PreviewClipboardFeature } from "./preview_clipboard";
 export interface PreviewContextMenuDependencies {
     readonly document: Document;
     readonly window: Window;
@@ -37,6 +38,7 @@ export interface PreviewContextMenuDependencies {
     readonly grid: Pick<GridFeature, "ctx" | "scheduleMainGridSave">;
     readonly selection: Pick<ButtonSettingsSelectionFeature, "hideSettingsOverlay" | "openClockBarTemperatureSettings">;
     readonly preview: Pick<PreviewRenderFeature, "registryValue">;
+    readonly clipboard: Pick<PreviewClipboardFeature, "copyButtons" | "copySlot" | "cutButtons" | "cutSlot" | "pasteButton" | "pasteSubpageButton" | "showCopyCode" | "showPasteCode">;
 }
 export function installPreviewContextMenuModule(dependencies: PreviewContextMenuDependencies): GlobalDescriptors {
     const document = dependencies.document;
@@ -47,6 +49,7 @@ export function installPreviewContextMenuModule(dependencies: PreviewContextMenu
     const { ctx, scheduleMainGridSave } = dependencies.grid;
     const { hideSettingsOverlay, openClockBarTemperatureSettings } = dependencies.selection;
     const { registryValue: buttonTypeRegistryValue } = dependencies.preview;
+    const { copyButtons, copySlot, cutButtons, cutSlot, pasteButton, pasteSubpageButton, showCopyCode: showCopyCardCode, showPasteCode: showPasteCardCode } = dependencies.clipboard;
     const {
         cardRequiresSquareSize,
         cardSupportsMaxSize,

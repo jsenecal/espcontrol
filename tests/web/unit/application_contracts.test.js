@@ -944,6 +944,21 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:canPlaceSlotAt|findDuplicatePlacement|findPlacementCell|getCellFromEvent|moveSelectedToCell|moveToCell|placeOrderedGridEntries|placeSlotAt|resolveSpanPos):/);
   });
 
+  test("composes preview clipboard and card transfer without compatibility globals", () => {
+    const clipboard = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_clipboard.ts"), "utf8");
+    const menu = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_context_menu.ts"), "utf8");
+    const hooks = fs.readFileSync(path.join(ROOT, "src/webserver/testing/app_test_hooks_config.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(clipboard, /export function createPreviewClipboardFeature/);
+    assert.doesNotMatch(clipboard, /GlobalDescriptors|staticGlobal|liveGlobal|installPreviewClipboardModule/);
+    assert.match(menu, /clipboard: Pick<PreviewClipboardFeature/);
+    assert.match(hooks, /clipboard: Pick<PreviewClipboardFeature/);
+    assert.match(entry, /clipboard = createPreviewClipboardFeature\(\{/);
+    assert.doesNotMatch(entry, /installPreviewClipboardModule/);
+    assert.doesNotMatch(globals, /\bvar (?:buildClipboardEntry|clipboardEntriesFromCardTransfer|copyButtons|copySlot|cutButtons|cutSlot|pasteButton|pasteSubpageButton|showCopyCardCode|showPasteCardCode):/);
+  });
+
   test("injects the UI shell into preview, persistence, backup, and startup modules", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     for (const file of [

@@ -1,7 +1,6 @@
 import { state } from "../state/app_instance";
 import * as EspControlModel from "../model";
 import { sizeFromToken } from "../model/grid";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { createClipboardEntry } from "../features/clipboard";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { PreviewRenderFeature } from "./preview_render";
@@ -31,9 +30,22 @@ export interface PreviewClipboardDependencies {
     readonly preview: Pick<PreviewRenderFeature, "configDisabled" | "registryValue">;
     readonly placement: Pick<PreviewGridPlacementFeature, "findDuplicatePlacement" | "placeOrderedGridEntries" | "placeSlotAt">;
 }
-export function installPreviewClipboardModule(
+export interface PreviewClipboardFeature {
+    buildEntry(slot?: any): any;
+    copySlot(slot?: any): void;
+    copyButtons(slots?: any): void;
+    entriesFromTransfer(envelope?: any, targetIsSubpage?: any): any;
+    cutSlot(slot?: any): void;
+    cutButtons(slots?: any): void;
+    showCopyCode(slots?: any): void;
+    showPasteCode(position?: any, targetIsSubpage?: any): void;
+    pasteButton(position?: any): void;
+    pasteSubpageButton(position?: any): void;
+}
+
+export function createPreviewClipboardFeature(
     dependencies: PreviewClipboardDependencies,
-): GlobalDescriptors {
+): PreviewClipboardFeature {
     const configPersistence = dependencies.configPersistence;
     const { configDisabled: buttonConfigDisabledForDevice, registryValue: buttonTypeRegistryValue } = dependencies.preview;
     const { findDuplicatePlacement, placeOrderedGridEntries, placeSlotAt } = dependencies.placement;
@@ -633,15 +645,15 @@ export function installPreviewClipboardModule(
         textarea.focus();
     }
     return {
-        "buildClipboardEntry": staticGlobal(buildClipboardEntry),
-        "copySlot": staticGlobal(copySlot),
-        "copyButtons": staticGlobal(copyButtons),
-        "clipboardEntriesFromCardTransfer": staticGlobal(clipboardEntriesFromCardTransfer),
-        "cutSlot": staticGlobal(cutSlot),
-        "cutButtons": staticGlobal(cutButtons),
-        "showCopyCardCode": staticGlobal(showCopyCardCode),
-        "showPasteCardCode": staticGlobal(showPasteCardCode),
-        "pasteButton": staticGlobal(pasteButton),
-        "pasteSubpageButton": staticGlobal(pasteSubpageButton),
+        buildEntry: buildClipboardEntry,
+        copySlot,
+        copyButtons,
+        entriesFromTransfer: clipboardEntriesFromCardTransfer,
+        cutSlot,
+        cutButtons,
+        showCopyCode: showCopyCardCode,
+        showPasteCode: showPasteCardCode,
+        pasteButton,
+        pasteSubpageButton,
     };
 }

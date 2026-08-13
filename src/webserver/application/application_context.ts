@@ -68,6 +68,7 @@ import type { ControlsFieldsFeature } from "./controls_fields";
 import type { ButtonSettingsSelectionFeature } from "./button_settings_selection";
 import type { PreviewRenderFeature } from "./preview_render";
 import type { PreviewGridPlacementFeature } from "./preview_grid_placement";
+import type { PreviewClipboardFeature } from "./preview_clipboard";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -169,6 +170,7 @@ export interface ApplicationContext {
     readonly selection: ButtonSettingsSelectionFeature;
     readonly preview: PreviewRenderFeature;
     readonly placement: PreviewGridPlacementFeature;
+    readonly clipboard: PreviewClipboardFeature;
   };
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
@@ -246,6 +248,7 @@ export interface ApplicationContextOptions {
   readonly selection: ButtonSettingsSelectionFeature;
   readonly preview: PreviewRenderFeature;
   readonly placement: PreviewGridPlacementFeature;
+  readonly clipboard: PreviewClipboardFeature;
   readonly dom: ApplicationDomServices;
   readonly cards: CardRegistry;
 }
@@ -343,6 +346,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       selection: options.selection,
       preview: options.preview,
       placement: options.placement,
+      clipboard: options.clipboard,
     },
     dom: options.dom,
     cards: options.cards,
