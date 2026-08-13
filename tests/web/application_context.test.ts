@@ -68,6 +68,7 @@ export function runApplicationContextTests(): void {
   const entityState = {} as any;
   const shell = {} as any;
   const requestApi = {} as any;
+  const stateLoader = {} as any;
   const coverArtScreensaver = {} as any;
   const mediaPlayback = {} as any;
   const pageTitle = {} as any;
@@ -126,6 +127,7 @@ export function runApplicationContextTests(): void {
     entityState,
     shell,
     requestApi,
+    stateLoader,
     coverArtScreensaver,
     mediaPlayback,
     pageTitle,
@@ -151,6 +153,7 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.entityState, entityState, "context owns entity lookup and post-path behavior");
   equal(context.controllers.shell, shell, "context owns UI shell behavior");
   equal(context.controllers.requestApi, requestApi, "context owns application request behavior");
+  equal(context.controllers.stateLoader, stateLoader, "context owns initial-state loading");
   equal(context.layout.numSlots, 12, "context initializes slot count");
   equal(context.layout.totalSlots, 12, "context initializes total slot count");
   equal(context.layout.gridCols, 4, "context initializes grid columns");

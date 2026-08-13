@@ -48,7 +48,7 @@ import { createConfigAccessClimateAlarmOptionsFeature } from "./application/conf
 import { createConfigCodecFeature } from "./application/config_codec";
 import { createNativePanelConfigMigrationController } from "./application/native_panel_config_migration";
 import { createConfigPersistenceFeature } from "./application/config_post_api";
-import { installStateLoaderApiModule } from "./application/state_loader_api";
+import { createStateLoaderFeature, stateLoaderCompatibilityGlobals, type StateLoaderFeature } from "./application/state_loader_api";
 import { installArtworkPostApiModule } from "./application/artwork_post_api";
 import { installScreenSchedulePostApiModule } from "./application/screen_schedule_post_api";
 import { installClockBarPostApiModule } from "./application/clock_bar_post_api";
@@ -160,7 +160,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell, context.controllers.requestApi));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.entityState, context.controllers.shell, context.controllers.requestApi));
+  installGlobals(stateLoaderCompatibilityGlobals(context.controllers.stateLoader));
   installGlobals(installArtworkPostApiModule(context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installScreenSchedulePostApiModule(context.controllers.entityState, context.controllers.requestApi));
   installGlobals(installClockBarPostApiModule(context.controllers.entityState, context.controllers.requestApi));
@@ -392,6 +392,7 @@ function composeApplicationContext(): ApplicationContext {
   );
   const runtime = createUiRuntimeState(layout, dom.document);
   let requestApi: ApplicationApiFeature;
+  let stateLoader: StateLoaderFeature;
   const shell = createControlsShellFeature(runtime, {
     document: dom.document,
     state: AppInstance.state,
@@ -400,7 +401,7 @@ function composeApplicationContext(): ApplicationContext {
     buildSettingsPage: (parent) => { buildSettingsPage(parent); },
     closeSettings: () => { closeSettings(); },
     postButtonPress: (name) => requestApi.postButtonPress(name),
-    waitForReboot: () => { waitForReboot(); },
+    waitForReboot: () => { stateLoader.waitForReboot(); },
     hideContextMenu: () => { hideContextMenu(); },
     hideSettingsOverlay: () => { hideSettingsOverlay(); },
     clearPlaceholder: () => { clearPlaceholder(); },
@@ -433,7 +434,7 @@ function composeApplicationContext(): ApplicationContext {
   });
   firmwareUpdate = createFirmwareUpdateFeature(runtime, layout.deviceId, firmwareVersion, {
     postInstall: () => postFirmwareUpdateInstall(),
-    refreshVersion: () => refreshFirmwareVersion(),
+    refreshVersion: () => stateLoader.refreshFirmwareVersion(),
     installViaWebOta: (info) => { void installPublicFirmwareViaWebOta(info); },
     c6UpdateKnownAvailable: () => c6Firmware.updateKnownAvailable(),
   });
@@ -553,6 +554,22 @@ function composeApplicationContext(): ApplicationContext {
   );
   configurationPersistence.connectRequestApi(requestApi);
   configurationCodec.connectRequestApi(requestApi);
+  stateLoader = createStateLoaderFeature(
+    runtime,
+    layout,
+    screensaverTimeout,
+    firmwareVersion,
+    firmwareUpdate,
+    c6Firmware,
+    entityState,
+    shell,
+    requestApi,
+    {
+      subpageEntityKeys: configurationPersistence.subpageEntityKeys,
+      connectEvents: () => connectEvents(),
+      scheduleMigration: () => scheduleMigration(),
+    },
+  );
   const clockBar = createClockBarController();
   clockBarState = createClockBarFeature(clockBar, runtime, core, environment, {
     hideSettingsOverlay: () => hideSettingsOverlay(),
@@ -716,9 +733,9 @@ function composeApplicationContext(): ApplicationContext {
     requestApi,
   });
   const reconnect = createReconnectController<unknown>({
-    eventStreamEnabled: () => eventStreamEnabled(),
+    eventStreamEnabled: stateLoader.eventStreamEnabled,
     loadInitialState: (handleState, markConnected) =>
-      loadInitialState(handleState, markConnected),
+      stateLoader.loadInitialState(handleState, markConnected),
     createEventSource: dom.createEventSource,
     getActiveSource: () => runtime.eventSource,
     setActiveSource: (source) => { runtime.eventSource = source; },
@@ -760,6 +777,7 @@ function composeApplicationContext(): ApplicationContext {
     entityState,
     shell,
     requestApi,
+    stateLoader,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,

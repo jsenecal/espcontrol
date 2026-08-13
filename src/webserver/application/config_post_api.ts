@@ -14,6 +14,7 @@ export interface ConfigPersistenceFeature {
     readonly globals: GlobalDescriptors;
     connectCodec(codec: Pick<ConfigCodecFeature, "serializeButtonConfig" | "serializeSubpageConfig">): void;
     connectRequestApi(requestApi: ApplicationApiFeature): void;
+    subpageEntityKeys(): string[];
     saveButtonConfig(slot: number): void;
     saveSubpageEntity(slot: number): unknown;
 }
@@ -135,6 +136,7 @@ export function createConfigPersistenceFeature(
     return {
         connectCodec,
         connectRequestApi,
+        subpageEntityKeys,
         globals: {
             "saveButtonConfig": staticGlobal(saveButtonConfig),
             "subpageEntityKeys": staticGlobal(subpageEntityKeys),

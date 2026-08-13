@@ -1,6 +1,6 @@
 import { state } from "../state/app_instance";
 import { ENTITY_CATALOG } from "../generated/entity_catalog";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 import type { ApplicationLayoutState } from "./application_context";
 import {
@@ -18,7 +18,25 @@ import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
-export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, c6Firmware: C6FirmwareFeature, entityState: Pick<EntityStateFeature, "entityStateItems" | "entityStateItemsForSlots" | "entityLookupNames" | "rememberEntityPostPath" | "entityName" | "entityObjectIds">, shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">, requestApi: Pick<ApplicationApiFeature, "getJsonQuietly" | "getJsonFirst" | "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">): GlobalDescriptors {
+export interface StateLoaderDependencies {
+    readonly subpageEntityKeys: () => string[];
+    readonly connectEvents: () => void;
+    readonly scheduleMigration: () => void;
+}
+
+export interface StateLoaderFeature {
+    eventStreamEnabled(): boolean;
+    cardStateEntities(): any[];
+    settingsStateEntities(): any[];
+    subpageStateEntities(): any[];
+    loadStateItems(items?: any[], handleState?: (state: any) => void, concurrency?: number): Promise<number>;
+    loadInitialState(handleState?: (state: any) => void, onLoaded?: () => void): void;
+    refreshFirmwareVersion(): void;
+    refreshScreensaverTimeout(): void;
+    waitForReboot(): void;
+}
+
+export function createStateLoaderFeature(runtime: UiRuntimeState, layout: ApplicationLayoutState, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, c6Firmware: C6FirmwareFeature, entityState: Pick<EntityStateFeature, "entityStateItems" | "entityStateItemsForSlots" | "entityLookupNames" | "rememberEntityPostPath" | "entityName" | "entityObjectIds">, shell: Pick<ControlsShellFeature, "setConfigLocked" | "showBanner">, requestApi: Pick<ApplicationApiFeature, "getJsonQuietly" | "getJsonFirst" | "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">, dependencies: StateLoaderDependencies): StateLoaderFeature {
     const { entityStateItems, entityStateItemsForSlots, entityLookupNames, rememberEntityPostPath, entityName, entityObjectIds } = entityState;
     const { setConfigLocked, showBanner } = shell;
     const { getJsonQuietly, getJsonFirst, entityDetailPath, entityDetailPaths, entityInitialDetail } = requestApi;
@@ -67,14 +85,14 @@ export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: App
         return items;
     }
     function subpageStateEntities(this: any) {
-        return entityStateItemsForSlots(subpageEntityKeys());
+        return entityStateItemsForSlots(dependencies.subpageEntityKeys());
     }
     function loadStateItems(this: any, items?: any, handleState?: any, concurrency?: any) {
         var index: any = 0;
         var active: any = 0;
         var loadedCount: any = 0;
         var limit: any = Math.max(1, concurrency || 1);
-        return new Promise(function (this: any, resolve?: any) {
+        return new Promise<number>(function (this: any, resolve?: any) {
             function done(this: any) {
                 active--;
                 run();
@@ -103,13 +121,13 @@ export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: App
             if (loadedCount === 0) {
                 setConfigLocked(true, "Reconnecting to device\u2026");
                 showBanner("Reconnecting to device\u2026", "offline");
-                setTimeout(connectEvents, 5000);
+                setTimeout(dependencies.connectEvents, 5000);
                 return;
             }
             if (onLoaded)
                 onLoaded();
             clearTimeout(runtime.migrationTimer as any);
-            runtime.migrationTimer = setTimeout(scheduleMigration, 5000);
+            runtime.migrationTimer = setTimeout(dependencies.scheduleMigration, 5000);
             clearTimeout(runtime.sliderMigrationTimer as any);
             runtime.pendingSliderSubpageMigrations = {};
             loadStateItems(settingsStateEntities(), handleState, 2).then(function (this: any) {
@@ -212,18 +230,32 @@ export function installStateLoaderApiModule(runtime: UiRuntimeState, layout: App
         setConfigLocked(true, "Restarting device\u2026");
         showBanner("Restarting device\u2026", "offline");
         setTimeout(function (this: any) {
-            connectEvents();
+            dependencies.connectEvents();
         }, 15000);
     }
     return {
-        "eventStreamEnabled": staticGlobal(eventStreamEnabled),
-        "cardStateEntities": staticGlobal(cardStateEntities),
-        "settingsStateEntities": staticGlobal(settingsStateEntities),
-        "subpageStateEntities": staticGlobal(subpageStateEntities),
-        "loadStateItems": staticGlobal(loadStateItems),
-        "loadInitialState": staticGlobal(loadInitialState),
-        "refreshFirmwareVersion": staticGlobal(refreshFirmwareVersion),
-        "refreshScreensaverTimeout": staticGlobal(refreshScreensaverTimeout),
-        "waitForReboot": staticGlobal(waitForReboot),
+        eventStreamEnabled,
+        cardStateEntities,
+        settingsStateEntities,
+        subpageStateEntities,
+        loadStateItems,
+        loadInitialState,
+        refreshFirmwareVersion,
+        refreshScreensaverTimeout,
+        waitForReboot,
+    };
+}
+
+export function stateLoaderCompatibilityGlobals(feature: StateLoaderFeature): GlobalDescriptors {
+    return {
+        "eventStreamEnabled": staticGlobal(feature.eventStreamEnabled),
+        "cardStateEntities": staticGlobal(feature.cardStateEntities),
+        "settingsStateEntities": staticGlobal(feature.settingsStateEntities),
+        "subpageStateEntities": staticGlobal(feature.subpageStateEntities),
+        "loadStateItems": staticGlobal(feature.loadStateItems),
+        "loadInitialState": staticGlobal(feature.loadInitialState),
+        "refreshFirmwareVersion": staticGlobal(feature.refreshFirmwareVersion),
+        "refreshScreensaverTimeout": staticGlobal(feature.refreshScreensaverTimeout),
+        "waitForReboot": staticGlobal(feature.waitForReboot),
     };
 }

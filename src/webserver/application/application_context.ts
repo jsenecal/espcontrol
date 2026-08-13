@@ -50,6 +50,7 @@ import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
+import type { StateLoaderFeature } from "./state_loader_api";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -115,6 +116,7 @@ export interface ApplicationContext {
     readonly entityState: EntityStateFeature;
     readonly shell: ControlsShellFeature;
     readonly requestApi: ApplicationApiFeature;
+    readonly stateLoader: StateLoaderFeature;
     readonly alarmDelayAudio: AlarmDelayAudioController;
     readonly cardEditorDraft: CardEditorDraftController;
     readonly cardEditorSave: CardEditorSaveController;
@@ -174,6 +176,7 @@ export interface ApplicationContextOptions {
   readonly entityState: EntityStateFeature;
   readonly shell: ControlsShellFeature;
   readonly requestApi: ApplicationApiFeature;
+  readonly stateLoader: StateLoaderFeature;
   readonly alarmDelayAudio: AlarmDelayAudioController;
   readonly cardEditorDraft: CardEditorDraftController;
   readonly cardEditorSave: CardEditorSaveController;
@@ -253,6 +256,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       entityState: options.entityState,
       shell: options.shell,
       requestApi: options.requestApi,
+      stateLoader: options.stateLoader,
       alarmDelayAudio: options.alarmDelayAudio,
       cardEditorDraft: options.cardEditorDraft,
       cardEditorSave: options.cardEditorSave,

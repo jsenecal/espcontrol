@@ -86,6 +86,17 @@ describe("browserless application contracts", () => {
     assert.match(entry, /installClockBarPostApiModule\(context\.controllers\.entityState, context\.controllers\.requestApi\)/);
   });
 
+  test("owns initial-state loading and reconnect through the application context", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const loader = fs.readFileSync(path.join(ROOT, "src/webserver/application/state_loader_api.ts"), "utf8");
+    assert.match(loader, /export interface StateLoaderFeature/);
+    assert.match(loader, /export function createStateLoaderFeature/);
+    assert.match(entry, /stateLoader = createStateLoaderFeature\(/);
+    assert.match(entry, /eventStreamEnabled: stateLoader\.eventStreamEnabled/);
+    assert.match(entry, /stateLoader\.loadInitialState\(handleState, markConnected\)/);
+    assert.doesNotMatch(entry, /installStateLoaderApiModule/);
+  });
+
   test("imports the browser core service without ambient application names", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
