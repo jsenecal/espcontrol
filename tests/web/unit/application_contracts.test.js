@@ -195,6 +195,10 @@ describe("browserless application contracts", () => {
   test("owns all slot and grid geometry without layout globals", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const grid = fs.readFileSync(path.join(ROOT, "src/webserver/application/grid.ts"), "utf8");
+    const buttonSettings = fs.readFileSync(path.join(ROOT, "src/webserver/application/button_settings.ts"), "utf8");
+    const backup = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_backup.ts"), "utf8");
+    const stateHandlers = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_state_event_handlers.ts"), "utf8");
+    const previewHooks = fs.readFileSync(path.join(ROOT, "src/webserver/testing/app_test_hooks_preview.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.equal(fs.existsSync(path.join(ROOT, "src/webserver/runtime/layout_compatibility.ts")), false);
     assert.doesNotMatch(globals, /\bvar (?:NUM_SLOTS|TOTAL_SLOTS|GRID_COLS|GRID_ROWS):/);
@@ -204,7 +208,13 @@ describe("browserless application contracts", () => {
     assert.match(grid, /export function createGridFeature/);
     assert.doesNotMatch(entry, /installGridModule/);
     assert.match(entry, /createAppConfigEventsFeature\(configurationPersistence, configurationCodec, layout\)/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview, context\.controllers\.grid\)/);
+    for (const source of [buttonSettings, backup, stateHandlers, previewHooks]) {
+      assert.match(source, /GridFeature/);
+    }
+    assert.match(entry, /renderSelectionBar: \(\) => renderSelectionBar\(grid\.ctx\(\)\)/);
+    assert.match(entry, /createAppStateEventHandlersFeature\([\s\S]*statusPreview,[\s\S]*grid/);
+    assert.match(entry, /createAppBackupFeature\(\{[\s\S]*statusPreview,[\s\S]*grid/);
   });
 
   test("imports shared settings state helpers without application globals", () => {
@@ -694,7 +704,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /codec: context\.configuration\.codec/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview, context\.controllers\.grid\)/);
   });
 
   test("injects the configuration codec into persistence and application services", () => {

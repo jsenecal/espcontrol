@@ -11,6 +11,7 @@ import type { ApplicationLayoutState } from "../application/application_context"
 import type { ScreenRotationFeature } from "../application/screen_rotation_state";
 import type { FirmwareVersionFeature } from "../application/firmware_version_state";
 import type { AppStatusPreviewFeature } from "../application/app_status_preview";
+import type { GridFeature } from "../application/grid";
 export function installAppTestHooksPreview(
     cardRegistry: CardRegistry,
     codec: ConfigCodecFeature,
@@ -20,6 +21,7 @@ export function installAppTestHooksPreview(
     screenRotation: ScreenRotationFeature,
     firmwareVersion: FirmwareVersionFeature,
     statusPreview: Pick<AppStatusPreviewFeature, "networkPreviewIconSlug">,
+    grid: Pick<GridFeature, "applyImportedButtonOrder">,
 ): GlobalDescriptors {
     const {
         mockNow: webserverMockNow,
@@ -106,7 +108,7 @@ export function installAppTestHooksPreview(
                 if (gridCols)
                     layout.gridCols = gridCols;
                 try {
-                    var normalizedOrder: any = applyImportedButtonOrder(orderStr, {});
+                    var normalizedOrder: any = grid.applyImportedButtonOrder(orderStr, {});
                     var sizes: any = {};
                     for (var k in state.sizes)
                         sizes[k] = state.sizes[k];

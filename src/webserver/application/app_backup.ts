@@ -42,6 +42,7 @@ import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
+import type { GridFeature } from "./grid";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -63,6 +64,7 @@ export interface AppBackupControllers {
     readonly shell: Pick<ControlsShellFeature, "switchTab">;
     readonly requestApi: ApplicationApiFeature;
     readonly statusPreview: Pick<AppStatusPreviewFeature, "syncInput" | "updateTempPreview">;
+    readonly grid: Pick<GridFeature, "applyImportedButtonOrder" | "cancelMainGridSave" | "serializeGrid">;
 }
 
 export interface AppBackupFeature {
@@ -76,6 +78,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
     const { switchTab } = controllers.shell;
     const requestApi = controllers.requestApi;
     const { syncInput, updateTempPreview } = controllers.statusPreview;
+    const { applyImportedButtonOrder, cancelMainGridSave, serializeGrid } = controllers.grid;
     const {
         postText,
         postSwitch,

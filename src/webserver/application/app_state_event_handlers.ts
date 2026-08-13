@@ -44,6 +44,7 @@ import type { FirmwareUpdateFeature } from "./firmware_update_state";
 import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { AppStatusPreviewFeature } from "./app_status_preview";
+import type { GridFeature } from "./grid";
 
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
@@ -65,6 +66,7 @@ export function createAppStateEventHandlersFeature(
     c6Firmware: C6FirmwareFeature,
     clockBar: ClockBarFeature,
     statusPreview: Pick<AppStatusPreviewFeature, "appendTimezoneOption" | "normalizeNetworkTransport" | "normalizeWifiStrengthPercent" | "syncInput" | "updateClock" | "updateClockBarItemUi" | "updateNetworkPreview" | "updateSunInfo" | "updateTempPreview">,
+    grid: Pick<GridFeature, "applyButtonOrderValue">,
 ): AppStateEventHandlersFeature {
     const { syncPreviewOrientation } = core;
     const els = runtime.els;
@@ -103,6 +105,7 @@ export function createAppStateEventHandlersFeature(
         updateSunInfo,
         updateTempPreview,
     } = statusPreview;
+    const { applyButtonOrderValue } = grid;
     // ── State Event Handlers ──────────────────────────────────────────
     const createSseHandlers: SseHandlerFactory = () => {
         return {

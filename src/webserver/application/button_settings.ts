@@ -16,6 +16,7 @@ import type { UiRuntimeState } from "./state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
+import type { GridFeature } from "./grid";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
@@ -30,10 +31,12 @@ export function installButtonSettingsModule(
     entityState: Pick<EntityStateFeature, "entityName" | "entityInput">,
     shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton" | "showBanner">,
     requestApi: Pick<ApplicationApiFeature, "postText">,
+    grid: Pick<GridFeature, "ctx" | "serializeGrid">,
 ): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
     const { isConfigLocked, createActionButton, showBanner } = shell;
     const els = runtime.els;
+    const { ctx, serializeGrid } = grid;
     const {
         imageSlotCapacity,
         imageCardCountWithCandidate,

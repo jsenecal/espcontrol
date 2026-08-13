@@ -211,6 +211,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.controllers.entityState,
     context.controllers.shell,
     context.controllers.requestApi,
+    context.controllers.grid,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,
@@ -342,7 +343,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.core,
     context.layout,
   ));
-  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion, context.controllers.statusPreview));
+  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion, context.controllers.statusPreview, context.controllers.grid));
   installGlobals(installAppTestHooksBackup(context.layout));
   installGlobals(installAppTestHooksSettings(
     () => defaultTimezoneOptionsForDevice(context.device.profile),
@@ -412,7 +413,7 @@ function composeApplicationContext(): ApplicationContext {
     textInput: (id, value, placeholder) => textInput(id, value, placeholder),
   });
   const screenRotation = createScreenRotationFeature(runtime, layout, {
-    applyButtonOrder: (value, skipSpanNormalization) => applyButtonOrderValue(value, skipSpanNormalization),
+    applyButtonOrder: (value, skipSpanNormalization) => grid.applyButtonOrderValue(value, skipSpanNormalization),
     postNormalizedOrder: (value) => requestApi.postText(entityState.entityName("button_order"), value),
     renderPreview: () => renderPreview(),
   });
@@ -586,7 +587,7 @@ function composeApplicationContext(): ApplicationContext {
     postTime: (value) => postClockBarTime(value),
     postVoiceServices: (value) => postVoiceServices(value),
     postNetworkStatus: (value) => postNetworkStatusIcon(value),
-    renderSelectionBar: () => renderSelectionBar(ctx()),
+    renderSelectionBar: () => renderSelectionBar(grid.ctx()),
     updateNetworkPreview: () => statusPreview.updateNetworkPreview(),
     updateVoicePreview: () => statusPreview.updateVoicePreview(),
   });
@@ -605,6 +606,7 @@ function composeApplicationContext(): ApplicationContext {
     c6Firmware,
     clockBarState,
     statusPreview,
+    grid,
   );
   const settingsUi = createSettingsUiFeature({
     document: dom.document,
@@ -749,6 +751,7 @@ function composeApplicationContext(): ApplicationContext {
     shell,
     requestApi,
     statusPreview,
+    grid,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: stateLoader.eventStreamEnabled,
