@@ -21,7 +21,7 @@ import { createScreenRotationFeature } from "./application/screen_rotation_state
 import { createScreenScheduleStateFeature } from "./application/screen_schedule_state";
 import { createAppearanceFeature } from "./application/appearance_state";
 import { createFirmwareVersionFeature } from "./application/firmware_version_state";
-import { installEntityStateModule } from "./application/entity_state";
+import { createEntityStateFeature, entityStateCompatibilityGlobals } from "./application/entity_state";
 import { createClockBarFeature, type ClockBarFeature } from "./application/clock_bar_state";
 import { createFirmwareUpdateFeature, type FirmwareUpdateFeature } from "./application/firmware_update_state";
 import { createScreensaverTimeoutFeature } from "./application/screensaver_timeout";
@@ -146,7 +146,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const firmwareUpdate = context.controllers.firmwareUpdate;
   const c6Firmware = context.controllers.c6Firmware;
   const clockBarState = context.controllers.clockBarState;
-  installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout, clockBarState));
+  installGlobals(entityStateCompatibilityGlobals(context.controllers.entityState));
   const clockBarController = context.controllers.clockBar;
   installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout));
   const deviceApi = context.api;
@@ -376,14 +376,22 @@ function composeApplicationContext(): ApplicationContext {
     DeviceConfig.deviceConfig,
   );
   const runtime = createUiRuntimeState(layout, dom.document);
+  let confirmationOptions: ReturnType<typeof createConfigConfirmationOptionsFeature>;
+  let clockBarState: ClockBarFeature;
+  const entityState = createEntityStateFeature({
+    actionCardStateEntity: (button) => confirmationOptions.actionCardStateEntity(button),
+    totalSlots: () => layout.totalSlots,
+    clockBarTemperatureEntities: () => clockBarState.temperatureEntities(),
+    textInput: (id, value, placeholder) => textInput(id, value, placeholder),
+  });
   const screenRotation = createScreenRotationFeature(runtime, layout, {
     applyButtonOrder: (value, skipSpanNormalization) => applyButtonOrderValue(value, skipSpanNormalization),
-    postNormalizedOrder: (value) => postText(entityName("button_order"), value),
+    postNormalizedOrder: (value) => postText(entityState.entityName("button_order"), value),
     renderPreview: () => renderPreview(),
   });
   const appearance = createAppearanceFeature(runtime, {
     renderPreview: () => renderPreview(),
-    postOnColor: (value) => postText(entityName("button_on_color"), value),
+    postOnColor: (value) => postText(entityState.entityName("button_on_color"), value),
   });
   let firmwareUpdate: FirmwareUpdateFeature;
   let c6Firmware: C6FirmwareFeature;
@@ -408,8 +416,8 @@ function composeApplicationContext(): ApplicationContext {
   const nativePanelConfig = createNativePanelConfigMigrationController({
     deviceProfile: () => layout.deviceId,
     slotCount: () => layout.numSlots,
-    entityName: (name) => entityName(name),
-    entityNameForSlot: (name, slot) => entityNameForSlot(name, slot),
+    entityName: (name) => entityState.entityName(name),
+    entityNameForSlot: (name, slot) => entityState.entityNameForSlot(name, slot),
     normalizeHexColor: (value, fallback) => Model.normalizeHexColor(value, fallback),
     showBanner: (message, level) => showBanner(message, level),
     delay: (callback, milliseconds) => dom.schedule(callback, milliseconds),
@@ -429,7 +437,6 @@ function composeApplicationContext(): ApplicationContext {
   const robotConfigurationOptions = createConfigRobotCardOptionsFeature();
   const lockConfigurationOptions = createConfigLockOptionsFeature();
   let configurationCodec: ReturnType<typeof createConfigCodecFeature>;
-  let clockBarState: ClockBarFeature;
   const core = createCoreFeature(
     layout,
     (subpage) => configurationCodec.serializeSubpageGrid(subpage),
@@ -438,7 +445,7 @@ function composeApplicationContext(): ApplicationContext {
       state: AppInstance.state,
       document: dom.document,
       clockBarVisibleInPreview: () => clockBarState.visibleInPreview(),
-      postButtonOrder: (value) => postText(entityName("button_order"), value),
+      postButtonOrder: (value) => postText(entityState.entityName("button_order"), value),
       saveSubpage: (homeSlot) => saveSubpageEntity(homeSlot),
     },
   );
@@ -457,7 +464,7 @@ function composeApplicationContext(): ApplicationContext {
     renderButtonSettings: () => renderButtonSettings(),
   });
   const accessClimateAlarmOptions = createConfigAccessClimateAlarmOptionsFeature(modalTabOptions);
-  const confirmationOptions = createConfigConfirmationOptionsFeature(accessClimateAlarmOptions);
+  confirmationOptions = createConfigConfirmationOptionsFeature(accessClimateAlarmOptions);
   configurationCodec = createConfigCodecFeature(
     cards,
     configurationOptions,
@@ -512,7 +519,7 @@ function composeApplicationContext(): ApplicationContext {
     timezoneId: (value) => getTzId(value),
     postTemperatureEntities: (value) => postClockBarTemperatureEntities(value),
     postSwitch: (name, value) => postSwitch(name, value),
-    entityName: (key) => entityName(key),
+    entityName: (key) => entityState.entityName(key),
     postText: (name, value) => postText(name, value),
     updateTemperaturePreview: () => updateTempPreview(),
     updateItemUi: () => updateClockBarItemUi(),
@@ -707,6 +714,7 @@ function composeApplicationContext(): ApplicationContext {
     firmwareUpdate,
     c6Firmware,
     clockBarState,
+    entityState,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,

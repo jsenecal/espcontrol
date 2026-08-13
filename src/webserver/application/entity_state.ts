@@ -1,10 +1,8 @@
 import { state } from "../state/app_instance";
 import { ENTITY_CATALOG } from "../generated/entity_catalog";
 import { entityStateKeys } from "../state/event_state";
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
+import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { ConfigConfirmationOptionsFeature } from "./config_confirmation_options";
-import type { ApplicationLayoutState } from "./application_context";
-import type { ClockBarFeature } from "./clock_bar_state";
 
 type EntityDefinition = {
     readonly domain?: string;
@@ -15,13 +13,15 @@ type EntityDefinition = {
 
 const entityDefinitions = ENTITY_CATALOG.entities as unknown as Readonly<Record<string, EntityDefinition>>;
 
-export function installEntityStateModule(
-    confirmationOptions: ConfigConfirmationOptionsFeature,
-    layout: ApplicationLayoutState,
-    clockBar: Pick<ClockBarFeature, "temperatureEntities">,
-): GlobalDescriptors {
-    const { actionCardStateEntity } = confirmationOptions;
-    const { temperatureEntities: clockBarTemperatureEntities } = clockBar;
+export interface EntityStateDependencies {
+    readonly actionCardStateEntity: ConfigConfirmationOptionsFeature["actionCardStateEntity"];
+    readonly totalSlots: () => number;
+    readonly clockBarTemperatureEntities: () => any[];
+    readonly textInput: (id: any, value: any, placeholder: any) => any;
+}
+
+export function createEntityStateFeature(dependencies: EntityStateDependencies) {
+    const { actionCardStateEntity, clockBarTemperatureEntities } = dependencies;
     // ── Entity State Helpers ───────────────────────────────────────────────
     function uniquePush(this: any, list?: any, value?: any) {
         if (value && list.indexOf(value) === -1)
@@ -54,7 +54,7 @@ export function installEntityStateModule(
     }
     function entityStateItemsForSlots(this: any, keys?: any) {
         var items: any = [];
-        for (var i: any = 1; i <= layout.totalSlots; i++) {
+        for (var i: any = 1; i <= dependencies.totalSlots(); i++) {
             keys.forEach(function (this: any, key?: any) {
                 items.push([entityDef(key).domain, entityNameForSlot(key, i)]);
             });
@@ -263,7 +263,7 @@ export function installEntityStateModule(
         return input;
     }
     function entityInput(this: any, id?: any, value?: any, placeholder?: any, domains?: any) {
-        var el: any = textInput(id, value, placeholder);
+        var el: any = dependencies.textInput(id, value, placeholder);
         return attachEntitySuggestions(el, domains);
     }
     function rememberEntityPostPath(this: any, data?: any) {
@@ -316,32 +316,67 @@ export function installEntityStateModule(
         return urls;
     }
     return {
-        "uniquePush": staticGlobal(uniquePush),
-        "entityDef": staticGlobal(entityDef),
-        "entityName": staticGlobal(entityName),
-        "entityNameForSlot": staticGlobal(entityNameForSlot),
-        "entityObjectIds": staticGlobal(entityObjectIds),
-        "entityLookupNames": staticGlobal(entityLookupNames),
-        "entityStateItem": staticGlobal(entityStateItem),
-        "entityStateItems": staticGlobal(entityStateItems),
-        "entityStateItemsForSlots": staticGlobal(entityStateItemsForSlots),
-        "esphomeObjectId": staticGlobal(esphomeObjectId),
-        "parseEntityId": staticGlobal(parseEntityId),
-        "parseHomeAssistantEntity": staticGlobal(parseHomeAssistantEntity),
-        "titleFromEntityId": staticGlobal(titleFromEntityId),
-        "rememberEntityName": staticGlobal(rememberEntityName),
-        "rememberConfiguredButtonEntities": staticGlobal(rememberConfiguredButtonEntities),
-        "rememberConfiguredEntities": staticGlobal(rememberConfiguredEntities),
-        "optionLabelForEntity": staticGlobal(optionLabelForEntity),
-        "entitySuggestions": staticGlobal(entitySuggestions),
-        "ensureEntityDropdown": staticGlobal(ensureEntityDropdown),
-        "closeEntityDropdown": staticGlobal(closeEntityDropdown),
-        "refreshEntityDatalist": staticGlobal(refreshEntityDatalist),
-        "attachEntitySuggestions": staticGlobal(attachEntitySuggestions),
-        "entityInput": staticGlobal(entityInput),
-        "rememberEntityPostPath": staticGlobal(rememberEntityPostPath),
-        "rememberedPostUrls": staticGlobal(rememberedPostUrls),
-        "hasRememberedPostPath": staticGlobal(hasRememberedPostPath),
-        "entityPostUrls": staticGlobal(entityPostUrls),
+        uniquePush,
+        entityDef,
+        entityName,
+        entityNameForSlot,
+        entityObjectIds,
+        entityLookupNames,
+        entityStateItem,
+        entityStateItems,
+        entityStateItemsForSlots,
+        esphomeObjectId,
+        parseEntityId,
+        parseHomeAssistantEntity,
+        titleFromEntityId,
+        rememberEntityName,
+        rememberConfiguredButtonEntities,
+        rememberConfiguredEntities,
+        optionLabelForEntity,
+        entitySuggestions,
+        ensureEntityDropdown,
+        closeEntityDropdown,
+        refreshEntityDatalist,
+        attachEntitySuggestions,
+        entityInput,
+        rememberEntityPostPath,
+        rememberedPostUrls,
+        hasRememberedPostPath,
+        entityPostUrls,
+    };
+}
+
+export type EntityStateFeature = ReturnType<typeof createEntityStateFeature>;
+
+/** Temporary adapter for application modules that have not yet received EntityStateFeature directly. */
+export function entityStateCompatibilityGlobals(feature: EntityStateFeature): GlobalDescriptors {
+    return {
+        "uniquePush": staticGlobal(feature.uniquePush),
+        "entityDef": staticGlobal(feature.entityDef),
+        "entityName": staticGlobal(feature.entityName),
+        "entityNameForSlot": staticGlobal(feature.entityNameForSlot),
+        "entityObjectIds": staticGlobal(feature.entityObjectIds),
+        "entityLookupNames": staticGlobal(feature.entityLookupNames),
+        "entityStateItem": staticGlobal(feature.entityStateItem),
+        "entityStateItems": staticGlobal(feature.entityStateItems),
+        "entityStateItemsForSlots": staticGlobal(feature.entityStateItemsForSlots),
+        "esphomeObjectId": staticGlobal(feature.esphomeObjectId),
+        "parseEntityId": staticGlobal(feature.parseEntityId),
+        "parseHomeAssistantEntity": staticGlobal(feature.parseHomeAssistantEntity),
+        "titleFromEntityId": staticGlobal(feature.titleFromEntityId),
+        "rememberEntityName": staticGlobal(feature.rememberEntityName),
+        "rememberConfiguredButtonEntities": staticGlobal(feature.rememberConfiguredButtonEntities),
+        "rememberConfiguredEntities": staticGlobal(feature.rememberConfiguredEntities),
+        "optionLabelForEntity": staticGlobal(feature.optionLabelForEntity),
+        "entitySuggestions": staticGlobal(feature.entitySuggestions),
+        "ensureEntityDropdown": staticGlobal(feature.ensureEntityDropdown),
+        "closeEntityDropdown": staticGlobal(feature.closeEntityDropdown),
+        "refreshEntityDatalist": staticGlobal(feature.refreshEntityDatalist),
+        "attachEntitySuggestions": staticGlobal(feature.attachEntitySuggestions),
+        "entityInput": staticGlobal(feature.entityInput),
+        "rememberEntityPostPath": staticGlobal(feature.rememberEntityPostPath),
+        "rememberedPostUrls": staticGlobal(feature.rememberedPostUrls),
+        "hasRememberedPostPath": staticGlobal(feature.hasRememberedPostPath),
+        "entityPostUrls": staticGlobal(feature.entityPostUrls),
     };
 }

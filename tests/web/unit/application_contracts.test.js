@@ -14,6 +14,7 @@ describe("browserless application contracts", () => {
   const { runDeviceApiTests } = loadTypescriptTest("tests/web/device_api.test.ts");
   const { runSettingsFeatureTests } = loadTypescriptTest("tests/web/settings_feature.test.ts");
   const { runStateContractTests } = loadTypescriptTest("tests/web/state_contract.test.ts");
+  const { createEntityStateFeature } = loadTypescriptTest("src/webserver/application/entity_state.ts");
 
   test("plans clipboard transfers", () => {
     runClipboardFeatureTests();
@@ -21,6 +22,34 @@ describe("browserless application contracts", () => {
 
   test("owns browser composition and compatibility layout state", () => {
     runApplicationContextTests();
+  });
+
+  test("owns entity catalogue helpers as one explicit service", () => {
+    const entities = createEntityStateFeature({
+      actionCardStateEntity: () => "",
+      totalSlots: () => 12,
+      clockBarTemperatureEntities: () => [],
+      textInput: () => ({}),
+    });
+    assert.equal(entities.entityName("button_order"), "Button Order");
+    assert.equal(entities.entityNameForSlot("button_config", 3), "Button 3 Config");
+    assert.deepEqual(Array.from(entities.entityLookupNames("firmware_version")), [
+      "Firmware: Version", "firmware__version", "firmware_version", "firmware_version_sensor",
+    ]);
+    assert.deepEqual(
+      { ...entities.parseHomeAssistantEntity("sensor.kitchen_temperature") },
+      { id: "sensor.kitchen_temperature", domain: "sensor", objectId: "kitchen_temperature" },
+    );
+    assert.equal(entities.titleFromEntityId("sensor.kitchen_temperature"), "Kitchen Temperature");
+  });
+
+  test("composes entity state before exposing its temporary compatibility adapter", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const source = fs.readFileSync(path.join(ROOT, "src/webserver/application/entity_state.ts"), "utf8");
+    assert.match(entry, /createEntityStateFeature\(/);
+    assert.match(entry, /entityStateCompatibilityGlobals\(context\.controllers\.entityState\)/);
+    assert.doesNotMatch(entry, /installEntityStateModule/);
+    assert.match(source, /export type EntityStateFeature/);
   });
 
   test("imports the browser core service without ambient application names", () => {
@@ -380,7 +409,7 @@ describe("browserless application contracts", () => {
     assert.match(options, /const actionCardActions/);
     assert.match(entry, /registerActionCardTypes\(registry, context\.configuration\.confirmationOptions\);/);
     assert.doesNotMatch(entry, /registerCompatibility\(registerActionCardTypes/);
-    assert.match(entry, /installEntityStateModule\(context\.configuration\.confirmationOptions, context\.layout, clockBarState\)/);
+    assert.match(entry, /actionCardStateEntity: \(button\) => confirmationOptions\.actionCardStateEntity\(button\)/);
     assert.doesNotMatch(globals, /\bvar (?:ACTION_CARD_ACTIONS|ACTION_CARD_METADATA|actionCardInfo|actionCardIsLocal|actionCardIsOptionSelect|actionCardNeedsExtraValue|actionCardStateDisplayMode|actionCardStateEntity|actionCardStatePrecision|actionCardStateUnit|normalizeActionCardConfig|normalizeSavedConfigActionFields|renderActionCardLocalSettings|setActionCardStateOptions):/);
   });
 

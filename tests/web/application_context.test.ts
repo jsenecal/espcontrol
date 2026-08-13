@@ -65,6 +65,7 @@ export function runApplicationContextTests(): void {
   const previewPlacement = {} as any;
   const clockBar = {} as any;
   const clockBarState = {} as any;
+  const entityState = {} as any;
   const coverArtScreensaver = {} as any;
   const mediaPlayback = {} as any;
   const pageTitle = {} as any;
@@ -120,6 +121,7 @@ export function runApplicationContextTests(): void {
     previewPlacement,
     clockBar,
     clockBarState,
+    entityState,
     coverArtScreensaver,
     mediaPlayback,
     pageTitle,
@@ -142,6 +144,7 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.firmwareUpdate, firmwareUpdate, "context owns firmware update behavior");
   equal(context.controllers.c6Firmware, c6Firmware, "context owns C6 firmware behavior");
   equal(context.controllers.clockBarState, clockBarState, "context owns Clock Bar behavior");
+  equal(context.controllers.entityState, entityState, "context owns entity lookup and post-path behavior");
   equal(context.layout.numSlots, 12, "context initializes slot count");
   equal(context.layout.totalSlots, 12, "context initializes total slot count");
   equal(context.layout.gridCols, 4, "context initializes grid columns");
