@@ -36,6 +36,7 @@ import { syncIdleUi } from "./idle_state";
 import { getActiveScreensaverMode } from "./screensaver_state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
+import type { FirmwareUpdateFeature } from "./firmware_update_state";
 
 export interface AppBackupControllers {
     readonly layout: ApplicationLayoutState;
@@ -51,6 +52,7 @@ export interface AppBackupControllers {
     readonly core: Pick<CoreFeature, "syncPreviewOrientation">;
     readonly screenScheduleState: ScreenScheduleStateFeature;
     readonly screensaverTimeout: ScreensaverTimeoutFeature;
+    readonly firmwareUpdate: FirmwareUpdateFeature;
 }
 
 export interface AppBackupFeature {
@@ -65,6 +67,7 @@ export function createAppBackupFeature(controllers: AppBackupControllers): AppBa
     const els = controllers.runtime.els;
     const { syncUi: syncScreenScheduleUi } = controllers.screenScheduleState;
     const { syncUi: syncScreensaverTimeoutUi } = controllers.screensaverTimeout;
+    const { controlsVisible: firmwareUpdateControlsVisible, syncUi: syncFirmwareUpdateUi } = controllers.firmwareUpdate;
     // ── Export / Import ────────────────────────────────────────────────────
     var backupExportController: BackupExportController = controllers.backupExport;
     function backupExportScreenSizeSlug(this: any, value?: any) {

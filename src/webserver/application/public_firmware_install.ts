@@ -9,11 +9,23 @@ import {
     publicFirmwareManifestUrl,
     publicFirmwareVersionsUrl,
 } from "./firmware_metadata";
+import type { FirmwareUpdateFeature } from "./firmware_update_state";
 
 export function installPublicFirmwareInstallModule(
     deviceApi: DeviceApi,
     deviceId: string,
+    firmwareUpdate: FirmwareUpdateFeature,
 ): GlobalDescriptors {
+    const {
+        selectedInfo: selectedFirmwareInfo,
+        setPublicVersions: setPublicFirmwareVersions,
+        infoForVersion: firmwareInfoForVersion,
+        setPublicInfo: setPublicFirmwareInfo,
+        clearWebOtaFallback: clearFirmwareWebOtaFallback,
+        renderStatus: renderFirmwareUpdateStatus,
+        startInstallRefresh: startFirmwareInstallRefresh,
+        stopInstallRefresh: stopFirmwareInstallRefresh,
+    } = firmwareUpdate;
     // ── Public Firmware Web OTA ────────────────────────────────────────────
     function ensurePublicFirmwareOtaUrl(this: any, info?: any) {
         info = info || selectedFirmwareInfo();

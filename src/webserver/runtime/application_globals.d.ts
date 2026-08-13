@@ -7,7 +7,6 @@ declare global {
   var CLOCK_BAR_TIME_UNAVAILABLE: any;
   var CLOCK_BAR_UNAVAILABLE: any;
   var FAVICON_SVG: any;
-  var FIRMWARE_WEB_OTA_FALLBACK_DELAY_MS: any;
   var MAX_CLOCK_BAR_TEMPERATURES: any;
   var NETWORK_STATUS_ICON_UNAVAILABLE: any;
   var SCREENSAVER_ACTION_UNAVAILABLE: any;
@@ -97,7 +96,6 @@ declare global {
   var cardTypePickerOptions: any;
   var clampMenuPosition: any;
   var clearCardSelection: any;
-  var clearFirmwareWebOtaFallback: any;
   var clearPlaceholder: any;
   var clearTextSelection: any;
   var clockBarDefaultSection: any;
@@ -189,16 +187,7 @@ declare global {
   var fieldLabel: any;
   var fieldWithControl: any;
   var findDuplicatePlacement: any;
-  var findFirmwareVersionInfo: any;
   var findPlacementCell: any;
-  var firmwareInfoForVersion: any;
-  var firmwareInstallRefreshTimer: any;
-  var firmwareInstallRefreshUntil: any;
-  var firmwareUpdateAvailable: any;
-  var firmwareUpdateControlsVisible: any;
-  var firmwareVersionMatches: any;
-  var firmwareVersionSelectorVisible: any;
-  var firmwareWebOtaFallbackTimer: any;
   var firstFreeCell: any;
   var firstFreeSlot: any;
   var formatGmtOffset: any;
@@ -223,14 +212,9 @@ declare global {
   var disclosureBadge: any;
   var inlineDisclosure: any;
   var installPublicFirmwareViaWebOta: any;
-  var installedFirmwareMatchesPublicRelease: any;
   var isClockBarTemperatureItem: any;
   var isConfigLocked: any;
   var isSelectionControlTarget: any;
-  var latestFirmwareInfo: any;
-  var latestFirmwareInfoFromState: any;
-  var latestFirmwareInstallAction: any;
-  var latestFirmwareInstallAvailable: any;
   var legacyClockBarTemperatureEntities: any;
   var loadInitialState: any;
   var loadStateItems: any;
@@ -263,7 +247,6 @@ declare global {
   var placeSlotAt: any;
   var planBackupImport: any;
   var planClipboardPaste: any;
-  var pollFirmwareInstallRefresh: any;
   var positionMenu: any;
   var post: any;
   var postBrightnessMode: any;
@@ -342,9 +325,7 @@ declare global {
   var previewHtmlValue: any;
   var previewValue: any;
   var primaryClockBarTemperatureEntity: any;
-  var publicFirmwareInstallAvailable: any;
   var publicFirmwareOtaFilename: any;
-  var publicFirmwareReleaseKnown: any;
   var refreshEntityDatalist: any;
   var refreshFirmwareVersion: any;
   var refreshScreensaverTimeout: any;
@@ -370,7 +351,6 @@ declare global {
   var renderCardTextField: any;
   var renderClockBarLayout: any;
   var renderClockBarSelectionBar: any;
-  var renderFirmwareUpdateStatus: any;
   var renderPreview: any;
   var renderSelectionBar: any;
   var resetPostQueueError: any;
@@ -384,7 +364,6 @@ declare global {
   var saveClockBarTemperatureSettings: any;
   var saveSubpageEntity: any;
   var saveSubpageEntityLegacy: any;
-  var scheduleFirmwareWebOtaFallback: any;
   var scheduleMigration: any;
   var scheduleRender: any;
   var scheduleSliderSubpageMigration: any;
@@ -392,11 +371,6 @@ declare global {
   var selectButton: any;
   var selectClockBarItem: any;
   var selectField: any;
-  var selectedFirmwareInfo: any;
-  var previousFirmwareInfos: any;
-  var previousFirmwareInstallAvailable: any;
-  var selectedPreviousFirmwareInfo: any;
-  var syncPreviousFirmwareUi: any;
   var serializeClockBarTemperatureEntities: any;
   var serializeGrid: any;
   var setC6FirmwareCurrentVersion: any;
@@ -405,10 +379,7 @@ declare global {
   var setClockBarItemVisible: any;
   var setConfigLocked: any;
   var setFavicon: any;
-  var setFirmwareUpdateInfo: any;
   var setPostThrottle: any;
-  var setPublicFirmwareInfo: any;
-  var setPublicFirmwareVersions: any;
   var setViewportMeta: any;
   var settingsStateEntities: any;
   var settingsStatusHeader: any;
@@ -422,10 +393,7 @@ declare global {
   var showPasteCardCode: any;
   var showSelectionMenu: any;
   var sizeClass: any;
-  var startFirmwareInstallRefresh: any;
   var statusBadge: any;
-  var stopFirmwareInstallRefresh: any;
-  var stopFirmwareInstallRefreshIfComplete: any;
   var subpageChunkShouldPost: any;
   var subpageEntityKeys: any;
   var subpageStateEntities: any;
@@ -438,9 +406,6 @@ declare global {
   var syncClockScreensaverControls: any;
   var syncConfigLockUi: any;
   var syncCoverArtScreensaverUi: any;
-  var syncFirmwareUpdateUi: any;
-  var syncFirmwareCardBadge: any;
-  var syncFirmwareVersionSelect: any;
   var syncInput: any;
   var syncMediaPlayerSleepPreventionUi: any;
   var syncOptionalClockBrightness: any;

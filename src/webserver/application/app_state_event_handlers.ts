@@ -41,6 +41,7 @@ import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
 import type { ScreenRotationFeature } from "./screen_rotation_state";
 import type { AppearanceFeature } from "./appearance_state";
 import type { FirmwareVersionFeature } from "./firmware_version_state";
+import type { FirmwareUpdateFeature } from "./firmware_update_state";
 
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
@@ -54,6 +55,7 @@ export function installAppStateEventHandlersModule(
     screenRotation: ScreenRotationFeature,
     appearance: AppearanceFeature,
     firmwareVersion: FirmwareVersionFeature,
+    firmwareUpdate: FirmwareUpdateFeature,
     onCreateSseHandlers?: (factory: SseHandlerFactory) => void,
 ): GlobalDescriptors {
     const { syncPreviewOrientation } = core;
@@ -69,6 +71,7 @@ export function installAppStateEventHandlersModule(
     } = screenRotation;
     const { syncColorUi } = appearance;
     const { set: setFirmwareVersion } = firmwareVersion;
+    const { syncUi: syncFirmwareUpdateUi, setInfo: setFirmwareUpdateInfo } = firmwareUpdate;
     // ── State Event Handlers ──────────────────────────────────────────
     const createSseHandlers: SseHandlerFactory = () => {
         return {

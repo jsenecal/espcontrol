@@ -24,6 +24,7 @@ import type { SseHandlerFactory } from "./app_state_event_handlers";
 import type { UiRuntimeState } from "./state";
 import type { AppTitleFeature } from "./app_title";
 import type { FirmwareVersionFeature } from "./firmware_version_state";
+import type { FirmwareUpdateFeature } from "./firmware_update_state";
 
 export function installAppEventsModule(
     reconnectController: ReconnectController<unknown>,
@@ -31,9 +32,11 @@ export function installAppEventsModule(
     runtime: UiRuntimeState,
     pageTitle: AppTitleFeature,
     firmwareVersion: FirmwareVersionFeature,
+    firmwareUpdate: FirmwareUpdateFeature,
 ): GlobalDescriptors {
     const els = runtime.els;
     const { set: setFirmwareVersion } = firmwareVersion;
+    const { setInfo: setFirmwareUpdateInfo, renderStatus: renderFirmwareUpdateStatus } = firmwareUpdate;
     // ── SSE ────────────────────────────────────────────────────────────────
     function connectEvents(this: any) {
         function markConnected(this: any) {

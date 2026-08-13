@@ -1,8 +1,10 @@
 import { state } from "../state/app_instance";
 import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
-export function installC6FirmwareUiModule(runtime: UiRuntimeState): GlobalDescriptors {
+import type { FirmwareUpdateFeature } from "./firmware_update_state";
+export function installC6FirmwareUiModule(runtime: UiRuntimeState, firmwareUpdate: FirmwareUpdateFeature): GlobalDescriptors {
     const els = runtime.els;
+    const { syncCardBadge: syncFirmwareCardBadge } = firmwareUpdate;
     // WiFi co-processor firmware update UI helpers.
     function displayC6FirmwareVersion(this: any, version?: any) {
         version = String(version == null ? "" : version).trim();

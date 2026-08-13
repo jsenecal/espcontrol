@@ -9,6 +9,7 @@ import {
     publicFirmwareVersionsUrl,
 } from "./firmware_metadata";
 import type { FirmwareVersionFeature } from "./firmware_version_state";
+import type { FirmwareUpdateFeature } from "./firmware_update_state";
 
 export interface SettingsSystemSectionActions {
     exportBackup(): void;
@@ -19,9 +20,25 @@ export function installSettingsSystemSectionModule(
     actions: SettingsSystemSectionActions,
     runtime: UiRuntimeState,
     firmwareVersion: FirmwareVersionFeature,
+    firmwareUpdate: FirmwareUpdateFeature,
 ): GlobalDescriptors {
     const els = runtime.els;
     const { render: renderFirmwareVersion } = firmwareVersion;
+    const {
+        controlsVisible: firmwareUpdateControlsVisible,
+        latestInstallAction: latestFirmwareInstallAction,
+        latestInfo: latestFirmwareInfo,
+        renderStatus: renderFirmwareUpdateStatus,
+        clearWebOtaFallback: clearFirmwareWebOtaFallback,
+        startInstallRefresh: startFirmwareInstallRefresh,
+        scheduleWebOtaFallback: scheduleFirmwareWebOtaFallback,
+        setPublicInfo: setPublicFirmwareInfo,
+        setPublicVersions: setPublicFirmwareVersions,
+        syncUi: syncFirmwareUpdateUi,
+        syncPreviousUi: syncPreviousFirmwareUi,
+        selectedPreviousInfo: selectedPreviousFirmwareInfo,
+        syncVersionSelect: syncFirmwareVersionSelect,
+    } = firmwareUpdate;
     // ── Settings System Section ────────────────────────────────────────
     function buildSystemSettingsCards(this: any) {
         var backupBody: any = document.createElement("div");

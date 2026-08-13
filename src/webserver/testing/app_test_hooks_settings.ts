@@ -17,10 +17,25 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import type { EnvironmentStateFeature } from "../application/environment_state";
 import type { ScreensaverTimeoutFeature } from "../application/screensaver_timeout";
 import type { FirmwareVersionFeature } from "../application/firmware_version_state";
-export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature): GlobalDescriptors {
+import type { FirmwareUpdateFeature } from "../application/firmware_update_state";
+export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature): GlobalDescriptors {
     const { timezoneOptionsWithFallback, effectiveTimezoneOptionForWeb } = environment;
     const { supported: screensaverTimeoutSupported } = screensaverTimeout;
     const { set: setFirmwareVersion } = firmwareVersion;
+    const {
+        controlsVisible: firmwareUpdateControlsVisible,
+        setInfo: setFirmwareUpdateInfo,
+        latestInstallAvailable: latestFirmwareInstallAvailable,
+        latestInstallAction: latestFirmwareInstallAction,
+        setPublicInfo: setPublicFirmwareInfo,
+        updateAvailable: firmwareUpdateAvailable,
+        setPublicVersions: setPublicFirmwareVersions,
+        selectedPreviousInfo: selectedPreviousFirmwareInfo,
+        previousInstallAvailable: previousFirmwareInstallAvailable,
+        versionSelectorVisible: firmwareVersionSelectorVisible,
+        previousInfos: previousFirmwareInfos,
+        infoForVersion: firmwareInfoForVersion,
+    } = firmwareUpdate;
     if (typeof globalThis !== "undefined" && globalThis.__ESPCONTROL_TEST_HOOKS__) {
         registerEspControlTestHookGroup("settings", {
             normalizeTemperatureUnit: normalizeTemperatureUnit,

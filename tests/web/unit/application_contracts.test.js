@@ -46,8 +46,8 @@ describe("browserless application contracts", () => {
     const migration = fs.readFileSync(path.join(ROOT, "src/webserver/application/native_panel_config_migration.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar DEVICE_ID:/);
     assert.doesNotMatch(migration, /\bDEVICE_ID\b|\bNUM_SLOTS\b|dependencies\?/);
-    assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime, context\.device\.id, firmwareVersion\)/);
-    assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id\)/);
+    assert.match(entry, /createFirmwareUpdateFeature\(runtime, layout\.deviceId, firmwareVersion/);
+    assert.match(entry, /installPublicFirmwareInstallModule\(deviceApi, context\.device\.id, firmwareUpdate\)/);
   });
 
   test("owns all slot and grid geometry without layout globals", () => {
@@ -659,7 +659,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance\)/);
-    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion\)\)/);
+    assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime, firmwareVersion, firmwareUpdate\)\)/);
   });
 
   test("injects display-state DOM references", () => {
@@ -675,7 +675,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /createScreenScheduleStateFeature\(/);
-    assert.match(entry, /installFirmwareUpdateStateModule\(context\.runtime, context\.device\.id, firmwareVersion\)/);
+    assert.match(entry, /createFirmwareUpdateFeature\(runtime, layout\.deviceId, firmwareVersion/);
   });
 
   test("owns appearance behavior without application globals", () => {
@@ -700,6 +700,18 @@ describe("browserless application contracts", () => {
     assert.match(entry, /firmwareVersion = createFirmwareVersionFeature/);
     assert.doesNotMatch(entry, /installFirmwareVersionStateModule/);
     assert.doesNotMatch(globals, /\bvar (?:renderFirmwareVersion|setFirmwareVersion|displayFirmwareVersion|firmwareVersionLabel):/);
+  });
+
+  test("owns firmware update behavior without application globals", () => {
+    const firmwareUpdate = fs.readFileSync(path.join(ROOT, "src/webserver/application/firmware_update_state.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(firmwareUpdate, /export interface FirmwareUpdateFeature/);
+    assert.match(firmwareUpdate, /createFirmwareUpdateFeature/);
+    assert.doesNotMatch(firmwareUpdate, /GlobalDescriptors|(?:live|static)Global/);
+    assert.match(entry, /firmwareUpdate = createFirmwareUpdateFeature/);
+    assert.doesNotMatch(entry, /installFirmwareUpdateStateModule/);
+    assert.doesNotMatch(globals, /\bvar (?:firmwareUpdateAvailable|latestFirmwareInstallAction|setFirmwareUpdateInfo|renderFirmwareUpdateStatus|syncFirmwareUpdateUi|startFirmwareInstallRefresh):/);
   });
 
   test("removes the ambient DOM registry", () => {

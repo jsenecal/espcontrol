@@ -23,7 +23,7 @@ import { createAppearanceFeature } from "./application/appearance_state";
 import { createFirmwareVersionFeature } from "./application/firmware_version_state";
 import { installEntityStateModule } from "./application/entity_state";
 import { installClockBarStateModule } from "./application/clock_bar_state";
-import { installFirmwareUpdateStateModule } from "./application/firmware_update_state";
+import { createFirmwareUpdateFeature, type FirmwareUpdateFeature } from "./application/firmware_update_state";
 import { createScreensaverTimeoutFeature } from "./application/screensaver_timeout";
 import { installC6FirmwareUiModule } from "./application/c6_firmware_ui";
 import { installGridModule } from "./application/grid";
@@ -143,11 +143,11 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const screensaverTimeout = context.controllers.screensaverTimeout;
   const appearance = context.controllers.appearance;
   const firmwareVersion = context.controllers.firmwareVersion;
+  const firmwareUpdate = context.controllers.firmwareUpdate;
   installGlobals(installEntityStateModule(context.configuration.confirmationOptions, context.layout));
   const clockBarController = context.controllers.clockBar;
   installGlobals(installClockBarStateModule(clockBarController, context.runtime, context.core, context.controllers.environment));
-  installGlobals(installFirmwareUpdateStateModule(context.runtime, context.device.id, firmwareVersion));
-  installGlobals(installC6FirmwareUiModule(context.runtime));
+  installGlobals(installC6FirmwareUiModule(context.runtime, firmwareUpdate));
   installGlobals(installGridModule(context.configuration.codec, context.runtime, context.layout));
   const deviceApi = context.api;
   const nativePanelConfig = context.configuration.native;
@@ -157,10 +157,10 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const previewPlacementController = context.controllers.previewPlacement;
   installGlobals(installApiModule(nativePanelConfig, deviceApi, screensaverTimeout));
   installGlobals(installFirmwareUpdatePostApiModule());
-  installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id));
+  installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate));
   const cardEditorSave = context.controllers.cardEditorSave;
   installGlobals(configPersistence.globals);
-  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion));
+  installGlobals(installStateLoaderApiModule(context.runtime, context.layout, screensaverTimeout, firmwareVersion, firmwareUpdate));
   installGlobals(installArtworkPostApiModule());
   installGlobals(installScreenSchedulePostApiModule());
   installGlobals(installClockBarPostApiModule());
@@ -241,18 +241,18 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installSettingsSystemSectionModule({
     exportBackup: backupUiFeature.exportConfig,
     importBackup: backupUiFeature.importConfig,
-  }, context.runtime, firmwareVersion));
+  }, context.runtime, firmwareVersion, firmwareUpdate));
   installGlobals(backupUiFeature.globals);
   installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, firmwareVersion, (factory) => {
+  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, appearance, firmwareVersion, firmwareUpdate, (factory) => {
     sseHandlerFactory = factory;
   }));
   const reconnectController = context.controllers.reconnect;
   if (!sseHandlerFactory) throw new Error("SSE handler factory was not initialized");
   installGlobals(installAppEventsModule(
-    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion,
+    reconnectController, sseHandlerFactory, context.runtime, context.controllers.pageTitle, firmwareVersion, firmwareUpdate,
   ));
   installGlobals(installAppModule(
     context.controllers.pageTitle,
@@ -340,6 +340,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.controllers.environment,
     context.controllers.screensaverTimeout,
     context.controllers.firmwareVersion,
+    context.controllers.firmwareUpdate,
   ));
 }
 
@@ -379,10 +380,17 @@ function composeApplicationContext(): ApplicationContext {
     renderPreview: () => renderPreview(),
     postOnColor: (value) => postText(entityName("button_on_color"), value),
   });
+  let firmwareUpdate: FirmwareUpdateFeature;
   const firmwareVersion = createFirmwareVersionFeature(runtime, {
-    syncVersionSelect: () => syncFirmwareVersionSelect(),
-    renderUpdateStatus: () => renderFirmwareUpdateStatus(),
-    stopInstallRefreshIfComplete: () => stopFirmwareInstallRefreshIfComplete(),
+    syncVersionSelect: () => firmwareUpdate.syncVersionSelect(),
+    renderUpdateStatus: () => firmwareUpdate.renderStatus(),
+    stopInstallRefreshIfComplete: () => firmwareUpdate.stopInstallRefreshIfComplete(),
+  });
+  firmwareUpdate = createFirmwareUpdateFeature(runtime, layout.deviceId, firmwareVersion, {
+    postInstall: () => postFirmwareUpdateInstall(),
+    refreshVersion: () => refreshFirmwareVersion(),
+    installViaWebOta: (info) => { void installPublicFirmwareViaWebOta(info); },
+    c6UpdateKnownAvailable: () => c6FirmwareUpdateKnownAvailable(),
   });
   const voiceServices = createVoiceServicesController();
   const environment = createEnvironmentStateFeature(
@@ -628,6 +636,7 @@ function composeApplicationContext(): ApplicationContext {
     core,
     screenScheduleState,
     screensaverTimeout,
+    firmwareUpdate,
   });
   const reconnect = createReconnectController<unknown>({
     eventStreamEnabled: () => eventStreamEnabled(),
@@ -668,6 +677,7 @@ function composeApplicationContext(): ApplicationContext {
     backupApplication,
     appearance,
     firmwareVersion,
+    firmwareUpdate,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,
