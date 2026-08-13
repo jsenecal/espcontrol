@@ -49,6 +49,7 @@ import type { C6FirmwareFeature } from "./c6_firmware_ui";
 import type { ClockBarFeature } from "./clock_bar_state";
 import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
+import type { ApplicationApiFeature } from "./api";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -113,6 +114,7 @@ export interface ApplicationContext {
     readonly clockBarState: ClockBarFeature;
     readonly entityState: EntityStateFeature;
     readonly shell: ControlsShellFeature;
+    readonly requestApi: ApplicationApiFeature;
     readonly alarmDelayAudio: AlarmDelayAudioController;
     readonly cardEditorDraft: CardEditorDraftController;
     readonly cardEditorSave: CardEditorSaveController;
@@ -171,6 +173,7 @@ export interface ApplicationContextOptions {
   readonly clockBarState: ClockBarFeature;
   readonly entityState: EntityStateFeature;
   readonly shell: ControlsShellFeature;
+  readonly requestApi: ApplicationApiFeature;
   readonly alarmDelayAudio: AlarmDelayAudioController;
   readonly cardEditorDraft: CardEditorDraftController;
   readonly cardEditorSave: CardEditorSaveController;
@@ -249,6 +252,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       clockBarState: options.clockBarState,
       entityState: options.entityState,
       shell: options.shell,
+      requestApi: options.requestApi,
       alarmDelayAudio: options.alarmDelayAudio,
       cardEditorDraft: options.cardEditorDraft,
       cardEditorSave: options.cardEditorSave,

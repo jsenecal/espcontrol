@@ -67,6 +67,7 @@ export function runApplicationContextTests(): void {
   const clockBarState = {} as any;
   const entityState = {} as any;
   const shell = {} as any;
+  const requestApi = {} as any;
   const coverArtScreensaver = {} as any;
   const mediaPlayback = {} as any;
   const pageTitle = {} as any;
@@ -124,6 +125,7 @@ export function runApplicationContextTests(): void {
     clockBarState,
     entityState,
     shell,
+    requestApi,
     coverArtScreensaver,
     mediaPlayback,
     pageTitle,
@@ -148,6 +150,7 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.clockBarState, clockBarState, "context owns Clock Bar behavior");
   equal(context.controllers.entityState, entityState, "context owns entity lookup and post-path behavior");
   equal(context.controllers.shell, shell, "context owns UI shell behavior");
+  equal(context.controllers.requestApi, requestApi, "context owns application request behavior");
   equal(context.layout.numSlots, 12, "context initializes slot count");
   equal(context.layout.totalSlots, 12, "context initializes total slot count");
   equal(context.layout.gridCols, 4, "context initializes grid columns");

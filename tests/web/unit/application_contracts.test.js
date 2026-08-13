@@ -61,7 +61,7 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(entry, /installControlsModule/);
   });
 
-  test("injects entity state into API and persistence modules", () => {
+  test("owns the application API service and injects entity state into request modules", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const modules = [
       "api.ts",
@@ -76,7 +76,9 @@ describe("browserless application contracts", () => {
       const source = fs.readFileSync(path.join(ROOT, "src/webserver/application", fileName), "utf8");
       assert.match(source, /Pick<EntityStateFeature,/i, `${fileName} should declare its entity dependency`);
     }
-    assert.match(entry, /installApiModule\(nativePanelConfig, deviceApi, context\.controllers\.entityState, screensaverTimeout, context\.controllers\.shell\)/);
+    assert.match(entry, /requestApi = createApplicationApiFeature\([\s\S]*entityState,[\s\S]*screensaverTimeout,[\s\S]*shell/);
+    assert.match(entry, /applicationApiCompatibilityGlobals\(context\.controllers\.requestApi\)/);
+    assert.doesNotMatch(entry, /installApiModule/);
     assert.match(entry, /installFirmwareUpdatePostApiModule\(context\.controllers\.entityState\)/);
     assert.match(entry, /installArtworkPostApiModule\(context\.controllers\.entityState\)/);
     assert.match(entry, /installScreenSchedulePostApiModule\(context\.controllers\.entityState\)/);
@@ -687,7 +689,8 @@ describe("browserless application contracts", () => {
       assert.match(source, /Pick<ControlsShellFeature, "setConfigLocked" \| "showBanner">/);
       assert.match(source, /const \{ setConfigLocked, showBanner \} = shell/);
     }
-    assert.match(entry, /installApiModule\([\s\S]*context\.controllers\.shell\)/);
+    assert.match(entry, /createApplicationApiFeature\([\s\S]*screensaverTimeout,[\s\S]*shell/);
+    assert.match(entry, /applicationApiCompatibilityGlobals\(context\.controllers\.requestApi\)/);
     assert.match(entry, /installAppEventsModule\([\s\S]*context\.controllers\.shell/);
   });
 

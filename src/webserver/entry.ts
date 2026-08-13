@@ -27,7 +27,11 @@ import { createFirmwareUpdateFeature, type FirmwareUpdateFeature } from "./appli
 import { createScreensaverTimeoutFeature } from "./application/screensaver_timeout";
 import { createC6FirmwareFeature, type C6FirmwareFeature } from "./application/c6_firmware_ui";
 import { installGridModule } from "./application/grid";
-import { installApiModule } from "./application/api";
+import {
+  applicationApiCompatibilityGlobals,
+  createApplicationApiFeature,
+  type ApplicationApiFeature,
+} from "./application/api";
 import { installFirmwareUpdatePostApiModule } from "./application/firmware_update_post_api";
 import { installPublicFirmwareInstallModule } from "./application/public_firmware_install";
 import { createConfigMediaOptionsFeature } from "./application/config_media_options";
@@ -153,7 +157,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   const cardEditorDraft = context.controllers.cardEditorDraft;
   const cardEditorValidation = context.controllers.cardEditorValidation;
   const previewPlacementController = context.controllers.previewPlacement;
-  installGlobals(installApiModule(nativePanelConfig, deviceApi, context.controllers.entityState, screensaverTimeout, context.controllers.shell));
+  installGlobals(applicationApiCompatibilityGlobals(context.controllers.requestApi));
   installGlobals(installFirmwareUpdatePostApiModule(context.controllers.entityState));
   installGlobals(installPublicFirmwareInstallModule(deviceApi, context.device.id, firmwareUpdate, context.controllers.shell));
   const cardEditorSave = context.controllers.cardEditorSave;
@@ -384,6 +388,7 @@ function composeApplicationContext(): ApplicationContext {
     DeviceConfig.deviceConfig,
   );
   const runtime = createUiRuntimeState(layout, dom.document);
+  let requestApi: ApplicationApiFeature;
   const shell = createControlsShellFeature(runtime, {
     document: dom.document,
     state: AppInstance.state,
@@ -391,7 +396,7 @@ function composeApplicationContext(): ApplicationContext {
     cancelSchedule: (handle) => { dom.window.clearTimeout(handle); },
     buildSettingsPage: (parent) => { buildSettingsPage(parent); },
     closeSettings: () => { closeSettings(); },
-    postButtonPress: (name) => postButtonPress(name),
+    postButtonPress: (name) => requestApi.postButtonPress(name),
     waitForReboot: () => { waitForReboot(); },
     hideContextMenu: () => { hideContextMenu(); },
     hideSettingsOverlay: () => { hideSettingsOverlay(); },
@@ -409,12 +414,12 @@ function composeApplicationContext(): ApplicationContext {
   });
   const screenRotation = createScreenRotationFeature(runtime, layout, {
     applyButtonOrder: (value, skipSpanNormalization) => applyButtonOrderValue(value, skipSpanNormalization),
-    postNormalizedOrder: (value) => postText(entityState.entityName("button_order"), value),
+    postNormalizedOrder: (value) => requestApi.postText(entityState.entityName("button_order"), value),
     renderPreview: () => renderPreview(),
   });
   const appearance = createAppearanceFeature(runtime, {
     renderPreview: () => renderPreview(),
-    postOnColor: (value) => postText(entityState.entityName("button_on_color"), value),
+    postOnColor: (value) => requestApi.postText(entityState.entityName("button_on_color"), value),
   });
   let firmwareUpdate: FirmwareUpdateFeature;
   let c6Firmware: C6FirmwareFeature;
@@ -468,7 +473,7 @@ function composeApplicationContext(): ApplicationContext {
       state: AppInstance.state,
       document: dom.document,
       clockBarVisibleInPreview: () => clockBarState.visibleInPreview(),
-      postButtonOrder: (value) => postText(entityState.entityName("button_order"), value),
+      postButtonOrder: (value) => requestApi.postText(entityState.entityName("button_order"), value),
       saveSubpage: (homeSlot) => saveSubpageEntity(homeSlot),
     },
   );
@@ -536,14 +541,21 @@ function composeApplicationContext(): ApplicationContext {
     },
   );
   const screensaverTimeout = createScreensaverTimeoutFeature(runtime, screenScheduleState);
+  requestApi = createApplicationApiFeature(
+    nativePanelConfig,
+    deviceApi,
+    entityState,
+    screensaverTimeout,
+    shell,
+  );
   const clockBar = createClockBarController();
   clockBarState = createClockBarFeature(clockBar, runtime, core, environment, {
     hideSettingsOverlay: () => hideSettingsOverlay(),
     timezoneId: (value) => getTzId(value),
     postTemperatureEntities: (value) => postClockBarTemperatureEntities(value),
-    postSwitch: (name, value) => postSwitch(name, value),
+    postSwitch: (name, value) => requestApi.postSwitch(name, value),
     entityName: (key) => entityState.entityName(key),
-    postText: (name, value) => postText(name, value),
+    postText: (name, value) => requestApi.postText(name, value),
     updateTemperaturePreview: () => updateTempPreview(),
     updateItemUi: () => updateClockBarItemUi(),
     postTemperatureDegreeSymbol: (value) => postTemperatureDegreeSymbol(value),
@@ -629,10 +641,10 @@ function composeApplicationContext(): ApplicationContext {
     plan: backupImport.plan,
     warnings: (plannedImport) => plannedImport.backupPlan.warnings,
     showBanner: shell.showBanner,
-    setPostThrottle: (milliseconds) => setPostThrottle(milliseconds),
-    resetPostQueueError: () => resetPostQueueError(),
-    postQueueIdle: () => postQueueIdle(),
-    postQueueHadError: () => postQueueHadError(),
+    setPostThrottle: (milliseconds) => requestApi.setPostThrottle(milliseconds),
+    resetPostQueueError: () => requestApi.resetPostQueueError(),
+    postQueueIdle: () => requestApi.postQueueIdle(),
+    postQueueHadError: () => requestApi.postQueueHadError(),
   });
   const backupFile = createBackupFileController({
     transport: {
@@ -741,6 +753,7 @@ function composeApplicationContext(): ApplicationContext {
     clockBarState,
     entityState,
     shell,
+    requestApi,
     alarmDelayAudio,
     cardEditorDraft,
     cardEditorSave,
