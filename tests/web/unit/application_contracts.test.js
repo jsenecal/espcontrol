@@ -929,6 +929,21 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:buttonTypeDisabledForDevice|buttonConfigDisabledForDevice|buttonTypeInfoOnlyVisible|buttonTypePickerDetails|buttonTypePickerKeys|buttonTypePickerOptionList|buttonTypeRegistryValue|buttonTypeVisibleInPicker|defaultButtonTypeForPicker|previewHtmlValue):/);
   });
 
+  test("composes preview grid placement without compatibility globals", () => {
+    const placement = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_grid_placement.ts"), "utf8");
+    const clipboard = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_clipboard.ts"), "utf8");
+    const interactions = fs.readFileSync(path.join(ROOT, "src/webserver/application/preview_interactions.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(placement, /export function createPreviewGridPlacementFeature/);
+    assert.doesNotMatch(placement, /GlobalDescriptors|staticGlobal|liveGlobal|installPreviewGridPlacementModule/);
+    assert.match(clipboard, /placement: Pick<PreviewGridPlacementFeature/);
+    assert.match(interactions, /placement: Pick<PreviewGridPlacementFeature/);
+    assert.match(entry, /placement = createPreviewGridPlacementFeature\(\{/);
+    assert.doesNotMatch(entry, /installPreviewGridPlacementModule/);
+    assert.doesNotMatch(globals, /\bvar (?:canPlaceSlotAt|findDuplicatePlacement|findPlacementCell|getCellFromEvent|moveSelectedToCell|moveToCell|placeOrderedGridEntries|placeSlotAt|resolveSpanPos):/);
+  });
+
   test("injects the UI shell into preview, persistence, backup, and startup modules", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     for (const file of [

@@ -5,6 +5,7 @@ import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/glo
 import { createClipboardEntry } from "../features/clipboard";
 import type { ConfigPersistenceFeature } from "./config_post_api";
 import type { PreviewRenderFeature } from "./preview_render";
+import type { PreviewGridPlacementFeature } from "./preview_grid_placement";
 import type { ApplicationLayoutState } from "./application_context";
 import type { CardRegistry } from "./card_registry";
 import type { ConfigImageOptionsFeature } from "./config_image_options";
@@ -28,12 +29,14 @@ export interface PreviewClipboardDependencies {
     readonly requestApi: Pick<ApplicationApiFeature, "postText">;
     readonly grid: Pick<GridFeature, "ctx" | "serializeGrid">;
     readonly preview: Pick<PreviewRenderFeature, "configDisabled" | "registryValue">;
+    readonly placement: Pick<PreviewGridPlacementFeature, "findDuplicatePlacement" | "placeOrderedGridEntries" | "placeSlotAt">;
 }
 export function installPreviewClipboardModule(
     dependencies: PreviewClipboardDependencies,
 ): GlobalDescriptors {
     const configPersistence = dependencies.configPersistence;
     const { configDisabled: buttonConfigDisabledForDevice, registryValue: buttonTypeRegistryValue } = dependencies.preview;
+    const { findDuplicatePlacement, placeOrderedGridEntries, placeSlotAt } = dependencies.placement;
     const document = dependencies.document;
     const { entityName } = dependencies.entityState;
     const { isConfigLocked, showBanner, createActionButton } = dependencies.shell;

@@ -25,7 +25,6 @@ declare global {
   var buildSettingsPage: any;
   var buildSystemSettingsCards: any;
   var clipboardEntriesFromCardTransfer: any;
-  var canPlaceSlotAt: any;
   var cardBadgeLabelHtml: any;
   var cardBadgePreview: any;
   var cardIconHtml: any;
@@ -72,11 +71,8 @@ declare global {
   var emptyButtonConfig: any;
   var fieldLabel: any;
   var fieldWithControl: any;
-  var findDuplicatePlacement: any;
-  var findPlacementCell: any;
   var firstFreeCell: any;
   var firstFreeSlot: any;
-  var getCellFromEvent: any;
   var groupCardSettingsFields: any;
   var handleBtnClick: any;
   var hideContextMenu: any;
@@ -88,8 +84,6 @@ declare global {
   var makeCollapsibleCard: any;
   var markCardPrimaryField: any;
   var moveSelectedGridEntries: any;
-  var moveSelectedToCell: any;
-  var moveToCell: any;
   var newCardDraftKey: any;
   var normalizeVacuumMode: any;
   var openCardSettings: any;
@@ -98,8 +92,6 @@ declare global {
   var optionValue: any;
   var pasteButton: any;
   var pasteSubpageButton: any;
-  var placeOrderedGridEntries: any;
-  var placeSlotAt: any;
   var planClipboardPaste: any;
   var positionMenu: any;
   var previewValue: any;
@@ -120,7 +112,6 @@ declare global {
   var renderCardTextField: any;
   var renderPreview: any;
   var resizeSlot: any;
-  var resolveSpanPos: any;
   var resolveSpanPosition: any;
   var segmentControl: any;
   var selectButton: any;

@@ -65,7 +65,7 @@ import { createButtonSettingsSelectionFeature, type ButtonSettingsSelectionFeatu
 import { createButtonSettingsRenderQueueFeature } from "./application/button_settings_render_queue";
 import { createButtonSettingsIconPickerFeature } from "./application/button_settings_icon_picker";
 import { installButtonSettingsModule } from "./application/button_settings";
-import { installPreviewGridPlacementModule } from "./application/preview_grid_placement";
+import { createPreviewGridPlacementFeature } from "./application/preview_grid_placement";
 import { installPreviewContextMenuModule } from "./application/preview_context_menu";
 import { installPreviewClipboardModule } from "./application/preview_clipboard";
 import { installPreviewInteractionsModule } from "./application/preview_interactions";
@@ -198,12 +198,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.controllers.selection,
     context.controllers.preview,
   ));
-  installGlobals(installPreviewGridPlacementModule({
-    controller: previewPlacementController,
-    layout: context.layout,
-    codec: context.configuration.codec,
-    grid: context.controllers.grid,
-  }));
   installGlobals(installPreviewContextMenuModule({
     document: context.dom.document,
     window: context.dom.window,
@@ -230,6 +224,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     requestApi: context.controllers.requestApi,
     grid: context.controllers.grid,
     preview: context.controllers.preview,
+    placement: context.controllers.placement,
   }));
   installGlobals(installPreviewInteractionsModule({
     cardEditorDraft,
@@ -244,6 +239,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     requestApi: context.controllers.requestApi,
     grid: context.controllers.grid,
     selection: context.controllers.selection,
+    placement: context.controllers.placement,
   }));
   const backupUiFeature = context.backup.application;
   installGlobals(installSettingsSystemSectionModule({
@@ -568,6 +564,12 @@ function composeApplicationContext(): ApplicationContext {
   configurationCodec.connectRequestApi(requestApi);
   const grid = createGridFeature(configurationCodec, runtime, layout, entityState, requestApi, renderQueue);
   const fields = createControlsFieldsFeature(cards, configurationOptions, shell, requestApi);
+  const placement = createPreviewGridPlacementFeature({
+    controller: previewPlacement,
+    layout,
+    codec: configurationCodec,
+    grid,
+  });
   const gridMigration = createGridMigrationFeature(runtime, layout, {
     renderPreview: () => renderPreview(),
     renderButtonSettings: () => renderButtonSettings(),
@@ -906,6 +908,7 @@ function composeApplicationContext(): ApplicationContext {
     fields,
     selection,
     preview,
+    placement,
     dom,
     cards,
   });

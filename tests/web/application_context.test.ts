@@ -96,6 +96,7 @@ export function runApplicationContextTests(): void {
   const fields = {} as any;
   const selection = {} as any;
   const preview = {} as any;
+  const placement = {} as any;
   const state = { grid: [] } as any;
   const runtime = {} as any;
   const core = {} as any;
@@ -172,6 +173,7 @@ export function runApplicationContextTests(): void {
     fields,
     selection,
     preview,
+    placement,
     dom,
     cards,
   });
@@ -232,6 +234,7 @@ export function runApplicationContextTests(): void {
   equal(context.controllers.fields, fields, "context retains shared field ownership");
   equal(context.controllers.selection, selection, "context retains card selection ownership");
   equal(context.controllers.preview, preview, "context retains preview rendering ownership");
+  equal(context.controllers.placement, placement, "context retains preview placement ownership");
   equal(context.controllers.screenScheduleState, screenScheduleState, "context retains screen schedule state ownership");
   equal(context.controllers.screenRotation, screenRotation, "context retains screen rotation ownership");
   equal(context.controllers.screensaverTimeout, screensaverTimeout, "context retains screensaver timeout ownership");
