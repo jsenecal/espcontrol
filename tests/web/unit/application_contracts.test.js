@@ -129,14 +129,16 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:applyButtonConfigStateEvent|applySubpageConfigStateEvent|configEventPatterns|connectEvents|createSseHandlers|ensureSubpageRaw):/);
   });
 
-  test("composes status and connectivity preview as one context service", () => {
+  test("owns status and connectivity preview without compatibility globals", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const preview = fs.readFileSync(path.join(ROOT, "src/webserver/application/app_status_preview.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.match(preview, /export interface AppStatusPreviewFeature/);
     assert.match(preview, /export function createAppStatusPreviewFeature/);
     assert.match(entry, /statusPreview = createAppStatusPreviewFeature\(runtime, core, layout, environment, clockBarState\)/);
-    assert.match(entry, /appStatusPreviewCompatibilityGlobals\(context\.controllers\.statusPreview\)/);
-    assert.doesNotMatch(entry, /installAppStatusPreviewModule/);
+    assert.doesNotMatch(entry, /installAppStatusPreviewModule|appStatusPreviewCompatibilityGlobals/);
+    assert.doesNotMatch(preview, /GlobalDescriptors|staticGlobal|appStatusPreviewCompatibilityGlobals/);
+    assert.doesNotMatch(globals, /\bvar (?:appendTimezoneOption|clockBarItemActive|clockBarItemLabel|clockBarItems|isClockBarTemperatureItem|networkPreviewIconSlug|normalizeNetworkTransport|syncInput|updateClock|updateClockBarItemUi|updateNetworkPreview|updateSunInfo|updateTempPreview|updateVoicePreview):/);
   });
 
   test("injects status preview into core startup and state consumers", () => {
@@ -197,7 +199,7 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:NUM_SLOTS|TOTAL_SLOTS|GRID_COLS|GRID_ROWS):/);
     assert.match(entry, /installGridModule\(context\.configuration\.codec, context\.runtime, context\.layout, context\.controllers\.entityState, context\.controllers\.requestApi\)/);
     assert.match(entry, /createAppConfigEventsFeature\(configurationPersistence, configurationCodec, layout\)/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview\)/);
   });
 
   test("imports shared settings state helpers without application globals", () => {
@@ -687,7 +689,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /codec: context\.configuration\.codec/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation, context\.controllers\.firmwareVersion, context\.controllers\.statusPreview\)/);
   });
 
   test("injects the configuration codec into persistence and application services", () => {
@@ -786,7 +788,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /ControlsShellFeature/, `${file} should declare its shell dependency`);
     }
     assert.match(entry, /installControlsFieldsModule\(context\.cards, context\.configuration\.options, context\.controllers\.shell, context\.controllers\.requestApi\)/);
-    assert.match(entry, /installButtonSettingsSelectionModule\(context\.runtime, clockBarState, context\.controllers\.entityState, context\.controllers\.shell\)/);
+    assert.match(entry, /installButtonSettingsSelectionModule\(context\.runtime, clockBarState, context\.controllers\.entityState, context\.controllers\.shell, context\.controllers\.statusPreview\)/);
   });
 
   test("injects the UI shell into preview, persistence, backup, and startup modules", () => {

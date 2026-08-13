@@ -10,6 +10,7 @@ import type { CoreFeature } from "../application/core";
 import type { ApplicationLayoutState } from "../application/application_context";
 import type { ScreenRotationFeature } from "../application/screen_rotation_state";
 import type { FirmwareVersionFeature } from "../application/firmware_version_state";
+import type { AppStatusPreviewFeature } from "../application/app_status_preview";
 export function installAppTestHooksPreview(
     cardRegistry: CardRegistry,
     codec: ConfigCodecFeature,
@@ -18,6 +19,7 @@ export function installAppTestHooksPreview(
     layout: ApplicationLayoutState,
     screenRotation: ScreenRotationFeature,
     firmwareVersion: FirmwareVersionFeature,
+    statusPreview: Pick<AppStatusPreviewFeature, "networkPreviewIconSlug">,
 ): GlobalDescriptors {
     const {
         mockNow: webserverMockNow,
@@ -81,7 +83,7 @@ export function installAppTestHooksPreview(
                     return globalThis.__ESPCONTROL_TEST_HOOKS__.config.buttonTypePreviewFor(type, button, options);
                 });
             },
-            networkPreviewIconSlug: networkPreviewIconSlug,
+            networkPreviewIconSlug: statusPreview.networkPreviewIconSlug,
             displayFirmwareVersion: displayFirmwareVersion,
             firmwareVersionLabelFor: function (this: any, version?: any, pending?: any) {
                 var oldVersion: any = state.firmwareVersion;

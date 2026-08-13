@@ -21,7 +21,8 @@ import type { FirmwareUpdateFeature } from "../application/firmware_update_state
 import type { ClockBarFeature } from "../application/clock_bar_state";
 import type { EntityStateFeature } from "../application/entity_state";
 import type { ApplicationApiFeature } from "../application/api";
-export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">, entityState: Pick<EntityStateFeature, "entityLookupNames">, requestApi: Pick<ApplicationApiFeature, "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">): GlobalDescriptors {
+import type { AppStatusPreviewFeature } from "../application/app_status_preview";
+export function installAppTestHooksSettings(defaultTimezoneOptions: () => string[], environment: EnvironmentStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, firmwareVersion: FirmwareVersionFeature, firmwareUpdate: FirmwareUpdateFeature, clockBar: Pick<ClockBarFeature, "temperatureUnitSymbol">, entityState: Pick<EntityStateFeature, "entityLookupNames">, requestApi: Pick<ApplicationApiFeature, "entityDetailPath" | "entityDetailPaths" | "entityInitialDetail">, statusPreview: Pick<AppStatusPreviewFeature, "normalizeNetworkTransport">): GlobalDescriptors {
     const { timezoneOptionsWithFallback, effectiveTimezoneOptionForWeb } = environment;
     const { supported: screensaverTimeoutSupported } = screensaverTimeout;
     const { set: setFirmwareVersion } = firmwareVersion;
@@ -67,7 +68,7 @@ export function installAppTestHooksSettings(defaultTimezoneOptions: () => string
             firmwareUpdateControlsVisibleFor: function (this: any, transport?: any, supported?: any) {
                 var oldTransport: any = state.networkTransport;
                 var oldSupported: any = state.firmwareUpdateControlsSupported;
-                state.networkTransport = normalizeNetworkTransport(transport);
+                state.networkTransport = statusPreview.normalizeNetworkTransport(transport);
                 state.firmwareUpdateControlsSupported = supported;
                 var visible: any = firmwareUpdateControlsVisible();
                 state.networkTransport = oldTransport;

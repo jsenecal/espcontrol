@@ -88,7 +88,7 @@ import { createBackupRestoreController } from "./features/backup_restore_control
 import { createBackupFeature } from "./features/backup";
 import { installBackupContractModule } from "./application/backup_contract";
 import { createAppBackupFeature } from "./application/app_backup";
-import { appStatusPreviewCompatibilityGlobals, createAppStatusPreviewFeature, type AppStatusPreviewFeature } from "./application/app_status_preview";
+import { createAppStatusPreviewFeature, type AppStatusPreviewFeature } from "./application/app_status_preview";
 import { createAppTitleFeature } from "./application/app_title";
 import { createAppConfigEventsFeature } from "./application/app_config_events";
 import { createAppStateEventHandlersFeature } from "./application/app_state_event_handlers";
@@ -198,7 +198,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     screenRotation,
     shell: context.controllers.shell,
   }));
-  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState, context.controllers.shell));
+  installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.statusPreview));
   installGlobals(installButtonSettingsRenderQueueModule(context.runtime));
   installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
@@ -225,6 +225,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     codec: context.configuration.codec,
     clockBar: clockBarState,
     shell: context.controllers.shell,
+    statusPreview: context.controllers.statusPreview,
   }));
   installGlobals(installPreviewClipboardModule({
     configPersistence,
@@ -257,7 +258,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     importBackup: backupUiFeature.importConfig,
   }, context.runtime, firmwareVersion, firmwareUpdate, c6Firmware, context.controllers.shell, context.controllers.requestApi, context.controllers.stateLoader));
   installGlobals(backupUiFeature.globals);
-  installGlobals(appStatusPreviewCompatibilityGlobals(context.controllers.statusPreview));
   installGlobals(installAppModule(
     context.controllers.pageTitle,
     createWebStyles(context.layout.config.dragAnimation),
@@ -342,7 +342,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.core,
     context.layout,
   ));
-  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion));
+  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation, context.controllers.firmwareVersion, context.controllers.statusPreview));
   installGlobals(installAppTestHooksBackup(context.layout));
   installGlobals(installAppTestHooksSettings(
     () => defaultTimezoneOptionsForDevice(context.device.profile),
@@ -353,6 +353,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.controllers.clockBarState,
     context.controllers.entityState,
     context.controllers.requestApi,
+    context.controllers.statusPreview,
   ));
 }
 

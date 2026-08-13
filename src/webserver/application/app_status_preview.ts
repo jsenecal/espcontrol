@@ -1,6 +1,5 @@
 import { state } from "../state/app_instance";
 import { normalizeBrightnessMode } from "../model/settings";
-import { staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import type { UiRuntimeState } from "./state";
 import type { CoreFeature } from "./core";
 import type { ApplicationLayoutState } from "./application_context";
@@ -395,8 +394,4 @@ export function createAppStatusPreviewFeature(runtime: UiRuntimeState, core: Cor
         updateNetworkPreview,
         updateVoicePreview,
     };
-}
-
-export function appStatusPreviewCompatibilityGlobals(feature: AppStatusPreviewFeature): GlobalDescriptors {
-    return Object.fromEntries(Object.entries(feature).map(([name, value]) => [name, staticGlobal(value)]));
 }
