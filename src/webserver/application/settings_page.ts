@@ -19,13 +19,15 @@ import { getActiveScreensaverMode } from "./screensaver_state";
 import type { EnvironmentStateFeature } from "./environment_state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
-export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature): GlobalDescriptors {
+import type { ScreenRotationFeature } from "./screen_rotation_state";
+export function installSettingsPageModule(codec: Pick<ConfigCodecFeature, "bindTextPost">, runtime: UiRuntimeState, core: Pick<CoreFeature, "syncPreviewOrientation">, layout: ApplicationLayoutState, environment: EnvironmentStateFeature, schedule: ScreenScheduleStateFeature, screensaverTimeout: ScreensaverTimeoutFeature, screenRotation: ScreenRotationFeature): GlobalDescriptors {
     const { bindTextPost } = codec;
     const { syncPreviewOrientation } = core;
     const els = runtime.els;
     const { timezoneOptionsWithFallback, voiceServicesUiState, setVoiceServicesEnabled } = environment;
     const { syncUi: syncScreenScheduleUi } = schedule;
     const { syncUi: syncScreensaverTimeoutUi } = screensaverTimeout;
+    const { normalize: normalizeScreenRotation, activeOptions: activeScreenRotationOptions, appendOption: appendScreenRotationOption } = screenRotation;
     // ── Settings Page ──────────────────────────────────────────────────────
     function buildSettingsPage(this: any, parent?: any) {
         var page: any = document.createElement("div");

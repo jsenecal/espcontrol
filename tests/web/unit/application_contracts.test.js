@@ -36,7 +36,7 @@ describe("browserless application contracts", () => {
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
     assert.doesNotMatch(globals, /\bvar CFG:/);
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation\)/);
     assert.match(entry, /createConfigPersistenceFeature\(nativePanelConfig, runtime, layout\)/);
   });
 
@@ -57,7 +57,7 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:NUM_SLOTS|TOTAL_SLOTS|GRID_COLS|GRID_ROWS):/);
     assert.match(entry, /installGridModule\(context\.configuration\.codec, context\.runtime, context\.layout\)/);
     assert.match(entry, /installAppConfigEventsModule\(configPersistence, context\.configuration\.codec, context\.layout\)/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation\)/);
   });
 
   test("imports shared settings state helpers without application globals", () => {
@@ -105,6 +105,17 @@ describe("browserless application contracts", () => {
     assert.match(timeout, /export interface ScreensaverTimeoutFeature/);
     assert.doesNotMatch(timeout, /GlobalDescriptors|liveGlobal|staticGlobal/);
     assert.doesNotMatch(globals, /\bvar (?:SCREENSAVER_TIMEOUT_OPTIONS|readNumberMeta|syncScreensaverTimeoutLimits|screensaverTimeoutSupported|syncScreensaverTimeoutUi|applyScreensaverTimeoutState):/);
+  });
+
+  test("owns screen-rotation startup and UI state without application globals", () => {
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const rotation = fs.readFileSync(path.join(ROOT, "src/webserver/application/screen_rotation_state.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(entry, /createScreenRotationFeature\(/);
+    assert.doesNotMatch(entry, /installScreenRotationStateModule/);
+    assert.match(rotation, /export interface ScreenRotationFeature/);
+    assert.doesNotMatch(rotation, /GlobalDescriptors|liveGlobal|staticGlobal/);
+    assert.doesNotMatch(globals, /\bvar (?:SCREEN_ROTATION_STARTUP_FALLBACK_MS|normalizeScreenRotation|activeScreenRotationOptions|allScreenRotationOptions|syncScreenRotationSelect|displayScreenRotation|screenRotationSortValue|sortScreenRotationOptions|appendScreenRotationOption|screenRotationStartupRequired|gridPreviewBlockedByRotationStartup|clearInitialScreenRotationTimer|startInitialScreenRotationCheck|applyDeferredButtonOrderValue|resolveInitialScreenRotationCheck):/);
   });
 
   test("registers migrated card families through the typed registry", () => {
@@ -536,7 +547,7 @@ describe("browserless application contracts", () => {
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
     assert.match(entry, /codec: context\.configuration\.codec/);
-    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout\)/);
+    assert.match(entry, /installAppTestHooksPreview\(context\.cards, context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.screenRotation\)/);
   });
 
   test("injects the configuration codec into persistence and application services", () => {
@@ -647,7 +658,7 @@ describe("browserless application contracts", () => {
       assert.match(source, /const els = .*runtime\.els/, `${moduleName} should use context-owned DOM references`);
     }
     const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
-    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout\)/);
+    assert.match(entry, /installSettingsPageModule\(context\.configuration\.codec, context\.runtime, context\.core, context\.layout, context\.controllers\.environment, screenScheduleState, screensaverTimeout, screenRotation\)/);
     assert.match(entry, /installSettingsSystemSectionModule\([\s\S]*context\.runtime\)\)/);
   });
 

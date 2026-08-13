@@ -14,7 +14,6 @@ declare global {
   var MAX_CLOCK_BAR_TEMPERATURES: any;
   var NETWORK_STATUS_ICON_UNAVAILABLE: any;
   var SCREENSAVER_ACTION_UNAVAILABLE: any;
-  var SCREEN_ROTATION_STARTUP_FALLBACK_MS: any;
   var SCREEN_SCHEDULE_CLOCK_BRIGHTNESS_UNAVAILABLE: any;
   var SCREEN_SCHEDULE_DIMMED_BRIGHTNESS_UNAVAILABLE: any;
   var SCREEN_SCHEDULE_MODE_UNAVAILABLE: any;
@@ -34,7 +33,6 @@ declare global {
   var _renderPending: any;
   var _settingsDeferred: any;
   var _settingsUiFeature: any;
-  var activeScreenRotationOptions: any;
   var addBackButtonMenuItems: any;
   var addBulkCardMenuItems: any;
   var addClockBarMenuItems: any;
@@ -46,13 +44,10 @@ declare global {
   var addSubItem: any;
   var addSubpageSlot: any;
   var addSupportButton: any;
-  var allScreenRotationOptions: any;
-  var appendScreenRotationOption: any;
   var appendSettingsSection: any;
   var appendTimezoneOption: any;
   var applyButtonConfigStateEvent: any;
   var applyButtonOrderValue: any;
-  var applyDeferredButtonOrderValue: any;
   var applyCardMetadataFields: any;
   var applyClockBarTemperatureEntities: any;
   var applyImportedButtonOrder: any;
@@ -106,7 +101,6 @@ declare global {
   var clampMenuPosition: any;
   var clearCardSelection: any;
   var clearFirmwareWebOtaFallback: any;
-  var clearInitialScreenRotationTimer: any;
   var clearPlaceholder: any;
   var clearTextSelection: any;
   var clockBarDefaultSection: any;
@@ -172,7 +166,6 @@ declare global {
   var disclosureSection: any;
   var displayC6FirmwareVersion: any;
   var displayFirmwareVersion: any;
-  var displayScreenRotation: any;
   var duplicateButton: any;
   var duplicateSubpageButton: any;
   var emptyButtonConfig: any;
@@ -220,7 +213,6 @@ declare global {
   var getJsonQuietly: any;
   var getTzId: any;
   var gridHasAny: any;
-  var gridPreviewBlockedByRotationStartup: any;
   var groupCardSettingsFields: any;
   var handleBtnClick: any;
   var handleDocumentSelectionMouseDown: any;
@@ -258,7 +250,6 @@ declare global {
   var normalizeClockBarTemperatureEntities: any;
   var normalizeClockBarTemperatureEntries: any;
   var normalizeNetworkTransport: any;
-  var normalizeScreenRotation: any;
   var normalizeVacuumMode: any;
   var normalizeWifiStrengthPercent: any;
   var openCardSettings: any;
@@ -394,7 +385,6 @@ declare global {
   var scheduleMainGridSave: any;
   var cancelMainGridSave: any;
   var resolveIcon: any;
-  var resolveInitialScreenRotationCheck: any;
   var resolveSpanPos: any;
   var resolveSpanPosition: any;
   var saveButtonConfig: any;
@@ -405,8 +395,6 @@ declare global {
   var scheduleMigration: any;
   var scheduleRender: any;
   var scheduleSliderSubpageMigration: any;
-  var screenRotationSortValue: any;
-  var screenRotationStartupRequired: any;
   var segmentControl: any;
   var selectButton: any;
   var selectClockBarItem: any;
@@ -442,9 +430,7 @@ declare global {
   var showPasteCardCode: any;
   var showSelectionMenu: any;
   var sizeClass: any;
-  var sortScreenRotationOptions: any;
   var startFirmwareInstallRefresh: any;
-  var startInitialScreenRotationCheck: any;
   var statusBadge: any;
   var stopFirmwareInstallRefresh: any;
   var stopFirmwareInstallRefreshIfComplete: any;
@@ -467,7 +453,6 @@ declare global {
   var syncInput: any;
   var syncMediaPlayerSleepPreventionUi: any;
   var syncOptionalClockBrightness: any;
-  var syncScreenRotationSelect: any;
   var syncTabChrome: any;
   var syncTemperatureUi: any;
   var temperatureUnitSymbol: any;

@@ -38,6 +38,7 @@ import { getActiveScreensaverMode } from "./screensaver_state";
 import type { EnvironmentStateFeature } from "./environment_state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
+import type { ScreenRotationFeature } from "./screen_rotation_state";
 
 export type SseStateHandler = (value?: any, data?: any, key?: any) => void;
 export type SseHandlerFactory = () => Record<string, SseStateHandler>;
@@ -48,6 +49,7 @@ export function installAppStateEventHandlersModule(
     environment: EnvironmentStateFeature,
     schedule: ScreenScheduleStateFeature,
     screensaverTimeout: ScreensaverTimeoutFeature,
+    screenRotation: ScreenRotationFeature,
     onCreateSseHandlers?: (factory: SseHandlerFactory) => void,
 ): GlobalDescriptors {
     const { syncPreviewOrientation } = core;
@@ -55,6 +57,12 @@ export function installAppStateEventHandlersModule(
     const { timezoneOptionsWithFallback, isHomeAssistantAutoTimezone } = environment;
     const { syncUi: syncScreenScheduleUi } = schedule;
     const { applyState: applyScreensaverTimeoutState } = screensaverTimeout;
+    const {
+        gridPreviewBlocked: gridPreviewBlockedByRotationStartup,
+        normalize: normalizeScreenRotation,
+        syncSelect: syncScreenRotationSelect,
+        resolveInitialCheck: resolveInitialScreenRotationCheck,
+    } = screenRotation;
     // ── State Event Handlers ──────────────────────────────────────────
     const createSseHandlers: SseHandlerFactory = () => {
         return {

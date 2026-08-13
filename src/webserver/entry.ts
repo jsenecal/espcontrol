@@ -17,7 +17,7 @@ import { createCardRegistry } from "./application/card_registry";
 import { createWebStyles } from "./application/styles";
 import { createUiRuntimeState } from "./application/state";
 import { createEnvironmentStateFeature } from "./application/environment_state";
-import { installScreenRotationStateModule } from "./application/screen_rotation_state";
+import { createScreenRotationFeature } from "./application/screen_rotation_state";
 import { createScreenScheduleStateFeature } from "./application/screen_schedule_state";
 import { installAppearanceStateModule } from "./application/appearance_state";
 import { installFirmwareVersionStateModule } from "./application/firmware_version_state";
@@ -138,7 +138,7 @@ const startupState = globalThis as typeof globalThis & {
 };
 
 function installApplicationCompatibility(context: ApplicationContext): void {
-  installGlobals(installScreenRotationStateModule(context.runtime, context.layout));
+  const screenRotation = context.controllers.screenRotation;
   const screenScheduleState = context.controllers.screenScheduleState;
   const screensaverTimeout = context.controllers.screensaverTimeout;
   installGlobals(installAppearanceStateModule(context.runtime));
@@ -184,7 +184,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   }));
   installGlobals(installSettingsScheduleSectionModule(context.configuration.codec, context.runtime, screenScheduleState));
   installGlobals(installSettingsCoverArtSectionModule(context.configuration.codec, context.runtime));
-  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout));
+  installGlobals(installSettingsPageModule(context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation));
   installGlobals(installControlsFieldsModule(context.cards, context.configuration.options));
   installGlobals(installPreviewRenderModule({
     document: context.dom.document,
@@ -193,6 +193,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     confirmationOptions: context.configuration.confirmationOptions,
     codec: context.configuration.codec,
     runtime: context.runtime,
+    screenRotation,
   }));
   installGlobals(installButtonSettingsSelectionModule(context.runtime));
   installGlobals(installButtonSettingsRenderQueueModule(context.runtime));
@@ -245,7 +246,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   installGlobals(installAppStatusPreviewModule(context.runtime, context.core, context.layout, context.controllers.environment));
   installGlobals(installAppConfigEventsModule(configPersistence, context.configuration.codec, context.layout));
   let sseHandlerFactory: SseHandlerFactory | undefined;
-  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, (factory) => {
+  installGlobals(installAppStateEventHandlersModule(context.runtime, context.core, context.controllers.environment, screenScheduleState, screensaverTimeout, screenRotation, (factory) => {
     sseHandlerFactory = factory;
   }));
   const reconnectController = context.controllers.reconnect;
@@ -257,6 +258,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.controllers.pageTitle,
     createWebStyles(context.layout.config.dragAnimation),
     context.core,
+    screenRotation,
   ));
 }
 
@@ -331,7 +333,7 @@ function installTestCompatibility(context: ApplicationContext, lightCards: Retur
     context.core,
     context.layout,
   ));
-  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout));
+  installGlobals(installAppTestHooksPreview(context.cards, context.configuration.codec, context.runtime, context.core, context.layout, context.controllers.screenRotation));
   installGlobals(installAppTestHooksBackup(context.layout));
   installGlobals(installAppTestHooksSettings(
     () => defaultTimezoneOptionsForDevice(context.device.profile),
@@ -367,6 +369,11 @@ function composeApplicationContext(): ApplicationContext {
     DeviceConfig.deviceConfig,
   );
   const runtime = createUiRuntimeState(layout, dom.document);
+  const screenRotation = createScreenRotationFeature(runtime, layout, {
+    applyButtonOrder: (value, skipSpanNormalization) => applyButtonOrderValue(value, skipSpanNormalization),
+    postNormalizedOrder: (value) => postText(entityName("button_order"), value),
+    renderPreview: () => renderPreview(),
+  });
   const voiceServices = createVoiceServicesController();
   const environment = createEnvironmentStateFeature(
     voiceServices,
@@ -522,7 +529,7 @@ function composeApplicationContext(): ApplicationContext {
       autoUpdate: state.autoUpdate,
       updateFrequency: state.updateFrequency,
       updateFrequencyOptions: state.updateFreqOptions,
-      screenRotationOptions: allScreenRotationOptions(),
+      screenRotationOptions: screenRotation.allOptions(),
     });
   };
   const gridColsForImportedSettings = (importedSettings: any): number => {
@@ -661,6 +668,7 @@ function composeApplicationContext(): ApplicationContext {
     reconnect,
     screenSchedule,
     screenScheduleState,
+    screenRotation,
     screensaverTimeout,
     screensaver,
     settingsUi,

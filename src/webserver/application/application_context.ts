@@ -41,6 +41,7 @@ import type { CoreFeature } from "./core";
 import type { EnvironmentStateFeature } from "./environment_state";
 import type { ScreenScheduleStateFeature } from "./screen_schedule_state";
 import type { ScreensaverTimeoutFeature } from "./screensaver_timeout";
+import type { ScreenRotationFeature } from "./screen_rotation_state";
 
 export type { CardRegistry } from "./card_registry";
 
@@ -110,6 +111,7 @@ export interface ApplicationContext {
     readonly reconnect: ReconnectController<unknown>;
     readonly screenSchedule: ScreenScheduleController;
     readonly screenScheduleState: ScreenScheduleStateFeature;
+    readonly screenRotation: ScreenRotationFeature;
     readonly screensaver: ScreensaverController;
     readonly screensaverTimeout: ScreensaverTimeoutFeature;
     readonly settingsUi: SettingsUiFeature;
@@ -160,6 +162,7 @@ export interface ApplicationContextOptions {
   readonly reconnect: ReconnectController<unknown>;
   readonly screenSchedule: ScreenScheduleController;
   readonly screenScheduleState: ScreenScheduleStateFeature;
+  readonly screenRotation: ScreenRotationFeature;
   readonly screensaver: ScreensaverController;
   readonly screensaverTimeout: ScreensaverTimeoutFeature;
   readonly settingsUi: SettingsUiFeature;
@@ -230,6 +233,7 @@ export function createApplicationContext(options: ApplicationContextOptions): Ap
       reconnect: options.reconnect,
       screenSchedule: options.screenSchedule,
       screenScheduleState: options.screenScheduleState,
+      screenRotation: options.screenRotation,
       screensaver: options.screensaver,
       screensaverTimeout: options.screensaverTimeout,
       settingsUi: options.settingsUi,
