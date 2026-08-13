@@ -812,6 +812,22 @@ describe("browserless application contracts", () => {
     assert.doesNotMatch(globals, /\bvar (?:addNativeConfigToBackup|backupExportFileDate|backupExportFileName|normalizeImportedPanelSettings|gridColsForImportedSettings|backupExportScreenSizeSlug|downloadBackupConfig|exportConfig|importConfig):/);
   });
 
+  test("composes the card-editor icon picker without compatibility globals", () => {
+    const picker = fs.readFileSync(path.join(ROOT, "src/webserver/application/button_settings_icon_picker.ts"), "utf8");
+    const settings = fs.readFileSync(path.join(ROOT, "src/webserver/application/button_settings.ts"), "utf8");
+    const context = fs.readFileSync(path.join(ROOT, "src/webserver/application/application_context.ts"), "utf8");
+    const entry = fs.readFileSync(path.join(ROOT, "src/webserver/entry.ts"), "utf8");
+    const globals = fs.readFileSync(path.join(ROOT, "src/webserver/runtime/application_globals.d.ts"), "utf8");
+    assert.match(picker, /export function createButtonSettingsIconPickerFeature/);
+    assert.doesNotMatch(picker, /GlobalDescriptors|staticGlobal|liveGlobal|installButtonSettingsIconPickerModule/);
+    assert.match(settings, /iconPicker: ButtonSettingsIconPickerFeature/);
+    assert.match(settings, /iconPicker\.init\(picker, currentVal, onSelect\)/);
+    assert.match(context, /readonly iconPicker: ButtonSettingsIconPickerFeature/);
+    assert.match(entry, /createButtonSettingsIconPickerFeature\(dom\.document, \(\) => renderPreview\(\)\)/);
+    assert.doesNotMatch(entry, /installGlobals\(installButtonSettingsIconPickerModule/);
+    assert.doesNotMatch(globals, /\bvar initIconPicker:/);
+  });
+
   test("imports shared UI primitives without application globals", () => {
     const primitives = fs.readFileSync(path.join(ROOT, "src/webserver/application/ui_primitives.ts"), "utf8");
     const stateModule = fs.readFileSync(path.join(ROOT, "src/webserver/application/state.ts"), "utf8");

@@ -17,6 +17,7 @@ import type { EntityStateFeature } from "./entity_state";
 import type { ControlsShellFeature } from "./controls_shell";
 import type { ApplicationApiFeature } from "./api";
 import type { GridFeature } from "./grid";
+import type { ButtonSettingsIconPickerFeature } from "./button_settings_icon_picker";
 export function installButtonSettingsModule(
     cardEditorDraftController: CardEditorDraftController,
     cardEditorValidationController: CardEditorValidationController,
@@ -32,6 +33,7 @@ export function installButtonSettingsModule(
     shell: Pick<ControlsShellFeature, "isConfigLocked" | "createActionButton" | "showBanner">,
     requestApi: Pick<ApplicationApiFeature, "postText">,
     grid: Pick<GridFeature, "ctx" | "serializeGrid">,
+    iconPicker: ButtonSettingsIconPickerFeature,
 ): GlobalDescriptors {
     const { entityName, entityInput } = entityState;
     const { isConfigLocked, createActionButton, showBanner } = shell;
@@ -372,7 +374,7 @@ export function installButtonSettingsModule(
             dropdown.className = "sp-icon-dropdown";
             picker.appendChild(dropdown);
             icf.appendChild(picker);
-            initIconPicker(picker, currentVal, onSelect);
+            iconPicker.init(picker, currentVal, onSelect);
             return icf;
         }
         function entityField(this: any, labelText?: any, inputId?: any, value?: any, placeholder?: any, domains?: any, bindName?: any, rerender?: any, requiredMessage?: any) {

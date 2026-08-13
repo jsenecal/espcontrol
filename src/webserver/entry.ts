@@ -63,7 +63,7 @@ import { installControlsFieldsModule } from "./application/controls_fields";
 import { installPreviewRenderModule } from "./application/preview_render";
 import { installButtonSettingsSelectionModule } from "./application/button_settings_selection";
 import { installButtonSettingsRenderQueueModule } from "./application/button_settings_render_queue";
-import { installButtonSettingsIconPickerModule } from "./application/button_settings_icon_picker";
+import { createButtonSettingsIconPickerFeature } from "./application/button_settings_icon_picker";
 import { installButtonSettingsModule } from "./application/button_settings";
 import { installPreviewGridPlacementModule } from "./application/preview_grid_placement";
 import { installPreviewContextMenuModule } from "./application/preview_context_menu";
@@ -195,7 +195,6 @@ function installApplicationCompatibility(context: ApplicationContext): void {
   }));
   installGlobals(installButtonSettingsSelectionModule(context.runtime, clockBarState, context.controllers.entityState, context.controllers.shell, context.controllers.statusPreview, context.controllers.grid));
   installGlobals(installButtonSettingsRenderQueueModule(context.runtime));
-  installGlobals(installButtonSettingsIconPickerModule());
   installGlobals(installButtonSettingsModule(
     cardEditorDraft, cardEditorValidation, cardEditorSave, configPersistence, context.cards,
     context.configuration.imageOptions,
@@ -207,6 +206,7 @@ function installApplicationCompatibility(context: ApplicationContext): void {
     context.controllers.shell,
     context.controllers.requestApi,
     context.controllers.grid,
+    context.controllers.iconPicker,
   ));
   installGlobals(installPreviewGridPlacementModule({
     controller: previewPlacementController,
@@ -455,6 +455,7 @@ function composeApplicationContext(): ApplicationContext {
   });
   const configurationPersistence = createConfigPersistenceFeature(nativePanelConfig, runtime, layout, entityState, shell);
   const cards = createCardRegistry();
+  const iconPicker = createButtonSettingsIconPickerFeature(dom.document, () => renderPreview());
   const configurationOptions = createConfigSensorOptionsFeature(cards);
   const mediaConfigurationOptions = createConfigMediaOptionsFeature(layout.config);
   const imageConfigurationOptions = createConfigImageOptionsFeature({
@@ -865,6 +866,7 @@ function composeApplicationContext(): ApplicationContext {
     settingsUi,
     voiceServices,
     environment,
+    iconPicker,
     dom,
     cards,
   });

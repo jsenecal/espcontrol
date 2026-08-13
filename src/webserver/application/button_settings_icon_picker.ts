@@ -1,6 +1,13 @@
-import { liveGlobal, staticGlobal, type GlobalDescriptors } from "../runtime/globals";
 import { iconOptions as ICON_OPTIONS, iconSlug, mdiIcon, textSpan } from "./ui_primitives";
-export function installButtonSettingsIconPickerModule(): GlobalDescriptors {
+
+export interface ButtonSettingsIconPickerFeature {
+    init(picker: any, currentIcon: any, onSelect: (icon: any) => void): void;
+}
+
+export function createButtonSettingsIconPickerFeature(
+    document: Document,
+    renderPreview: () => void,
+): ButtonSettingsIconPickerFeature {
     // ── Button Settings Icon Picker ───────────────────────────────────
     // ── Icon picker (optimized) ────────────────────────────────────────────
     function initIconPicker(this: any, picker?: any, currentIcon?: any, onSelect?: any) {
@@ -142,7 +149,5 @@ export function installButtonSettingsIconPickerModule(): GlobalDescriptors {
             }
         });
     }
-    return {
-        "initIconPicker": staticGlobal(initIconPicker),
-    };
+    return { init: initIconPicker };
 }

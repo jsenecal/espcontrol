@@ -98,7 +98,6 @@ declare global {
   var infoOnlyCardVisible: any;
   var infoPanel: any;
   var init: any;
-  var initIconPicker: any;
   var disclosureBadge: any;
   var inlineDisclosure: any;
   var isSelectionControlTarget: any;
