@@ -1705,10 +1705,12 @@ inline void cover_control_apply_card_visual(CoverControlCtx *ctx,
                                             const std::string &state_text = "") {
   if (!ctx || !ctx->btn) return;
   cover_control_update_card_slider(ctx, state_text);
-  bool active = ctx->current_position_known
-    ? slider_clamp_pct(ctx->current_position) < 100
-    : (!state_text.empty() ? cover_toggle_state_is_active(state_text) : ctx->current_position < 100);
-  set_card_checked_state(ctx->btn, ctx->available && active);
+  // All Controls covers show position through the proportional closed-amount
+  // fill bar (docs/card-types/covers.md), not a full-tile highlight. Keep the
+  // card unchecked so the fill stays visible; otherwise the CHECKED background
+  // paints the whole tile the on-color and masks the fill at every partial
+  // position. (The Toggle interaction is the mode that lights the tile up.)
+  set_card_checked_state(ctx->btn, false);
   if (ctx->icon_lbl) {
     bool open_icon = ctx->current_position_known
       ? slider_clamp_pct(ctx->current_position) == 100
