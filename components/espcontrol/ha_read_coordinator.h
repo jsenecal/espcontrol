@@ -62,13 +62,22 @@ class HaReadCoordinator {
         break;
       }
     }
-    if (channel == subscription_channels_.size()) {
-      subscription_channels_.push_back({entity_id, attribute});
+    const bool new_channel = channel == subscription_channels_.size();
+    if (new_channel) {
+      subscription_channels_.push_back({entity_id, attribute, std::string(), false});
       transport_.subscribe(
           entity_id, attribute,
           [this, channel](State state) { invoke_subscription_channel(channel, state); });
     }
     subscriptions_.push_back({callback_ref, scope, owner, channel});
+    // A grid rebuild re-subscribes on an existing channel: the transport only
+    // delivers the current value to the first subscriber, so a card rebuilt
+    // later would sit on stale defaults until Home Assistant next reports a
+    // change. Replay the last cached value to the new subscriber so rebuilt
+    // cards (e.g. cover tiles) reflect the live state immediately.
+    if (!new_channel && subscription_channels_[channel].has_last_state) {
+      invoke(callback_ref, State(subscription_channels_[channel].last_state));
+    }
     return true;
   }
 
@@ -153,6 +162,8 @@ class HaReadCoordinator {
   struct SubscriptionChannel {
     std::string entity_id;
     std::string attribute;
+    std::string last_state;
+    bool has_last_state = false;
   };
 
   static constexpr size_t MAX_DEFERRED_REQUESTS = 64;
@@ -249,6 +260,10 @@ class HaReadCoordinator {
   }
 
   void invoke_subscription_channel(size_t channel, State state) {
+    if (channel < subscription_channels_.size()) {
+      subscription_channels_[channel].last_state.assign(state.c_str(), state.size());
+      subscription_channels_[channel].has_last_state = true;
+    }
     std::vector<std::shared_ptr<Callback>> callbacks;
     callbacks.reserve(subscriptions_.size());
     for (const auto &ref : subscriptions_) {
