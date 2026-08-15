@@ -179,6 +179,28 @@ void rebuilt_subscriptions_share_one_transport_channel() {
           "shared transport channel did not invoke only the current callback");
 }
 
+void rebuilt_subscription_replays_last_value() {
+  Coordinator coordinator;
+  constexpr uint32_t scope = 1u;
+  std::string old_value;
+  std::string new_value;
+  require(coordinator.subscribe("cover.blind", "current_position",
+                                [&](std::string value) { old_value = value; }, scope),
+          "initial subscription should register");
+  coordinator.transport().publish(0, "18");
+  require(old_value == "18", "initial subscriber did not receive the published value");
+  coordinator.reset_subscriptions(scope);
+  require(coordinator.subscribe("cover.blind", "current_position",
+                                [&](std::string value) { new_value = value; }, scope),
+          "rebuilt subscription should register");
+  require(new_value == "18",
+          "rebuilt subscription did not replay the last cached value");
+  old_value.clear();
+  coordinator.transport().publish(0, "42");
+  require(new_value == "42" && old_value.empty(),
+          "shared channel did not deliver a later publish to the current subscriber");
+}
+
 void stale_generations_do_not_deliver() {
   Coordinator coordinator;
   int calls = 0;
@@ -278,6 +300,7 @@ int main() {
   reentrant_reads_are_deferred();
   cancellation_is_safe_during_callback();
   rebuilt_subscriptions_share_one_transport_channel();
+  rebuilt_subscription_replays_last_value();
   stale_generations_do_not_deliver();
   attribute_requests_preserve_attribute();
   released_owner_drops_pending_reads_even_if_its_address_is_reused();
