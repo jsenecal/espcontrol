@@ -1712,9 +1712,14 @@ inline void cover_control_apply_card_visual(CoverControlCtx *ctx,
   // position. (The Toggle interaction is the mode that lights the tile up.)
   set_card_checked_state(ctx->btn, false);
   if (ctx->icon_lbl) {
+    // The open glyph represents the open OR partially open state; only a fully
+    // closed cover (position 0) shows the closed glyph. This matches the
+    // Slider: Position card (subscribe_slider_state uses pct > 0) and
+    // docs/card-types/covers.md. Using == 100 kept the closed glyph for every
+    // partial position, so the tile icon looked static during normal use.
     bool open_icon = ctx->current_position_known
-      ? slider_clamp_pct(ctx->current_position) == 100
-      : (!state_text.empty() ? garage_state_uses_open_icon(state_text) : ctx->current_position == 100);
+      ? slider_clamp_pct(ctx->current_position) > 0
+      : (!state_text.empty() ? garage_state_uses_open_icon(state_text) : ctx->current_position > 0);
     lv_label_set_text(ctx->icon_lbl, open_icon ? ctx->icon_open_glyph : ctx->icon_closed_glyph);
   }
   if (ctx->label_lbl) {
