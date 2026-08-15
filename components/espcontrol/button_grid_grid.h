@@ -846,9 +846,17 @@ inline void refresh_media_card_layout(BtnSlot &s, const ParsedCfg &p,
 
 inline void refresh_slider_card_layout(BtnSlot &s) {
   lv_obj_t *slider = (lv_obj_t *)lv_obj_get_user_data(s.sensor_container);
-  lv_coord_t pad = lv_obj_get_style_radius(s.btn, LV_PART_MAIN) + 4;
-  if (s.icon_lbl) lv_obj_align(s.icon_lbl, LV_ALIGN_TOP_LEFT, pad, pad);
-  if (s.text_lbl) lv_obj_align(s.text_lbl, LV_ALIGN_BOTTOM_LEFT, pad, -pad);
+  SliderCtx *ctx = slider ? (SliderCtx *)lv_obj_get_user_data(slider) : nullptr;
+  // Reuse the padding captured before the slider zeroed it so the icon and label
+  // stay aligned with every non-slider card.
+  const lv_coord_t pad_left = ctx
+    ? ctx->label_pad_left : lv_obj_get_style_pad_left(s.btn, LV_PART_MAIN);
+  const lv_coord_t pad_top = ctx
+    ? ctx->label_pad_top : lv_obj_get_style_pad_top(s.btn, LV_PART_MAIN);
+  const lv_coord_t pad_bottom = ctx
+    ? ctx->label_pad_bottom : lv_obj_get_style_pad_bottom(s.btn, LV_PART_MAIN);
+  if (s.icon_lbl) lv_obj_align(s.icon_lbl, LV_ALIGN_TOP_LEFT, pad_left, pad_top);
+  if (s.text_lbl) lv_obj_align(s.text_lbl, LV_ALIGN_BOTTOM_LEFT, pad_left, -pad_bottom);
   if (slider) slider_refresh_geometry(slider);
 }
 
@@ -883,6 +891,9 @@ inline void refresh_card_layout(BtnSlot &s, const ParsedCfg &p,
     return;
   } else if (espcontrol::cards::media_driver_refresh_layout(
                s, p, context, cfg, row_span, col_span)) {
+    return;
+  } else if (espcontrol::cards::cover_modal_driver_refresh_layout(
+               s, p, context)) {
     return;
   } else {
     espcontrol::cards::access_cover_driver_refresh_layout(

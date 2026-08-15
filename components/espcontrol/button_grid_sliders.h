@@ -41,6 +41,11 @@ struct SliderCtx {
   lv_obj_t *media_value_lbl = nullptr;
   lv_obj_t *media_status_lbl = nullptr;
   lv_coord_t content_pad = 0;
+  // Button padding captured before the slider widget zeroes it, so the icon and
+  // label can be inset to match every non-slider card (see setup_slider_visual).
+  lv_coord_t label_pad_left = 0;
+  lv_coord_t label_pad_top = 0;
+  lv_coord_t label_pad_bottom = 0;
   bool available = true;
   bool interactive = true;
   // light_temperature fields
@@ -2617,6 +2622,19 @@ inline void setup_slider_visual(BtnSlot &s, const ParsedCfg &p, uint32_t on_colo
   if (p.type == "cover")
     lv_label_set_text(s.icon_lbl, slider_icon_off(p.type, p.entity, p.icon));
 
+  // Capture the card padding before setup_slider_widget zeroes it, so the icon
+  // and label stay inset by the same amount as every non-slider card. The card
+  // button is reused across grid rebuilds and setup_slider_widget zeroes its
+  // padding so the position fill can reach the edges; on later rebuilds we would
+  // otherwise read back that leftover 0 and pin the icon and label to the
+  // corner. Drop the local override first so we read the themed inset.
+  lv_obj_remove_local_style_prop(s.btn, LV_STYLE_PAD_LEFT, LV_PART_MAIN);
+  lv_obj_remove_local_style_prop(s.btn, LV_STYLE_PAD_TOP, LV_PART_MAIN);
+  lv_obj_remove_local_style_prop(s.btn, LV_STYLE_PAD_BOTTOM, LV_PART_MAIN);
+  const lv_coord_t label_pad_left = lv_obj_get_style_pad_left(s.btn, LV_PART_MAIN);
+  const lv_coord_t label_pad_top = lv_obj_get_style_pad_top(s.btn, LV_PART_MAIN);
+  const lv_coord_t label_pad_bottom = lv_obj_get_style_pad_bottom(s.btn, LV_PART_MAIN);
+
   bool horizontal = false;
   lv_obj_t *slider = setup_slider_widget(s.btn, on_color, horizontal);
   if (!slider) {
@@ -2629,9 +2647,8 @@ inline void setup_slider_visual(BtnSlot &s, const ParsedCfg &p, uint32_t on_colo
     return;
   }
   ESP_LOGI("slider", "Slider object created for %s", p.entity.c_str());
-  lv_coord_t pad = lv_obj_get_style_radius(s.btn, LV_PART_MAIN) + 4;
-  lv_obj_align(s.icon_lbl, LV_ALIGN_TOP_LEFT, pad, pad);
-  lv_obj_align(s.text_lbl, LV_ALIGN_BOTTOM_LEFT, pad, -pad);
+  lv_obj_align(s.icon_lbl, LV_ALIGN_TOP_LEFT, label_pad_left, label_pad_top);
+  lv_obj_align(s.text_lbl, LV_ALIGN_BOTTOM_LEFT, label_pad_left, -label_pad_bottom);
   lv_obj_set_user_data(s.sensor_container, (void *)slider);
 
   lv_obj_t *fill = lv_obj_get_child(s.btn, 0);
@@ -2652,6 +2669,9 @@ inline void setup_slider_visual(BtnSlot &s, const ParsedCfg &p, uint32_t on_colo
   ctx->cover_tilt = p.type == "cover" && cover_tilt_mode(p.sensor);
   ctx->inverted = is_cover_entity(p.entity);
   ctx->radius = lv_obj_get_style_radius(s.btn, LV_PART_MAIN);
+  ctx->label_pad_left = label_pad_left;
+  ctx->label_pad_top = label_pad_top;
+  ctx->label_pad_bottom = label_pad_bottom;
   ctx->interactive = interactive;
   lv_obj_set_user_data(slider, (void *)ctx);
   slider_bind_geometry_refresh(s.btn, slider);
