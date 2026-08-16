@@ -172,6 +172,14 @@ format when it starts with `~`:
   card fields as a button (icon/icon_on default to `Auto`). Commas/pipes inside a
   value must be encoded; plain spaces are fine.
 
+A subpage string longer than 255 bytes is fine: the firmware chunks it across
+`Subpage N Config` + `Ext`…`Ext 7` (8×255). The durable doc stores it as one
+record. **Gotcha:** writing an *active* subpage (one a button points at) can race
+the panel's live re-render, which round-trips through the 255-byte primary text
+entity and truncates the stored doc — so `panelctl.py subpage` verifies the
+round-trip and retries; if it still truncates, write when that subpage isn't
+on-screen, or reboot after writing (the boot restore path chunks it correctly).
+
 CODE is the subpage type code from `card_contract.json` `subpageTypeCodes`
 (e.g. `LC`=light_control, `Q`=light_switch, `V`=light_brightness, `W`=weather,
 `S`=sensor, `A`=action, `CK`=clock). Example:
