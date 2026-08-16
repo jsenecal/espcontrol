@@ -2612,8 +2612,13 @@ def firmware_clock_screensaver_overlay_errors(backlight_path: Path, root: Path) 
     dimmed_body = yaml_script_body(text, "show_dimmed_view")
     if dimmed_body is None:
         errors.append(f"{rel}: missing show_dimmed_view script")
-    elif "lv_obj_move_foreground(id(dim_screensaver_touch_guard))" not in dimmed_body:
-        errors.append(f"{rel}: raise the dim screensaver touch guard above any existing top-layer elements")
+    else:
+        if "lv_obj_move_foreground(id(dim_screensaver_touch_guard))" not in dimmed_body:
+            errors.append(f"{rel}: raise the dim screensaver touch guard above any existing top-layer elements")
+        if "script.execute: clock_bar_hide" in dimmed_body or "script.wait: clock_bar_hide" in dimmed_body:
+            errors.append(f"{rel}: keep the complete clock bar visible over the dimmed home screen")
+        if "script.execute: clock_bar_apply" not in dimmed_body:
+            errors.append(f"{rel}: reapply the clock bar after raising the dim screensaver touch guard")
 
     return errors
 
@@ -6730,12 +6735,17 @@ def run_self_test() -> int:
         "          lv_obj_move_foreground(id(clock_screensaver));\n"
         "  - id: show_dimmed_view\n"
         "    then:\n"
+        "      - script.execute: clock_bar_hide\n"
         "      - lambda: 'lv_obj_move_foreground(id(dim_screensaver_touch_guard));'\n"
+        "      - script.execute: clock_bar_apply\n"
         "interval:\n"
         "  - interval: 1s\n"
         "    then:\n"
         "      - script.execute: clock_screensaver_keep_on_top\n",
-        ("overlay the existing UI without closing it",),
+        (
+            "overlay the existing UI without closing it",
+            "keep the complete clock bar visible over the dimmed home screen",
+        ),
     )
     expect_clock_screensaver_overlay_errors(
         "clock screensaver overlays active UI",
@@ -6767,6 +6777,7 @@ def run_self_test() -> int:
         "  - id: show_dimmed_view\n"
         "    then:\n"
         "      - lambda: 'lv_obj_move_foreground(id(dim_screensaver_touch_guard));'\n"
+        "      - script.execute: clock_bar_apply\n"
         "interval:\n"
         "  - interval: 1s\n"
         "    then:\n"

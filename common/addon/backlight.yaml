@@ -1259,8 +1259,6 @@ script:
                       static_cast<uint32_t>(generation), espcontrol::DisplayMode::DIMMED);
           then:
             - lvgl.resume:
-            - script.execute: clock_bar_hide
-            - script.wait: clock_bar_hide
             - lambda: |-
                 if (!id(espcontrol_app).display().transition_is_current(
                       static_cast<uint32_t>(generation), espcontrol::DisplayMode::DIMMED)) {
@@ -1270,6 +1268,7 @@ script:
             - lambda: 'refresh_screensaver_fullscreen(id(clock_screensaver), id(dim_screensaver_touch_guard));'
             - lvgl.widget.show: dim_screensaver_touch_guard
             - lambda: 'lv_obj_move_foreground(id(dim_screensaver_touch_guard));'
+            - script.execute: clock_bar_apply
             - script.execute:
                 id: backlight_note_internal_brightness
                 brightness: !lambda 'return id(screensaver_dimmed_target_level);'
