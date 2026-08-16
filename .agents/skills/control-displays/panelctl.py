@@ -267,7 +267,20 @@ def cmd_subpage(host, args):
     if getattr(args, "live", False):
         post(host, "text", f"Subpage {args.n} Config", "set", {"value": args.config})
         return
-    pc_modify(host, lambda doc: doc["subpages"].__setitem__(args.n, args.config))
+    # Writing an ACTIVE subpage (one a button points at) can race the panel's
+    # live re-render, which round-trips through the 255-byte primary text entity
+    # and truncates the stored doc. Verify the round-trip and retry once.
+    for attempt in range(2):
+        pc_modify(host, lambda doc: doc["subpages"].__setitem__(args.n, args.config))
+        buf, _ = pc_get(host)
+        got = pc_decode(buf)["subpages"].get(args.n, "")
+        if got == args.config:
+            print(f"verified: subpage {args.n} stored intact ({len(got)} bytes)")
+            return
+        print(f"warning: subpage {args.n} read back as {len(got)}/{len(args.config)} "
+              f"bytes (truncation race){'; retrying' if attempt == 0 else ''}")
+    sys.exit(f"error: subpage {args.n} kept truncating — retry when the panel is not "
+             f"rendering that subpage, or reboot after writing")
 
 
 def cmd_doc(host, args):
