@@ -102,6 +102,101 @@ def post(host: str, domain: str, name: str, action: str, params: dict | None = N
     print(f"ok: {domain}/{name}/{action}{query}")
 
 
+# ---- durable native PanelConfig document (survives reboot) ----------------
+# Live text-sets (POST /text/.../set) are PREVIEW ONLY: on boot the firmware
+# reloads its binary PanelConfig document and overwrites them. The durable store
+# is GET/PUT /api/v1/config (Content-Type application/vnd.espcontrol.panel-config,
+# ETag-guarded). Codec mirrors src/webserver/model/panel_config.ts.
+PC_MAGIC = b"EPCF"
+PC_HEADER = 16
+PC_VERSION = 1
+RT_DEVICE, RT_BUTTON, RT_SUBPAGE, RT_SETTING = 1, 2, 3, 4
+
+
+def pc_decode(buf: bytes) -> dict:
+    if buf[:4] != PC_MAGIC or len(buf) < PC_HEADER:
+        sys.exit("error: not a PanelConfig document (bad magic)")
+    import struct
+    ver, hsize, payload, rcount, reserved = struct.unpack_from("<HHIHH", buf, 4)
+    if ver != PC_VERSION or hsize != PC_HEADER or reserved != 0 or payload != len(buf) - PC_HEADER:
+        sys.exit("error: unsupported/invalid PanelConfig header")
+    doc = {"deviceProfile": "", "buttons": {}, "subpages": {}, "settings": {}}
+    off = PC_HEADER
+    for _ in range(rcount):
+        rtype = buf[off]
+        blen = struct.unpack_from("<H", buf, off + 1)[0]
+        off += 3
+        body = buf[off:off + blen]
+        off += blen
+        if rtype == RT_DEVICE:
+            doc["deviceProfile"] = body.decode("utf-8")
+        elif rtype in (RT_BUTTON, RT_SUBPAGE):
+            slot = body[0]
+            key = "buttons" if rtype == RT_BUTTON else "subpages"
+            doc[key][slot] = body[1:].decode("utf-8")
+        elif rtype == RT_SETTING:
+            klen = body[0]
+            doc["settings"][body[1:1 + klen].decode("utf-8")] = body[1 + klen:].decode("utf-8")
+    return doc
+
+
+def pc_encode(doc: dict) -> bytes:
+    import struct
+    records = []
+
+    def rec(rtype, body):
+        records.append(bytes([rtype]) + struct.pack("<H", len(body)) + body)
+
+    rec(RT_DEVICE, doc["deviceProfile"].encode("utf-8"))
+    for slot in sorted(doc["buttons"]):
+        rec(RT_BUTTON, bytes([slot]) + doc["buttons"][slot].encode("utf-8"))
+    for slot in sorted(doc["subpages"]):
+        rec(RT_SUBPAGE, bytes([slot]) + doc["subpages"][slot].encode("utf-8"))
+    for key in sorted(doc["settings"]):
+        k = key.encode("utf-8")
+        rec(RT_SETTING, bytes([len(k)]) + k + doc["settings"][key].encode("utf-8"))
+    payload = b"".join(records)
+    return PC_MAGIC + struct.pack("<HHIHH", PC_VERSION, PC_HEADER, len(payload), len(records), 0) + payload
+
+
+def pc_get(host: str) -> tuple[bytes, str]:
+    url = base_url(host) + "/api/v1/config"
+    req = urllib.request.Request(url, headers={"Cache-Control": "no-store"})
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            return resp.read(), resp.headers.get("ETag") or ""
+    except Exception as exc:  # noqa: BLE001
+        sys.exit(f"error: GET {url}: {exc}")
+
+
+def pc_put(host: str, buf: bytes, etag: str) -> None:
+    url = base_url(host) + "/api/v1/config"
+    headers = {"Content-Type": "application/vnd.espcontrol.panel-config"}
+    if etag:
+        headers["If-Match"] = etag
+    req = urllib.request.Request(url, data=buf, method="PUT", headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            code = resp.getcode()
+    except urllib.error.HTTPError as exc:
+        if exc.code == 412:
+            sys.exit("error: PUT rejected (412) - config changed since read; retry")
+        sys.exit(f"error: PUT {url} -> HTTP {exc.code}")
+    except Exception as exc:  # noqa: BLE001
+        sys.exit(f"error: PUT {url}: {exc}")
+    if code not in (200, 204):
+        sys.exit(f"error: PUT {url} -> HTTP {code}")
+
+
+def pc_modify(host: str, mutate) -> None:
+    """Read the durable doc, mutate(doc), PUT it back with the ETag guard."""
+    buf, etag = pc_get(host)
+    doc = pc_decode(buf)
+    mutate(doc)
+    pc_put(host, pc_encode(doc), etag)
+    print(f"ok: durable config saved (was ETag {etag or '?'}); survives reboot")
+
+
 # ---- commands -------------------------------------------------------------
 
 def cmd_dump(host, args):
@@ -162,7 +257,29 @@ def cmd_press(host, args):
 
 
 def cmd_button(host, args):
-    post(host, "text", f"Button {args.n} Config", "set", {"value": args.config})
+    if getattr(args, "live", False):
+        post(host, "text", f"Button {args.n} Config", "set", {"value": args.config})
+        return
+    pc_modify(host, lambda doc: doc["buttons"].__setitem__(args.n, args.config))
+
+
+def cmd_subpage(host, args):
+    if getattr(args, "live", False):
+        post(host, "text", f"Subpage {args.n} Config", "set", {"value": args.config})
+        return
+    pc_modify(host, lambda doc: doc["subpages"].__setitem__(args.n, args.config))
+
+
+def cmd_doc(host, args):
+    buf, etag = pc_get(host)
+    doc = pc_decode(buf)
+    print(f"deviceProfile={doc['deviceProfile']}  (ETag {etag})")
+    for slot in sorted(doc["buttons"]):
+        print(f"  button {slot:2} = {doc['buttons'][slot]}")
+    for slot in sorted(doc["subpages"]):
+        print(f"  subpage {slot:2} = {doc['subpages'][slot]}")
+    for key in sorted(doc["settings"]):
+        print(f"  setting {key} = {doc['settings'][key]}")
 
 
 def cmd_apply(host, args):
@@ -203,10 +320,18 @@ def build_parser() -> argparse.ArgumentParser:
     pr = sub.add_parser("press", help="press a button entity")
     pr.add_argument("name"); pr.set_defaults(fn=cmd_press)
 
-    b = sub.add_parser("button", help="set Button N Config (N = slot number)")
+    sub.add_parser("doc", help="dump the durable PanelConfig document (buttons/subpages/settings)").set_defaults(fn=cmd_doc)
+
+    b = sub.add_parser("button", help="set Button N Config durably (survives reboot)")
     b.add_argument("n", type=int); b.add_argument("config",
         help="entity;label;icon;icon_on;sensor;unit;type;precision;options")
+    b.add_argument("--live", action="store_true", help="preview only via text entity (lost on reboot)")
     b.set_defaults(fn=cmd_button)
+
+    sp = sub.add_parser("subpage", help="set Subpage N Config durably (survives reboot)")
+    sp.add_argument("n", type=int); sp.add_argument("config", help="~<order>|<CODE,entity,...>|... compact subpage string")
+    sp.add_argument("--live", action="store_true", help="preview only via text entity (lost on reboot)")
+    sp.set_defaults(fn=cmd_subpage)
 
     return p
 
