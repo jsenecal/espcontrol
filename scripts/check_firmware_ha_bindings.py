@@ -2529,43 +2529,6 @@ def firmware_clock_bar_pending_wake_errors(display_path: Path, root: Path) -> li
         return [f"{rel}: missing clock_bar_apply script"]
     if "id(espcontrol_app).display().target_mode()" not in body:
         return [f"{rel}: resolve clock bar visibility from the pending display target"]
-    settled_body = yaml_script_body(text, "clock_bar_apply_after_page_show")
-    required_settled_tokens = (
-        "delay: 100ms",
-        "lv_scr_act() == id(main_page)->obj",
-        "script.execute: clock_bar_apply",
-        "script.wait: clock_bar_apply",
-    )
-    if settled_body is None or any(
-        token not in settled_body for token in required_settled_tokens
-    ):
-        return [f"{rel}: reapply the clock bar after the home page becomes active"]
-    repaint_body = yaml_script_body(text, "clock_bar_redraw_after_content_change")
-    force_body = yaml_script_body(text, "clock_bar_force_redraw")
-    required_repaint_tokens = (
-        "delay: 100ms",
-        "lv_scr_act() == id(main_page)->obj",
-        "script.execute: clock_bar_apply",
-        "script.wait: clock_bar_apply",
-        "script.execute: clock_bar_force_redraw",
-    )
-    required_force_tokens = (
-        "lv_obj_invalidate(id(temperatures));",
-        "lv_obj_invalidate(id(display_time));",
-        "lv_obj_invalidate(id(network_status_button));",
-        "lv_obj_invalidate(lv_layer_top());",
-        "lv_refr_now(nullptr);",
-    )
-    if (
-        "set_dashboard_content_changed_callback" not in text
-        or repaint_body is None
-        or any(token not in repaint_body for token in required_repaint_tokens)
-        or force_body is None
-        or any(token not in force_body for token in required_force_tokens)
-    ):
-        return [
-            f"{rel}: repaint the visible clock bar after asynchronous dashboard content settles"
-        ]
     return []
 
 
@@ -2581,11 +2544,17 @@ def firmware_clock_bar_navigation_errors(
         if body is None:
             errors.append(f"{rel}: missing navigate_after_api script")
             continue
-        page_index = body.find("lvgl.page.show: main_page")
-        settled_index = body.find("script.execute: clock_bar_apply_after_page_show")
-        if page_index == -1 or settled_index < page_index:
+        active_guard = body.find("target_mode_is(")
+        active_mode = body.find("DisplayMode::ACTIVE", active_guard)
+        page_show = body.find("lvgl.page.show: main_page")
+        if (
+            active_guard == -1
+            or active_mode == -1
+            or page_show == -1
+            or active_guard > page_show
+        ):
             errors.append(
-                f"{rel}: apply the clock bar only after showing and settling the home page"
+                f"{rel}: guard late home-page navigation behind the active display mode"
             )
     return errors
 
@@ -4037,6 +4006,21 @@ def expect_display_backlight_manual_sleep_errors(
         errors = firmware_display_backlight_manual_sleep_errors(
             backlight_path, tuple(device_paths), root
         )
+        for item in expected:
+            assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
+        if not expected:
+            assert not errors, f"{name}: expected no errors, got {errors!r}"
+
+
+def expect_clock_bar_navigation_errors(
+    name: str, text: str, expected: tuple[str, ...]
+) -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        path = root / "common" / "addon" / "connectivity.yaml"
+        path.parent.mkdir(parents=True)
+        path.write_text(text, encoding="utf-8")
+        errors = firmware_clock_bar_navigation_errors((path,), root)
         for item in expected:
             assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
         if not expected:
@@ -6764,6 +6748,28 @@ def run_self_test() -> int:
         valid_shared_wake_guard_widget,
         "",
         ("clear the shared wake guard after a stuck touch timeout",),
+    )
+    expect_clock_bar_navigation_errors(
+        "late navigation requires active display mode",
+        "script:\n"
+        "  - id: navigate_after_api\n"
+        "    then:\n"
+        "      - lvgl.page.show: main_page\n",
+        ("guard late home-page navigation",),
+    )
+    expect_clock_bar_navigation_errors(
+        "active navigation remains available",
+        "script:\n"
+        "  - id: navigate_after_api\n"
+        "    then:\n"
+        "      - if:\n"
+        "          condition:\n"
+        "            lambda: |-\n"
+        "              return id(espcontrol_app).display().target_mode_is(\n"
+        "                  espcontrol::DisplayMode::ACTIVE);\n"
+        "          then:\n"
+        "            - lvgl.page.show: main_page\n",
+        (),
     )
     expect_clock_screensaver_overlay_errors(
         "clock screensaver closes active UI before showing",
