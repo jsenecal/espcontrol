@@ -85,17 +85,48 @@ inline bool weather_driver_bind_data(
   return true;
 }
 
+// Lift the temperature unit into a tight superscript hugging the high/low
+// number instead of sitting low near the tile border. Mirrors the web
+// configurator's `.sp-forecast-preview` styling so the on-device display and
+// the preview match. `value_font` is the number font (standard or large), and
+// `raise_percent` is how far up to shift the unit as a fraction of that font's
+// line height (large numbers need a bigger fraction).
+inline void weather_driver_style_forecast_unit(
+    const BtnSlot &slot, const lv_font_t *value_font, int raise_percent) {
+  if (!slot.unit_lbl) return;
+  const lv_font_t *unit_font =
+    lv_obj_get_style_text_font(slot.unit_lbl, LV_PART_MAIN);
+  lv_coord_t unit_lh =
+    unit_font && unit_font->line_height > 0 ? unit_font->line_height : 16;
+  lv_coord_t value_lh =
+    value_font && value_font->line_height > 0 ? value_font->line_height : unit_lh;
+  // Drop the generic bottom-padding nudge so the translate below fully controls
+  // the unit position.
+  lv_obj_set_style_pad_bottom(slot.unit_lbl, 0, LV_PART_MAIN);
+  // Tuck the unit toward the number (tighten) and raise it (superscript). The
+  // horizontal tuck scales with the number font because the visible gap is the
+  // big, thin digit's trailing side bearing, not the small unit's size.
+  lv_obj_set_style_translate_x(slot.unit_lbl, -(value_lh * 15 / 100), LV_PART_MAIN);
+  lv_obj_set_style_translate_y(slot.unit_lbl, -(value_lh * raise_percent / 100), LV_PART_MAIN);
+}
+
 inline bool weather_driver_refresh_layout(
     BtnSlot &slot, const ParsedCfg &config, const Context &context,
     const DisplayProfile &display, int row_span, int col_span) {
   if (!weather_driver_matches(context)) return false;
-  if (weather_driver_shows_forecast(config) &&
-      large_number_square_card_layout(row_span, col_span) &&
-      card_large_numbers_active_for_layout(config, row_span, col_span) &&
-      display_large_sensor_font(display)) {
+  if (!weather_driver_shows_forecast(config)) return true;
+  const bool large =
+    large_number_square_card_layout(row_span, col_span) &&
+    card_large_numbers_active_for_layout(config, row_span, col_span) &&
+    display_large_sensor_font(display);
+  if (large) {
     apply_large_sensor_number_style(
       slot, display_large_sensor_font(display),
       display_large_sensor_unit_offset_percent(display));
+    weather_driver_style_forecast_unit(slot, display_large_sensor_font(display), 54);
+  } else {
+    apply_standard_sensor_number_style(slot, display);
+    weather_driver_style_forecast_unit(slot, display_sensor_font(display), 50);
   }
   return true;
 }

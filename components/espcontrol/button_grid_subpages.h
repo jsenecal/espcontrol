@@ -312,6 +312,11 @@ inline lv_obj_t *create_grid_card_button(lv_obj_t *parent, lv_coord_t radius,
   return btn;
 }
 
+// Default bottom padding that lifts a sensor/value unit label into a light
+// superscript above the number. Shared so number-style normalizers can restore
+// it after the weather forecast driver overrides it for its own layout.
+constexpr int SENSOR_UNIT_DEFAULT_PAD_BOTTOM = 6;
+
 inline lv_obj_t *create_card_sensor_container(lv_obj_t *parent,
                                               const lv_font_t *value_font,
                                               const lv_font_t *unit_font,
@@ -340,7 +345,7 @@ inline lv_obj_t *create_card_sensor_container(lv_obj_t *parent,
   lv_obj_t *unit = lv_label_create(container);
   if (unit_font) lv_obj_set_style_text_font(unit, unit_font, LV_PART_MAIN);
   lv_obj_set_style_text_color(unit, text_color, LV_PART_MAIN);
-  lv_obj_set_style_pad_bottom(unit, 6, LV_PART_MAIN);
+  lv_obj_set_style_pad_bottom(unit, SENSOR_UNIT_DEFAULT_PAD_BOTTOM, LV_PART_MAIN);
   lv_label_set_text(unit, "");
 
   if (value_lbl) *value_lbl = value;

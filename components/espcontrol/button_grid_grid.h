@@ -217,6 +217,10 @@ inline void apply_large_sensor_number_style(const BtnSlot &s, const lv_font_t *l
   if (s.unit_lbl) {
     lv_obj_set_style_translate_y(
       s.unit_lbl, large_sensor_unit_offset_px(large_font, unit_offset_percent), LV_PART_MAIN);
+    // Clear any forecast-specific superscript nudge so a reused slot starts clean
+    // (the weather forecast driver overrides these again when it owns the slot).
+    lv_obj_set_style_translate_x(s.unit_lbl, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_bottom(s.unit_lbl, SENSOR_UNIT_DEFAULT_PAD_BOTTOM, LV_PART_MAIN);
   }
 }
 
@@ -224,7 +228,12 @@ inline void apply_standard_sensor_number_style(const BtnSlot &s, const DisplayPr
   if (s.sensor_lbl && display_sensor_font(display)) {
     lv_obj_set_style_text_font(s.sensor_lbl, display_sensor_font(display), LV_PART_MAIN);
   }
-  if (s.unit_lbl) lv_obj_set_style_translate_y(s.unit_lbl, 0, LV_PART_MAIN);
+  if (s.unit_lbl) {
+    lv_obj_set_style_translate_y(s.unit_lbl, 0, LV_PART_MAIN);
+    // Clear any forecast-specific superscript nudge so a reused slot starts clean.
+    lv_obj_set_style_translate_x(s.unit_lbl, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_bottom(s.unit_lbl, SENSOR_UNIT_DEFAULT_PAD_BOTTOM, LV_PART_MAIN);
+  }
 }
 
 inline bool large_number_square_card_layout(int row_span, int col_span) {
