@@ -2529,6 +2529,12 @@ def firmware_clock_bar_pending_wake_errors(display_path: Path, root: Path) -> li
         return [f"{rel}: missing clock_bar_apply script"]
     if "id(espcontrol_app).display().target_mode()" not in body:
         return [f"{rel}: resolve clock bar visibility from the pending display target"]
+    visible_index = body.find("if (!visible) return;")
+    invalidate_index = body.find("lv_obj_invalidate(lv_layer_top());")
+    if visible_index == -1 or invalidate_index < visible_index:
+        return [
+            f"{rel}: invalidate the visible clock-bar top layer after applying its layout"
+        ]
     return []
 
 
