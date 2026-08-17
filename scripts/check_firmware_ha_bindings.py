@@ -2529,13 +2529,39 @@ def firmware_clock_bar_pending_wake_errors(display_path: Path, root: Path) -> li
         return [f"{rel}: missing clock_bar_apply script"]
     if "id(espcontrol_app).display().target_mode()" not in body:
         return [f"{rel}: resolve clock bar visibility from the pending display target"]
-    visible_index = body.find("if (!visible) return;")
-    invalidate_index = body.find("lv_obj_invalidate(lv_layer_top());")
-    if visible_index == -1 or invalidate_index < visible_index:
-        return [
-            f"{rel}: invalidate the visible clock-bar top layer after applying its layout"
-        ]
+    settled_body = yaml_script_body(text, "clock_bar_apply_after_page_show")
+    required_settled_tokens = (
+        "delay: 100ms",
+        "lv_scr_act() == id(main_page)->obj",
+        "script.execute: clock_bar_apply",
+        "script.wait: clock_bar_apply",
+    )
+    if settled_body is None or any(
+        token not in settled_body for token in required_settled_tokens
+    ):
+        return [f"{rel}: reapply the clock bar after the home page becomes active"]
     return []
+
+
+def firmware_clock_bar_navigation_errors(
+    connectivity_paths: tuple[Path, ...], root: Path
+) -> list[str]:
+    errors: list[str] = []
+    for path in connectivity_paths:
+        if not path.exists():
+            continue
+        rel = path.relative_to(root)
+        body = yaml_script_body(path.read_text(encoding="utf-8"), "navigate_after_api")
+        if body is None:
+            errors.append(f"{rel}: missing navigate_after_api script")
+            continue
+        page_index = body.find("lvgl.page.show: main_page")
+        settled_index = body.find("script.execute: clock_bar_apply_after_page_show")
+        if page_index == -1 or settled_index < page_index:
+            errors.append(
+                f"{rel}: apply the clock bar only after showing and settling the home page"
+            )
+    return errors
 
 
 def firmware_clock_screensaver_overlay_errors(backlight_path: Path, root: Path) -> list[str]:
@@ -3304,6 +3330,7 @@ def run_scan() -> int:
         )
     )
     errors.extend(firmware_clock_bar_pending_wake_errors(DISPLAY_CONFIG_PATH, ROOT))
+    errors.extend(firmware_clock_bar_navigation_errors(CONNECTIVITY_PATHS, ROOT))
     errors.extend(firmware_clock_screensaver_overlay_errors(BACKLIGHT_PATH, ROOT))
     errors.extend(firmware_screen_schedule_screensaver_overlay_errors(COVER_ART_PATH, ROOT))
     errors.extend(firmware_screen_schedule_screensaver_override_errors(BACKLIGHT_PATH, ROOT))
