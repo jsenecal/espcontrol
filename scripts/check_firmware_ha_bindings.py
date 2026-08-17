@@ -2565,6 +2565,33 @@ def firmware_clock_bar_pending_wake_errors(display_path: Path, root: Path) -> li
     return []
 
 
+def firmware_clock_bar_navigation_errors(
+    connectivity_paths: tuple[Path, ...], root: Path
+) -> list[str]:
+    errors: list[str] = []
+    for path in connectivity_paths:
+        if not path.exists():
+            continue
+        rel = path.relative_to(root)
+        body = yaml_script_body(path.read_text(encoding="utf-8"), "navigate_after_api")
+        if body is None:
+            errors.append(f"{rel}: missing navigate_after_api script")
+            continue
+        active_guard = body.find("target_mode_is(")
+        active_mode = body.find("DisplayMode::ACTIVE", active_guard)
+        page_show = body.find("lvgl.page.show: main_page")
+        if (
+            active_guard == -1
+            or active_mode == -1
+            or page_show == -1
+            or active_guard > page_show
+        ):
+            errors.append(
+                f"{rel}: guard late home-page navigation behind the active display mode"
+            )
+    return errors
+
+
 def firmware_clock_screensaver_overlay_errors(backlight_path: Path, root: Path) -> list[str]:
     errors: list[str] = []
     if not backlight_path.exists():
@@ -2645,8 +2672,13 @@ def firmware_clock_screensaver_overlay_errors(backlight_path: Path, root: Path) 
     dimmed_body = yaml_script_body(text, "show_dimmed_view")
     if dimmed_body is None:
         errors.append(f"{rel}: missing show_dimmed_view script")
-    elif "lv_obj_move_foreground(id(dim_screensaver_touch_guard))" not in dimmed_body:
-        errors.append(f"{rel}: raise the dim screensaver touch guard above any existing top-layer elements")
+    else:
+        if "lv_obj_move_foreground(id(dim_screensaver_touch_guard))" not in dimmed_body:
+            errors.append(f"{rel}: raise the dim screensaver touch guard above any existing top-layer elements")
+        if "script.execute: clock_bar_hide" in dimmed_body or "script.wait: clock_bar_hide" in dimmed_body:
+            errors.append(f"{rel}: keep the complete clock bar visible over the dimmed home screen")
+        if "script.execute: clock_bar_apply" not in dimmed_body:
+            errors.append(f"{rel}: reapply the clock bar after raising the dim screensaver touch guard")
 
     return errors
 
@@ -3326,6 +3358,7 @@ def run_scan() -> int:
         )
     )
     errors.extend(firmware_clock_bar_pending_wake_errors(DISPLAY_CONFIG_PATH, ROOT))
+    errors.extend(firmware_clock_bar_navigation_errors(CONNECTIVITY_PATHS, ROOT))
     errors.extend(firmware_clock_screensaver_overlay_errors(BACKLIGHT_PATH, ROOT))
     errors.extend(firmware_screen_schedule_screensaver_overlay_errors(COVER_ART_PATH, ROOT))
     errors.extend(firmware_screen_schedule_screensaver_override_errors(BACKLIGHT_PATH, ROOT))
@@ -4006,6 +4039,21 @@ def expect_display_backlight_manual_sleep_errors(
         errors = firmware_display_backlight_manual_sleep_errors(
             backlight_path, tuple(device_paths), root
         )
+        for item in expected:
+            assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
+        if not expected:
+            assert not errors, f"{name}: expected no errors, got {errors!r}"
+
+
+def expect_clock_bar_navigation_errors(
+    name: str, text: str, expected: tuple[str, ...]
+) -> None:
+    with TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        path = root / "common" / "addon" / "connectivity.yaml"
+        path.parent.mkdir(parents=True)
+        path.write_text(text, encoding="utf-8")
+        errors = firmware_clock_bar_navigation_errors((path,), root)
         for item in expected:
             assert any(item in error for error in errors), f"{name}: missing {item!r} in {errors!r}"
         if not expected:
@@ -6736,6 +6784,28 @@ def run_self_test() -> int:
         "",
         ("clear the shared wake guard after a stuck touch timeout",),
     )
+    expect_clock_bar_navigation_errors(
+        "late navigation requires active display mode",
+        "script:\n"
+        "  - id: navigate_after_api\n"
+        "    then:\n"
+        "      - lvgl.page.show: main_page\n",
+        ("guard late home-page navigation",),
+    )
+    expect_clock_bar_navigation_errors(
+        "active navigation remains available",
+        "script:\n"
+        "  - id: navigate_after_api\n"
+        "    then:\n"
+        "      - if:\n"
+        "          condition:\n"
+        "            lambda: |-\n"
+        "              return id(espcontrol_app).display().target_mode_is(\n"
+        "                  espcontrol::DisplayMode::ACTIVE);\n"
+        "          then:\n"
+        "            - lvgl.page.show: main_page\n",
+        (),
+    )
     expect_clock_screensaver_overlay_errors(
         "clock screensaver closes active UI before showing",
         "script:\n"
@@ -6765,12 +6835,17 @@ def run_self_test() -> int:
         "          lv_obj_move_foreground(id(clock_screensaver));\n"
         "  - id: show_dimmed_view\n"
         "    then:\n"
+        "      - script.execute: clock_bar_hide\n"
         "      - lambda: 'lv_obj_move_foreground(id(dim_screensaver_touch_guard));'\n"
+        "      - script.execute: clock_bar_apply\n"
         "interval:\n"
         "  - interval: 1s\n"
         "    then:\n"
         "      - script.execute: clock_screensaver_keep_on_top\n",
-        ("overlay the existing UI without closing it",),
+        (
+            "overlay the existing UI without closing it",
+            "keep the complete clock bar visible over the dimmed home screen",
+        ),
     )
     expect_clock_screensaver_overlay_errors(
         "clock screensaver overlays active UI",
@@ -6802,6 +6877,7 @@ def run_self_test() -> int:
         "  - id: show_dimmed_view\n"
         "    then:\n"
         "      - lambda: 'lv_obj_move_foreground(id(dim_screensaver_touch_guard));'\n"
+        "      - script.execute: clock_bar_apply\n"
         "interval:\n"
         "  - interval: 1s\n"
         "    then:\n"
