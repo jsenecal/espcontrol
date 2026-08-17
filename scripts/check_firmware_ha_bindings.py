@@ -2540,6 +2540,32 @@ def firmware_clock_bar_pending_wake_errors(display_path: Path, root: Path) -> li
         token not in settled_body for token in required_settled_tokens
     ):
         return [f"{rel}: reapply the clock bar after the home page becomes active"]
+    repaint_body = yaml_script_body(text, "clock_bar_redraw_after_content_change")
+    force_body = yaml_script_body(text, "clock_bar_force_redraw")
+    required_repaint_tokens = (
+        "delay: 100ms",
+        "lv_scr_act() == id(main_page)->obj",
+        "script.execute: clock_bar_apply",
+        "script.wait: clock_bar_apply",
+        "script.execute: clock_bar_force_redraw",
+    )
+    required_force_tokens = (
+        "lv_obj_invalidate(id(temperatures));",
+        "lv_obj_invalidate(id(display_time));",
+        "lv_obj_invalidate(id(network_status_button));",
+        "lv_obj_invalidate(lv_layer_top());",
+        "lv_refr_now(nullptr);",
+    )
+    if (
+        "set_dashboard_content_changed_callback" not in text
+        or repaint_body is None
+        or any(token not in repaint_body for token in required_repaint_tokens)
+        or force_body is None
+        or any(token not in force_body for token in required_force_tokens)
+    ):
+        return [
+            f"{rel}: repaint the visible clock bar after asynchronous dashboard content settles"
+        ]
     return []
 
 
