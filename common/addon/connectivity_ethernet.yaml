@@ -76,17 +76,9 @@ script:
           condition:
             lambda: 'return !id(button_order).state.empty();'
           then:
-            # Do not let a delayed connectivity callback replace a full-screen
-            # display mode while the controller still owns that mode.
-            - if:
-                condition:
-                  lambda: |-
-                    return id(espcontrol_app).display().target_mode_is(
-                        espcontrol::DisplayMode::ACTIVE);
-                then:
-                  - lvgl.page.show: main_page
-                  - script.execute: clock_bar_apply
-                  - script.execute: screensaver_idle_check
+            - lvgl.page.show: main_page
+            - script.execute: clock_bar_apply
+            - script.execute: screensaver_idle_check
           else:
             - lambda: |-
                 auto ips = ethernet::global_eth_component->get_ip_addresses();
