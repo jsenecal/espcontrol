@@ -105,10 +105,26 @@ script:
           condition:
             lambda: 'return !id(button_order).state.empty();'
           then:
-            - lvgl.page.show: main_page
-            - script.execute: clock_bar_apply
-            - script.execute: screensaver_idle_check
+            - if:
+                condition:
+                  lambda: |-
+                    return id(espcontrol_app).display().target_mode_is(
+                        espcontrol::DisplayMode::ACTIVE);
+                then:
+                  - globals.set:
+                      id: navigate_after_api_pending
+                      value: 'false'
+                  - lvgl.page.show: main_page
+                  - script.execute: clock_bar_apply
+                  - script.execute: screensaver_idle_check
+                else:
+                  - globals.set:
+                      id: navigate_after_api_pending
+                      value: 'true'
           else:
+            - globals.set:
+                id: navigate_after_api_pending
+                value: 'false'
             - lambda: |-
                 auto ips = wifi::global_wifi_component->get_ip_addresses();
                 if (!ips.empty()) {
