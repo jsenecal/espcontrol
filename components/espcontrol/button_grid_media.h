@@ -271,21 +271,6 @@ inline void media_set_now_playing_artist(MediaNowPlayingCtx *ctx,
   ctx->artist[sizeof(ctx->artist) - 1] = '\0';
 }
 
-inline void media_refresh_artist_text(MediaNowPlayingCtx *ctx,
-                                      const std::string &entity_id) {
-  if (!ctx || entity_id.empty()) return;
-  ctx->artist[0] = '\0';
-  media_apply_now_playing_artist_text(ctx);
-  ha_get_attribute(
-    entity_id, std::string("media_artist"),
-    std::function<void(esphome::StringRef)>(
-      [ctx](esphome::StringRef artist) {
-        media_set_now_playing_artist(ctx, artist);
-        media_apply_now_playing_artist_text(ctx);
-      })
-  );
-}
-
 inline bool media_position_timestamp_ms(esphome::StringRef value, uint32_t &updated_ms);
 inline bool media_control_seek_pending_active(MediaControlCtx *ctx);
 inline bool media_control_track_position_reset_active(MediaControlCtx *ctx);
@@ -1493,7 +1478,7 @@ inline void media_playback_subscribe_source(MediaPlaybackState *state) {
     HA_SUBSCRIPTION_SCOPE_DEFAULT,
     true
   );
-  ha_get_attribute(entity_id, std::string("source"), handle_media_source);
+  ha_read_retained_attribute(entity_id, std::string("source"), handle_media_source);
 }
 
 inline void media_playback_subscribe_progress(MediaPlaybackState *state,
