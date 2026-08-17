@@ -28,10 +28,6 @@ esphome:
     - priority: -150
       then:
         - lambda: |-
-            set_dashboard_content_changed_callback([]() {
-              id(clock_bar_redraw_after_content_change).execute();
-            });
-        - lambda: |-
             bool preferences_changed = false;
             if (!id(media_player_sleep_prevention_default_on_migrated)) {
               id(media_player_sleep_prevention_enabled).turn_on();
@@ -193,48 +189,6 @@ script:
                                     id(indoor_temp_enable).state,
                                     id(outdoor_temp_enable).state,
                                     id(indoor_temp), id(outdoor_temp));
-
-  # Page changes are rendered asynchronously. Wait for the home page to
-  # become active before resolving visibility; otherwise the loading page can
-  # make the first clock-bar application hide every top-layer widget.
-  - id: clock_bar_apply_after_page_show
-    mode: restart
-    then:
-      - delay: 100ms
-      - if:
-          condition:
-            lambda: 'return lv_scr_act() == id(main_page)->obj;'
-          then:
-            - script.execute: clock_bar_apply
-            - script.wait: clock_bar_apply
-            - script.execute: clock_bar_force_redraw
-
-  # Dashboard cards can finish rendering after the home page and clock bar
-  # have already been drawn (notably while artwork downloads complete). The
-  # direct framebuffer keeps those later pixels, so debounce content changes
-  # and repaint the top-layer HUD once the dashboard has settled.
-  - id: clock_bar_redraw_after_content_change
-    mode: restart
-    then:
-      - delay: 100ms
-      - if:
-          condition:
-            lambda: 'return lv_scr_act() == id(main_page)->obj;'
-          then:
-            - script.execute: clock_bar_apply
-            - script.wait: clock_bar_apply
-            - script.execute: clock_bar_force_redraw
-
-  - id: clock_bar_force_redraw
-    mode: restart
-    then:
-      - lambda: |-
-          lv_obj_invalidate(id(temperatures));
-          lv_obj_invalidate(id(display_time));
-          lv_obj_invalidate(id(network_status_button));
-          lv_obj_invalidate(id(night_mode_status_icon));
-          lv_obj_invalidate(lv_layer_top());
-          lv_refr_now(nullptr);
 
 switch:
   - platform: template
