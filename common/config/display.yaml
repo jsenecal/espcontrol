@@ -189,12 +189,20 @@ script:
                                     id(indoor_temp_enable).state,
                                     id(outdoor_temp_enable).state,
                                     id(indoor_temp), id(outdoor_temp));
-          // Clock-bar widgets live on LVGL's top layer. Some direct-render
-          // displays do not repaint that layer when an already-visible widget
-          // is merely repositioned during startup or a dimmed transition.
-          // Explicitly invalidate it so the complete bar is rendered without
-          // waiting for the first touch to invalidate the wake guard.
-          lv_obj_invalidate(lv_layer_top());
+
+  # Page changes are rendered asynchronously. Wait for the home page to
+  # become active before resolving visibility; otherwise the loading page can
+  # make the first clock-bar application hide every top-layer widget.
+  - id: clock_bar_apply_after_page_show
+    mode: restart
+    then:
+      - delay: 100ms
+      - if:
+          condition:
+            lambda: 'return lv_scr_act() == id(main_page)->obj;'
+          then:
+            - script.execute: clock_bar_apply
+            - script.wait: clock_bar_apply
 
 switch:
   - platform: template
