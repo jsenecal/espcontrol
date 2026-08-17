@@ -105,9 +105,17 @@ script:
           condition:
             lambda: 'return !id(button_order).state.empty();'
           then:
-            - lvgl.page.show: main_page
-            - script.execute: clock_bar_apply_after_page_show
-            - script.execute: screensaver_idle_check
+            # Do not let a delayed connectivity callback replace a full-screen
+            # display mode while the controller still owns that mode.
+            - if:
+                condition:
+                  lambda: |-
+                    return id(espcontrol_app).display().target_mode_is(
+                        espcontrol::DisplayMode::ACTIVE);
+                then:
+                  - lvgl.page.show: main_page
+                  - script.execute: clock_bar_apply
+                  - script.execute: screensaver_idle_check
           else:
             - lambda: |-
                 auto ips = wifi::global_wifi_component->get_ip_addresses();
