@@ -1519,6 +1519,7 @@ struct CoverControlCtx {
   int current_position = 0;
   int current_tilt = 0;
   bool current_position_known = false;
+  bool moving = false;
   uint32_t accent_color = DEFAULT_SLIDER_COLOR;
   uint32_t secondary_color = SECONDARY_GREY;
   lv_obj_t *btn = nullptr;
@@ -1565,6 +1566,7 @@ struct CoverControlModalUi {
   lv_obj_t *down_btn = nullptr;
   lv_obj_t *presets_box = nullptr;
   lv_obj_t *preset_btns[5] = {nullptr, nullptr, nullptr, nullptr, nullptr};
+  int selected_preset = -1;
   lv_obj_t *position_slider = nullptr;
   lv_obj_t *position_fill = nullptr;
   lv_obj_t *position_handle = nullptr;
@@ -1705,14 +1707,21 @@ inline void cover_control_apply_card_visual(CoverControlCtx *ctx,
                                             const std::string &state_text = "") {
   if (!ctx || !ctx->btn) return;
   cover_control_update_card_slider(ctx, state_text);
-  bool active = ctx->current_position_known
-    ? slider_clamp_pct(ctx->current_position) < 100
-    : (!state_text.empty() ? cover_toggle_state_is_active(state_text) : ctx->current_position < 100);
-  set_card_checked_state(ctx->btn, ctx->available && active);
+  // All Controls covers show position through the proportional closed-amount
+  // fill bar (docs/card-types/covers.md), not a full-tile highlight. Keep the
+  // card unchecked so the fill stays visible; otherwise the CHECKED background
+  // paints the whole tile the on-color and masks the fill at every partial
+  // position. (The Toggle interaction is the mode that lights the tile up.)
+  set_card_checked_state(ctx->btn, false);
   if (ctx->icon_lbl) {
+    // The open glyph represents the open OR partially open state; only a fully
+    // closed cover (position 0) shows the closed glyph. This matches the
+    // Slider: Position card (subscribe_slider_state uses pct > 0) and
+    // docs/card-types/covers.md. Using == 100 kept the closed glyph for every
+    // partial position, so the tile icon looked static during normal use.
     bool open_icon = ctx->current_position_known
-      ? slider_clamp_pct(ctx->current_position) == 100
-      : (!state_text.empty() ? garage_state_uses_open_icon(state_text) : ctx->current_position == 100);
+      ? slider_clamp_pct(ctx->current_position) > 0
+      : (!state_text.empty() ? garage_state_uses_open_icon(state_text) : ctx->current_position > 0);
     lv_label_set_text(ctx->icon_lbl, open_icon ? ctx->icon_open_glyph : ctx->icon_closed_glyph);
   }
   if (ctx->label_lbl) {
@@ -1802,6 +1811,7 @@ inline void cover_control_apply_tab_visibility() {
 
 inline void cover_control_layout_modal(CoverControlCtx *ctx);
 inline void cover_control_set_position_value(CoverControlCtx *ctx, int pct);
+inline void cover_control_refresh_preset_selection(CoverControlCtx *ctx);
 
 inline lv_obj_t *cover_control_create_tab_button(lv_obj_t *parent, const char *icon,
                                                  const lv_font_t *font,
@@ -1912,6 +1922,11 @@ inline lv_obj_t *cover_control_create_preset_button(lv_obj_t *parent, int pct,
     if (!ui.active || !ui.active->available || !cover_control_supports_position(ui.active)) return;
     ui.active->current_position_known = true;
     ui.active->current_position = slider_clamp_pct(pct);
+    // Lock the tapped preset as the selection and treat the cover as moving so
+    // the highlight holds through travel (and any stale in-flight position
+    // reports) until Home Assistant reports the cover has stopped.
+    ui.selected_preset = ui.active->current_position;
+    ui.active->moving = true;
     cover_control_set_position_value(ui.active, ui.active->current_position);
     cover_control_apply_card_visual(ui.active);
     send_slider_action(ui.active->entity_id, ui.active->current_position, false);
@@ -2197,25 +2212,20 @@ inline void cover_control_layout_modal(CoverControlCtx *ctx) {
     for (int i = 0; i < 5; i++) {
       lv_obj_t *btn = ui.preset_btns[i];
       if (!btn) continue;
-      int pct = static_cast<int>(reinterpret_cast<uintptr_t>(lv_obj_get_user_data(btn)));
-      bool selected = ctx->current_position_known && slider_clamp_pct(ctx->current_position) == pct;
-      uint32_t bg_color = selected ? ctx->accent_color : ctx->secondary_color;
-      uint32_t text_color = selected ? DARK_TEXT_PRIMARY : readable_text_color_for_bg(bg_color);
       lv_obj_set_size(btn, tile_w, tile_h);
       lv_obj_set_style_radius(btn, control_modal_card_radius(ctx->btn), LV_PART_MAIN);
-      lv_obj_set_style_bg_color(btn, lv_color_hex(bg_color), LV_PART_MAIN);
       lv_obj_t *icon = lv_obj_get_child(btn, 0);
       lv_obj_t *label = lv_obj_get_child(btn, 1);
       if (icon) {
-        lv_obj_set_style_text_color(icon, lv_color_hex(text_color), LV_PART_MAIN);
         const lv_font_t *icon_font = cover_control_preset_icon_font(ctx, layout);
         if (icon_font) lv_obj_set_style_text_font(icon, icon_font, LV_PART_MAIN);
       }
-      if (label) {
-        lv_obj_set_style_text_color(label, lv_color_hex(text_color), LV_PART_MAIN);
-        lv_obj_set_width(label, lv_pct(100));
-      }
+      if (label) lv_obj_set_width(label, lv_pct(100));
     }
+    // Highlight the preset matching the current position. Colours live in the
+    // shared helper so they also update on preset taps and live position
+    // changes, not just when this layout pass runs.
+    cover_control_refresh_preset_selection(ctx);
     lv_obj_scroll_to_y(ui.presets_box, 0, LV_ANIM_OFF);
   }
   if (ui.tab_row) lv_obj_move_foreground(ui.tab_row);
@@ -2246,6 +2256,45 @@ inline void cover_control_set_slider_value(lv_obj_t *slider, bool &updating,
   updating = false;
 }
 
+// Recolour the preset tiles so the highlighted one tracks the cover. While the
+// cover is moving the selection is held (a tapped preset stays lit and stale
+// in-flight position reports do not clear it); once it comes to rest the
+// selection reconciles with the exact position, clearing when it sits between
+// presets. ui.selected_preset carries the choice across updates.
+inline void cover_control_refresh_preset_selection(CoverControlCtx *ctx) {
+  CoverControlModalUi &ui = cover_control_modal_ui();
+  if (!ctx || ui.active != ctx || !ui.presets_box) return;
+  if (!ctx->moving) {
+    int selected = -1;
+    if (ctx->current_position_known) {
+      int pos = slider_clamp_pct(ctx->current_position);
+      for (int i = 0; i < 5; i++) {
+        lv_obj_t *btn = ui.preset_btns[i];
+        if (!btn) continue;
+        if (static_cast<int>(reinterpret_cast<uintptr_t>(lv_obj_get_user_data(btn))) == pos) {
+          selected = pos;
+          break;
+        }
+      }
+    }
+    ui.selected_preset = selected;
+  }
+  for (int i = 0; i < 5; i++) {
+    lv_obj_t *btn = ui.preset_btns[i];
+    if (!btn) continue;
+    int pct = static_cast<int>(reinterpret_cast<uintptr_t>(lv_obj_get_user_data(btn)));
+    bool selected = pct == ui.selected_preset;
+    uint32_t bg_color = selected ? ctx->accent_color : ctx->secondary_color;
+    uint32_t text_color = selected ? DARK_TEXT_PRIMARY
+                                   : readable_text_color_for_bg(bg_color);
+    lv_obj_set_style_bg_color(btn, lv_color_hex(bg_color), LV_PART_MAIN);
+    lv_obj_t *icon = lv_obj_get_child(btn, 0);
+    lv_obj_t *label = lv_obj_get_child(btn, 1);
+    if (icon) lv_obj_set_style_text_color(icon, lv_color_hex(text_color), LV_PART_MAIN);
+    if (label) lv_obj_set_style_text_color(label, lv_color_hex(text_color), LV_PART_MAIN);
+  }
+}
+
 inline void cover_control_set_position_value(CoverControlCtx *ctx, int pct) {
   CoverControlModalUi &ui = cover_control_modal_ui();
   if (!ctx || ui.active != ctx) return;
@@ -2253,6 +2302,7 @@ inline void cover_control_set_position_value(CoverControlCtx *ctx, int pct) {
   cover_control_set_slider_value(
     ui.position_slider, ctx->updating_position, ctx->dragging_position, pct);
   cover_control_update_position_fill(pct);
+  cover_control_refresh_preset_selection(ctx);
 }
 
 inline void cover_control_set_tilt_value(CoverControlCtx *ctx, int pct) {
@@ -2548,7 +2598,12 @@ inline void subscribe_cover_control_state(CoverControlCtx *ctx) {
       [ctx](esphome::StringRef state) {
         std::string state_text = string_ref_limited(state, HA_SHORT_STATE_MAX_LEN);
         ctx->available = !ha_state_unavailable_ref(state);
+        // Home Assistant reports opening/closing while the cover travels and a
+        // resting state once it stops. Hold the preset selection during travel;
+        // reconcile it with the exact position when the cover comes to rest.
+        ctx->moving = state_text == "opening" || state_text == "closing";
         cover_control_apply_card_visual(ctx, state_text);
+        cover_control_refresh_preset_selection(ctx);
       })
   );
   ha_subscribe_attribute(

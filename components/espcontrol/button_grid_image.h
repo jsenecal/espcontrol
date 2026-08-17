@@ -1560,7 +1560,7 @@ inline void image_card_request_picture(ImageCardCtx *ctx) {
     }
     const uint32_t generation = ha_subscription_generation();
     ctx->access_token_request_pending = true;
-    bool requested = ha_get_attribute(
+    bool requested = ha_read_retained_attribute(
       entity_id,
       std::string("access_token"),
       std::function<void(esphome::StringRef)>(
@@ -1592,7 +1592,7 @@ inline void image_card_request_picture(ImageCardCtx *ctx) {
   }
   if (image_card_prefer_local_picture(ctx)) {
     const uint32_t generation = ha_subscription_generation();
-    bool requested_local = ha_get_attribute(
+    bool requested_local = ha_read_retained_attribute(
       entity_id,
       std::string("entity_picture_local"),
       std::function<void(esphome::StringRef)>(
@@ -1610,7 +1610,7 @@ inline void image_card_request_picture(ImageCardCtx *ctx) {
             image_card_handle_picture(ctx, esphome::StringRef(fallback));
             return;
           }
-          bool fallback_requested = ha_get_attribute(
+          bool fallback_requested = ha_read_retained_attribute(
             entity_id,
             std::string("entity_picture"),
             std::function<void(esphome::StringRef)>(
@@ -1625,7 +1625,7 @@ inline void image_card_request_picture(ImageCardCtx *ctx) {
     if (requested_local) return;
   }
   const uint32_t generation = ha_subscription_generation();
-  bool requested = ha_get_attribute(
+  bool requested = ha_read_retained_attribute(
     entity_id,
     std::string("entity_picture"),
     std::function<void(esphome::StringRef)>(
@@ -2066,7 +2066,7 @@ inline void image_card_handle_picture(ImageCardCtx *ctx, esphome::StringRef pict
     const std::string retry_picture = raw;
     const uint32_t generation = ha_subscription_generation();
     ctx->access_token_request_pending = true;
-    bool requested = ha_get_attribute(
+    bool requested = ha_read_retained_attribute(
       entity_id,
       std::string("access_token"),
       std::function<void(esphome::StringRef)>(
@@ -2313,7 +2313,7 @@ inline void image_card_request_media_artwork(ImageCardCtx *ctx, bool force_refre
            ha_api_state_connected());
   bool remote_queued = true;
   if ((request_mask & espcontrol::artwork::ARTWORK_SOURCE_REMOTE) != 0) {
-    remote_queued = ha_get_attribute(
+    remote_queued = ha_read_retained_attribute(
       entity_id,
       std::string("entity_picture"),
       std::function<void(esphome::StringRef)>(
@@ -2325,7 +2325,7 @@ inline void image_card_request_media_artwork(ImageCardCtx *ctx, bool force_refre
   }
   bool local_queued = true;
   if ((request_mask & espcontrol::artwork::ARTWORK_SOURCE_LOCAL) != 0) {
-    local_queued = ha_get_attribute(
+    local_queued = ha_read_retained_attribute(
       entity_id,
       std::string("entity_picture_local"),
       std::function<void(esphome::StringRef)>(
